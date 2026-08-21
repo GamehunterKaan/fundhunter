@@ -1359,3 +1359,11 @@ delayed 15 minutes as Borsa İstanbul's real-time feed is licensed. This is an
 independent project with no affiliation to any of them.
 
 **Not investment advice.** Past performance does not guarantee future results.
+
+### Licence
+
+The source is [MIT](LICENSE).
+
+That covers the code, not the contents of `data/`, which is fetched from the
+sources above and republished unchanged. Each remains subject to its own
+source's terms — and none of them is affiliated with this project.
