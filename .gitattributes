@@ -1,0 +1,11 @@
+# Every source file in this repo is LF, and the site is served from GitHub Pages
+# where that is what matters. Declaring it here means a checkout on Windows, or an
+# editor that rewrites a file wholesale, cannot quietly flip a file to CRLF and
+# turn one edited line into a diff of the whole file.
+* text=auto eol=lf
+
+# Binary fixtures must never be touched.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary

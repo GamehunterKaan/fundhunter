@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="tr" data-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>FundHunter — Türkiye yatırım fonları ve içerikleri</title>
+    <meta
+      name="description"
+      content="Türkiye'deki tüm yatırım, emeklilik ve borsa yatırım fonları; portföy dağılımları, getirileri ve risk göstergeleriyle birlikte. Veriler TEFAS'tan günlük olarak güncellenir."
+    />
+    <link rel="canonical" href="https://fundhunter.kaangultekin.net/" />
+
+    <!-- Link previews. No og:image: an SVG is not rendered as one by most
+         platforms, and pointing at a file that will not draw is worse than a
+         card with no picture on it. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FundHunter" />
+    <meta property="og:url" content="https://fundhunter.kaangultekin.net/" />
+    <meta property="og:title" content="FundHunter — Türkiye yatırım fonları ve içerikleri" />
+    <meta
+      property="og:description"
+      content="Türkiye'deki tüm yatırım, emeklilik ve borsa yatırım fonları ile Borsa İstanbul hisseleri: portföy dağılımları, getirileri, risk göstergeleri ve hangi fonun hangi hisseyi tuttuğu."
+    />
+    <meta property="og:locale" content="tr_TR" />
+    <meta property="og:locale:alternate" content="en_GB" />
+    <meta name="twitter:card" content="summary" />
+
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="apple-touch-icon" href="icon.svg" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230f6b70'/%3E%3Crect x='3' y='4' width='10' height='2.4' rx='1.2' fill='%23fbfbfc'/%3E%3Crect x='3' y='7.4' width='6.5' height='2.4' rx='1.2' fill='%23eda100'/%3E%3Crect x='3' y='10.8' width='3.5' height='2.4' rx='1.2' fill='%23e87ba4'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <a class="skip-link" href="#view">İçeriğe geç</a>
+
+    <header class="masthead">
+      <a class="wordmark" href="#/" data-nav>
+        <span class="wordmark-mark" aria-hidden="true"></span>
+        <span class="wordmark-text">Fund<b>Hunter</b></span>
+      </a>
+
+      <nav class="masthead-nav" id="main-nav" aria-label="Bölümler">
+        <a href="#/" data-route="/">Panel</a>
+        <a href="#/fonlar" data-route="/fonlar">Fonlar</a>
+        <a href="#/hisseler" data-route="/hisseler">Hisseler</a>
+        <a href="#/piyasa" data-route="/piyasa">Piyasa</a>
+        <a href="#/populer" data-route="/populer">Popüler</a>
+        <a href="#/dusus" data-route="/dusus">Düşüşler</a>
+        <a href="#/favoriler" data-route="/favoriler">Favoriler</a>
+      </nav>
+
+      <form class="nav-search" id="nav-search" role="search" autocomplete="off">
+        <label class="visually-hidden" for="nav-search-input">Fon veya hisse ara</label>
+        <span class="nav-search-icon" aria-hidden="true"></span>
+        <input id="nav-search-input" type="search" placeholder="Fon veya hisse ara"
+               role="combobox" aria-controls="nav-results" aria-expanded="false"
+               aria-autocomplete="list" />
+        <kbd class="nav-search-key" aria-hidden="true">/</kbd>
+        <div class="nav-results" id="nav-results" role="listbox" hidden></div>
+      </form>
+
+      <div class="masthead-actions">
+        <div class="seg" role="group" id="lang-toggle" aria-label="Dil / Language">
+          <button type="button" data-lang="tr" aria-pressed="true">TR</button>
+          <button type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+        <button type="button" class="icon-btn" id="theme-toggle" aria-label="Tema değiştir">
+          <span class="theme-icon" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <div class="tape-rail" id="market-tape"></div>
+
+    <main id="view" tabindex="-1">
+      <p class="state-msg" id="boot-msg">Yükleniyor…</p>
+    </main>
+
+    <footer class="colophon">
+      <p id="colophon-source"></p>
+      <p class="colophon-note" id="colophon-note"></p>
+    </footer>
+
+    <noscript>
+      <p class="state-msg">
+        Bu site fon verilerini tarayıcıda işler; görüntülemek için JavaScript gerekir.
+      </p>
+    </noscript>
+
+    <script type="module" src="ui.js"></script>
+  </body>
+</html>

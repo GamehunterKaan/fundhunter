@@ -1,0 +1,72 @@
+name: Update Fund Data
+
+on:
+  schedule:
+    # 06:15 UTC ≈ 09:15 Europe/Istanbul — TEFAS publishes the previous trading
+    # day's valuations overnight, so this picks them up once they are settled.
+    - cron: '15 6 * * 1-6'
+  workflow_dispatch:
+    inputs:
+      months:
+        description: 'Months of history to fetch'
+        required: false
+        default: '12'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify core logic before touching data
+        run: npm test
+
+      - name: Fetch TEFAS funds, holdings and history
+        run: node scripts/fetch-tefas.mjs --months=${{ github.event.inputs.months || '12' }}
+
+      - name: Fetch benchmarks (BIST, FX, gold, money-market)
+        run: node scripts/fetch-benchmarks.mjs
+
+      # Reads the BIST series the previous step wrote, and asks TEFAS for each
+      # fund's price at the two ends of every fall it finds. Around 40 small
+      # requests, all cached by date, so past falls are only ever fetched once.
+      - name: Measure what funds did through BIST's falls
+        run: node scripts/fetch-crashes.mjs
+
+      # One request per market for the sector and the dividend yield of every
+      # listing the funds hold. Cheap, and the foreign half is asked for by
+      # ticker, so it only covers what is actually in a filing.
+      - name: Fetch sectors and dividend yields
+        run: node scripts/fetch-sectors.mjs
+
+      # One scanner request for the whole exchange, then one Yahoo request per
+      # share for its history — about 620 of them at four in flight, a minute in
+      # all. Everything is cached by date, so a re-run in the same day is free.
+      - name: Fetch Borsa İstanbul shares and their history
+        run: node scripts/fetch-stocks.mjs
+
+      # Needs the fund history, the benchmarks, the falls, the sectors and the
+      # share index (which it writes fund ownership back into), so it runs last.
+      - name: Build analytics (flows, factor models, peers, crash protection, themes, share ownership)
+        run: node scripts/build-analytics.mjs
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data
+          git diff --staged --quiet || git commit -m "chore: update fund data $(date -u '+%Y-%m-%d')"
+          git push

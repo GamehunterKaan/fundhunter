@@ -1,0 +1,13 @@
+# Gzipped TEFAS responses. Local scratch only — makes re-runs cheap and the
+# fetch resumable, but must never be committed.
+.cache/
+
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+
+# My own working space, not part of the published project: the running decision
+# log, the to-do list, the inbox I write requests into, and the original brief.
+notes/
+plan.md

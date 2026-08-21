@@ -1,0 +1,3184 @@
+/* FundHunter
+ *
+ * Design thesis: every fund is a *composition* — a set of weights summing to 100.
+ * So the composition bar is the page's recurring unit, at three scales: the whole
+ * industry in the hero, one fund per table row, and the full breakdown on a detail
+ * page. Everything else stays quiet so those bars carry the page.
+ *
+ * Colour rules that are load-bearing, not taste:
+ *   - The eight asset-group hues are a CVD-validated categorical set in a fixed
+ *     order (see scripts/lib/taxonomy.mjs). Never reorder or extend them here.
+ *   - The accent is teal precisely because red and green are reserved for
+ *     gains and losses; an accent in either would collide with return values.
+ *   - Returns always pair colour with an arrow glyph, so colour is never the
+ *     only carrier of meaning.
+ */
+
+/* ---------------------------------------------------------------- tokens */
+
+:root {
+  color-scheme: light;
+
+  --plane: #f4f5f7;
+  --surface: #fbfbfc;
+  --raised: #ffffff;
+  --ink: #10131a;
+  --ink-2: #4a5160;
+  --ink-muted: #7c8494;
+  --hairline: #e2e5ea;
+  --rule: #ced4dd;
+  --accent: #0f6b70;
+  --accent-soft: #e2f0f0;
+  --on-accent: #ffffff;
+  --focus: #0f6b70;
+  --tape: #eceef2;
+
+  --up: #006300;
+  --down: #c0392e;
+  --shadow: 0 1px 2px rgba(16, 19, 26, 0.05), 0 8px 24px -12px rgba(16, 19, 26, 0.18);
+
+  /* Asset groups — validated categorical slots, fixed order. */
+  --g-equity: #2a78d6;
+  --g-govDebt: #eb6834;
+  --g-corpDebt: #1baf7a;
+  --g-lease: #eda100;
+  --g-cash: #e87ba4;
+  --g-metals: #008300;
+  --g-foreign: #4a3aa7;
+  --g-other: #e34948;
+
+  --font-ui: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Full bleed, less a gutter. The page is a dashboard and an eleven-column
+   * table; both want the screen. The cap is only there so an ultrawide monitor
+   * does not stretch a line of prose to a metre. */
+  --page: min(2560px, 100% - 2rem);
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    color-scheme: dark;
+    --plane: #0e1116;
+    --surface: #171b22;
+    --raised: #1e232c;
+    --ink: #f2f4f8;
+    --ink-2: #a7b0c0;
+    --ink-muted: #78818f;
+    --hairline: #262c36;
+    --rule: #333b47;
+    --accent: #3fb9bd;
+    --accent-soft: #10312f;
+    --on-accent: #06231f;
+    --focus: #3fb9bd;
+    --tape: #12161c;
+    --up: #0ca30c;
+    --down: #e66767;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+
+    --g-equity: #3987e5;
+    --g-govDebt: #d95926;
+    --g-corpDebt: #199e70;
+    --g-lease: #c98500;
+    --g-cash: #d55181;
+    --g-metals: #008300;
+    --g-foreign: #9085e9;
+    --g-other: #e66767;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --plane: #0e1116;
+  --surface: #171b22;
+  --raised: #1e232c;
+  --ink: #f2f4f8;
+  --ink-2: #a7b0c0;
+  --ink-muted: #78818f;
+  --hairline: #262c36;
+  --rule: #333b47;
+  --accent: #3fb9bd;
+  --accent-soft: #10312f;
+  --on-accent: #06231f;
+  --focus: #3fb9bd;
+  --tape: #12161c;
+  --up: #0ca30c;
+  --down: #e66767;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+
+  --g-equity: #3987e5;
+  --g-govDebt: #d95926;
+  --g-corpDebt: #199e70;
+  --g-lease: #c98500;
+  --g-cash: #d55181;
+  --g-metals: #008300;
+  --g-foreign: #9085e9;
+  --g-other: #e66767;
+}
+
+/* ---------------------------------------------------------------- base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--plane);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* The router focuses #view on navigation so screen readers land in the new
+ * content. That is programmatic, not keyboard intent, so it must not paint a
+ * ring around the whole page. */
+#view:focus,
+#view:focus-visible {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 0.6rem 1rem;
+  z-index: 60;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* ---------------------------------------------------------------- masthead */
+
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem calc((100% - var(--page)) / 2);
+  background: color-mix(in srgb, var(--plane) 86%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-variation-settings: 'wdth' 112;
+  letter-spacing: -0.01em;
+}
+.wordmark b {
+  font-weight: 800;
+  color: var(--accent);
+}
+
+/* The mark is a three-band composition bar — the site's unit, in miniature. */
+.wordmark-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--g-equity);
+  background-image: linear-gradient(
+    to bottom,
+    var(--g-equity) 0 38%,
+    transparent 38% 46%,
+    var(--g-lease) 46% 74%,
+    transparent 74% 82%,
+    var(--g-cash) 82% 100%
+  );
+  flex: none;
+}
+
+.masthead-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-right: auto;
+  margin-left: 0.75rem;
+}
+.masthead-nav a {
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.masthead-nav a:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+.masthead-nav a[aria-current='page'] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.masthead-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  color: var(--ink-muted);
+}
+.seg button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.theme-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ink-2);
+  box-shadow: inset -4px -3px 0 0 var(--surface);
+}
+:root[data-theme='dark'] .theme-icon,
+:root[data-theme='light'] .theme-icon {
+  box-shadow: inset -4px -3px 0 0 var(--surface);
+}
+
+/* ---------------------------------------------------------------- nav search */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.nav-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 1 22rem;
+  min-width: 0;
+}
+.nav-search input {
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0.4rem 2rem 0.4rem 2rem;
+  font: inherit;
+  font-size: 0.86rem;
+  min-height: 34px;
+}
+.nav-search input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+.nav-search-icon {
+  position: absolute;
+  left: 0.65rem;
+  width: 12px;
+  height: 12px;
+  border: 1.6px solid var(--ink-muted);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.nav-search-icon::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  width: 6px;
+  height: 1.6px;
+  background: var(--ink-muted);
+  transform: rotate(45deg);
+}
+.nav-search-key {
+  position: absolute;
+  right: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 0.15rem 0.35rem;
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  color: var(--ink-muted);
+  background: var(--plane);
+  pointer-events: none;
+}
+.nav-search:focus-within .nav-search-key {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------- market tape */
+
+/* The rail sits under the masthead as its own instrument: a distinct ground, a
+ * hairline top and bottom, and figures set entirely in the mono face. */
+/* Deliberately not sticky. The masthead, toolbar and table header already claim
+ * ~175px; adding the tape would put a quarter of a laptop screen above the first
+ * row. The tape is reference you read once, not a control you keep reaching for. */
+.tape-rail {
+  background: var(--tape);
+  border-bottom: 1px solid var(--hairline);
+}
+.tape-inner {
+  width: var(--page);
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+  gap: 0.9rem;
+}
+.tape-stamp {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.1rem;
+  flex: none;
+  padding-right: 0.9rem;
+  border-right: 1px solid var(--hairline);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  max-width: 8rem;
+  line-height: 1.2;
+}
+.tape-scroll {
+  display: flex;
+  gap: 0.2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+}
+.tape-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tape-tile {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: 'label label' 'body change';
+  align-items: center;
+  gap: 0 0.6rem;
+  flex: 1 1 auto;
+  min-width: 8.5rem;
+  padding: 0.45rem 0.7rem;
+  text-decoration: none;
+  border-radius: 8px;
+}
+.tape-tile:hover {
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.tape-label {
+  grid-area: label;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+/* The money market is not just another line — it is what every fund here is
+ * measured against, so it says so. */
+.tape-hurdle {
+  font-size: 0.56rem;
+  letter-spacing: 0.06em;
+  padding: 0.05rem 0.25rem;
+  border-radius: 3px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.tape-body {
+  grid-area: body;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+/* The shape gives way, never the number: the value is nowrap and cannot shrink,
+ * so the sparkline is the only thing in the row that can — without this it kept
+ * its 62px and painted straight over the change figure beside it. */
+.tape-body .spark {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.tape-value {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.tape-change {
+  grid-area: change;
+  font-size: 0.76rem;
+}
+/* Neutral on purpose: the figure beside it is a day's move, and a 30-day line in
+ * red or green would put two periods in one tile under the same colour code. */
+.spark path {
+  stroke: var(--ink-muted);
+  opacity: 0.7;
+}
+
+/* Live marker. The dot is paired with the "Canlı · HH:MM" stamp, so the state is
+ * never carried by an animation alone. */
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+  animation: live-pulse 2.4s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.tape-stamp.is-live b {
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- layout */
+
+main {
+  width: var(--page);
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.state-msg {
+  padding: 4rem 0;
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+.eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-variation-settings: 'wdth' 95;
+}
+
+/* Section pages (popular, favourites) — quieter than the hero, same rhythm. */
+.page-head {
+  padding: 0.5rem 0 1.5rem;
+  border-bottom: 1px solid var(--hairline);
+  margin-bottom: 1.5rem;
+}
+.page-title {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-variation-settings: 'wdth' 112;
+  letter-spacing: -0.025em;
+  margin: 0.3rem 0 0;
+}
+.page-lede {
+  max-width: 62ch;
+  margin: 0.6rem 0 0;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* ---------------------------------------------------------------- industry */
+
+.industry-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+.industry-head .eyebrow {
+  margin: 0;
+}
+.industry-figure {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0.2rem 0 0;
+}
+.industry-head .panel-note {
+  margin: 0;
+}
+
+/* The signature element: the whole industry as one stacked bar. */
+.comp-bar {
+  display: flex;
+  width: 100%;
+  height: 46px;
+  gap: 2px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--hairline);
+}
+.comp-bar > span {
+  display: block;
+  min-width: 2px;
+}
+.comp-bar > span:first-child {
+  border-radius: 6px 0 0 6px;
+}
+.comp-bar > span:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.comp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.15rem;
+  margin-top: 0.85rem;
+  font-size: 0.83rem;
+}
+.comp-legend li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  color: var(--ink-2);
+}
+.comp-legend .swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: none;
+  transform: translateY(-1px);
+}
+.comp-legend .val {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+ul.comp-legend {
+  list-style: none;
+  margin: 0.85rem 0 0;
+  padding: 0;
+}
+
+/* ---------------------------------------------------------------- highlights */
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.75rem;
+  margin-bottom: 0.7rem;
+}
+.section-head h2 {
+  font-size: 0.95rem;
+  font-variation-settings: 'wdth' 104;
+}
+.section-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+.section-link {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.section-link:hover {
+  text-decoration: underline;
+}
+
+.highlights {
+  padding: 1.25rem 0 0;
+}
+
+.tile-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(10.5rem, 1fr);
+  gap: 0.6rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: 0.25rem;
+}
+
+.fund-tile {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem 0;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  text-decoration: none;
+  overflow: hidden;
+}
+.fund-tile:hover {
+  border-color: var(--rule);
+  background: var(--raised);
+}
+.tile-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.tile-code {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+.tile-top .delta {
+  font-size: 0.76rem;
+}
+.tile-name {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  line-height: 1.25;
+  height: 1.8rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.tile-price {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+/* The composition bar rides the tile's bottom edge: the one thing this site
+ * shows that a price screen does not. */
+.tile-comp {
+  display: flex;
+  height: 4px;
+  gap: 1px;
+  margin: 0 -0.75rem;
+}
+.tile-comp > span {
+  min-width: 1px;
+}
+
+/* ---------------------------------------------------------------- toolbar */
+
+.toolbar {
+  position: sticky;
+  top: var(--stick-toolbar, 59px);
+  z-index: 30;
+  margin-top: 1.25rem;
+  background: color-mix(in srgb, var(--plane) 94%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hairline);
+}
+/* An open panel would make the sticky block tall enough to bury the table. You
+ * are filtering, not scrolling, so it stops sticking until you close it. */
+.toolbar:has(.filter-panel:not([hidden])) {
+  position: static;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.7rem;
+  padding: 0.6rem 0;
+}
+
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  min-height: 34px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.filter-btn:hover {
+  border-color: var(--ink-muted);
+}
+.filter-btn[aria-expanded='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+/* Three stacked rules, shortest last — the universal "filter" glyph, drawn
+ * rather than fetched so the page stays self-contained. */
+.filter-icon {
+  width: 13px;
+  height: 9px;
+  background:
+    linear-gradient(currentColor, currentColor) top left / 13px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) center left 2px / 9px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) bottom left 4px / 5px 1.5px no-repeat;
+}
+.filter-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+/* `display` on the badge outranks the UA's `[hidden] { display: none }`, which
+ * left an empty teal dot glued to the button whenever no filter was set. */
+.filter-badge[hidden] {
+  display: none;
+}
+
+/* With the controls behind a button, these chips are the only thing standing
+ * between the reader and a list narrowed by something they forgot they set. */
+.active-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--hairline);
+  background: var(--raised);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem 0.2rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.active-chip:hover {
+  border-color: var(--down);
+  color: var(--down);
+}
+.chip-x {
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+.active-chip:hover .chip-x {
+  color: var(--down);
+}
+.chip-clear {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0.3rem;
+}
+.chip-clear:hover {
+  text-decoration: underline;
+}
+
+.sort-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+.sort-field select {
+  max-width: 13rem;
+  text-overflow: ellipsis;
+  appearance: none;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0.4rem 1.8rem 0.4rem 0.65rem;
+  font: inherit;
+  font-size: 0.84rem;
+  min-height: 34px;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 0.8rem center, right 0.5rem center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.filter-panel {
+  padding: 0.25rem 0 1rem;
+  border-top: 1px solid var(--hairline);
+}
+.filter-panel[hidden] {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- filters */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0.9rem 0 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.field > label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.control,
+.filters select,
+.filters input {
+  appearance: none;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  font-size: 0.88rem;
+  min-height: 36px;
+}
+.filters select {
+  padding-right: 1.9rem;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 0.85rem center, right 0.55rem center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+.filters input[type='search'] {
+  min-width: 15rem;
+}
+
+.ghost-btn {
+  align-self: flex-end;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  min-height: 36px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ghost-btn:hover {
+  background: var(--accent-soft);
+}
+
+.result-count {
+  margin-left: auto;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- preferences */
+
+.prefs {
+  padding: 1rem 0 0.2rem;
+  margin-top: 0.9rem;
+  border-top: 1px dashed var(--hairline);
+}
+.prefs-title {
+  margin: 0 0 0.5rem;
+}
+.prefs-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem 0.9rem;
+}
+.prefs select {
+  appearance: none;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0.45rem 1.9rem 0.45rem 0.7rem;
+  font: inherit;
+  font-size: 0.88rem;
+  min-height: 36px;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: right 0.85rem center, right 0.55rem center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 36px;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+.prefs-note {
+  margin: 0.7rem 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+  max-width: 68ch;
+}
+
+/* Risk band 1–7. A single-hue sequential ramp — higher risk sits further from
+ * the surface — and the number is always present, so colour never carries the
+ * meaning alone. Deliberately not red/green: those mean loss and gain here. */
+.risk-chip {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #0b1a2b;
+  background: #cde2fb;
+}
+.risk-2 { background: #9ec5f4; }
+.risk-3 { background: #6da7ec; }
+.risk-4 { background: #3987e5; color: #fff; }
+.risk-5 { background: #256abf; color: #fff; }
+.risk-6 { background: #184f95; color: #fff; }
+.risk-7 { background: #0d366b; color: #fff; }
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) .risk-chip { background: #1c3a5e; color: #dce8f7; }
+  :root:where(:not([data-theme='light'])) .risk-2 { background: #21507f; }
+  :root:where(:not([data-theme='light'])) .risk-3 { background: #2a6bab; }
+  :root:where(:not([data-theme='light'])) .risk-4 { background: #3987e5; color: #06121f; }
+  :root:where(:not([data-theme='light'])) .risk-5 { background: #6da7ec; color: #06121f; }
+  :root:where(:not([data-theme='light'])) .risk-6 { background: #9ec5f4; color: #06121f; }
+  :root:where(:not([data-theme='light'])) .risk-7 { background: #cde2fb; color: #06121f; }
+}
+:root[data-theme='dark'] .risk-chip { background: #1c3a5e; color: #dce8f7; }
+:root[data-theme='dark'] .risk-2 { background: #21507f; }
+:root[data-theme='dark'] .risk-3 { background: #2a6bab; }
+:root[data-theme='dark'] .risk-4 { background: #3987e5; color: #06121f; }
+:root[data-theme='dark'] .risk-5 { background: #6da7ec; color: #06121f; }
+:root[data-theme='dark'] .risk-6 { background: #9ec5f4; color: #06121f; }
+:root[data-theme='dark'] .risk-7 { background: #cde2fb; color: #06121f; }
+
+/* ---------------------------------------------------------------- flags */
+
+.flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0 0 1.1rem;
+  padding: 0;
+}
+.flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--raised);
+  color: var(--ink-2);
+}
+.flag-mark {
+  font-family: var(--font-mono);
+}
+.flag-good .flag-mark { color: var(--up); }
+.flag-warn .flag-mark { color: var(--down); }
+.flag-neutral .flag-mark { color: var(--ink-muted); }
+
+.stat-row-inset {
+  margin-bottom: 0;
+}
+
+.chip-warn {
+  border-color: color-mix(in srgb, var(--down) 45%, transparent);
+  color: var(--down);
+}
+.chip-ok {
+  border-color: color-mix(in srgb, var(--up) 45%, transparent);
+  color: var(--up);
+}
+
+.risk-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+/* Qualified-investor marker. A legal restriction, so it is spelled out rather
+ * than encoded in the risk colour. */
+.nq-mark {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.25rem;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--down) 40%, transparent);
+  color: var(--down);
+}
+
+/* ---------------------------------------------------------------- table */
+
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+/* Fixed layout, not auto. An auto table sizes itself to max-content when nothing
+ * constrains it, so no column ever gives way and the whole row scrolls sideways.
+ * Fixed makes the declared widths authoritative and lets the name column absorb
+ * whatever is left — which in turn let the wrapper drop `overflow-x`, since a
+ * scroll container silently disables `position: sticky` on the header inside it. */
+table.funds {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.col-fav { width: 34px; }
+.col-rank { width: 34px; }
+.col-code { width: 58px; }
+/* .col-name has no width on purpose — it takes the remaining space. */
+.col-metric { width: 116px; }
+.col-submetric { width: 104px; }
+.col-size { width: 96px; }
+.col-inv { width: 94px; }
+.col-ret { width: 86px; }
+.col-excess { width: 104px; }
+.col-fee { width: 92px; }
+.col-risk { width: 74px; }
+.col-comp { width: 144px; }
+
+table.funds th {
+  position: sticky;
+  top: var(--stick-table, 115px);
+  z-index: 2;
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  background: var(--surface);
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid var(--rule);
+  /* Headers wrap to two lines rather than forcing a column wider than its data:
+   * "Toplam gider oranı" is far longer than the "%2,00" underneath it. */
+  line-height: 1.2;
+  vertical-align: bottom;
+  hyphens: auto;
+}
+table.funds th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+table.funds th.sortable:hover {
+  color: var(--ink);
+}
+table.funds th[aria-sort] {
+  color: var(--accent);
+}
+
+table.funds td {
+  padding: 0.55rem 0.7rem;
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: middle;
+  overflow: hidden;
+}
+table.funds tbody tr:last-child td {
+  border-bottom: 0;
+}
+table.funds tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.cell-code {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+.cell-code a {
+  text-decoration: none;
+  color: var(--accent);
+}
+.cell-code a:hover {
+  text-decoration: underline;
+}
+
+.fund-name {
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fund-name:hover {
+  text-decoration: underline;
+}
+.fund-meta {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.num-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+/* Values must not wrap, but their headings must — "Para piyasasına göre" is three
+ * times the width of the "▲ 4,5 puan" beneath it, and a nowrap heading would
+ * hold the whole column open to its own length. */
+table.funds th.num-cell {
+  white-space: normal;
+  /* Over its own column, not away from it. `table.funds th` out-specifies the
+   * bare `.num-cell` above, so every numeric heading on the site sat hard left
+   * above right-aligned figures. Invisible in a 90px return column and glaring
+   * in the 350px one on the forecast table. */
+  text-align: right;
+}
+
+.delta {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+.delta.up {
+  color: var(--up);
+}
+.delta.down {
+  color: var(--down);
+}
+.delta.flat {
+  color: var(--ink-muted);
+}
+
+/* The horizon column is what the preference strip is pointing at, so it reads a
+ * step stronger than the context column beside it. */
+table.funds td.col-primary .delta {
+  font-weight: 600;
+}
+table.funds th.col-primary {
+  color: var(--accent);
+}
+
+.col-fav,
+.col-rank {
+  padding-left: 0.4rem !important;
+  padding-right: 0.2rem !important;
+  text-align: center;
+}
+td.col-rank {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+.fav-btn {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 0.15rem 0.2rem;
+  line-height: 1;
+  font-size: 1rem;
+  color: var(--ink-muted);
+  border-radius: 6px;
+}
+.fav-btn:hover {
+  color: var(--g-lease);
+}
+.fav-btn.is-on {
+  color: var(--g-lease);
+}
+
+/* Tables inside a panel already have the panel's border and padding. */
+.table-flush {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  margin-top: 0.5rem;
+}
+.table-flush table.funds th {
+  background: var(--surface);
+}
+
+/* Row-scale composition bar: same unit as the hero, 120px wide. */
+.mini-comp {
+  display: flex;
+  width: 128px;
+  height: 14px;
+  gap: 1.5px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--hairline);
+}
+.mini-comp > span {
+  min-width: 1.5px;
+}
+
+/* ---------------------------------------------------------------- detail */
+
+.detail-head {
+  padding: 0.5rem 0 1.5rem;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.detail-id {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.detail-id .fav-btn {
+  font-size: 1.35rem;
+}
+
+.detail-code {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+.detail-title {
+  font-size: clamp(1.4rem, 3.5vw, 2.1rem);
+  font-variation-settings: 'wdth' 105;
+  margin-top: 0.15rem;
+  text-wrap: balance;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  padding: 0;
+  list-style: none;
+}
+.chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--raised);
+  border: 1px solid var(--hairline);
+  color: var(--ink-2);
+}
+
+/* Dividers are drawn as insets on each cell rather than as gaps over a coloured
+ * backdrop, so a partially-filled last row does not leave a grey block. */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.stat {
+  padding: 0.85rem 1rem;
+  box-shadow: inset 1px 0 0 var(--hairline), inset 0 1px 0 var(--hairline);
+}
+.stat dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.stat dd {
+  margin: 0.25rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.panel > h2 {
+  font-size: 1.05rem;
+  font-variation-settings: 'wdth' 104;
+  margin-bottom: 0.15rem;
+}
+.panel-note {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  margin: 0 0 1rem;
+}
+
+/* --- dashboard ------------------------------------------------------------ */
+
+/* Two rails around a chart. The rails are fixed-ish so the chart takes whatever
+ * is left — it is the element that actually needs the width, and a rail of fund
+ * codes reads the same at 300px as at 400px. */
+.dash-grid {
+  display: grid;
+  grid-template-columns: minmax(19rem, 22rem) minmax(0, 1fr) minmax(19rem, 22rem);
+  gap: 1.25rem;
+  align-items: start;
+}
+/* Grid items default to min-width:auto and refuse to shrink below their content,
+ * which a sixty-character fund name will happily blow past. */
+.dash-grid > .panel {
+  margin-bottom: 0;
+  min-width: 0;
+}
+.dash-pane-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+}
+.dash-more {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+.dash-more:hover {
+  color: var(--accent);
+}
+
+/* Block, not grid: a grid track sizes to max-content, and the nowrap title
+ * inside would size it to the full sixty characters. */
+.dash-rows {
+  display: block;
+}
+
+/* Code, name, last published move, live estimate. The two figures sit next to
+ * each other on purpose: the second is an estimate of what the first has not
+ * caught up with. */
+.dash-row {
+  display: block;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--hairline);
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.86rem;
+}
+.dash-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.4rem 4.4rem;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.dash-rows > .dash-row:first-child {
+  border-top: 0;
+}
+a.dash-row:hover {
+  background: var(--surface-2, rgba(127, 127, 127, 0.07));
+}
+.dash-head {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding-bottom: 0.3rem;
+}
+.dash-code {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent);
+}
+.dash-head .dash-code {
+  font-family: inherit;
+  color: inherit;
+}
+.dash-title,
+.dash-meta {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dash-meta {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+.dash-last,
+.dash-live {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+/* The live figure is the one you came for; the published one is context. */
+.dash-last {
+  opacity: 0.75;
+}
+
+/* --- the watchlist: one month per fund, one chart each --------------------- */
+
+/* Sized against the pane, not the window. The pane is a middle column between
+ * two fixed rails, so its width and the viewport's are not the same question —
+ * at 1200px the viewport is wide and this pane is 480px, which is two tiles
+ * with a readable fund name on them, not three. */
+.dash-chart {
+  min-width: 0;
+  container-type: inline-size;
+}
+.watch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+@container (max-width: 34rem) {
+  .watch-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (max-width: 22rem) {
+  .watch-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.watch-tile {
+  display: block;
+  padding: 0.6rem 0.7rem 0.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: calc(var(--radius) - 4px);
+  color: inherit;
+  text-decoration: none;
+}
+.watch-tile:hover {
+  border-color: color-mix(in srgb, currentColor 35%, var(--hairline));
+}
+.watch-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+/* The tile takes its colour from the month it is drawing, and the line and wash
+ * inherit it — so a red month is red end to end without a second class. */
+.watch-tile.up { color: var(--up); }
+.watch-tile.down { color: var(--down); }
+.watch-tile.flat { color: var(--ink-muted); }
+
+.watch-spark {
+  display: block;
+  width: 100%;
+  height: 64px;
+  margin: 0.4rem 0 0.3rem;
+}
+/* preserveAspectRatio="none" stretches the viewBox to the tile, which would take
+ * the stroke with it; the line keeps its weight at any width. */
+.watch-line {
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.watch-fill {
+  fill: currentColor;
+  opacity: 0.12;
+  stroke: none;
+}
+/* The name the tile is actually about. It is the one thing on the tile that can
+ * be sixty characters long, so it gets a line of its own and gives way at the
+ * end rather than pushing the tile wider. */
+.watch-name {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The window's ends, under the ends of the line they belong to. Without them a
+ * fund younger than the window looks like a fund that went nowhere for a year. */
+.watch-dates {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  font-size: 0.66rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Below three columns the chart goes full width and the rails sit under it,
+ * side by side while there is room for two. */
+@media (max-width: 1180px) {
+  .dash-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dash-chart {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dash-top {
+    grid-template-columns: minmax(0, 1fr) 4rem 4rem;
+  }
+  .watch-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .watch-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- lines of business ---------------------------------------------------- */
+
+/* Name, bar, figure. The bar is scaled to the fund's own largest theme rather
+ * than to 100, so the ordering is readable even on a fund whose biggest position
+ * is 4% — the figure beside it is the one that means something. */
+.theme-list {
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+}
+.theme-list li {
+  display: grid;
+  grid-template-columns: minmax(7rem, 12rem) 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.87rem;
+}
+.theme-bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--hairline);
+  overflow: hidden;
+}
+.theme-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--g-equity);
+}
+.theme-val {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+@media (max-width: 560px) {
+  .theme-list li {
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 0.6rem;
+  }
+  /* The bar spans the row underneath once the name needs the full width. */
+  .theme-bar {
+    grid-column: 1 / -1;
+    order: 2;
+  }
+}
+
+/* --- crash protection ---------------------------------------------------- */
+
+/* Four columns, and the date range is the widest thing in the table. The three
+ * figures get fixed widths so the range takes what is left, same arrangement as
+ * the fund list. */
+.crash-table .crash-period { width: auto; }
+.crash-table th.num-cell,
+.crash-table td.num-cell { width: 108px; }
+
+.crash-period span {
+  display: block;
+}
+.crash-days {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A fall the fund was not around for. Dimmed rather than dropped: the row is
+ * evidence that the record has a hole in it, and a table that quietly omitted
+ * those rows would read as a complete one. */
+.crash-table tr.is-absent {
+  color: var(--ink-muted);
+}
+.crash-table tr.is-absent .crash-days {
+  opacity: 0.7;
+}
+
+.breakdown {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.87rem;
+  margin-top: 1.25rem;
+}
+.breakdown th {
+  text-align: left;
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+.breakdown td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--hairline);
+}
+.breakdown tr.group-row td {
+  font-weight: 700;
+  background: color-mix(in srgb, var(--ink) 3%, transparent);
+}
+.breakdown tr.group-row .swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 0.5rem;
+}
+.breakdown .leaf td:first-child {
+  padding-left: 1.6rem;
+  color: var(--ink-2);
+}
+.breakdown .pct {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Individual holdings from the KAP filing, grouped by asset class. One row per
+   position rather than per filed line: managers split a holding over several
+   lines and a table that repeats ASELS five times answers a bookkeeping
+   question rather than "what does this fund own". */
+.holdings-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1.5rem;
+}
+.holdings-head h2 {
+  margin-bottom: 0.5rem;
+}
+.holdings-head .panel-note {
+  margin-bottom: 0;
+  max-width: 62ch;
+}
+.holdings-stamp {
+  margin: 0;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Two rails: what kind of thing, then which way it moved. They are buttons, not
+   links — they change what the table shows, not where you are. */
+.rail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 1rem;
+}
+.rail-chips-sub {
+  margin-top: 0.4rem;
+}
+/* A fund with nothing priced offers no movement filters, so the rail is empty
+   rather than a row of zeroes — and an empty rail must not leave its margin. */
+.rail-chips:empty {
+  display: none;
+}
+.rail-chip {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.rail-chip:hover {
+  color: var(--ink);
+  border-color: var(--rule);
+}
+.rail-chip.is-on {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--ink);
+  font-weight: 600;
+}
+.rail-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.rail-chips-sub .rail-chip {
+  font-size: 0.72rem;
+  padding: 0.22rem 0.6rem;
+}
+
+.holdings-table {
+  table-layout: fixed;
+}
+.holdings-table th:nth-child(1),
+.holdings-table td:nth-child(1) { width: auto; }
+.holdings-table th:nth-child(2),
+.holdings-table td:nth-child(2) { width: 7rem; }
+.holdings-table th:nth-child(3),
+.holdings-table td:nth-child(3) { width: 6rem; }
+.holdings-table th:nth-child(4),
+.holdings-table td:nth-child(4) { width: 5.5rem; }
+.holdings-table th:nth-child(5),
+.holdings-table td:nth-child(5) { width: 5.5rem; }
+.holdings-table th:nth-child(6),
+.holdings-table td:nth-child(6) { width: 5.5rem; }
+
+/* Numbers are compared down their column, so they align right under a
+   right-aligned heading like every other figure here. */
+.holdings-table .num-head { text-align: right; }
+.holding-price,
+.holding-move {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.holding-price { color: var(--ink-2); }
+.holding-weight { font-weight: 600; }
+.holding-prev { color: var(--ink-muted); }
+
+/* The group heading carries its own weight, including any rows the fold is
+   hiding, so it never disagrees with the portfolio below it. */
+.breakdown tr.group-row td {
+  padding-top: 1.1rem;
+  padding-bottom: 0.45rem;
+  background: none;
+  border-bottom: 1px solid var(--rule);
+  font-weight: 400;
+}
+.group-accent {
+  display: inline-block;
+  width: 3px;
+  height: 0.95rem;
+  border-radius: 2px;
+  margin-right: 0.55rem;
+  vertical-align: -0.15rem;
+}
+.group-name {
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+}
+.group-count {
+  margin-left: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+/* Floated rather than flexed. The row is one cell spanning every column, and
+   `display: flex` on a `td` takes it out of the table layout altogether, so the
+   cell collapsed to the first column's width and the figure came with it. A
+   float leaves the cell a real table cell. */
+.group-weight {
+  float: right;
+  font-weight: 700;
+}
+
+/* The asset cell stacks the ticker over the issuer, which frees the column the
+   issuer used to need and puts the two things a reader pairs on one line. */
+.holding-asset {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.holding-mark {
+  flex: none;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: hsl(var(--mark-hue) 65% 32%);
+  background: hsl(var(--mark-hue) 62% 88%);
+  border: 1px solid hsl(var(--mark-hue) 45% 78%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) .holding-mark {
+    color: hsl(var(--mark-hue) 70% 78%);
+    background: hsl(var(--mark-hue) 40% 20%);
+    border-color: hsl(var(--mark-hue) 35% 32%);
+  }
+}
+:root[data-theme='dark'] .holding-mark {
+  color: hsl(var(--mark-hue) 70% 78%);
+  background: hsl(var(--mark-hue) 40% 20%);
+  border-color: hsl(var(--mark-hue) 35% 32%);
+}
+.holding-id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.holding-code {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.holding-name {
+  color: var(--ink-muted);
+  font-size: 0.76rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.holding-ref,
+.holding-new {
+  display: inline-block;
+  padding: 0.05rem 0.32rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.holding-ref:hover,
+.holding-ref:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.holding-new {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+/* The delay is stated in the panel's footnote; this is the per-row reminder that
+   the price beside it is not this second's. */
+.delay-dot {
+  margin-right: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  cursor: help;
+}
+
+.fold-row td {
+  padding-top: 0.5rem;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+}
+
+/* A button that reads as a link: it changes what the page shows, not where you
+   are, so it must stay a button for the keyboard and for screen readers. */
+.link-btn {
+  margin-top: 0.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.82rem;
+  color: var(--accent);
+  cursor: pointer;
+}
+.link-btn:hover { text-decoration: underline; }
+
+@media (max-width: 760px) {
+  /* Last month and the change go first: on a narrow screen the ticker, what it
+     is doing now and how much of the fund it is are the whole story. */
+  .holdings-table th:nth-child(5),
+  .holdings-table td:nth-child(5),
+  .holdings-table th:nth-child(6),
+  .holdings-table td:nth-child(6) { display: none; }
+  /* Not `auto`. A hidden column still takes an equal share of the leftover width
+     in a fixed layout, so with two of them hidden the asset column was left with
+     a third of what it should have had — 63px of a 189px remainder. A percentage
+     makes it claim the remainder outright. */
+  .holdings-table th:nth-child(1),
+  .holdings-table td:nth-child(1) { width: 100%; }
+}
+
+@media (max-width: 620px) {
+  .holdings-table th:nth-child(2),
+  .holdings-table td:nth-child(2) { width: 5.4rem; }
+  .holdings-table th:nth-child(3),
+  .holdings-table td:nth-child(3),
+  .holdings-table th:nth-child(4),
+  .holdings-table td:nth-child(4) { width: 4.4rem; }
+  .holdings-table { font-size: 0.8rem; }
+  .holdings-table td { padding-inline: 0.3rem; }
+  .holding-mark { display: none; }
+  .holdings-stamp { white-space: normal; }
+}
+
+.panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+.panel-head .panel-note {
+  margin: 0;
+}
+
+.seg-range button {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.74rem;
+}
+
+/* The chart and its readout share a positioning context; the frame is focusable
+ * so the crosshair can be driven from the keyboard. */
+.chart-frame {
+  position: relative;
+  touch-action: pan-y;
+}
+.chart-frame:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.chart-hint {
+  margin: 0.5rem 0 0;
+}
+
+/* Legend and control in one: the swatch identifies the line, the checkbox turns
+ * it off, and the value is the change over the visible window. */
+.series-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 1.1rem;
+  list-style: none;
+  margin: 0.9rem 0 0;
+  padding: 0;
+}
+.series-picker .check {
+  gap: 0.4rem;
+  min-height: 30px;
+  font-size: 0.84rem;
+}
+.series-picker input {
+  width: 14px;
+  height: 14px;
+}
+.series-picker .swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: none;
+}
+.series-picker .pick-name {
+  color: var(--ink-2);
+}
+.series-picker .val {
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+/* An unticked series keeps its row but stops competing for attention. */
+.series-picker .check:has(input:not(:checked)) .swatch {
+  opacity: 0.3;
+}
+.series-picker .check:has(input:not(:checked)) .pick-name,
+.series-picker .check:has(input:not(:checked)) .val {
+  color: var(--ink-muted);
+}
+
+.crosshair line {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.chart-tip {
+  position: absolute;
+  top: 0;
+  z-index: 5;
+  min-width: 9rem;
+  max-width: 17rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--raised);
+  box-shadow: var(--shadow);
+  font-size: 0.78rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(10px);
+}
+.chart-tip.is-on {
+  opacity: 1;
+}
+.chart-tip.flip {
+  transform: translateX(-100%) translateX(-10px);
+}
+.chart-tip .tip-date {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  font-size: 0.74rem;
+  color: var(--ink-2);
+}
+.chart-tip ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+.chart-tip li {
+  display: grid;
+  grid-template-columns: 9px 1fr auto;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.chart-tip .swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  transform: translateY(-1px);
+}
+.chart-tip .tip-label {
+  color: var(--ink-2);
+  /* Grid items default to min-width:auto, which refuses to shrink below the
+   * text and lets a long asset name run into the value. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chart-tip .tip-val {
+  font-weight: 600;
+  font-size: 0.76rem;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.chart .grid line {
+  stroke: var(--hairline);
+  stroke-width: 1;
+}
+.chart .axis text {
+  fill: var(--ink-muted);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+.chart .series {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: var(--ink-2);
+  background: var(--accent-soft);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin: 1rem 0 0;
+}
+
+/* ---------------------------------------------------------------- statements */
+
+/* Two rows of controls, not one: nine line buttons and three period buttons on
+ * a single line wrap into a ragged block on any screen narrower than a desk. */
+.fin-head {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.seg-lines {
+  flex-wrap: wrap;
+}
+.seg-lines button {
+  font-size: 0.78rem;
+}
+.fin-chart {
+  margin: 0.9rem 0 0.2rem;
+}
+.fin-sub {
+  margin: 1.4rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+.fin-table-wrap {
+  margin-top: 0.6rem;
+}
+/* Newest column first, so the row label has to stay put while the older
+ * quarters scroll out from under it. */
+.fin-table th.fin-line {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  text-align: left;
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.fin-table thead th.fin-line {
+  color: var(--ink-muted);
+}
+.fin-table td {
+  white-space: nowrap;
+}
+
+/* Bars sit on a zero line rather than on the floor of the box, so a loss has
+ * somewhere to hang. */
+.bar-chart .fin-bar {
+  fill: var(--accent);
+}
+.bar-chart .fin-bar.down {
+  fill: var(--down);
+}
+.bar-chart .grid {
+  stroke: var(--hairline);
+  stroke-width: 1;
+}
+.bar-chart .grid-zero {
+  stroke: var(--ink-muted);
+  stroke-opacity: 0.5;
+}
+.bar-chart text {
+  fill: var(--ink-muted);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+/* The chart is stretched to the panel width, which stretches its glyphs with
+ * it; the labels are drawn upright by cancelling the stretch out. */
+.bar-chart {
+  overflow: visible;
+}
+
+/* A range whose ends carry no judgement of their own. */
+.range-plain {
+  background: var(--hairline);
+}
+
+/* The period a figure belongs to, under the figure. */
+.stat-sub {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+
+/* ---------------------------------------------------------------- analysts */
+
+/* One bar, three segments, each labelled with its own count — a legend for
+ * three numbers would take more room than the numbers. */
+.rating-bar {
+  display: flex;
+  margin-top: 0.9rem;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 1.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  color: var(--surface);
+}
+.rating-buy { background: var(--up); }
+.rating-hold { background: var(--ink-muted); }
+.rating-sell { background: var(--down); }
+
+/* A score's band, next to the score. */
+.band {
+  margin-left: 0.4rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  text-transform: lowercase;
+}
+.band-safe {
+  background: color-mix(in srgb, var(--up) 16%, transparent);
+  color: var(--up);
+}
+.band-grey {
+  background: var(--raised);
+  color: var(--ink-muted);
+}
+.band-distress {
+  background: color-mix(in srgb, var(--down) 16%, transparent);
+  color: var(--down);
+}
+
+/* ---------------------------------------------------------------- peers */
+
+.peer-table th[scope='row'] {
+  text-align: left;
+  font-weight: 500;
+}
+/* The company whose page this is, kept visible in the list it is being
+ * compared against. */
+.peer-self {
+  background: var(--accent-soft);
+}
+.peer-self th[scope='row'] {
+  font-weight: 700;
+}
+.peer-median th[scope='row'],
+.peer-median td {
+  border-top: 1px solid var(--ink-muted);
+  color: var(--ink-2);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------- colophon */
+
+.colophon {
+  width: var(--page);
+  margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+}
+.colophon p {
+  margin: 0.2rem 0;
+}
+.colophon a {
+  color: var(--accent);
+}
+
+/* --- shares ---------------------------------------------------------------- */
+
+.share-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+.share-search {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+}
+.share-theme {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+}
+.share-count {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The share table is the fund table with different columns, so it borrows the
+ * whole of `table.funds` — sticky head, hairlines, hover — and only declares the
+ * widths that differ. Fixed layout means every column but the name needs one. */
+.col-figure { width: 94px; }
+
+/* A name under the code it belongs to. Every table that pairs the two uses it,
+ * so it is declared once — scoped to one table it silently did nothing in the
+ * next one, and the code and the name ran together into "TUPRSTupras". */
+.row-sub {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.share-table .live-dot {
+  margin-right: 0.3rem;
+}
+.sort-arrow {
+  color: var(--accent);
+}
+
+.more-row {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0 1.5rem;
+}
+/* The list is long enough that the button is the only way to the tail; it reads
+ * as a control rather than as a caption. */
+.more-row .btn,
+.btn {
+  padding: 0.45rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* --- one share ------------------------------------------------------------- */
+
+/* Three panels, so three columns — not auto-fit. The ownership panel spans the
+ * full row, and a spanned track is not an empty track, so auto-fit had nothing
+ * to collapse: it kept a fourth column that only the wide panel reached into and
+ * left the other three huddled in three quarters of the page. */
+.share-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 1100px) {
+  .share-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .share-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.share-grid > .panel {
+  margin-bottom: 0;
+  min-width: 0;
+}
+/* The one panel no other site can draw, so it gets the width of the page. */
+.share-owners {
+  grid-column: 1 / -1;
+}
+
+.chip-quiet {
+  color: var(--ink-muted);
+}
+
+/* Label left, figure right, hairline between: a figure list is read down the
+ * right edge, so the numbers are what line up. */
+.figure-list {
+  display: grid;
+  margin: 0.75rem 0 0;
+}
+.figure {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.86rem;
+}
+.figure:first-child {
+  border-top: 0;
+}
+.figure dt {
+  color: var(--ink-2);
+}
+.figure dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* A definition that has one. Drawn as a mark rather than left to a bare tooltip,
+ * because a tooltip nobody can see is not an explanation. */
+.figure-mark {
+  display: inline-block;
+  margin-left: 0.3rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  font-size: 0.6rem;
+  line-height: 0.85rem;
+  text-align: center;
+  color: var(--ink-muted);
+  cursor: help;
+}
+
+/* Where the price sits between its own extremes of the year. */
+.range-bar {
+  margin: 0.9rem 0 0.4rem;
+}
+.range-track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right,
+    color-mix(in srgb, var(--down) 45%, transparent),
+    var(--hairline) 50%,
+    color-mix(in srgb, var(--up) 45%, transparent));
+}
+.range-mark {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  transform: translateY(-50%);
+}
+.range-ends {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+}
+.range-label {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.66rem;
+}
+
+/* --- who owns it ----------------------------------------------------------- */
+
+.own-move {
+  margin: 0.9rem 0 0.2rem;
+  font-size: 0.9rem;
+}
+.own-move b {
+  font-weight: 600;
+}
+.own-basis {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  margin-left: 0.35rem;
+}
+/* Its own table rather than `table.funds`: that one's header is sticky to the
+ * masthead, which inside a panel would leave a row of column names floating over
+ * the page as you scroll past it. */
+.own-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  font-size: 0.86rem;
+}
+.own-table th {
+  text-align: left;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--rule);
+}
+.own-table td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid var(--hairline);
+  vertical-align: top;
+}
+.own-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+/* The figures are the point of the table, so they sit together on the right
+ * rather than being pushed there by a sixty-character fund name. */
+.own-table th.num,
+.own-table td.num {
+  width: 9rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.own-table td .num {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent);
+  text-align: left;
+}
+/* The fund column is the widest thing in this table; without a ceiling one long
+ * founder name sets the width of the whole panel. */
+.own-table .row-sub {
+  max-width: 24rem;
+}
+
+/* Four columns do not fit a phone, and dropping one would drop the reason the
+ * table exists. It scrolls inside the panel instead — the panel itself never
+ * moves, so the page still has one horizontal extent. */
+.own-scroll {
+  overflow-x: auto;
+}
+@media (max-width: 720px) {
+  .own-table {
+    min-width: 32rem;
+  }
+  .own-table th.num,
+  .own-table td.num {
+    width: 7rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .share-count {
+    margin-left: 0;
+  }
+  .figure {
+    font-size: 0.82rem;
+  }
+}
+
+/* ---------------------------------------------------------------- responsive */
+
+/* The search box and three nav items cannot share one row with the language and
+ * theme controls at phone widths — the nav was being clipped to "P…". So the
+ * search drops to a full-width second row and everything keeps its label. */
+@media (max-width: 760px) {
+  .masthead {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+  .nav-search {
+    order: 3;
+    flex: 1 1 100%;
+  }
+  .tape-stamp {
+    max-width: 6.5rem;
+    font-size: 0.6rem;
+  }
+}
+
+/* Five tiles share the rail, so below roughly 1150px the sparkline is down to a
+ * ten-pixel nub squeezed between two numbers. The number is the signal and the
+ * shape is the texture, so the texture goes rather than shrinking to nothing. */
+@media (max-width: 1150px) {
+  .tape-body .spark {
+    display: none;
+  }
+}
+
+/* The tile still cannot go below the width of the longest quote it carries —
+ * ₺47,9572 next to its change — or the price runs straight over the figure
+ * beside it. The rail scrolls, so a wider tile costs nothing but a swipe. */
+@media (max-width: 620px) {
+  .tape-tile {
+    min-width: 10.25rem;
+  }
+}
+
+@media (max-width: 860px) {
+  :root {
+    --page: calc(100% - 1.5rem);
+  }
+  /* The nav is the primary way between sections, so it stays; the wordmark text
+   * is what gives way. */
+  .wordmark-text {
+    display: none;
+  }
+  .masthead-nav {
+    margin-left: 0.35rem;
+    gap: 0;
+  }
+  .masthead-nav a {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  .filters {
+    gap: 0.5rem;
+  }
+  .chart-tip {
+    min-width: 7.5rem;
+    font-size: 0.74rem;
+  }
+  /* Selects sized for a desktop row overflow a phone; stack them instead. */
+  .filters .field {
+    flex: 1 1 100%;
+  }
+  .filters select,
+  .filters input[type='search'] {
+    width: 100%;
+    min-width: 0;
+  }
+  .ghost-btn {
+    align-self: flex-start;
+  }
+  .hero-top {
+    align-items: flex-start;
+  }
+}
+
+/* The secondary return, investor count and fee are all repeated on the fund
+ * page, so they are the first to go when the row stops fitting. Dropping them at
+ * 1200px rather than 860px is what keeps the list from scrolling sideways on an
+ * ordinary laptop. */
+@media (max-width: 1200px) {
+  .col-optional {
+    display: none;
+  }
+}
+
+/* Below this a six-column row cannot fit without squeezing the fund name — the
+ * one thing you are reading — down to a couple of characters. So the row stops
+ * being a row and becomes a card: identity on the first line, name on the second,
+ * figures on the third, composition bar last. The headings move onto the values
+ * themselves, since there is no header row to look up to any more. */
+@media (max-width: 820px) {
+  table.funds,
+  table.funds tbody {
+    display: block;
+  }
+  table.funds thead {
+    display: none;
+  }
+  /* The statement table is the exception, and has to be. A card works when a row
+   * is one THING and the columns describe it; here a row is one line of the
+   * accounts and the columns are eight quarters, so stacking it produces eight
+   * unlabelled numbers under a heading. It scrolls sideways instead, with the
+   * line name pinned — which is how a statement is read on a phone anyway. */
+  table.fin-table,
+  table.fin-table tbody,
+  table.fin-table thead {
+    display: revert;
+  }
+  table.fin-table tr {
+    display: table-row;
+    padding: 0;
+    border-bottom: 0;
+  }
+  table.fin-table td,
+  table.fin-table th {
+    display: table-cell;
+    padding: 0.45rem 0.6rem;
+  }
+  .fin-table-wrap {
+    overflow-x: auto;
+  }
+  /* Stated rather than left to the table's own sizing: nine columns squeezed
+   * into a phone will happily shrink a lira figure until it wraps mid-number. */
+  table.fin-table {
+    min-width: 42rem;
+    table-layout: auto;
+  }
+  table.funds tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.8rem;
+    padding: 0.7rem 0.75rem;
+    border-bottom: 1px solid var(--hairline);
+  }
+  table.funds tbody tr:last-child {
+    border-bottom: 0;
+  }
+  table.funds td {
+    display: block;
+    width: auto !important;
+    /* Flex items default to min-width:auto and refuse to shrink below their
+     * content, which is what let a long fund name blow the card open. */
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+  /* `table.funds td` outweighs a bare `.col-optional`, so the rule above would
+   * otherwise resurrect every column hidden at 1200px — and they would lead the
+   * card, since they carry no order of their own. */
+  table.funds td.col-optional,
+  table.funds th.col-optional {
+    display: none;
+  }
+
+  .col-rank { order: 0; padding: 0 !important; }
+  .col-fav { order: 1; padding: 0 !important; }
+  .col-code { order: 2; }
+  .col-risk { order: 3; margin-left: auto; }
+  .col-name { order: 4; flex: 1 1 100%; overflow: hidden; }
+  .col-metric { order: 5; }
+  .col-ret { order: 6; }
+  .col-excess { order: 7; }
+  .col-size { order: 8; }
+  .col-comp { order: 9; flex: 1 1 100%; margin-top: 0.15rem; }
+
+  /* Numbers need their heading back now that the header row is gone. */
+  .col-ret::before,
+  .col-excess::before,
+  .col-size::before,
+  .col-metric::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .col-ret,
+  .col-excess,
+  .col-size,
+  .col-metric {
+    text-align: left;
+  }
+  .mini-comp {
+    width: 100%;
+  }
+
+  /* The crash tables become cards too, but they are four columns rather than
+   * eleven and the date range is the row's identity, so it leads on its own line
+   * with the three figures beneath it. */
+  .crash-table .crash-period {
+    order: 0;
+    flex: 1 1 100%;
+  }
+  .crash-table td.num-cell {
+    order: 1;
+    text-align: left;
+  }
+  .crash-table td.num-cell::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+
+}
+
+/* Below this the masthead runs out of room: mark + four nav items + the language
+ * and theme controls exceed the viewport. The controls are fixed-size, so the nav
+ * is the part that gives — it tightens up and, as a last resort, scrolls. */
+@media (max-width: 420px) {
+  .masthead {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    gap: 0.4rem;
+  }
+  .wordmark-mark {
+    width: 18px;
+    height: 18px;
+  }
+  .masthead-nav {
+    min-width: 0;
+    margin-left: 0.2rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .masthead-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .masthead-nav a {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.76rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* A holdings code that goes somewhere. Underlined on hover only: a table of
+ * sixty rows with every code underlined reads as a page of links. */
+.holding-link {
+  color: inherit;
+  text-decoration: none;
+}
+.holding-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* The fund list's own search, in the toolbar with the filters. Flexible so it
+ * gives way to the chips before the sort control does. */
+.list-search {
+  flex: 0 1 13rem;
+  min-width: 7rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.84rem;
+}
+.list-search:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* --- the masthead's global search ------------------------------------------ */
+
+/* Funds and shares in one list, hanging off the field. The masthead is
+ * `position: sticky` with its own stacking context, so this only has to clear
+ * the tape below it. */
+/* Anchored to the right edge and allowed to grow leftwards past the field: a
+ * Turkish fund name is sixty characters and the field is twenty-two. */
+.nav-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: auto;
+  width: min(34rem, 90vw);
+  z-index: 60;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.28);
+}
+.nav-hit {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  border-top: 1px solid var(--hairline);
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.84rem;
+}
+.nav-hit:first-child {
+  border-top: 0;
+}
+/* One highlight for both pointer and keyboard: the arrow keys move the same mark
+ * the mouse does, so there is never a second "current" row. */
+.nav-hit.is-on {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.nav-hit-code {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent);
+}
+.nav-hit-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+.nav-hit-kind {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.nav-hit-empty {
+  margin: 0;
+  padding: 0.7rem;
+  font-size: 0.84rem;
+  color: var(--ink-muted);
+}
+
+/* --- the market map -------------------------------------------------------- */
+
+/* Absolute tiles inside a measured box. The layout is computed in real pixels
+ * because a treemap's whole job is aspect ratio, and percentages of a box whose
+ * shape you do not know cannot preserve one. */
+.map-box {
+  position: relative;
+  width: 100%;
+  margin-top: 0.9rem;
+  border-radius: calc(var(--radius) - 4px);
+  overflow: hidden;
+  background: var(--plane);
+}
+/* The industry behind its companies: a hairline box and a small name, drawn
+ * under the tiles so the grouping reads without competing with them. */
+.map-group {
+  position: absolute;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.map-group-name {
+  display: block;
+  padding: 1px 4px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-tile {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border: 1px solid var(--plane);
+  border-radius: 2px;
+  color: var(--ink);
+  text-decoration: none;
+  overflow: hidden;
+  line-height: 1.05;
+}
+.map-tile:hover {
+  border-color: var(--ink);
+  z-index: 2;
+}
+.map-code {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.map-move {
+  font-size: 0.64rem;
+  opacity: 0.85;
+}
+
+/* The scale, so a colour means a number rather than a mood. */
+.map-key {
+  display: flex;
+  gap: 2px;
+  margin-top: 0.6rem;
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+}
+.map-key-step {
+  flex: 1 1 0;
+  padding: 0.2rem 0;
+  text-align: center;
+  color: var(--ink-2);
+  border-radius: 2px;
+}
+
+/* The starred shares, under the starred funds. Its own panel because the two
+ * have almost no columns in common. */
+.fav-shares .table-wrap {
+  margin-top: 0.9rem;
+  border: 0;
+}
+.fav-shares table.funds th {
+  position: static;
+}
+
+/* --- watchlist tiles: each with its own window ----------------------------- */
+
+/* The tile is a link with a control inside it, so the link is the head and the
+ * footer sits outside it — a select nested in an anchor swallows its own clicks. */
+.watch-head {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.watch-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+/* The name gives way, the price does not: a truncated name is still a name, a
+ * truncated price is a wrong number. */
+.watch-name-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Live, and the reason a share tile opens on today. */
+.watch-price {
+  flex: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* Between the two ends of the window it changes, which is where a control that
+ * changes the window belongs. */
+.watch-range {
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 0 0.1rem;
+  cursor: pointer;
+}
+.watch-range:hover,
+.watch-range:focus-visible {
+  color: var(--accent);
+}
+/* One line, always: the window's two ends and the control that changes them. The
+ * select gives way before the dates do — a truncated date is unreadable and a
+ * truncated "1M" is still "1M". */
+.watch-dates {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.25rem;
+}
+.watch-dates > span {
+  white-space: nowrap;
+}
+.watch-range {
+  min-width: 0;
+}
