@@ -98,5 +98,21 @@
     </noscript>
 
     <script type="module" src="ui.js"></script>
+
+    <!--
+      Simple Analytics: no cookies, no fingerprint, no personal data, nothing to
+      consent to. The only third-party script on the site, and the page works
+      exactly the same when it is blocked.
+
+      data-mode="hash" is not optional here. Every route on this site is a hash
+      — #/fon/TLY, #/hisse/ASELS — and without it the script reports one page
+      view per visit and never says which fund anybody actually opened.
+    -->
+    <script
+      data-collect-dnt="true"
+      data-mode="hash"
+      async
+      src="https://scripts.simpleanalyticscdn.com/latest.js"
+    ></script>
   </body>
 </html>
