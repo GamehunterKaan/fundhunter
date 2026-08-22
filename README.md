@@ -1188,6 +1188,84 @@ four or five, so **one favourites list holds both** and can never confuse them.
 Star a share and it joins your funds on the dashboard chart; the code decides
 which file its history comes from and which page it links to.
 
+## Speculative boards
+
+"Tahta" is Turkish market slang for a share whose price board a small group can
+move at will. **Nothing in any dataset can prove that anyone did**, and this does
+not try to. What it measures is not conduct but condition: how little of a
+company actually trades, how much of it one holder has, how far the price has
+run, and how little in the accounts anchors it anywhere.
+
+Every one of the six is a figure the exchange itself publishes, and every
+threshold sits at roughly the top decile of Borsa İstanbul — so a flag means
+"unusual for this exchange", not "unusual anywhere".
+
+| Condition | Threshold |
+|---|---|
+| **Sharp run-up** | +75% over a quarter, or +200% over a year |
+| **Thin free float** | a quarter or less of the shares actually trade |
+| **One fund holds a large stake** | a single fund holds ≥5% of the whole company |
+| **No earnings behind the price** | the company loses money, or P/E ≥ 100 |
+| **Far above book value** | P/B ≥ 10 |
+| **Violent daily moves** | monthly volatility ≥ 8%, twice the exchange's median |
+
+**The run-up is required.** A thin, loss-making, closely-held company whose price
+has not moved is an illiquid company, not a board being worked — and saying
+otherwise about a real business would be both wrong and unfair. Three conditions
+including that one is the bar; **25 of 624 companies** clear it.
+
+A test that cannot run is never counted as passed or failed, and exchange-traded
+funds are excluded outright: a tracker has no float, no earnings and no book
+value, so it would score two out of two and be called speculative for doing its
+job.
+
+The strongest example currently on file hits all six:
+
+```
+GUNDG   +2,080% over a year · 21.9% float · one fund holds 7.8% of it
+        loses money · 87.6× book · 9.7% daily volatility
+```
+
+### The half that matters: which funds are in them
+
+A share page can show the conditions. **Only this project can tell you that two
+thirds of a fund you might buy is in shares like that**, because that needs every
+fund's KAP filing at once.
+
+```
+PBR   66.9% of the portfolio — 84.9% of its equity — across 8 shares
+PHE   65.7%
+TLY   54.8%
+```
+
+77 funds hold at least one; 9 hold a quarter or more of themselves in them. Two
+figures rather than one, because either alone misleads: 30% of a portfolio is a
+very different sentence when the fund is 35% shares than when it is 95%.
+
+**Equity only.** A fund holding a company's commercial paper or lending against
+it in reverse repo is not holding the share. The first version of this counted
+`code` matches and put three *money-market* funds at the top of the list, which
+would have been a serious thing to publish and completely wrong — `isPriceable()`
+already gated on the filing's own group, and the fix was to use it.
+
+Index trackers appear here too, and the panel says why: a BIST Technology fund
+holds what the index holds. It did not pick those names, but its investors are
+exposed to those prices either way.
+
+### What this deliberately does not claim
+
+The exchange keeps its own **Watchlist Market** for companies that need
+supervising, and 17 companies are on it. **None of them is flagged here** — the
+two lists are looking at different problems. The exchange watchlists distress:
+companies that have already collapsed, or failed to file. This looks for a live
+run-up. An earlier version without the run-up requirement did line up with the
+watchlist — those companies scored a median of 32 against 19 for the market — and
+that version was measuring susceptibility rather than the thing being asked for.
+
+The concentration test sees **funds only**. A company controlled by one family
+shows up here as a thin float and not as concentration, because KAP filings are
+fund portfolios and there is no equivalent public feed for individual holders.
+
 ## The market
 
 `#/piyasa` is the two things the tape can only hint at.

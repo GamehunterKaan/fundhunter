@@ -29,6 +29,7 @@ import {
   peerGroupOf, riskBand, stanceOf, leverageOf, netFlow, investorChange,
   allocationTurnover, ridgeFit, dailyReturns, factorReader, median,
   crashProtection, themeExposure, ownership,
+  boardSummary, speculativeExposure, MIN_BOARD_FLAGS, SPECULATIVE_HEAVY,
 } from '../analytics.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -78,6 +79,7 @@ async function main() {
     delete fund.cr;
     delete fund.th;
     delete fund.dy;
+    delete fund.spec;
   }
 
   // --- leverage -------------------------------------------------------------
@@ -218,6 +220,7 @@ async function main() {
   if (stockFile) {
     const listed = new Map(stockFile.stocks.map((s) => [s.c, s]));
     const holders = new Map();
+    const perFund = new Map();
     let readFilings = 0;
     let skipped = 0;
     let unusablePrev = 0;
@@ -272,6 +275,10 @@ async function main() {
           prev: prevUsable ? row.prev : null,
         });
       }
+      // Kept for the speculative pass below, which cannot run until every share
+      // has its flags and every share needs this loop's ownership figures first.
+      // Re-reading 880 filings to get back to the same numbers would be silly.
+      perFund.set(fund.c, new Map([...perTicker].map(([t, r]) => [t, r.weight])));
     }
 
     let held = 0;
@@ -286,6 +293,36 @@ async function main() {
         delete stock.own;
       }
     }
+
+    // Now that ownership is on the shares, the conditions can be tested — one of
+    // them is how much of a company a single fund holds, which did not exist a
+    // dozen lines ago.
+    const flagged = new Set();
+    for (const stock of stockFile.stocks) {
+      const summary = boardSummary(stock);
+      if (summary) {
+        stock.spec = summary;
+        flagged.add(stock.c);
+      } else {
+        delete stock.spec;
+      }
+    }
+
+    let exposed = 0;
+    let heavy = 0;
+    for (const fund of funds) {
+      const exposure = speculativeExposure(perFund.get(fund.c), flagged);
+      if (exposure) {
+        fund.spec = exposure;
+        exposed++;
+        if (exposure.w >= SPECULATIVE_HEAVY) heavy++;
+      } else {
+        delete fund.spec;
+      }
+    }
+    log(`  speculative boards: ${flagged.size} listings meet ${MIN_BOARD_FLAGS}+ conditions ` +
+      `including a run-up; ${exposed} funds hold at least one, ${heavy} hold ` +
+      `${SPECULATIVE_HEAVY}% or more of themselves in them`);
 
     stockFile.ownershipFrom = {
       filings: readFilings, skipped, unusablePrev, builtAt: new Date().toISOString(),

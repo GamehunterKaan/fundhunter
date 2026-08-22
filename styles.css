@@ -2611,6 +2611,88 @@ a.dash-row:hover {
   font-size: 0.74rem;
 }
 
+/* ------------------------------------------------------- speculative boards */
+
+/* Warning colours, used sparingly: this panel appears on 25 of 624 companies
+ * and on the funds that hold them, so it can afford to be loud. */
+.spec-panel {
+  border-color: color-mix(in srgb, var(--down) 35%, var(--hairline));
+}
+.spec-count {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--down);
+  white-space: nowrap;
+}
+.spec-flags {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.spec-flags li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--hairline);
+}
+.spec-flags li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.spec-mark {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--down);
+  background: color-mix(in srgb, var(--down) 16%, transparent);
+}
+.spec-body {
+  display: block;
+  min-width: 0;
+  font-size: 0.86rem;
+}
+/* The condition on one line and what it means on the next: a reader who does
+ * not know what a free float is gets told without having to hover anything. */
+.spec-why {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+.spec-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.spec-fund.is-heavy {
+  border-color: color-mix(in srgb, var(--down) 35%, var(--hairline));
+}
+.spec-holdings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+}
+.spec-holdings li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------------------------------------------------------------- colophon */
 
 .colophon {

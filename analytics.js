@@ -1283,3 +1283,170 @@ export function versusCash(funds, horizon, cashReturns) {
     of: values.length,
   };
 }
+
+// ---------------------------------------------------------------- speculative boards
+//
+// "Tahta" is Turkish market slang for a share whose price board a small group
+// can move at will. Nothing in any dataset can prove that anyone did — so what
+// is measured here is not conduct but CONDITION: how little of a company
+// actually trades, how much of it one holder has, how far the price has run,
+// and how little in the accounts anchors it anywhere.
+//
+// Every one of these is a published fact about the listing. A company can hit
+// every test and be doing nothing wrong; a thin float and a loss are not
+// misconduct. What the flags say is that this price would be easy to move and
+// hard to argue with — which is exactly what a fund's investor deserves to know
+// before finding out that half of it is in shares like these.
+
+/** How far a price must have run before the rest of the tests are worth applying. */
+export const BOARD_RUN_3M = 75;
+export const BOARD_RUN_1Y = 200;
+
+/**
+ * The conditions, each a published figure against a threshold.
+ *
+ * Thresholds sit at roughly the top decile of Borsa İstanbul on each measure,
+ * so a flag means "unusual for this exchange" rather than "unusual anywhere".
+ * Every test returns null when the figure it needs is missing, and a test that
+ * could not run is never counted as passed OR failed.
+ */
+export const BOARD_TESTS = [
+  {
+    id: 'runUp',
+    // The gate. Both windows, because a share can double in a quarter or grind
+    // up over a year, and either is a run.
+    test: (s) => {
+      const m3 = s?.r?.m3;
+      const y1 = s?.r?.y1;
+      if (m3 == null && y1 == null) return null;
+      return (m3 ?? -Infinity) >= BOARD_RUN_3M || (y1 ?? -Infinity) >= BOARD_RUN_1Y;
+    },
+    value: (s) => (s?.r?.y1 ?? s?.r?.m3 ?? null),
+  },
+  {
+    id: 'thinFloat',
+    // The precondition for everything else: a quarter of the shares on the
+    // market means a buyer needs a quarter of the money to move the price.
+    test: (s) => (s?.float == null ? null : s.float <= 25),
+    value: (s) => s?.float ?? null,
+  },
+  {
+    id: 'concentrated',
+    // One fund holding a twentieth of a whole company is extraordinary — the
+    // largest single stake on the exchange is a quarter of one. Only funds are
+    // visible here; a company held by one family shows up as a thin float
+    // instead, which is why the two tests are separate and neither is required.
+    test: (s) => {
+      const top = s?.own?.top?.[0]?.v;
+      if (!top || !s?.cap) return null;
+      return (100 * top) / s.cap >= 5;
+    },
+    value: (s) => {
+      const top = s?.own?.top?.[0]?.v;
+      return top && s?.cap ? round2((100 * top) / s.cap) : null;
+    },
+  },
+  {
+    id: 'noEarnings',
+    // Either there are no profits at all, or the price is a century of them.
+    test: (s) => {
+      if (s?.pe != null) return s.pe >= 100;
+      if (s?.ni != null) return s.ni <= 0;
+      return null;
+    },
+    value: (s) => s?.pe ?? null,
+  },
+  {
+    id: 'richBook',
+    // Ten times the company's own books. Turkish accounts are inflation-adjusted
+    // since 2023, so this is not the artefact of stale asset values it would
+    // have been a few years ago.
+    test: (s) => (s?.pb == null ? null : s.pb >= 10),
+    value: (s) => s?.pb ?? null,
+  },
+  {
+    id: 'violent',
+    // Daily moves twice the exchange's own median. A board being worked shows up
+    // here whether the price is going up or down.
+    test: (s) => (s?.vola == null ? null : s.vola >= 8),
+    value: (s) => s?.vola ?? null,
+  },
+];
+
+/** How many conditions, the run-up included, before a listing is called out. */
+export const MIN_BOARD_FLAGS = 3;
+
+/**
+ * Which of the conditions a listing meets, and which could not be tested.
+ *
+ * Returns null for anything that is not a company — an exchange-traded fund has
+ * no float, no earnings and no book value, and running these tests on one would
+ * produce a verdict out of two answers.
+ */
+export function boardFlags(stock) {
+  if (!stock || stock.kind !== 'stock') return null;
+  const flags = [];
+  let tested = 0;
+  for (const spec of BOARD_TESTS) {
+    const hit = spec.test(stock);
+    if (hit == null) continue;
+    tested++;
+    if (hit) flags.push({ id: spec.id, value: spec.value(stock) });
+  }
+  if (!tested) return null;
+  const moved = flags.some((f) => f.id === 'runUp');
+  return {
+    flags,
+    tested,
+    hit: flags.length,
+    moved,
+    // The run-up is required. A thin, loss-making, closely-held company whose
+    // price has not moved is an illiquid company, not a board being worked, and
+    // saying otherwise about a real business would be both wrong and unfair.
+    speculative: moved && flags.length >= MIN_BOARD_FLAGS,
+  };
+}
+
+/** The short form kept in the share index: which flags, and how many were run. */
+export function boardSummary(stock) {
+  const result = boardFlags(stock);
+  if (!result?.speculative) return null;
+  return { f: result.flags.map((x) => x.id), of: result.tested };
+}
+
+/**
+ * How much of a portfolio sits in shares carrying the flags.
+ *
+ * Takes weights already summed per ticker and already gated to real equity
+ * holdings — a fund holding a company's commercial paper or repo is not holding
+ * the share, and counting it would put money-market funds at the top of this
+ * list. `equity` is the denominator that makes the figure readable: 30% of a
+ * fund is a very different sentence when the fund is 35% shares than when it is
+ * 95%.
+ */
+export function speculativeExposure(perTicker, flagged) {
+  let weight = 0;
+  let equity = 0;
+  const codes = [];
+  for (const [ticker, w] of perTicker ?? []) {
+    if (!(w > 0)) continue;
+    equity += w;
+    if (flagged.has(ticker)) {
+      weight += w;
+      codes.push([ticker, round2(w)]);
+    }
+  }
+  if (!codes.length) return null;
+  codes.sort((a, b) => b[1] - a[1]);
+  return {
+    w: round2(weight),
+    equity: round2(equity),
+    // What share of the fund's EQUITY is in these, which is the figure a
+    // manager would be asked about.
+    ofEquity: equity > 0 ? round2((weight / equity) * 100) : null,
+    codes,
+  };
+}
+
+/** Above this share of a portfolio, the exposure is the fund's defining feature. */
+export const SPECULATIVE_HEAVY = 25;

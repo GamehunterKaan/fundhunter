@@ -16,6 +16,7 @@ import {
   beatRecord, surpriseOf, peersOf, peerMedians,
   overlapOf, weightsOf, overlappingPairs, sharedPositions,
   weightedMove, themeMoves, moversIn, versusCash,
+  boardFlags, boardSummary, speculativeExposure, MIN_BOARD_FLAGS, SPECULATIVE_HEAVY,
 } from '../analytics.js';
 import { HORIZONS } from '../core.js';
 
@@ -972,4 +973,110 @@ test('comparing with cash needs both halves', () => {
   assert.equal(noCash.median, 30);
   assert.equal(noCash.gap, null, 'no hurdle, no verdict — not a gap of thirty');
   assert.equal(noCash.beating, null);
+});
+
+// ---------------------------------------------------------------- speculative boards
+
+const board = (over = {}) => ({
+  c: 'TAHTA', kind: 'stock', cap: 10e9, float: 20, pb: 20, vola: 9,
+  r: { m3: 120, y1: 900 }, pe: null, ni: -1e6,
+  own: { top: [{ c: 'AAA', v: 2e9 }] },
+  ...over,
+});
+
+test('the conditions are only counted when the figures to test them exist', () => {
+  const full = boardFlags(board());
+  assert.equal(full.tested, 6);
+  assert.equal(full.hit, 6);
+  assert.ok(full.speculative);
+  // A listing the exchange publishes nothing about is not thereby clean.
+  const bare = boardFlags({ c: 'X', kind: 'stock', r: { y1: 900 } });
+  assert.equal(bare.tested, 1, 'only the run-up could be tested');
+  assert.equal(bare.speculative, false, 'one condition out of one is not a verdict');
+});
+
+test('an exchange-traded fund is not put through tests written for a company', () => {
+  // No float, no earnings, no book value: it would score two out of two and be
+  // called speculative for being an index tracker.
+  assert.equal(boardFlags({ c: 'ZPLIB', kind: 'etf', r: { y1: 900 }, vola: 9 }), null);
+  assert.equal(boardFlags({ c: 'T', kind: 'trust', r: { y1: 900 } }), null);
+  assert.equal(boardFlags(null), null);
+});
+
+test('the run-up is required, however many other conditions are met', () => {
+  // Thin, loss-making, closely held, dear against book, volatile — and the price
+  // has not moved. That is an illiquid company, not a board being worked, and
+  // calling it one about a real business would be wrong.
+  const still = boardFlags(board({ r: { m3: 4, y1: 11 } }));
+  assert.equal(still.hit, 5);
+  assert.equal(still.moved, false);
+  assert.equal(still.speculative, false);
+});
+
+test('either window can carry the run-up', () => {
+  assert.ok(boardFlags(board({ r: { m3: 80, y1: 10 } })).moved, 'a quarter is enough');
+  assert.ok(boardFlags(board({ r: { m3: 5, y1: 250 } })).moved, 'so is a year');
+  assert.equal(boardFlags(board({ r: { m3: 74, y1: 199 } })).moved, false,
+    'just under both thresholds is under');
+  // A share with only one of the two windows on file is still testable.
+  assert.ok(boardFlags(board({ r: { y1: 400 } })).moved);
+});
+
+test('three conditions including the run-up is the bar', () => {
+  const two = board({ float: 60, pb: 1, vola: 2, pe: 8, ni: 5e6, own: null, cap: 10e9 });
+  assert.equal(boardFlags(two).hit, 1, 'the run-up alone');
+  assert.equal(boardFlags(two).speculative, false);
+  const three = board({ float: 60, pb: 1, vola: 9, pe: null, ni: -1, own: null });
+  assert.equal(boardFlags(three).hit, 3);
+  assert.ok(boardFlags(three).speculative);
+});
+
+test('a single fund holding a twentieth of a company is the concentration test', () => {
+  const at5 = boardFlags(board({ cap: 100e9, own: { top: [{ v: 5e9 }] } }));
+  assert.ok(at5.flags.some((f) => f.id === 'concentrated'));
+  assert.equal(at5.flags.find((f) => f.id === 'concentrated').value, 5);
+  const under = boardFlags(board({ cap: 100e9, own: { top: [{ v: 4.9e9 }] } }));
+  assert.ok(!under.flags.some((f) => f.id === 'concentrated'));
+  // No fund holds it at all: the test cannot run, and is not counted either way.
+  const none = boardFlags(board({ own: null }));
+  assert.equal(none.tested, 5);
+});
+
+test('no earnings means a loss OR a price that is a century of profit', () => {
+  const loss = boardFlags(board({ pe: null, ni: -5 }));
+  assert.ok(loss.flags.some((f) => f.id === 'noEarnings'));
+  const dear = boardFlags(board({ pe: 140, ni: 1e6 }));
+  assert.ok(dear.flags.some((f) => f.id === 'noEarnings'));
+  const ordinary = boardFlags(board({ pe: 12, ni: 1e6 }));
+  assert.ok(!ordinary.flags.some((f) => f.id === 'noEarnings'));
+  // A profitable company with a stated P/E is judged on the P/E, not the profit.
+  assert.equal(boardFlags(board({ pe: 12, ni: -5 })).flags.some((f) => f.id === 'noEarnings'), false);
+});
+
+test('the index summary carries the flags only for listings that meet the bar', () => {
+  assert.deepEqual(boardSummary(board()).f,
+    ['runUp', 'thinFloat', 'concentrated', 'noEarnings', 'richBook', 'violent']);
+  assert.equal(boardSummary(board()).of, 6);
+  assert.equal(boardSummary(board({ r: { m3: 1, y1: 1 } })), null, 'nothing to publish');
+  assert.equal(boardSummary({ kind: 'etf' }), null);
+});
+
+test('a fund\'s speculative weight is measured against its equity, not its whole self', () => {
+  const flagged = new Set(['TAHTA', 'OTHER']);
+  const held = new Map([['TAHTA', 20], ['OTHER', 10], ['SAFE', 5]]);
+  const out = speculativeExposure(held, flagged);
+  assert.equal(out.w, 30, 'thirty per cent of the portfolio');
+  assert.equal(out.equity, 35);
+  // 30 of 35 is 86% of what the fund holds in shares — the figure a manager
+  // would be asked about, and a very different sentence from "30% of the fund".
+  assert.equal(out.ofEquity, 85.71);
+  assert.deepEqual(out.codes, [['TAHTA', 20], ['OTHER', 10]], 'largest first');
+});
+
+test('a fund holding none of them says nothing rather than zero', () => {
+  assert.equal(speculativeExposure(new Map([['SAFE', 90]]), new Set(['TAHTA'])), null);
+  assert.equal(speculativeExposure(new Map(), new Set(['TAHTA'])), null);
+  assert.equal(speculativeExposure(null, new Set(['TAHTA'])), null);
+  // A closed position files at zero weight and is not a holding.
+  assert.equal(speculativeExposure(new Map([['TAHTA', 0]]), new Set(['TAHTA'])), null);
 });

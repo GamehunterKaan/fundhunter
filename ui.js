@@ -15,6 +15,7 @@ import {
   trailingTwelve, yearOnYear, ratioSeries, netDebtToEbitda, altmanBand, piotroskiBand,
   consensus, shareOfTotal, beatRecord, surpriseOf, peersOf, peerMedians,
   weightsOf, overlappingPairs, sharedPositions, themeMoves, moversIn, versusCash,
+  boardFlags, SPECULATIVE_HEAVY,
 } from './analytics.js';
 import { LIVE_SOURCE, LIVE_REFRESH_MS, LIVE_TIMEOUT_MS, parseLiveQuotes, liveClock } from './live.js';
 import {
@@ -2673,7 +2674,10 @@ async function renderDetail(code) {
   const groupIds = state.meta.groups.map((g) => g.id);
   const { segments, hasNegative } = compositionSegments(fund.g, groupIds);
 
-  view.replaceChildren(
+  // Filtered: replaceChildren() stringifies null while h() skips it, so a panel
+  // that declines to draw itself — no factor model, no crash record — arrived as
+  // the literal text "null" on the page. ZIH showed one, SGK two.
+  view.replaceChildren(...[
     h('div', { class: 'detail-head' },
       h('a', { class: 'back-link', href: '#/fonlar' }, `← ${T('back')}`),
       h('div', { class: 'detail-id' },
@@ -2713,13 +2717,16 @@ async function renderDetail(code) {
     renderVsCash(fund),
     renderPrediction(fund),
     renderQuality(fund),
+    // Beside the other risk panels rather than beside the holdings table: what
+    // the fund is holding is the table's job, and this is a warning about it.
+    renderSpeculative(fund),
     renderCrash(fund),
     renderComposition(fund, segments, latestAlloc, hasNegative),
     renderThemes(fund),
     renderHoldings(holdings),
     allocRows.length > 2 ? renderAllocHistory(allocRows) : null,
     prices.length > 5 ? renderFundChart(fund, prices) : h('p', { class: 'panel-note' }, T('noHistory'))
-  );
+  ].filter(Boolean));
   window.scrollTo({ top: 0 });
 }
 
@@ -3851,6 +3858,7 @@ async function renderShare(code) {
         // by the exchange, not by choice.
         stock.bx ? h('li', { class: 'chip chip-ok' }, `BIST ${stock.bx}`) : null,
         marketChip(stock.mkt),
+        stock.spec ? h('li', { class: 'chip chip-warn' }, T('specChip')) : null,
         stock.th ? h('li', { class: 'chip' },
           // A link back into the funds, because "who buys this kind of company"
           // is the question a share page cannot answer on its own. The filter is
@@ -3873,6 +3881,8 @@ async function renderShare(code) {
     history.length > 5
       ? renderShareChart(stock, history)
       : h('section', { class: 'panel' }, h('p', { class: 'panel-note' }, T('noHistory'))),
+    // Before the statements, because it is the reason to read them sceptically.
+    shareBoard(stock),
     // What the company earns comes before what the market charges for it: the
     // multiples in the grid below are all ratios to these numbers.
     renderFinancials(stock, fin),
@@ -4104,6 +4114,85 @@ function renderShareChart(stock, history) {
         : []),
     ],
   });
+}
+
+// ------------------------------------------------------- speculative boards
+
+/** How each condition's figure is written, in its own unit. */
+const SPEC_VALUE = {
+  runUp: (v) => fmtPct(v, state.lang, { signed: true, digits: 0 }),
+  thinFloat: (v) => fmtPct(v, state.lang, { digits: 1 }),
+  concentrated: (v) => fmtPct(v, state.lang, { digits: 1 }),
+  noEarnings: (v) => (v == null ? null : `F/K ${fmtNum(v, state.lang, 0)}`),
+  richBook: (v) => `${fmtNum(v, state.lang, 1)}×`,
+  violent: (v) => fmtPct(v, state.lang, { digits: 1 }),
+};
+
+/**
+ * What makes this listing easy to move, condition by condition.
+ *
+ * Drawn only when the conditions are actually met, and worded with care. Every
+ * line is a figure the exchange itself publishes; none of them is an accusation,
+ * and the panel says so before it says anything else. A company can meet all six
+ * and be doing nothing whatever wrong — a thin float and a loss are not
+ * misconduct — but a fund's investor is entitled to know that the price they are
+ * exposed to has nothing underneath it.
+ */
+function shareBoard(stock) {
+  const board = boardFlags(stock);
+  if (!board?.speculative) return null;
+
+  return h('section', { class: 'panel spec-panel' },
+    h('div', { class: 'dash-pane-head' },
+      h('h2', {}, T('specPanel')),
+      h('span', { class: 'spec-count num' },
+        T('specMet', { n: board.hit, of: board.tested }))),
+    h('p', { class: 'panel-note' }, T('specNote')),
+    h('ul', { class: 'spec-flags' },
+      board.flags.map(({ id, value }) => {
+        const shown = value == null ? null : SPEC_VALUE[id]?.(value);
+        const key = `specFlag${id[0].toUpperCase()}${id.slice(1)}`;
+        return h('li', {},
+          h('span', { class: 'spec-mark', 'aria-hidden': 'true' }, '!'),
+          h('span', { class: 'spec-body' },
+            h('b', {}, T(key)),
+            h('span', { class: 'spec-why' }, T(`${key}Note`))),
+          shown ? h('span', { class: 'spec-value num' }, shown) : null);
+      }))
+  );
+}
+
+/**
+ * How much of a fund sits in shares that look like that.
+ *
+ * The panel that turns a fact about the exchange into a fact about your money.
+ * Two figures, because one of them alone misleads: 30% of a portfolio is a very
+ * different sentence when the fund is 35% shares than when it is 95%.
+ */
+function renderSpeculative(fund) {
+  const spec = fund?.spec;
+  if (!spec?.codes?.length) return null;
+  const heavy = spec.w >= SPECULATIVE_HEAVY;
+
+  return h('section', { class: `panel spec-fund ${heavy ? 'is-heavy' : ''}` },
+    h('h2', {}, T('specFundPanel')),
+    h('dl', { class: 'stat-row stat-row-inset' },
+      h('div', { class: 'stat' },
+        h('dt', {}, T('specWeight')),
+        h('dd', { class: heavy ? 'delta down' : '' }, pct(spec.w, 1))),
+      spec.ofEquity == null ? null : h('div', { class: 'stat' },
+        h('dt', {}, T('specOfEquity')),
+        h('dd', {}, pct(spec.ofEquity, 1))),
+      h('div', { class: 'stat' },
+        h('dt', {}, T('specCount')),
+        h('dd', {}, fmtInt(spec.codes.length, state.lang)))
+    ),
+    h('ul', { class: 'spec-holdings' },
+      spec.codes.map(([code, weight]) => h('li', {},
+        h('a', { class: 'code-link num', href: `#/hisse/${code}` }, code),
+        h('span', { class: 'num' }, pct(weight, 1))))),
+    h('p', { class: 'panel-note' }, T('specFundNote'))
+  );
 }
 
 // ------------------------------------------------------- the statements

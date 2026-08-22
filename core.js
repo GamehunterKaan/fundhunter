@@ -365,6 +365,37 @@ export const STRINGS = {
     floatNote: 'Sermayenin borsada serbestçe işlem gören kısmı.',
     sharesOut: 'Toplam pay adedi',
     range52: '52 hafta',
+    // --- spekülatif tahtalar ---
+    specPanel: 'Spekülatif görünüm',
+    specChip: 'Spekülatif görünüm',
+    specNote:
+      'Aşağıdakilerin hepsi borsanın yayımladığı rakamlar ve her biri BIST’in en ' +
+      'uç yüzde onunda. Bunlar şirket ya da yatırımcıları hakkında bir iddia ' +
+      'değil: fiyatın kolay oynatılabileceğini ve dayanacak bir mali tablo ' +
+      'olmadığını söylüyor. Piyasadaki adıyla “tahta” denen tablo budur.',
+    specMet: '{of} ölçütün {n} tanesi',
+    specFlagRunUp: 'Sert yükseliş',
+    specFlagThinFloat: 'Düşük halka açıklık',
+    specFlagConcentrated: 'Tek fonda yoğunlaşma',
+    specFlagNoEarnings: 'Arkasında kâr yok',
+    specFlagRichBook: 'Defter değerinin çok üstünde',
+    specFlagViolent: 'Sert günlük hareketler',
+    specFlagRunUpNote: 'Son bir yılda ya da son üç ayda olağanüstü yükseliş.',
+    specFlagThinFloatNote: 'Payların dörtte birinden azı borsada işlem görüyor.',
+    specFlagConcentratedNote: 'Tek bir fon şirketin en az yirmide birini tutuyor.',
+    specFlagNoEarningsNote: 'Şirket zarar ediyor ya da fiyat kârın yüz katından fazla.',
+    specFlagRichBookNote: 'Piyasa değeri özkaynağının en az on katı.',
+    specFlagViolentNote: 'Günlük dalgalanma borsanın ortancasının iki katı.',
+    // --- fon tarafı ---
+    specFundPanel: 'Spekülatif görünümlü hisseler',
+    specFundNote:
+      'Fonun KAP bildirimindeki hisselerden kaçı yukarıdaki ölçütleri karşılıyor. ' +
+      'Bir endeks fonu bunları seçmiş olmayabilir — endekste oldukları için tutar ' +
+      '— ama tutan fonun yatırımcısı yine de bu fiyatlara maruz kalıyor.',
+    specWeight: 'Portföydeki ağırlığı',
+    specOfEquity: 'Hisse kısmının',
+    specCount: 'Hisse sayısı',
+    specNoneFlagged: 'Bu fonun hisselerinden hiçbiri bu ölçütleri karşılamıyor.',
     // --- finansal tablolar ---
     financials: 'Finansal tablolar',
     financialsNote:
@@ -1032,6 +1063,38 @@ export const STRINGS = {
     floatNote: 'The share of the capital that trades freely on the exchange.',
     sharesOut: 'Shares outstanding',
     range52: '52 weeks',
+    // --- speculative boards ---
+    specPanel: 'Speculative profile',
+    specChip: 'Speculative profile',
+    specNote:
+      'All of these are figures the exchange publishes, and each sits in the ' +
+      'most extreme tenth of Borsa İstanbul. They are not a claim about the ' +
+      'company or about anybody trading it: they say this price would be easy ' +
+      'to move and has little in the accounts to argue with. This is the ' +
+      'picture the market calls a “tahta”.',
+    specMet: '{n} of {of} conditions',
+    specFlagRunUp: 'Sharp run-up',
+    specFlagThinFloat: 'Thin free float',
+    specFlagConcentrated: 'One fund holds a large stake',
+    specFlagNoEarnings: 'No earnings behind the price',
+    specFlagRichBook: 'Far above book value',
+    specFlagViolent: 'Violent daily moves',
+    specFlagRunUpNote: 'An extraordinary rise over the last year, or over the last quarter.',
+    specFlagThinFloatNote: 'Less than a quarter of the shares trade on the exchange.',
+    specFlagConcentratedNote: 'A single fund holds at least a twentieth of the whole company.',
+    specFlagNoEarningsNote: 'The company loses money, or the price is over a hundred years of profit.',
+    specFlagRichBookNote: 'Worth at least ten times the equity on its own books.',
+    specFlagViolentNote: 'Daily swings twice the exchange’s median.',
+    // --- the fund side ---
+    specFundPanel: 'Shares with a speculative profile',
+    specFundNote:
+      'How much of the fund’s filed equity meets the conditions above. An index ' +
+      'fund may not have chosen them — it holds what the index holds — but its ' +
+      'investor is exposed to those prices either way.',
+    specWeight: 'Of the portfolio',
+    specOfEquity: 'Of its equity',
+    specCount: 'How many',
+    specNoneFlagged: 'None of this fund’s shares meet those conditions.',
     // --- the statements ---
     financials: 'Financial statements',
     financialsNote:
