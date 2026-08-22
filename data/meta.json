@@ -1,13 +1,13 @@
 {
-  "lastUpdated": "2026-08-17T19:09:00.931Z",
-  "latestDate": "2026-08-17",
-  "rangeStart": "2025-08-17",
+  "lastUpdated": "2026-08-22T07:29:32.107Z",
+  "latestDate": "2026-08-21",
+  "rangeStart": "2025-08-21",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2063,
+    "funds": 2067,
     "byKind": {
-      "YAT": 2033,
+      "YAT": 2037,
       "BYF": 30
     }
   },
@@ -475,110 +475,6 @@
     "YAPI KREDİ PORTFÖY",
     "ZİRAAT PORTFÖY"
   ],
-  "peerGroups": [
-    {
-      "id": "equity",
-      "tr": "Hisse Ağırlıklı",
-      "en": "Equity-heavy"
-    },
-    {
-      "id": "metals",
-      "tr": "Kıymetli Maden Ağırlıklı",
-      "en": "Precious-metals-heavy"
-    },
-    {
-      "id": "foreign",
-      "tr": "Yabancı Varlık Ağırlıklı",
-      "en": "Foreign-asset-heavy"
-    },
-    {
-      "id": "bonds",
-      "tr": "Borçlanma Ağırlıklı",
-      "en": "Fixed-income-heavy"
-    },
-    {
-      "id": "cash",
-      "tr": "Nakit / Para Piyasası",
-      "en": "Cash / money market"
-    },
-    {
-      "id": "fundOfFunds",
-      "tr": "Fon Sepeti",
-      "en": "Fund of funds"
-    },
-    {
-      "id": "balanced",
-      "tr": "Dengeli",
-      "en": "Balanced"
-    },
-    {
-      "id": "conservative",
-      "tr": "Temkinli Karma",
-      "en": "Conservative mixed"
-    }
-  ],
-  "peerStats": {
-    "equity": {
-      "count": 733,
-      "medianY1": 28.2304,
-      "medianVol": 23.015
-    },
-    "metals": {
-      "count": 55,
-      "medianY1": 48.5218,
-      "medianVol": 25.21
-    },
-    "foreign": {
-      "count": 32,
-      "medianY1": 46.4405,
-      "medianVol": 18.295
-    },
-    "bonds": {
-      "count": 528,
-      "medianY1": 23.585,
-      "medianVol": 2.82
-    },
-    "cash": {
-      "count": 232,
-      "medianY1": 45.062250000000006,
-      "medianVol": 1.48
-    },
-    "fundOfFunds": {
-      "count": 141,
-      "medianY1": 35.85325,
-      "medianVol": 7.445
-    },
-    "balanced": {
-      "count": 152,
-      "medianY1": 37.185649999999995,
-      "medianVol": 12.379999999999999
-    },
-    "conservative": {
-      "count": 190,
-      "medianY1": 44.0695,
-      "medianVol": 1.8450000000000002
-    }
-  },
-  "cashReturn": 47.8,
-  "cashReturns": {
-    "m1": 3.48,
-    "m3": 10.45,
-    "m6": 21.59,
-    "ytd": 27.64,
-    "y1": 47.8
-  },
-  "taxDefaults": {
-    "equityIntensive": 0,
-    "moneyMarket": 0.075,
-    "standard": 0.1
-  },
-  "factors": [
-    "bist100",
-    "goldgram",
-    "usdtry",
-    "mmf"
-  ],
-  "analyticsBuiltAt": "2026-08-21T15:30:30.932Z",
   "crashes": [
     {
       "from": "2023-10-03",
@@ -623,7 +519,7 @@
       "cash": 0.56,
       "navFrom": "2025-03-18",
       "navTo": "2025-03-24",
-      "funds": 1615
+      "funds": 1614
     },
     {
       "from": "2025-08-26",
@@ -632,7 +528,7 @@
       "cash": 2.14,
       "navFrom": "2025-08-27",
       "navTo": "2025-09-15",
-      "funds": 1803
+      "funds": 1801
     },
     {
       "from": "2025-09-22",
@@ -641,7 +537,7 @@
       "cash": 3.04,
       "navFrom": "2025-09-23",
       "navTo": "2025-10-20",
-      "funds": 1820
+      "funds": 1819
     },
     {
       "from": "2026-02-16",
@@ -650,7 +546,7 @@
       "cash": 4.2,
       "navFrom": "2026-02-17",
       "navTo": "2026-03-31",
-      "funds": 1945
+      "funds": 1944
     },
     {
       "from": "2026-05-11",
@@ -659,7 +555,7 @@
       "cash": 1.04,
       "navFrom": "2026-05-12",
       "navTo": "2026-05-22",
-      "funds": 1972
+      "funds": 1971
     },
     {
       "from": "2026-06-18",
@@ -668,7 +564,7 @@
       "cash": 4.57,
       "navFrom": "2026-06-19",
       "navTo": "2026-07-31",
-      "funds": 1986
+      "funds": 1985
     }
   ],
   "crashIndex": "bist100",
@@ -694,7 +590,7 @@
     "tourism",
     "textile"
   ],
-  "marketYield": 1.49,
+  "marketYield": 1.48,
   "themeCoverage": 97.5,
   "listedCodes": [
     "A1CAP",
@@ -1345,5 +1241,109 @@
     "ZRE20",
     "ZRGYO",
     "ZSR25"
-  ]
+  ],
+  "peerGroups": [
+    {
+      "id": "equity",
+      "tr": "Hisse Ağırlıklı",
+      "en": "Equity-heavy"
+    },
+    {
+      "id": "metals",
+      "tr": "Kıymetli Maden Ağırlıklı",
+      "en": "Precious-metals-heavy"
+    },
+    {
+      "id": "foreign",
+      "tr": "Yabancı Varlık Ağırlıklı",
+      "en": "Foreign-asset-heavy"
+    },
+    {
+      "id": "bonds",
+      "tr": "Borçlanma Ağırlıklı",
+      "en": "Fixed-income-heavy"
+    },
+    {
+      "id": "cash",
+      "tr": "Nakit / Para Piyasası",
+      "en": "Cash / money market"
+    },
+    {
+      "id": "fundOfFunds",
+      "tr": "Fon Sepeti",
+      "en": "Fund of funds"
+    },
+    {
+      "id": "balanced",
+      "tr": "Dengeli",
+      "en": "Balanced"
+    },
+    {
+      "id": "conservative",
+      "tr": "Temkinli Karma",
+      "en": "Conservative mixed"
+    }
+  ],
+  "peerStats": {
+    "equity": {
+      "count": 737,
+      "medianY1": 28.238300000000002,
+      "medianVol": 23.025
+    },
+    "metals": {
+      "count": 55,
+      "medianY1": 53.2197,
+      "medianVol": 25.15
+    },
+    "foreign": {
+      "count": 33,
+      "medianY1": 46.7003,
+      "medianVol": 17.87
+    },
+    "bonds": {
+      "count": 536,
+      "medianY1": 23.614150000000002,
+      "medianVol": 2.8049999999999997
+    },
+    "cash": {
+      "count": 239,
+      "medianY1": 45.3243,
+      "medianVol": 1.47
+    },
+    "fundOfFunds": {
+      "count": 144,
+      "medianY1": 35.903850000000006,
+      "medianVol": 7.21
+    },
+    "balanced": {
+      "count": 150,
+      "medianY1": 38.0424,
+      "medianVol": 12.36
+    },
+    "conservative": {
+      "count": 173,
+      "medianY1": 44.6397,
+      "medianVol": 1.81
+    }
+  },
+  "cashReturn": 47.92,
+  "cashReturns": {
+    "m1": 3.38,
+    "m3": 10.5,
+    "m6": 21.64,
+    "ytd": 28.21,
+    "y1": 47.92
+  },
+  "taxDefaults": {
+    "equityIntensive": 0,
+    "moneyMarket": 0.075,
+    "standard": 0.1
+  },
+  "factors": [
+    "bist100",
+    "goldgram",
+    "usdtry",
+    "mmf"
+  ],
+  "analyticsBuiltAt": "2026-08-22T07:38:44.358Z"
 }
