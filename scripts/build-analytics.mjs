@@ -314,15 +314,17 @@ async function main() {
       const exposure = speculativeExposure(perFund.get(fund.c), flagged);
       if (exposure) {
         fund.spec = exposure;
-        exposed++;
+        if (exposure.w > 0) exposed++;
         if (exposure.w >= SPECULATIVE_HEAVY) heavy++;
       } else {
         delete fund.spec;
       }
     }
+    const answered = funds.filter((f) => f.spec).length;
     log(`  speculative boards: ${flagged.size} listings meet ${MIN_BOARD_FLAGS}+ conditions ` +
-      `including a run-up; ${exposed} funds hold at least one, ${heavy} hold ` +
-      `${SPECULATIVE_HEAVY}% or more of themselves in them`);
+      `including a run-up; of ${answered} funds whose shares could be read, ` +
+      `${exposed} hold at least one and ${heavy} hold ${SPECULATIVE_HEAVY}% or more ` +
+      `of themselves in them`);
 
     stockFile.ownershipFrom = {
       filings: readFilings, skipped, unusablePrev, builtAt: new Date().toISOString(),

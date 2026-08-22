@@ -1073,8 +1073,17 @@ test('a fund\'s speculative weight is measured against its equity, not its whole
   assert.deepEqual(out.codes, [['TAHTA', 20], ['OTHER', 10]], 'largest first');
 });
 
-test('a fund holding none of them says nothing rather than zero', () => {
-  assert.equal(speculativeExposure(new Map([['SAFE', 90]]), new Set(['TAHTA'])), null);
+test('holding shares and none of them flagged is an answer; holding no shares is not', () => {
+  // Zero is a real result and has to be one, or the "holds none" filter would
+  // have no way to tell a fund that avoided these companies from a fund nobody
+  // could read.
+  const clean = speculativeExposure(new Map([['SAFE', 90]]), new Set(['TAHTA']));
+  assert.equal(clean.w, 0);
+  assert.equal(clean.equity, 90);
+  assert.equal(clean.ofEquity, 0);
+  assert.deepEqual(clean.codes, []);
+
+  // No equity at all cannot be cleared of anything.
   assert.equal(speculativeExposure(new Map(), new Set(['TAHTA'])), null);
   assert.equal(speculativeExposure(null, new Set(['TAHTA'])), null);
   // A closed position files at zero weight and is not a holding.

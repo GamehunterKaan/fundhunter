@@ -7,6 +7,7 @@ import {
   assetBreakdown, alignAndIndex, returnOver, HORIZONS, horizonOf, LEVERED_FROM,
   CRASH_PROOF_FROM, THEME_IDS, MIN_THEME,
   aggregateHoldings, groupHoldings, queryMatcher, squarify,
+  SPEC_NONE, SPEC_STEPS, SPEC_MIN_EQUITY,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -70,7 +71,7 @@ const state = {
     tax: 'default', horizon: 'y1', maxRisk: null,
     beatsCash: false, retailOnly: false, tradeableOnly: false,
     onlyNew: false, stance: '', maxFee: null, levered: false, crashProof: false,
-  minDividend: null,
+  minDividend: null, speculative: '',
   },
   sort: { key: 'size', dir: 'desc' },
   /** Whether the filter panel is disclosed. Survives re-renders of the list. */
@@ -1653,6 +1654,11 @@ const riskFilters = () => ({
   levered: state.prefs.levered,
   crashProof: state.prefs.crashProof,
   minDividend: state.prefs.minDividend,
+  // Kept as the raw control value and read as one of two things: the string
+  // "none", or a threshold in per cent. The empty string is no filter at all.
+  speculative: state.prefs.speculative === SPEC_NONE
+    ? SPEC_NONE
+    : (state.prefs.speculative ? Number(state.prefs.speculative) : null),
 });
 
 /**
@@ -1747,6 +1753,12 @@ function activeFilters() {
     add(`${T('dividendLabel')}: ${T('dividendAtLeast', { n: fmtNum(p.minDividend, state.lang, 1) })}`,
       () => { p.minDividend = null; });
   }
+  if (p.speculative) {
+    add(p.speculative === SPEC_NONE
+      ? T('specFilterNoneChip')
+      : `${T('specFilter')}: ${T('specFilterOver', { n: p.speculative })}`,
+    () => { p.speculative = ''; });
+  }
   if (p.retailOnly) add(T('hideQualified'), () => { p.retailOnly = false; });
   if (p.tradeableOnly) add(T('tradeableOnly'), () => { p.tradeableOnly = false; });
   return out;
@@ -1777,7 +1789,7 @@ function resetFilters() {
   Object.assign(state.prefs, {
     maxRisk: null, beatsCash: false, retailOnly: false,
     tradeableOnly: false, onlyNew: false, stance: '', maxFee: null, levered: false,
-    crashProof: false, minDividend: null,
+    crashProof: false, minDividend: null, speculative: '',
   });
   syncSearchInput();
   renderList();
@@ -1973,9 +1985,11 @@ function renderPrefs() {
   const hz = horizonOf(p.horizon);
   const cash = cashReturnFor(scoringContext(), hz.key);
 
-  const pick = (id, labelText, options, current, onPick) =>
-    h('div', { class: 'field' },
-      h('label', { for: `p-${id}` }, labelText),
+  const pick = (id, labelText, options, current, onPick, note = null) =>
+    h('div', { class: 'field', title: note },
+      h('label', { for: `p-${id}` },
+        labelText,
+        note ? h('span', { class: 'figure-mark', 'aria-hidden': 'true' }, '?') : null),
       h('select', {
         id: `p-${id}`,
         onChange: (e) => {
@@ -2021,6 +2035,14 @@ function renderPrefs() {
         [['', T('all')], ...dividendSteps().map((n) =>
           [n, T('dividendAtLeast', { n: fmtNum(n, state.lang, n % 1 ? 2 : 0) })])],
         p.minDividend ?? '', (v) => { p.minDividend = v ? Number(v) : null; }),
+
+      // Both directions in one control, because they are one question. Placed
+      // beside the dividend picker, the other one that can only answer for funds
+      // whose filing could be read.
+      pick('speculative', T('specFilter'),
+        [['', T('all')], [SPEC_NONE, T('specFilterNone')],
+          ...SPEC_STEPS.map((n) => [n, T('specFilterOver', { n })])],
+        p.speculative ?? '', (v) => { p.speculative = v; }, T('specFilterNote')),
 
       h('label', { class: 'check' },
         h('input', {
@@ -4171,7 +4193,18 @@ function shareBoard(stock) {
  */
 function renderSpeculative(fund) {
   const spec = fund?.spec;
-  if (!spec?.codes?.length) return null;
+  if (!spec) return null;
+  // A fund that holds shares and none of them flagged has been told something,
+  // and the dashboard's overlap panel already sets the precedent for saying so.
+  // A bond fund has not avoided these companies, it has avoided the market, so
+  // it gets nothing.
+  if (!spec.codes.length) {
+    return spec.equity >= SPEC_MIN_EQUITY
+      ? h('section', { class: 'panel spec-fund' },
+          h('h2', {}, T('specFundPanel')),
+          h('p', { class: 'panel-note' }, T('specNoneFlagged')))
+      : null;
+  }
   const heavy = spec.w >= SPECULATIVE_HEAVY;
 
   return h('section', { class: `panel spec-fund ${heavy ? 'is-heavy' : ''}` },

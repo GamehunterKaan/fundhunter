@@ -1252,6 +1252,29 @@ Index trackers appear here too, and the panel says why: a BIST Technology fund
 holds what the index holds. It did not pick those names, but its investors are
 exposed to those prices either way.
 
+### Filtering on it, in both directions
+
+The fund list carries one control with both questions in it, because they are
+one question:
+
+| | |
+|---|---|
+| **Holds none** | 352 funds — read, holding shares, and none of them flagged |
+| **Over 5 / 10 / 25 / 50%** | 30 · 20 · 9 · 3 funds |
+
+**"Holds none" needs a fund that was actually looked at.** A fund whose KAP
+filing could not be read is not clean, it is unknown, and it drops out of both
+directions rather than passing unchecked — the same rule the fee cap follows,
+where an unknown fee is not a cheap one.
+
+It also needs the fund to hold shares. Without a floor the answer was 397 funds,
+most of them bond and money-market funds carrying a rounding error's worth of
+equity: a fund that is 2% shares has not avoided these companies, it has avoided
+the stock market. Five per cent of the portfolio is the floor.
+
+A fund that clears it and holds none of them gets told so on its own page, the
+same way the dashboard says when the funds you follow do not repeat each other.
+
 ### What this deliberately does not claim
 
 The exchange keeps its own **Watchlist Market** for companies that need

@@ -1436,14 +1436,19 @@ export function speculativeExposure(perTicker, flagged) {
       codes.push([ticker, round2(w)]);
     }
   }
-  if (!codes.length) return null;
+  // Null means "cannot say", not "holds none": a fund with no readable filing
+  // and a fund that holds no shares at all both land here, and neither has been
+  // cleared of anything. A fund that DOES hold shares and none of them flagged
+  // gets a real answer with w: 0, which is what lets the filter offer "none"
+  // without quietly counting the unknowns as clean.
+  if (equity <= 0) return null;
   codes.sort((a, b) => b[1] - a[1]);
   return {
     w: round2(weight),
     equity: round2(equity),
     // What share of the fund's EQUITY is in these, which is the figure a
     // manager would be asked about.
-    ofEquity: equity > 0 ? round2((weight / equity) * 100) : null,
+    ofEquity: round2((weight / equity) * 100),
     codes,
   };
 }

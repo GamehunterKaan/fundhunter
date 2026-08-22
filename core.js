@@ -395,6 +395,13 @@ export const STRINGS = {
     specWeight: 'Portföydeki ağırlığı',
     specOfEquity: 'Hisse kısmının',
     specCount: 'Hisse sayısı',
+    specFilter: 'Spekülatif hisse',
+    specFilterNone: 'Hiç tutmayanlar',
+    specFilterOver: '%{n} üstü',
+    specFilterNoneChip: 'Spekülatif hisse tutmayanlar',
+    specFilterNote:
+      'KAP portföy raporu okunabilen ve hisse tutan fonlarda. Raporu okunamayan ' +
+      'bir fon “tutmayanlar” arasında sayılmaz: bilinmiyor olması temiz olması demek değil.',
     specNoneFlagged: 'Bu fonun hisselerinden hiçbiri bu ölçütleri karşılamıyor.',
     // --- finansal tablolar ---
     financials: 'Finansal tablolar',
@@ -1094,6 +1101,13 @@ export const STRINGS = {
     specWeight: 'Of the portfolio',
     specOfEquity: 'Of its equity',
     specCount: 'How many',
+    specFilter: 'Speculative shares',
+    specFilterNone: 'Holds none',
+    specFilterOver: 'Over {n}%',
+    specFilterNoneChip: 'Holds no speculative shares',
+    specFilterNote:
+      'Covers funds whose KAP filing could be read and which hold shares. A fund ' +
+      'whose filing could not be read is not counted as holding none: unknown is not clean.',
     specNoneFlagged: 'None of this fund’s shares meet those conditions.',
     // --- the statements ---
     financials: 'Financial statements',
@@ -1787,11 +1801,27 @@ export const MIN_THEME = 10;
 export const CRASH_PROOF_FROM = 100;
 
 /** Apply the filter bar to the fund index. Pure; returns a new array. */
+/** The "holds none of them" setting, kept out of the numeric thresholds. */
+export const SPEC_NONE = 'none';
+
+/** The thresholds the speculative filter offers, in per cent of the portfolio. */
+export const SPEC_STEPS = [5, 10, 25, 50];
+
+/**
+ * How much of itself a fund must hold in shares before "holds none" means
+ * anything.
+ *
+ * Without it the answer is 397 funds, most of them bond and money-market funds
+ * carrying a rounding error's worth of equity. A fund that is 2% shares has not
+ * avoided these companies; it has avoided the stock market.
+ */
+export const SPEC_MIN_EQUITY = 5;
+
 export function filterFunds(funds, query = {}) {
   const {
     search, kinds, categories, founders, exposure, minExposure = 50, minSize,
     maxRisk, beatsCash, retailOnly, tradeableOnly, onlyNew, stance, maxFee, codes,
-    levered, crashProof, theme, minTheme = MIN_THEME, minDividend,
+    levered, crashProof, theme, minTheme = MIN_THEME, minDividend, speculative,
   } = query;
   const needle = search ? fold(search) : null;
   const kindSet = kinds?.length ? new Set(kinds) : null;
@@ -1820,6 +1850,14 @@ export function filterFunds(funds, query = {}) {
     // that silently answers over half the universe.
     if (theme && !((f.th?.[theme] ?? 0) >= minTheme)) return false;
     if (minDividend != null && !(f.dy >= minDividend)) return false;
+    // Both directions read `spec`, which is absent for a fund whose filing could
+    // not be read AND for one that holds no shares at all. Neither has been
+    // cleared of anything, so "none" needs a fund that was actually looked at
+    // and found to hold shares — the same rule as the fee cap, where an unknown
+    // fee is not a cheap one.
+    if (speculative === SPEC_NONE
+      && !(f.spec && f.spec.w === 0 && f.spec.equity >= SPEC_MIN_EQUITY)) return false;
+    if (typeof speculative === 'number' && !(f.spec?.w >= speculative)) return false;
     // An unknown fee cannot satisfy a fee cap: the whole point of the cap is to
     // exclude funds you would be overpaying, and "unknown" is not "cheap".
     if (maxFee != null && (f.expenseRatio == null || f.expenseRatio > maxFee)) return false;

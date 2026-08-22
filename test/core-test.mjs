@@ -6,6 +6,7 @@ import {
   compositionSegments, industryComposition, assetBreakdown,
   returnOver, returnYtd, returnForHorizon, volatility, maxDrawdown, indexSeries,
   alignAndIndex, signOf, HORIZONS, horizonOf, SORTS, STRINGS, LANGS,
+  SPEC_NONE, SPEC_MIN_EQUITY,
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
   squarify,
@@ -939,4 +940,38 @@ test('a treemap with nothing to lay out is empty, not broken', () => {
   assert.deepEqual(squarify(null, RECT), []);
   assert.deepEqual(squarify([{ weight: 1 }], { x: 0, y: 0, w: 0, h: 100 }), [],
     'a box with no width holds nothing');
+});
+
+test('the speculative filter runs in both directions', () => {
+  const funds = [
+    { c: 'HEAVY', spec: { w: 60, equity: 90, ofEquity: 66.7, codes: [['X', 60]] } },
+    { c: 'SOME', spec: { w: 8, equity: 80, ofEquity: 10, codes: [['X', 8]] } },
+    { c: 'CLEAN', spec: { w: 0, equity: 85, ofEquity: 0, codes: [] } },
+    { c: 'BONDS', spec: { w: 0, equity: 2, ofEquity: 0, codes: [] } },
+    { c: 'UNREAD' },
+  ].map((f) => ({ n: '', f: '', ...f }));
+
+  const codes = (q) => filterFunds(funds, q).map((x) => x.c);
+  assert.deepEqual(codes({}), ['HEAVY', 'SOME', 'CLEAN', 'BONDS', 'UNREAD'], 'no filter, no filtering');
+  assert.deepEqual(codes({ speculative: 5 }), ['HEAVY', 'SOME']);
+  assert.deepEqual(codes({ speculative: 25 }), ['HEAVY']);
+  assert.deepEqual(codes({ speculative: SPEC_NONE }), ['CLEAN'],
+    'the bond fund has avoided the market, not these companies');
+});
+
+test('a fund nobody could read is never counted as holding none', () => {
+  // The same rule as the fee cap: an unknown fee is not a cheap one, and an
+  // unreadable filing is not a clean one.
+  const funds = [{ c: 'UNREAD', n: '', f: '' }, { c: 'NOEQ', n: '', f: '', spec: null }];
+  assert.deepEqual(filterFunds(funds, { speculative: SPEC_NONE }), []);
+  assert.deepEqual(filterFunds(funds, { speculative: 5 }), []);
+});
+
+test('the equity floor is what stops "holds none" meaning "holds no shares"', () => {
+  const at = (equity) => filterFunds(
+    [{ c: 'F', n: '', f: '', spec: { w: 0, equity, ofEquity: 0, codes: [] } }],
+    { speculative: SPEC_NONE }
+  ).length;
+  assert.equal(at(SPEC_MIN_EQUITY), 1, 'exactly at the floor is in');
+  assert.equal(at(SPEC_MIN_EQUITY - 0.1), 0);
 });
