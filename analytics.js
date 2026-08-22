@@ -1113,3 +1113,173 @@ export function peerMedians(peers, keys) {
   for (const key of keys) out[key] = median((peers ?? []).map((s) => s[key]));
   return out;
 }
+
+// ---------------------------------------------------------------- the dashboard
+//
+// Four questions a home page can answer that a fund page structurally cannot,
+// because each of them needs more than one fund at a time.
+
+/**
+ * How much two portfolios are the same portfolio, in percentage points.
+ *
+ * The overlap of two weightings is the sum of the SMALLER weight wherever both
+ * hold the same thing. Two funds each 40% in ASELS overlap 40 points there; one
+ * at 40% and one at 5% overlap 5. That is the amount of the pair that is not a
+ * second position at all, and it runs 0 to 100 the way a reader expects.
+ *
+ * Not correlation, which two funds holding entirely different banks would score
+ * high on and which says nothing about whether you own the same shares twice.
+ */
+export function overlapOf(a, b) {
+  if (!a || !b) return null;
+  let shared = 0;
+  for (const [code, weight] of Object.entries(a)) {
+    const other = b[code];
+    if (other == null) continue;
+    shared += Math.min(weight, other);
+  }
+  return round2(shared);
+}
+
+/**
+ * A filing as a weight per position, summed across split lines.
+ *
+ * The same holding is filed under an ISIN on one line and a ticker on the next,
+ * so weights are added rather than replaced — the same rule the ownership pass
+ * follows. Rows with no code cannot be matched against another fund's and are
+ * left out, which makes the overlap a floor rather than an estimate.
+ */
+export function weightsOf(holdings) {
+  const out = {};
+  for (const h of holdings ?? []) {
+    const code = h?.code;
+    const weight = h?.weight;
+    if (!code || weight == null || !Number.isFinite(weight) || weight <= 0) continue;
+    out[code] = (out[code] ?? 0) + weight;
+  }
+  return out;
+}
+
+/** Below this an overlap is a coincidence of two big funds owning big companies. */
+export const OVERLAP_FLOOR = 25;
+
+/**
+ * Every pair among the given filings that shares more than the floor, worst first.
+ *
+ * Most pairs share nothing at all — across the equity funds that file, the
+ * median pair overlaps 0% — so this is silent unless there is something to say,
+ * which is the only way a warning belongs on a page you open every morning.
+ */
+export function overlappingPairs(filings, floor = OVERLAP_FLOOR) {
+  const codes = Object.keys(filings ?? {}).filter((c) => filings[c]);
+  const pairs = [];
+  for (let i = 0; i < codes.length; i++) {
+    for (let j = i + 1; j < codes.length; j++) {
+      const shared = overlapOf(filings[codes[i]], filings[codes[j]]);
+      if (shared != null && shared >= floor) pairs.push({ a: codes[i], b: codes[j], shared });
+    }
+  }
+  return pairs.sort((x, y) => y.shared - x.shared);
+}
+
+/**
+ * The positions two funds hold in common, largest first.
+ *
+ * The pair figure says how much is duplicated; this says what. Reported at the
+ * smaller of the two weights, for the same reason the total is.
+ */
+export function sharedPositions(a, b, limit = 6) {
+  const rows = [];
+  for (const [code, weight] of Object.entries(a ?? {})) {
+    const other = b?.[code];
+    if (other == null) continue;
+    rows.push({ code, weight: round2(Math.min(weight, other)), a: weight, b: other });
+  }
+  return rows.sort((x, y) => y.weight - x.weight).slice(0, limit);
+}
+
+/**
+ * What a group of tickers did today, weighted.
+ *
+ * Weighted rather than averaged: a theme is what the money in it did, and an
+ * equal-weighted "banks" figure lets the smallest listed bank move the number as
+ * far as the largest. Weights are renormalised over the members that actually
+ * have a quote, so a theme is not dragged toward zero by a suspended share.
+ */
+export function weightedMove(members, quotes) {
+  if (!members?.length || !quotes) return null;
+  let move = 0;
+  let covered = 0;
+  let priced = 0;
+  for (const [code, weight] of members) {
+    const change = quotes[code]?.change;
+    if (change == null || !Number.isFinite(change)) continue;
+    move += change * weight;
+    covered += weight;
+    priced++;
+  }
+  if (!priced || covered <= 0) return null;
+  return { move: round2(move / covered), priced, of: members.length, covered: round2(covered * 100) };
+}
+
+/** Below this share of a theme priced, the figure is not the theme's move. */
+export const MIN_THEME_COVERAGE = 50;
+
+/**
+ * Today's move for every theme, biggest absolute move first.
+ *
+ * Sorted by size of move rather than by name, because the question is "what kind
+ * of day was it" and the answer is at the two ends of that list.
+ */
+export function themeMoves(themeWeights, quotes, minCoverage = MIN_THEME_COVERAGE) {
+  const out = [];
+  for (const [id, members] of Object.entries(themeWeights ?? {})) {
+    const result = weightedMove(members, quotes);
+    if (!result || result.covered < minCoverage) continue;
+    out.push({ id, ...result });
+  }
+  return out.sort((a, b) => Math.abs(b.move) - Math.abs(a.move));
+}
+
+/**
+ * The best and worst of a named universe today.
+ *
+ * The universe is the argument and it is the whole point: the biggest movers on
+ * the whole exchange are always its smallest listings, hitting their price limit
+ * on a handful of trades. The index members are companies with a float.
+ */
+export function moversIn(codes, quotes, count = 5) {
+  const rows = (codes ?? [])
+    .map((code) => ({ code, change: quotes?.[code]?.change, price: quotes?.[code]?.price }))
+    .filter((r) => r.change != null && Number.isFinite(r.change));
+  if (!rows.length) return null;
+  const byMove = [...rows].sort((a, b) => b.change - a.change);
+  return {
+    up: byMove.slice(0, count).filter((r) => r.change > 0),
+    down: byMove.slice(-count).reverse().filter((r) => r.change < 0),
+    of: rows.length,
+  };
+}
+
+/**
+ * What a set of funds returned over one horizon, against holding cash instead.
+ *
+ * The median, not the mean: one fund up 600% would otherwise report a portfolio
+ * that beat the money market when five of its six holdings did not. The gap is
+ * in POINTS, because it is the difference between two percentages.
+ */
+export function versusCash(funds, horizon, cashReturns) {
+  const values = (funds ?? [])
+    .map((f) => f?.r?.[horizon])
+    .filter((v) => v != null && Number.isFinite(v));
+  if (!values.length) return null;
+  const cash = cashReturns?.[horizon];
+  const mid = median(values);
+  return {
+    median: round2(mid),
+    cash: cash ?? null,
+    gap: cash == null ? null : round2(mid - cash),
+    beating: cash == null ? null : values.filter((v) => v > cash).length,
+    of: values.length,
+  };
+}

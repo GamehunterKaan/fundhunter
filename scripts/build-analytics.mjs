@@ -297,7 +297,38 @@ async function main() {
     // code does not exist. The index itself is 490KB and is not worth loading on
     // a fund page to answer one yes-or-no question per row.
     meta.listedCodes = stockFile.stocks.map((s) => s.c).sort();
+
+    // The dashboard already asks the scanner for the whole exchange, so it holds
+    // today's move for every ticker and needs no second request to say what a
+    // theme or the index did. What it does NOT hold is which ticker belongs to
+    // what, or how big each one is — and loading the 900KB share index on the
+    // home page to find out would be absurd. These two maps are that membership,
+    // and they cost about 12KB in a file every visitor loads anyway.
+    const companies = stockFile.stocks.filter((s) => s.kind === 'stock' && s.cap > 0);
+
+    // Weights, not caps: normalised per theme they round to four places and stay
+    // small, and a raw market value would be stale the moment the price moved.
+    meta.themeWeights = {};
+    for (const id of THEME_IDS) {
+      const members = companies.filter((s) => s.th === id);
+      const total = members.reduce((sum, s) => sum + s.cap, 0);
+      if (!members.length || !total) continue;
+      meta.themeWeights[id] = members
+        .map((s) => [s.c, round(s.cap / total, 4)])
+        .filter(([, w]) => w > 0)
+        .sort((a, b) => b[1] - a[1]);
+    }
+
+    // The index members, for the movers strip. The universe matters more than
+    // the ranking: the biggest movers on the whole exchange are always the
+    // smallest listings on it, hitting their price limit on a few thousand lira
+    // of trade, which says nothing about the day.
+    meta.bist100 = companies.filter((s) => s.bx != null).map((s) => s.c).sort();
+
     await fs.writeFile(path.join(DATA, 'stocks.json'), JSON.stringify(stockFile) + '\n');
+    log(`  membership: ${Object.keys(meta.themeWeights).length} themes carry ` +
+      `${Object.values(meta.themeWeights).reduce((n, m) => n + m.length, 0)} companies, ` +
+      `${meta.bist100.length} in a headline index`);
     log(`  share ownership: ${held} of ${stockFile.stocks.length} shares are held by a fund, ` +
       `₺${(ownedValue / 1e9).toFixed(1)}bn in all, from ${readFilings} filings ` +
       `(${skipped} did not reconcile, ${unusablePrev} carry no usable previous weights)`);

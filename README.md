@@ -727,13 +727,19 @@ narrowed list can never be mistaken for the full universe.
 the dashboard is where you go to see what the ones you already care about are
 doing. The list moved to `#/fonlar` with everything it had.
 
-Three panes, one question each:
+Three panes across the top, one question each, and three more below them:
 
 | | |
 |---|---|
-| **Money in this week** | the seven-day net inflow ranking |
+| **Money in this week** | the seven-day net flow ranking, in either direction |
 | **What you follow** | a month of each starred fund, one chart per fund |
-| **Your funds** | the same funds as rows, with their figures |
+| **Your funds** | the same funds as rows, over the money-market hurdle |
+| **Portfolio overlap** | whether two funds you hold are the same fund |
+| **Themes today** | what each line of business did, weighted by market value |
+| **Movers today** | the best and worst of the BIST 100 |
+
+The three below are the ones a fund page cannot answer, because each needs more
+than one fund — or more than one company — at a time.
 
 It carries **no page heading and no standing prose**. A title reading
 "Dashboard" over a paragraph explaining what a dashboard is spends the top third
@@ -793,6 +799,93 @@ The dates are not decoration. A fund younger than the window draws whatever
 history it has, and without them **a six-week-old fund looks like a fund that
 went nowhere for a year**. They switch from days to months as the window grows,
 because "17 Ağu … 17 Ağu" over a year reads as a single day.
+
+### Money in, and money out
+
+One rail with a direction toggle rather than two panes. Arriving and leaving are
+the same question asked twice, and a reader comparing them wants both in the
+same place at the same size. Prices for both directions are fetched together, so
+switching does not go back to the exchange.
+
+The risk floor that already governs this rail is doing real work here: money-market
+funds hold the bulk of the industry's cash and therefore dominate both ends of
+any weekly flow ranking — ₺51.6bn left one of them in a week — which says
+something about the treasury and nothing about the fund.
+
+### Against the money market
+
+The hurdle sits at the top of the funds you actually hold, because that is the
+one place on the site where "did this beat doing nothing" is a question about
+your own money.
+
+The **median**, not the average. One fund up 600% would otherwise report a
+portfolio comfortably ahead of cash when most of it was behind, so the count of
+how many actually clear the hurdle sits under it. The gap is in **points**,
+because it is the difference between two percentages.
+
+It is equal-weighted and has to be: the site knows which funds you follow, not
+how much of each you hold. That is why it says "median of your funds" rather
+than "your return", which would be a number nobody could act on.
+
+### Portfolio overlap
+
+**The panel no fund page can ever draw**, because it needs every fund's filing at
+once.
+
+Two funds sharing most of their portfolio are one position wearing two names, and
+someone holding both believes they have diversified. Across the equity funds that
+file, the worst pair on the exchange is:
+
+```
+PHE + PBR   81% the same
+in both:  ODINE 13.7%   GUNDG 9.5%   KTLEV 8.9%   PCS-PUSULA 8.6%  …
+```
+
+The measure is the **sum of the smaller weight wherever both hold the same
+thing** — two funds each 40% in a share overlap 40 points there; one at 40% and
+one at 5% overlap 5. That is the amount of the pair which is not a second
+position at all, and it runs 0 to 100 the way a reader expects. Not correlation,
+which two funds holding entirely different banks would score high on and which
+says nothing about owning the same shares twice.
+
+The median pair overlaps **nothing at all**, so on most watchlists this draws one
+line saying the funds do not repeat each other — which is itself worth reading
+once. It is checked only against your own funds: two strangers in the popular
+rail overlapping is not your problem.
+
+Positions with no code in the filing are left out rather than matched by name, so
+every figure is a floor.
+
+### Themes today, and the movers
+
+Both come out of the scan the dashboard **already makes** — it asks the scanner
+for the whole exchange to price the rails — so this row costs no network at all.
+What the browser was missing was only which ticker belongs to what, and that now
+travels in `meta.json`: 608 companies with their weight inside a theme, and the
+100 index members. Together about 4.5KB gzipped, against the 900KB of
+`stocks.json` it saves the home page from fetching.
+
+A theme's move is **weighted by market value**, not averaged. An equal-weighted
+"banks" figure lets the smallest listed bank move the number as far as the
+largest. Weights are renormalised over the members that actually have a quote, so
+a suspended share shrinks the theme rather than dragging it toward zero, and a
+theme with less than half of itself priced reports nothing.
+
+Worth knowing when reading it: some themes are one company. ASELS is 96% of
+defence by market value, so "defence today" is very nearly "ASELS today" — which
+is true of the sector itself, not an artefact of the measure.
+
+The movers list is deliberately **confined to the BIST 100**. The biggest movers
+on the whole exchange are always its smallest listings, hitting their price limit
+on a few thousand lira of trade, and a home page that leads with those is
+reporting noise as news.
+
+The tiles are coloured by the same `moveColor()` the market map uses, but with a
+lower ceiling on the mix. A map tile labels itself with a ticker; a theme tile
+carries the theme's name, and at the map's full saturation the worst tile
+measured **4.17:1** against the page's ink in the dark theme — under the 4.5:1
+that text this size needs. At the lower ceiling both themes clear it at better
+than 6.7:1 and the colour still runs a full gradient.
 
 ### Each tile, its own window
 

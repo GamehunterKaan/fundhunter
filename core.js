@@ -479,8 +479,37 @@ export const STRINGS = {
     ownMoveNote: 'Bir önceki portföy bildirimine göre ağırlık değişimi, puan olarak.',
     navDash: 'Panel',
     dashPopular: 'Bu hafta para girenler',
+    dashFlowOut: 'Bu hafta para çıkanlar',
     dashFavourites: 'Fonlarınız',
     dashFlowWeek: '{n} giriş',
+    dashFlowWeekOut: '{n} çıkış',
+    flowIn: 'Giren',
+    flowOut: 'Çıkan',
+    flowDirection: 'Para yönü',
+    // --- örtüşme ---
+    dashOverlap: 'Portföy örtüşmesi',
+    overlapNote:
+      'Takip ettiğiniz fonların KAP bildirimlerinden. İki fonun ortak tuttuğu ' +
+      'kısım ikinci bir pozisyon değil: o kadarı aynı şirket, iki isim altında.',
+    overlapPair: '%{n} aynı',
+    overlapShared: 'İkisinde de',
+    overlapClean: 'Takip ettiğiniz fonlar birbirini tekrar etmiyor.',
+    // --- para piyasasına karşı ---
+    vsCashHead: 'Para piyasasına karşı',
+    vsCashMedian: 'Fonlarınızın ortancası',
+    vsCashHurdle: 'Para piyasası',
+    vsCashGap: 'Fark',
+    vsCashAhead: '{n}/{of} fon önde',
+    // --- piyasa ---
+    dashThemes: 'Sektörler bugün',
+    themesNote: 'Her sektörün bugünkü hareketi, piyasa değerine göre ağırlıklı.',
+    dashMovers: 'Bugün öne çıkanlar',
+    moversNote:
+      'BIST 100 içinde. Borsanın tamamında en çok hareket edenler her zaman ' +
+      'en küçük şirketlerdir; günü anlatan onlar değil.',
+    moversUp: 'Yükselenler',
+    moversDown: 'Düşenler',
+    awaitingQuotes: 'Fiyatlar bekleniyor…',
     dashLast: 'Son fiyat',
     dashLastNote:
       'TEFAS’ın yayımladığı en son fiyat değişimi. Bir iş günü gecikmeli: bugünün ' +
@@ -1117,8 +1146,38 @@ export const STRINGS = {
     ownMoveNote: 'Change in that weight since the previous filing, in percentage points.',
     navDash: 'Dashboard',
     dashPopular: 'Money in this week',
+    dashFlowOut: 'Money out this week',
     dashFavourites: 'Your funds',
     dashFlowWeek: '{n} in',
+    dashFlowWeekOut: '{n} out',
+    flowIn: 'In',
+    flowOut: 'Out',
+    flowDirection: 'Direction of money',
+    // --- overlap ---
+    dashOverlap: 'Portfolio overlap',
+    overlapNote:
+      'From the KAP filings of the funds you follow. What two funds hold in ' +
+      'common is not a second position: that much of it is one company, held ' +
+      'under two names.',
+    overlapPair: '{n}% the same',
+    overlapShared: 'In both',
+    overlapClean: 'The funds you follow do not repeat each other.',
+    // --- against cash ---
+    vsCashHead: 'Against the money market',
+    vsCashMedian: 'Median of your funds',
+    vsCashHurdle: 'Money market',
+    vsCashGap: 'Gap',
+    vsCashAhead: '{n} of {of} ahead',
+    // --- the market ---
+    dashThemes: 'Themes today',
+    themesNote: 'What each theme did today, weighted by market value.',
+    dashMovers: 'Movers today',
+    moversNote:
+      'Within the BIST 100. The biggest movers on the whole exchange are ' +
+      'always its smallest listings, and they are not what the day was about.',
+    moversUp: 'Gainers',
+    moversDown: 'Fallers',
+    awaitingQuotes: 'Waiting for prices…',
     dashLast: 'Last price',
     dashLastNote:
       'The most recent published change in the NAV. It runs one business day ' +

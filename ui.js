@@ -14,6 +14,7 @@ import {
   crashSpared, rangePosition,
   trailingTwelve, yearOnYear, ratioSeries, netDebtToEbitda, altmanBand, piotroskiBand,
   consensus, shareOfTotal, beatRecord, surpriseOf, peersOf, peerMedians,
+  weightsOf, overlappingPairs, sharedPositions, themeMoves, moversIn, versusCash,
 } from './analytics.js';
 import { LIVE_SOURCE, LIVE_REFRESH_MS, LIVE_TIMEOUT_MS, parseLiveQuotes, liveClock } from './live.js';
 import {
@@ -972,13 +973,6 @@ function dashPane(titleKey, rows, link) {
   );
 }
 
-/** Money in over the last week, which is the question a daily page can answer. */
-const weeklyPool = () =>
-  popularPool()
-    .filter((f) => f.fl7 != null && f.fl7 > 0)
-    .sort((a, b) => b.fl7 - a.fl7)
-    .slice(0, DASH_ROWS);
-
 const favouritePool = () =>
   state.funds.filter((f) => state.favs.has(f.c)).slice(0, DASH_ROWS);
 
@@ -988,7 +982,8 @@ const favouriteShares = () =>
 
 function renderDashboard() {
   state.page = 'dash';
-  const popular = weeklyPool();
+  const flows = renderFlows();
+  const popular = flowPool(false);
   const favourites = favouritePool();
   // Shares are starred from the same list as funds — a three-letter code is a
   // fund and a four-letter one a share, so they never collide — and they join
@@ -1005,54 +1000,314 @@ function renderDashboard() {
 
   const draw = () => {
     if (state.page !== 'dash') return;
-    const pane = (id, list) => {
-      const el = document.getElementById(id);
-      if (el) el.replaceChildren(dashHead(), ...list);
-    };
-    pane('dash-popular', popular.map((f) =>
-      dashRow(f, T('dashFlowWeek', { n: fmtMoney(f.fl7, state.lang) }))));
-    pane('dash-favs', favourites.map((f) => dashRow(f, f.f)));
+    flows.draw();
+    const el = document.getElementById('dash-favs');
+    if (el) el.replaceChildren(dashHead(), ...favourites.map((f) => dashRow(f, f.f)));
   };
 
   // Held rather than inlined, because the quote refresh below has to be able to
   // redraw its tiles: a share tile opens on today, and today is a quote.
   const watchlist = renderWatchlist(watched, fromFavourites);
+  // Both read the whole-exchange scan the page already makes, so they cost a
+  // membership map in meta.json and no request of their own.
+  const market = renderMarketRow();
 
   // No page heading. The dashboard is the thing you open every morning, and a
   // title that says "Dashboard" over a lede explaining what a dashboard is costs
   // a third of the screen to tell you what you can already see. The tape above
   // carries the date the figures close on.
-  view.replaceChildren(
+  view.replaceChildren(...[
     h('div', { class: 'dash-grid' },
-      dashPane('dashPopular',
-        popular.length
-          ? h('div', { class: 'dash-rows', id: 'dash-popular' }, dashHead(),
-              ...popular.map((f) => dashRow(f, T('dashFlowWeek', { n: fmtMoney(f.fl7, state.lang) }))))
-          : h('p', { class: 'panel-note' }, T('noneYet')),
-        { href: '#/populer', text: T('dashMore') }),
+      flows.panel,
 
       watchlist.panel,
 
-      dashPane('dashFavourites',
+      h('section', { class: 'panel dash-pane' },
+        h('div', { class: 'dash-pane-head' },
+          h('h2', {}, T('dashFavourites')),
+          favourites.length
+            ? h('a', { class: 'dash-more', href: '#/favoriler' }, T('dashMore')) : null),
+        // The hurdle sits at the top of the funds you actually hold, because
+        // that is the one place on the site where "did this beat doing nothing"
+        // is a question about your own money rather than about a stranger's.
+        favourites.length ? vsCashStrip(favourites) : null,
         favourites.length
           ? h('div', { class: 'dash-rows', id: 'dash-favs' }, dashHead(),
               ...favourites.map((f) => dashRow(f, f.f)))
-          : h('p', { class: 'panel-note' }, T('favoritesEmpty')),
-        favourites.length ? { href: '#/favoriler', text: T('dashMore') } : null)
-    )
-  );
+          : h('p', { class: 'panel-note' }, T('favoritesEmpty')))
+    ),
+    // Only your own funds are worth checking for duplication: the popular rail
+    // is a list of strangers and two of them overlapping is not your problem.
+    renderOverlap(favourites.map((f) => f.c)),
+    market.row,
+  ].filter(Boolean));
 
   // Prices arrive after the page is on screen, and again on every refresh while
   // it stays there. The watchlist redraws with them too, not only the rails: a
   // share tile opens on today, and today comes from the quotes rather than from
   // a file.
-  const codes = [...new Set([...popular, ...favourites].map((f) => f.c))];
-  const drawAll = () => { draw(); watchlist.draw(); };
+  // Both directions of the flows rail, so switching to outflows does not have
+  // to go back to the exchange for prices it could already have had.
+  const codes = [...new Set([...flows.codes(), ...favourites.map((f) => f.c)])];
+  const drawAll = () => { draw(); watchlist.draw(); market.draw(); };
   if (codes.length) loadEstimates(codes, drawAll).catch(() => {});
   else ensureQuotes(null).then(drawAll);
   dashView = { codes, draw: drawAll };
 
   window.scrollTo({ top: 0 });
+}
+
+/**
+ * The flows rail, in whichever direction you ask it for.
+ *
+ * One pane rather than two. Money arriving and money leaving are the same
+ * question asked twice, and a reader comparing them wants them in the same
+ * place at the same size — not one pane above the fold and its opposite below.
+ *
+ * Money-market funds dominate both ends, and for a good reason: they hold the
+ * bulk of the industry's cash, so they take in and give up the bulk of its
+ * movement every week. The risk floor that already governs this rail keeps them
+ * out of both directions.
+ */
+function renderFlows() {
+  let outward = false;
+  const rows = h('div', { class: 'dash-rows', id: 'dash-popular' });
+  const title = h('h2', {}, T('dashPopular'));
+
+  const buttons = [['flowIn', false], ['flowOut', true]].map(([labelKey, dir]) =>
+    h('button', {
+      type: 'button', 'aria-pressed': String(outward === dir),
+      onClick: () => { outward = dir; draw(); },
+    }, T(labelKey)));
+
+  const panel = h('section', { class: 'panel dash-pane' },
+    h('div', { class: 'dash-pane-head' },
+      title,
+      h('div', { class: 'seg seg-mini', role: 'group', 'aria-label': T('flowDirection') }, buttons)),
+    rows,
+    h('a', { class: 'dash-more', href: '#/populer' }, T('dashMore'))
+  );
+
+  function draw() {
+    const list = flowPool(outward);
+    title.textContent = T(outward ? 'dashFlowOut' : 'dashPopular');
+    buttons.forEach((b, i) => b.setAttribute('aria-pressed', String(Boolean(i) === outward)));
+    rows.replaceChildren(...(list.length
+      ? [dashHead(), ...list.map((f) => dashRow(f,
+          T(outward ? 'dashFlowWeekOut' : 'dashFlowWeek',
+            { n: fmtMoney(Math.abs(f.fl7), state.lang) })))]
+      : [h('p', { class: 'panel-note' }, T('noneYet'))]));
+  }
+
+  draw();
+  return { panel, draw, codes: () => [...flowPool(false), ...flowPool(true)].map((f) => f.c) };
+}
+
+/** The week's biggest movements of money, in one direction or the other. */
+const flowPool = (outward) =>
+  popularPool()
+    .filter((f) => f.fl7 != null && (outward ? f.fl7 < 0 : f.fl7 > 0))
+    .sort((a, b) => (outward ? a.fl7 - b.fl7 : b.fl7 - a.fl7))
+    .slice(0, DASH_ROWS);
+
+/**
+ * Whether the funds you follow are beating the thing you could have done instead.
+ *
+ * The money market is the hurdle everywhere else on this site, and the funds
+ * pane is where it matters most: these are the ones you actually hold. The
+ * median rather than the average, because one fund up 600% would otherwise
+ * report a portfolio comfortably ahead when most of it is behind.
+ *
+ * Equal-weighted, and it has to be — the site knows which funds you follow and
+ * not how much of each you hold. So it says "median of your funds" rather than
+ * "your return", which would be a number nobody could act on.
+ */
+function vsCashStrip(funds) {
+  const horizon = horizonOf(state.prefs.horizon);
+  const view = versusCash(funds, horizon.key, state.meta?.cashReturns);
+  if (!view || view.gap == null) return null;
+
+  return h('div', { class: 'vs-cash' },
+    h('div', { class: 'vs-cash-head' },
+      h('span', {}, T('vsCashHead')),
+      h('span', { class: 'vs-cash-hz num' }, T(horizon.labelKey))),
+    h('dl', { class: 'vs-cash-figures' },
+      h('div', {},
+        h('dt', {}, T('vsCashMedian')),
+        h('dd', { class: `num delta ${signOf(view.median)}` },
+          fmtPct(view.median, state.lang, { signed: true, digits: 1 }))),
+      h('div', {},
+        h('dt', {}, T('vsCashHurdle')),
+        h('dd', { class: 'num' }, fmtPct(view.cash, state.lang, { digits: 1 }))),
+      h('div', {},
+        // The gap is in POINTS. Two percentages differ by points, and printing
+        // that difference with a percent sign is the easiest way to mislead.
+        h('dt', {}, T('vsCashGap')),
+        h('dd', { class: `num delta ${signOf(view.gap)}` },
+          fmtPoints(view.gap, state.lang, { signed: true, digits: 1 })))
+    ),
+    // How many of them clear the hurdle, under the median that hides it: three
+    // funds with a median ahead of cash can still be two funds behind it.
+    h('p', { class: 'vs-cash-count' }, T('vsCashAhead', { n: view.beating, of: view.of }))
+  );
+}
+
+/**
+ * Whether two funds you follow are the same fund.
+ *
+ * The panel this project can draw and no fund page ever can: it needs every
+ * fund's filing at once. Two funds sharing 81% of their portfolio are one
+ * position wearing two names, and someone holding both believes they have
+ * diversified.
+ *
+ * Silent unless there is something to say. Across the equity funds that file,
+ * the median pair overlaps nothing at all, so on most watchlists this draws a
+ * single line saying so — which is itself worth reading once.
+ */
+function renderOverlap(codes) {
+  if (codes.length < 2) return null;
+  const body = h('div', { class: 'overlap-body' },
+    h('p', { class: 'panel-note' }, T('loading')));
+
+  const panel = h('section', { class: 'panel overlap-panel' },
+    h('h2', {}, T('dashOverlap')),
+    h('p', { class: 'panel-note' }, T('overlapNote')),
+    body
+  );
+
+  Promise.all(codes.map(loadHoldings)).then((filings) => {
+    if (state.page !== 'dash') return;
+    const weights = {};
+    codes.forEach((code, i) => {
+      const rows = filings[i]?.holdings;
+      // A filing whose weights do not reconcile is not published anywhere else
+      // on this site and is not quietly used here either.
+      if (rows?.length) weights[code] = weightsOf(rows);
+    });
+
+    const pairs = overlappingPairs(weights);
+    if (!pairs.length) {
+      body.replaceChildren(h('p', { class: 'panel-note' }, T('overlapClean')));
+      return;
+    }
+    body.replaceChildren(...pairs.map((pair) => overlapRow(pair, weights)));
+  }).catch(() => {
+    body.replaceChildren(h('p', { class: 'panel-note' }, T('overlapClean')));
+  });
+
+  return panel;
+}
+
+/** One overlapping pair: how much, and which positions account for it. */
+function overlapRow({ a, b, shared }, weights) {
+  const both = sharedPositions(weights[a], weights[b]);
+  const nameOf = (code) => state.funds.find((f) => f.c === code)?.n ?? '';
+
+  return h('div', { class: 'overlap-pair' },
+    h('div', { class: 'overlap-heads' },
+      h('a', { class: 'overlap-fund', href: `#/fon/${a}` },
+        h('span', { class: 'dash-code num' }, a),
+        h('span', { class: 'row-sub' }, nameOf(a))),
+      // The figure sits between the two codes it is about, so it never has to
+      // repeat them to say what it means.
+      h('span', { class: 'overlap-figure num' }, T('overlapPair', { n: fmtNum(shared, state.lang, 0) })),
+      h('a', { class: 'overlap-fund', href: `#/fon/${b}` },
+        h('span', { class: 'dash-code num' }, b),
+        h('span', { class: 'row-sub' }, nameOf(b)))
+    ),
+    h('div', { class: 'overlap-bar' },
+      h('span', { class: 'overlap-fill', style: `width:${Math.min(100, shared)}%` })),
+    both.length ? h('ul', { class: 'overlap-shared' },
+      h('li', { class: 'overlap-label' }, T('overlapShared')),
+      both.map((row) => h('li', {},
+        holdingCode(row.code),
+        h('span', { class: 'num' }, fmtPct(row.weight, state.lang, { digits: 1 }))))
+    ) : null
+  );
+}
+
+/** A shared position's code, linked when the exchange lists it. */
+function holdingCode(code) {
+  const listed = state.meta?.listedCodes?.includes(code);
+  return listed
+    ? h('a', { class: 'code-link num', href: `#/hisse/${code}` }, code)
+    : h('span', { class: 'num' }, code);
+}
+
+/**
+ * What kind of day it was, by theme, and who moved most inside the index.
+ *
+ * Both come out of the scan the dashboard already makes — it asks for the whole
+ * exchange — so this row costs one small membership map in `meta.json` and no
+ * network at all. Which ticker belongs to which theme, and which are in a
+ * headline index, is the only thing the browser was missing.
+ */
+function renderMarketRow() {
+  const themesBody = h('div', { class: 'theme-heat' });
+  const moversBody = h('div', { class: 'movers' });
+  const waiting = () => h('p', { class: 'panel-note' }, T('awaitingQuotes'));
+  themesBody.append(waiting());
+  moversBody.append(waiting());
+
+  const row = h('div', { class: 'market-row' },
+    h('section', { class: 'panel' },
+      h('h2', {}, T('dashThemes')),
+      h('p', { class: 'panel-note' }, T('themesNote')),
+      themesBody),
+    h('section', { class: 'panel' },
+      h('h2', {}, T('dashMovers')),
+      h('p', { class: 'panel-note' }, T('moversNote')),
+      moversBody)
+  );
+
+  const draw = () => {
+    if (state.page !== 'dash') return;
+    const quotes = state.quotes?.bist?.quotes ?? null;
+    if (!quotes) return;
+
+    const moves = themeMoves(state.meta?.themeWeights, quotes);
+    themesBody.replaceChildren(...(moves.length
+      ? moves.map((t) => h('a', {
+          class: 'theme-cell',
+          href: '#/fonlar',
+          style: `background:${moveColor(t.move, THEME_TILE_CEILING)}`,
+          title: `${themeName(t.id)} · ${t.priced}/${t.of}`,
+          onClick: () => {
+            // The same handoff a share page makes: set the filter, let the
+            // router take the route. Two ways of saying it would be one too many.
+            state.filters.theme = t.id;
+            state.filters.minTheme = MIN_THEME;
+          },
+        },
+          h('span', { class: 'theme-cell-name' }, themeName(t.id)),
+          h('span', { class: 'theme-cell-move num' },
+            fmtPct(t.move, state.lang, { signed: true, digits: 1 })))
+        )
+      : [waiting()]));
+
+    const movers = moversIn(state.meta?.bist100, quotes);
+    moversBody.replaceChildren(...(movers
+      ? [
+          moverColumn('moversUp', movers.up),
+          moverColumn('moversDown', movers.down),
+        ].filter(Boolean)
+      : [waiting()]));
+  };
+
+  return { row, draw };
+}
+
+/** One side of the movers panel, or nothing when the market went one way. */
+function moverColumn(titleKey, rows) {
+  if (!rows.length) return null;
+  return h('div', { class: 'mover-col' },
+    h('h3', {}, T(titleKey)),
+    h('ul', {}, rows.map((r) => h('li', {},
+      h('a', { class: 'code-link num', href: `#/hisse/${r.code}` }, r.code),
+      h('span', { class: 'mover-price num' }, `₺${fmtNum(r.price, state.lang, 2)}`),
+      h('span', { class: `num delta ${signOf(r.change)}` },
+        fmtPct(r.change, state.lang, { signed: true, digits: 2 })))))
+  );
 }
 
 /**
@@ -3152,14 +3407,25 @@ async function renderMarket() {
 }
 
 /** The colour for a day's move: red below, green above, flat in between. */
-function moveColor(change) {
+function moveColor(change, ceiling = 80) {
   if (change == null) return 'var(--surface-2, rgba(127,127,127,0.09))';
   const strength = Math.min(1, Math.abs(change) / MAP_FULL_MOVE);
   // A floor, so a share that moved 0.05% still reads as green rather than as a
   // hole in the map.
-  const mix = Math.round(18 + strength * 62);
+  const mix = Math.round(18 + strength * (ceiling - 18));
   return `color-mix(in srgb, var(--${change >= 0 ? 'up' : 'down'}) ${mix}%, var(--plane))`;
 }
+
+/**
+ * The ceiling the dashboard's theme tiles use, and why it is lower.
+ *
+ * A map tile's label is a ticker beside a percentage and can sit at 0.7rem on a
+ * fully saturated ground; a theme tile carries the theme's NAME, which is the
+ * thing being read. At the map's ceiling the worst tile measured 4.17:1 against
+ * the page's ink in the dark theme — under the 4.5:1 that text this size needs.
+ * At 55 both themes clear it, and the colour still runs a full gradient.
+ */
+const THEME_TILE_CEILING = 55;
 
 /**
  * Borsa İstanbul as a map: area is what a company is worth, colour is what it

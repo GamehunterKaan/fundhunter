@@ -14,6 +14,8 @@ import {
   periodEnds, quarterLabel, trailingTwelve, yearOnYear, ratioSeries,
   netDebtToEbitda, altmanBand, piotroskiBand, consensus, shareOfTotal,
   beatRecord, surpriseOf, peersOf, peerMedians,
+  overlapOf, weightsOf, overlappingPairs, sharedPositions,
+  weightedMove, themeMoves, moversIn, versusCash,
 } from '../analytics.js';
 import { HORIZONS } from '../core.js';
 
@@ -836,4 +838,138 @@ test('a rating bar divides the analysts it was given', () => {
   assert.equal(shareOfTotal(8, 10), 80);
   assert.equal(shareOfTotal(0, 10), 0);
   assert.equal(shareOfTotal(1, 0), 0, 'no analysts, no width');
+});
+
+// ---------------------------------------------------------------- dashboard
+
+test('overlap is the smaller weight wherever two funds hold the same thing', () => {
+  // Both 40% in ASELS: forty of those points are one position, not two.
+  assert.equal(overlapOf({ ASELS: 40 }, { ASELS: 40 }), 40);
+  // One at 40 and one at 5 duplicate only the 5.
+  assert.equal(overlapOf({ ASELS: 40 }, { ASELS: 5 }), 5);
+  assert.equal(overlapOf({ ASELS: 40 }, { THYAO: 40 }), 0, 'different shares are not an overlap');
+  assert.equal(overlapOf({ ASELS: 30, THYAO: 20 }, { ASELS: 25, THYAO: 25 }), 45);
+  assert.equal(overlapOf(null, { ASELS: 1 }), null);
+});
+
+test('a filing becomes weights, with split lines added rather than replaced', () => {
+  // The same holding is filed under an ISIN on one line and a ticker on the
+  // next; taking the last one would report half the position.
+  assert.deepEqual(
+    weightsOf([{ code: 'ASELS', weight: 3 }, { code: 'ASELS', weight: 2 }]),
+    { ASELS: 5 }
+  );
+  // A row with no code cannot be matched against another fund's, so it is left
+  // out — which makes every overlap a floor rather than a guess.
+  assert.deepEqual(weightsOf([{ code: null, weight: 9 }, { code: 'X', weight: 1 }]), { X: 1 });
+  // A closed position files at zero, and a correction can file negative.
+  assert.deepEqual(weightsOf([{ code: 'A', weight: 0 }, { code: 'B', weight: -1 }]), {});
+  assert.deepEqual(weightsOf(null), {});
+});
+
+test('only pairs that share more than the floor are worth warning about', () => {
+  const filings = {
+    PHE: { A: 50, B: 30, C: 20 },
+    PBR: { A: 45, B: 35, C: 20 },
+    OTH: { X: 60, Y: 40 },
+    NIL: null,
+  };
+  const pairs = overlappingPairs(filings);
+  assert.equal(pairs.length, 1, 'the unrelated fund and the missing filing raise nothing');
+  assert.equal(pairs[0].a, 'PHE');
+  assert.equal(pairs[0].b, 'PBR');
+  assert.equal(pairs[0].shared, 95);
+  // The floor is a floor, not a fixed rule.
+  assert.equal(overlappingPairs(filings, 100).length, 0);
+  assert.equal(overlappingPairs({}).length, 0);
+});
+
+test('the shared positions are reported at the smaller of the two weights', () => {
+  const rows = sharedPositions({ A: 50, B: 10, C: 5 }, { A: 20, B: 40 });
+  assert.deepEqual(rows.map((r) => r.code), ['A', 'B'], 'largest first, and C is not held by both');
+  assert.equal(rows[0].weight, 20, 'the smaller of 50 and 20');
+  assert.equal(rows[1].weight, 10);
+  assert.equal(sharedPositions({ A: 1 }, { A: 1, B: 1 }, 1).length, 1, 'the limit is honoured');
+});
+
+test('a theme moves by what the money in it did, not by an average of its members', () => {
+  const members = [['BIG', 0.9], ['SMALL', 0.1]];
+  const quotes = { BIG: { change: 1 }, SMALL: { change: 11 } };
+  // Equal-weighted this would be 6%. The big company is nine tenths of the
+  // theme, so the theme moved 2%.
+  assert.equal(weightedMove(members, quotes).move, 2);
+  assert.equal(weightedMove(members, quotes).priced, 2);
+});
+
+test('a suspended share renormalises its theme rather than dragging it to zero', () => {
+  const members = [['A', 0.5], ['B', 0.5]];
+  // B has no quote. The theme is what A did, over the half of it that is priced
+  // — not 1% because the other half was treated as flat.
+  const out = weightedMove(members, { A: { change: 2 } });
+  assert.equal(out.move, 2);
+  assert.equal(out.covered, 50);
+  assert.equal(out.priced, 1);
+  assert.equal(weightedMove(members, {}), null, 'nothing priced is not a move of zero');
+  assert.equal(weightedMove([], { A: { change: 1 } }), null);
+});
+
+test('a theme too thinly priced does not report a move at all', () => {
+  const weights = {
+    full: [['A', 0.6], ['B', 0.4]],
+    thin: [['C', 0.9], ['D', 0.1]],
+  };
+  const quotes = { A: { change: 3 }, B: { change: 1 }, D: { change: -5 } };
+  const moves = themeMoves(weights, quotes);
+  assert.deepEqual(moves.map((m) => m.id), ['full'],
+    'the thin theme has 10% of itself priced and says nothing');
+  assert.equal(moves[0].move, 2.2);
+  // With the floor dropped it reports, and reports what D did.
+  assert.equal(themeMoves(weights, quotes, 5).find((m) => m.id === 'thin').move, -5);
+});
+
+test('themes are ordered by the size of the move, either direction', () => {
+  const weights = { up: [['A', 1]], down: [['B', 1]], flat: [['C', 1]] };
+  const quotes = { A: { change: 2 }, B: { change: -7 }, C: { change: 0.1 } };
+  assert.deepEqual(themeMoves(weights, quotes).map((m) => m.id), ['down', 'up', 'flat'],
+    'the biggest fall leads, because that is what a reader is looking for');
+});
+
+test('movers come from a named universe and keep their direction', () => {
+  const quotes = {
+    A: { change: 5 }, B: { change: 3 }, C: { change: -1 }, D: { change: -4 },
+    PENNY: { change: 40 },
+  };
+  const out = moversIn(['A', 'B', 'C', 'D'], quotes, 2);
+  assert.deepEqual(out.up.map((r) => r.code), ['A', 'B']);
+  assert.deepEqual(out.down.map((r) => r.code), ['D', 'C'], 'worst first');
+  assert.equal(out.of, 4);
+  // The point of passing the universe: the 40% mover is not in the index and
+  // does not get to be the story of the day.
+  assert.ok(!out.up.some((r) => r.code === 'PENNY'));
+  // A green day has no fallers, and they are not filled in with flat names.
+  assert.equal(moversIn(['A', 'B'], quotes, 2).down.length, 0);
+  assert.equal(moversIn(['NOPE'], quotes), null);
+});
+
+test('a set of funds is compared with cash on the median, not the mean', () => {
+  const funds = [
+    { r: { y1: 40 } }, { r: { y1: 45 } }, { r: { y1: 50 } }, { r: { y1: 600 } },
+  ];
+  const out = versusCash(funds, 'y1', { y1: 47.92 });
+  // The mean is 183.75 and would report a portfolio comfortably ahead of cash
+  // when three of its four holdings are behind it.
+  assert.equal(out.median, 47.5);
+  assert.equal(out.cash, 47.92);
+  assert.equal(out.gap, -0.42, 'the gap between two percentages is in points');
+  assert.equal(out.beating, 2);
+  assert.equal(out.of, 4);
+});
+
+test('comparing with cash needs both halves', () => {
+  assert.equal(versusCash([], 'y1', { y1: 10 }), null);
+  assert.equal(versusCash([{ r: {} }], 'y1', { y1: 10 }), null, 'a fund too new to have the horizon');
+  const noCash = versusCash([{ r: { y1: 30 } }], 'y1', {});
+  assert.equal(noCash.median, 30);
+  assert.equal(noCash.gap, null, 'no hurdle, no verdict — not a gap of thirty');
+  assert.equal(noCash.beating, null);
 });

@@ -2380,6 +2380,237 @@ a.dash-row:hover {
   font-style: italic;
 }
 
+/* ------------------------------------------------------- dashboard additions */
+
+/* A toggle that has to fit beside a pane heading in a 19rem rail. */
+.seg-mini button {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+}
+
+/* The hurdle, above the funds it is judging. Boxed rather than laid out as
+ * another three rows, so it reads as a verdict on the list and not as part of
+ * it. */
+.vs-cash {
+  margin: 0.75rem 0 0.25rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  background: var(--raised);
+  border: 1px solid var(--hairline);
+}
+.vs-cash-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.vs-cash-hz {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+.vs-cash-figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+}
+.vs-cash-figures dt {
+  font-size: 0.66rem;
+  color: var(--ink-muted);
+  line-height: 1.25;
+}
+.vs-cash-figures dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.vs-cash-count {
+  margin: 0.5rem 0 0;
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------- overlap */
+
+.overlap-panel {
+  margin-top: 1.25rem;
+}
+.overlap-body {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+.overlap-pair {
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--raised);
+}
+/* Code, figure, code — the number sits between the two funds it is about, so it
+ * never has to name them again to be understood. */
+.overlap-heads {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+.overlap-fund {
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.overlap-fund:hover .dash-code {
+  text-decoration: underline;
+}
+.overlap-heads > .overlap-fund:last-child {
+  text-align: right;
+}
+.overlap-figure {
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  color: var(--down);
+}
+.overlap-bar {
+  height: 5px;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: var(--hairline);
+  overflow: hidden;
+}
+.overlap-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--down);
+}
+.overlap-shared {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.85rem;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.78rem;
+}
+.overlap-shared li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+.overlap-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------- the market row */
+
+.market-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+  align-items: start;
+}
+.market-row > .panel {
+  margin-bottom: 0;
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .market-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Nineteen themes, each a block sized the same: this is a legend for the day,
+ * not a treemap. The market page is where area means something. */
+.theme-heat {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+.theme-cell {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 7px;
+  /* The same treatment the market map's tiles get, and for the same reason: the
+   * background is a mix of the move colour INTO the page's own plane, so the
+   * page's own ink is what contrasts with it — in both themes. White text with
+   * a shadow held up in the dark theme and vanished in the light one, where an
+   * 18% mix of green is very nearly white. */
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.76rem;
+  min-width: 0;
+}
+.theme-cell:hover {
+  outline: 1px solid var(--ink-muted);
+}
+.theme-cell-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.theme-cell-move {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.movers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+.mover-col h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.mover-col ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mover-col li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.8rem;
+}
+.mover-col li:first-child {
+  border-top: 0;
+}
+.mover-price {
+  color: var(--ink-muted);
+  font-size: 0.74rem;
+}
+
 /* ---------------------------------------------------------------- colophon */
 
 .colophon {
