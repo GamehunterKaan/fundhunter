@@ -1027,36 +1027,58 @@ function renderDashboard() {
   const watchlist = renderWatchlist(watched, fromFavourites);
   // Both read the whole-exchange scan the page already makes, so they cost a
   // membership map in meta.json and no request of their own.
-  const market = renderMarketRow();
+  const market = renderMarketPanels();
+
+  const favouritesPane = h('section', { class: 'panel dash-pane' },
+    h('div', { class: 'dash-pane-head' },
+      h('h2', {}, T('dashFavourites')),
+      favourites.length
+        ? h('a', { class: 'dash-more', href: '#/favoriler' }, T('dashMore')) : null),
+    // The hurdle sits at the top of the funds you actually hold, because
+    // that is the one place on the site where "did this beat doing nothing"
+    // is a question about your own money rather than about a stranger's.
+    favourites.length ? vsCashStrip(favourites) : null,
+    favourites.length
+      ? h('div', { class: 'dash-rows', id: 'dash-favs' }, dashHead(),
+          ...favourites.map((f) => dashRow(f, f.f)))
+      : h('p', { class: 'panel-note' }, T('favoritesEmpty')));
 
   // No page heading. The dashboard is the thing you open every morning, and a
   // title that says "Dashboard" over a lede explaining what a dashboard is costs
   // a third of the screen to tell you what you can already see. The tape above
   // carries the date the figures close on.
+  //
+  // A column and a rail, each packing its own panels top to bottom — not one
+  // grid of cells. Every panel here is sized by data that changes daily: the
+  // rail of inflows is six rows tall, the funds you follow may be none. Put
+  // them in shared grid rows and the tallest sets the height of the row, so the
+  // short one leaves a hole in the middle of the fold with content all round
+  // it. Two independent stacks cannot do that — the leftover falls to the foot
+  // of a column, next to the footer, where nobody reads it as a gap.
+  //
+  // What goes where is editorial, and it also happens to balance. The rail is
+  // money: where the week's went, and where yours is — both lists of codes,
+  // which read the same at 340px as at 900px. The column is the market: what
+  // you follow, then the day by sector, then the day's extremes — all three
+  // want width, for a sparkline, nineteen labelled chips and a three-figure
+  // row respectively.
+  // Only your own funds are worth checking for duplication: the popular rail is
+  // a list of strangers and two of them overlapping is not your problem.
+  const overlap = renderOverlap(favourites.map((f) => f.c));
+
   view.replaceChildren(...[
     h('div', { class: 'dash-grid' },
-      flows.panel,
-
-      watchlist.panel,
-
-      h('section', { class: 'panel dash-pane' },
-        h('div', { class: 'dash-pane-head' },
-          h('h2', {}, T('dashFavourites')),
-          favourites.length
-            ? h('a', { class: 'dash-more', href: '#/favoriler' }, T('dashMore')) : null),
-        // The hurdle sits at the top of the funds you actually hold, because
-        // that is the one place on the site where "did this beat doing nothing"
-        // is a question about your own money rather than about a stranger's.
-        favourites.length ? vsCashStrip(favourites) : null,
-        favourites.length
-          ? h('div', { class: 'dash-rows', id: 'dash-favs' }, dashHead(),
-              ...favourites.map((f) => dashRow(f, f.f)))
-          : h('p', { class: 'panel-note' }, T('favoritesEmpty')))
+      h('div', { class: 'dash-col' },
+        watchlist.panel,
+        market.themes,
+        market.movers),
+      h('div', { class: 'dash-col dash-rail' },
+        flows.panel,
+        favouritesPane)
     ),
-    // Only your own funds are worth checking for duplication: the popular rail
-    // is a list of strangers and two of them overlapping is not your problem.
-    renderOverlap(favourites.map((f) => f.c)),
-    market.row,
+    // Full width, below both: a row of it is two fund names at either end of a
+    // shared-weight bar, and there is no width at which that wants a column.
+    overlap,
   ].filter(Boolean));
 
   // Prices arrive after the page is on screen, and again on every refresh while
@@ -1255,27 +1277,29 @@ function holdingCode(code) {
  * What kind of day it was, by theme, and who moved most inside the index.
  *
  * Both come out of the scan the dashboard already makes — it asks for the whole
- * exchange — so this row costs one small membership map in `meta.json` and no
+ * exchange — so the pair costs one small membership map in `meta.json` and no
  * network at all. Which ticker belongs to which theme, and which are in a
  * headline index, is the only thing the browser was missing.
  */
-function renderMarketRow() {
+function renderMarketPanels() {
   const themesBody = h('div', { class: 'theme-heat' });
   const moversBody = h('div', { class: 'movers' });
   const waiting = () => h('p', { class: 'panel-note' }, T('awaitingQuotes'));
   themesBody.append(waiting());
   moversBody.append(waiting());
 
-  const row = h('div', { class: 'market-row' },
-    h('section', { class: 'panel' },
-      h('h2', {}, T('dashThemes')),
-      h('p', { class: 'panel-note' }, T('themesNote')),
-      themesBody),
-    h('section', { class: 'panel' },
-      h('h2', {}, T('dashMovers')),
-      h('p', { class: 'panel-note' }, T('moversNote')),
-      moversBody)
-  );
+  // Handed back as two loose panels rather than a row of their own. The
+  // dashboard packs them into its two columns — themes into the wide one it
+  // needs, movers onto the rail — and a wrapper here would only be a box the
+  // caller has to unpick.
+  const themes = h('section', { class: 'panel' },
+    h('h2', {}, T('dashThemes')),
+    h('p', { class: 'panel-note' }, T('themesNote')),
+    themesBody);
+  const movers = h('section', { class: 'panel' },
+    h('h2', {}, T('dashMovers')),
+    h('p', { class: 'panel-note' }, T('moversNote')),
+    moversBody);
 
   const draw = () => {
     if (state.page !== 'dash') return;
@@ -1311,7 +1335,7 @@ function renderMarketRow() {
       : [waiting()]));
   };
 
-  return { row, draw };
+  return { themes, movers, draw };
 }
 
 /** One side of the movers panel, or nothing when the market went one way. */
@@ -1328,6 +1352,27 @@ function moverColumn(titleKey, rows) {
 }
 
 /**
+ * How many columns of tiles fill best, for a given number of tiles.
+ *
+ * A fixed three leaves an orphan whenever you follow four funds; a fixed four
+ * splits the six borrowed ones as 4 + 2. Neither number is right for both, so
+ * pick the one that leaves the fewest empty slots and, where two tie, the wider
+ * layout — four is the ceiling, because past it the sparkline is narrower than
+ * the fund name over it.
+ */
+function watchColumns(n) {
+  if (n < 2) return 1;
+  let best = Math.min(n, 4);
+  let waste = Infinity;
+  for (const c of [4, 3, 2]) {
+    if (c > n) continue;
+    const empty = (c - (n % c)) % c;
+    if (empty < waste) { waste = empty; best = c; }
+  }
+  return best;
+}
+
+/**
  * The funds you follow, one chart each.
  *
  * Not one chart with every fund on it. A shared axis forces two things on the
@@ -1336,7 +1381,9 @@ function moverColumn(titleKey, rows) {
  * A fund's own month, over its own price, under its own code asks for neither.
  */
 function renderWatchlist(items, fromFavourites) {
-  const grid = h('div', { class: 'watch-grid' });
+  // The container queries on .watch-grid still override this when the pane is
+  // too narrow to honour the number.
+  const grid = h('div', { class: 'watch-grid', style: `--watch-n:${watchColumns(items.length)}` });
   let histories = null;
 
   const draw = () => {

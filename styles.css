@@ -1397,7 +1397,19 @@ td.col-rank {
   overflow: hidden;
   margin-bottom: 2rem;
 }
+/* Two shared tracks, a label and a figure, via subgrid: the cells in one row of
+ * the strip line their labels and their figures up with each other's, however
+ * many lines a label takes. Without it "Toplam gider oranı" wraps, its own cell
+ * grows, and its figure sits half a line below every figure beside it — thirteen
+ * numbers on a fund page, and no two of them on a baseline.
+ *
+ * Three tracks, not two: a stat may carry a third line naming the period its
+ * figure belongs to. Cells without one leave that track empty at zero height,
+ * so a strip of plain label-and-figure cells is unchanged. */
 .stat {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
   padding: 0.85rem 1rem;
   box-shadow: inset 1px 0 0 var(--hairline), inset 0 1px 0 var(--hairline);
 }
@@ -1428,41 +1440,74 @@ td.col-rank {
   font-variation-settings: 'wdth' 104;
   margin-bottom: 0.15rem;
 }
+/* Capped to a measure, like the page lede above it. A panel is as wide as the
+ * instrument inside it — a table can want the whole screen — but the sentence
+ * explaining that instrument is prose, and prose set to 1400px runs past two
+ * hundred characters a line, which is where the eye stops finding the next one. */
 .panel-note {
+  max-width: 78ch;
   font-size: 0.8rem;
   color: var(--ink-muted);
   margin: 0 0 1rem;
+  text-wrap: pretty;
 }
 
 /* --- dashboard ------------------------------------------------------------ */
 
-/* Two rails around a chart. The rails are fixed-ish so the chart takes whatever
- * is left — it is the element that actually needs the width, and a rail of fund
- * codes reads the same at 300px as at 400px. */
+/* A column and a rail, not a grid of cells.
+ *
+ * Every panel on this page is sized by data that moves daily, so no two are the
+ * same height. Share grid rows between them and the tallest sets the row: the
+ * short one is then padded out with a hole that has content above, below and
+ * beside it, which reads as something failing to load. Two independent stacks
+ * cannot produce that — the leftover falls to the foot of a column, next to the
+ * footer, where a ragged edge is just where the page ends.
+ *
+ * The rail is fixed-ish and the column takes what is left: the chart is the
+ * element that actually needs width, and a list of fund codes reads the same at
+ * 340px as at 440px. */
 .dash-grid {
   display: grid;
-  grid-template-columns: minmax(19rem, 22rem) minmax(0, 1fr) minmax(19rem, 22rem);
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 23rem);
   gap: 1.25rem;
   align-items: start;
 }
-/* Grid items default to min-width:auto and refuse to shrink below their content,
- * which a sixty-character fund name will happily blow past. */
-.dash-grid > .panel {
+.dash-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  /* Flex and grid children default to min-width:auto and refuse to shrink below
+   * their content, which a sixty-character fund name will happily blow past. */
+  min-width: 0;
+}
+.dash-col > .panel {
   margin-bottom: 0;
   min-width: 0;
+}
+/* The overlap panel sits under the grid, so it keeps the gap the columns use
+ * rather than the default panel margin. */
+.dash-grid + .overlap-panel {
+  margin-top: 1.25rem;
 }
 .dash-pane-head {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.4rem 0.75rem;
+  gap: 0.4rem 0.6rem;
 }
+/* Only the link is pushed to the far edge. A caption that qualifies the title
+ * belongs beside it — spaced apart, in a pane nine hundred pixels wide, it
+ * reads as a second unrelated heading. */
 .dash-more {
+  margin-left: auto;
   font-size: 0.78rem;
   font-weight: 600;
   color: var(--ink-muted);
   white-space: nowrap;
+}
+.watch-window {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
 }
 .dash-more:hover {
   color: var(--accent);
@@ -1547,13 +1592,16 @@ a.dash-row:hover {
 }
 .watch-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Four is the ceiling however many you follow: past that the sparkline is
+   * narrower than the fund name sitting over it. --watch-n comes from the tile
+   * count so the last row fills instead of trailing an orphan. */
+  grid-template-columns: repeat(min(var(--watch-n, 3), 4), minmax(0, 1fr));
   gap: 0.75rem;
   margin-top: 0.9rem;
 }
 @container (max-width: 34rem) {
   .watch-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(min(var(--watch-n, 2), 2), minmax(0, 1fr));
   }
 }
 @container (max-width: 22rem) {
@@ -1630,22 +1678,17 @@ a.dash-row:hover {
   font-variant-numeric: tabular-nums;
 }
 
-/* Below three columns the chart goes full width and the rails sit under it,
- * side by side while there is room for two. */
-@media (max-width: 1180px) {
+/* One column below this: the rail's 20rem floor plus a chart worth looking at
+ * no longer both fit. The rail's panels keep their order and fall in under the
+ * column's, which is the order they are wanted in on a phone anyway — what you
+ * follow, then the day, then the market. */
+@media (max-width: 1080px) {
   .dash-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .dash-chart {
-    grid-column: 1 / -1;
-    order: -1;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 720px) {
-  .dash-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .dash-top {
     grid-template-columns: minmax(0, 1fr) 4rem 4rem;
   }
@@ -1715,6 +1758,11 @@ a.dash-row:hover {
 /* Four columns, and the date range is the widest thing in the table. The three
  * figures get fixed widths so the range takes what is left, same arrangement as
  * the fund list. */
+/* Four columns, and only one of them prose. Left to fill the page the period
+ * column absorbed eight hundred pixels of nothing, so a date and the figure it
+ * belongs to sat at opposite edges of the screen with the eye asked to carry
+ * one to the other. The cap is the width at which they stay one row. */
+.crash-table { max-width: 54rem; }
 .crash-table .crash-period { width: auto; }
 .crash-table th.num-cell,
 .crash-table td.num-cell { width: 108px; }
@@ -2252,12 +2300,44 @@ a.dash-row:hover {
 .fin-table-wrap {
   margin-top: 0.6rem;
 }
+/* A statement stops fitting long before a phone: a line name and eight quarters
+ * need about 59rem, so between that and a desk the fixed layout was shaving two
+ * pixels off every figure at 1024px and ten at 900px, wrapping lira amounts
+ * mid-number. It scrolls sideways from there down instead, with the line name
+ * pinned — which is how a statement is read on a small screen anyway. Sticky
+ * *left* is what does that pinning, and unlike sticky top it works perfectly
+ * well inside a scroll container: the container is the thing it sticks to. */
+@media (max-width: 1080px) {
+  .fin-table-wrap {
+    overflow-x: auto;
+  }
+  table.fin-table {
+    table-layout: auto;
+  }
+  /* A box with overflow-x is a scroll container on both axes, so the header's
+   * page offset — 115px, clearing the masthead — starts resolving against this
+   * wrapper instead, parking the header row and every row label 115px down, on
+   * top of the second row of figures. `top: auto` takes the vertical stickiness
+   * off without touching the horizontal: the line names still pin to the left,
+   * which is the one that matters here, and nine rows never needed a sticky
+   * header anyway. */
+  table.fin-table th {
+    top: auto;
+  }
+}
+
 /* Newest column first, so the row label has to stay put while the older
- * quarters scroll out from under it. */
+ * quarters scroll out from under it.
+ *
+ * The width is declared because table.funds is `table-layout: fixed`, and an
+ * undeclared column there takes an equal ninth — 114px for "Serbest nakit
+ * akışı", which does not wrap and so printed itself straight over the first
+ * quarter's figure. Sized to the longest line name instead. */
 .fin-table th.fin-line {
   position: sticky;
   left: 0;
   z-index: 1;
+  width: 11.5rem;
   background: var(--surface);
   text-align: left;
   font-weight: 500;
@@ -2519,28 +2599,14 @@ a.dash-row:hover {
 
 /* ------------------------------------------------------- the market row */
 
-.market-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 1.25rem;
-  margin-top: 1.25rem;
-  align-items: start;
-}
-.market-row > .panel {
-  margin-bottom: 0;
-  min-width: 0;
-}
-@media (max-width: 900px) {
-  .market-row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 /* Nineteen themes, each a block sized the same: this is a legend for the day,
  * not a treemap. The market page is where area means something. */
 .theme-heat {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  /* The floor is the longest theme name plus its figure, not a round number:
+   * at 8.5rem the grid fitted six across and clipped eight of the nineteen to
+   * "Teknoloji ve ya…". A legend whose labels are cut is not a legend. */
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
   gap: 0.4rem;
   margin-top: 0.75rem;
 }
@@ -2577,8 +2643,12 @@ a.dash-row:hover {
 
 .movers {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 1rem;
+  /* A row here is code + price + change, and the price runs to ₺2.062,00. Below
+   * about 12rem those three collide, so the floor is set where the widest row
+   * still fits: on the dashboard rail that means one column, and two wherever
+   * the panel is given real width. */
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem 1.25rem;
   margin-top: 0.75rem;
 }
 .mover-col h3 {
@@ -3006,13 +3076,33 @@ a.dash-row:hover {
 
 /* ---------------------------------------------------------------- responsive */
 
-/* The search box and three nav items cannot share one row with the language and
- * theme controls at phone widths — the nav was being clipped to "P…". So the
- * search drops to a full-width second row and everything keeps its label. */
+/* Two rows at phone widths, never more: mark, nav and controls on the first,
+ * the search across the second.
+ *
+ * The nav is what decides this. Left at its content width it does not fit
+ * beside the controls, so flex wrapped it onto a line of its own and pushed the
+ * controls onto a third — 167px of masthead over a 54px tape, a quarter of the
+ * screen spent before a single figure. Giving it `flex: 1 1 0` makes it shrink
+ * and scroll instead of wrap, which is also what makes the fade below honest:
+ * a nav with room to spare grows past its links, so the fade falls on empty
+ * space and cannot be seen; only one whose links overrun it shows the fade. */
 @media (max-width: 760px) {
   .masthead {
     flex-wrap: wrap;
     row-gap: 0.5rem;
+    column-gap: 0.5rem;
+  }
+  .masthead-nav {
+    flex: 1 1 0;
+    min-width: 0;
+    margin-left: 0.35rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+  }
+  .masthead-nav::-webkit-scrollbar {
+    display: none;
   }
   .nav-search {
     order: 3;
@@ -3126,15 +3216,6 @@ a.dash-row:hover {
     display: table-cell;
     padding: 0.45rem 0.6rem;
   }
-  .fin-table-wrap {
-    overflow-x: auto;
-  }
-  /* Stated rather than left to the table's own sizing: nine columns squeezed
-   * into a phone will happily shrink a lira figure until it wraps mid-number. */
-  table.fin-table {
-    min-width: 42rem;
-    table-layout: auto;
-  }
   table.funds tr {
     display: flex;
     flex-wrap: wrap;
@@ -3146,7 +3227,14 @@ a.dash-row:hover {
   table.funds tbody tr:last-child {
     border-bottom: 0;
   }
-  table.funds td {
+  /* The row header is in here too. A card whose first cell is a <th scope=row>
+   * — the peer table, where the row is a company — kept min-width:auto after
+   * the tds had been fixed, so "Aselsan Elektronik Sanayi ve Ticaret A.S. Class
+   * B" set a 399px floor inside a 390px phone and scrolled the whole page
+   * sideways. The name already carries text-overflow; it just needed to be
+   * allowed to shrink far enough to use it. */
+  table.funds td,
+  table.funds tbody th {
     display: block;
     width: auto !important;
     /* Flex items default to min-width:auto and refuse to shrink below their
@@ -3154,6 +3242,10 @@ a.dash-row:hover {
     min-width: 0;
     padding: 0;
     border: 0;
+  }
+  table.funds tbody th {
+    max-width: 100%;
+    text-align: left;
   }
   /* `table.funds td` outweighs a bare `.col-optional`, so the rule above would
    * otherwise resurrect every column hidden at 1200px — and they would lead the
@@ -3220,27 +3312,21 @@ a.dash-row:hover {
 
 }
 
-/* Below this the masthead runs out of room: mark + four nav items + the language
- * and theme controls exceed the viewport. The controls are fixed-size, so the nav
- * is the part that gives — it tightens up and, as a last resort, scrolls. */
+/* Below this the masthead runs out of room even scrolling: the controls are
+ * fixed-size, so the nav tightens its own padding to keep more of itself in
+ * view before the swipe is needed. */
 @media (max-width: 420px) {
   .masthead {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
-    gap: 0.4rem;
+    column-gap: 0.4rem;
   }
   .wordmark-mark {
     width: 18px;
     height: 18px;
   }
   .masthead-nav {
-    min-width: 0;
     margin-left: 0.2rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .masthead-nav::-webkit-scrollbar {
-    display: none;
   }
   .masthead-nav a {
     padding: 0.35rem 0.4rem;
