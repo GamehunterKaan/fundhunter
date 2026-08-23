@@ -18,7 +18,7 @@ import {
   weightedMove, themeMoves, moversIn, versusCash,
   boardFlags, boardSummary, speculativeExposure, MIN_BOARD_FLAGS, SPECULATIVE_HEAVY,
 } from '../analytics.js';
-import { HORIZONS } from '../core.js';
+import { HORIZONS, SPEC_STEPS } from '../core.js';
 
 const fund = (over = {}) => ({
   c: 'AAA', n: 'TEST FONU', k: 'YAT', cat: null, f: 'TEST PORTFÖY',
@@ -1080,12 +1080,30 @@ test('holding shares and none of them flagged is an answer; holding no shares is
   const clean = speculativeExposure(new Map([['SAFE', 90]]), new Set(['TAHTA']));
   assert.equal(clean.w, 0);
   assert.equal(clean.equity, 90);
-  assert.equal(clean.ofEquity, 0);
-  assert.deepEqual(clean.codes, []);
+  // The short shape: an empty holdings list already says `ofEquity` is 0, and
+  // 397 clean funds carrying the long one is 21KB on the file the site boots on.
+  assert.deepEqual(clean, { w: 0, equity: 90 });
 
   // No equity at all cannot be cleared of anything.
   assert.equal(speculativeExposure(new Map(), new Set(['TAHTA'])), null);
   assert.equal(speculativeExposure(null, new Set(['TAHTA'])), null);
   // A closed position files at zero weight and is not a holding.
   assert.equal(speculativeExposure(new Map([['TAHTA', 0]]), new Set(['TAHTA'])), null);
+});
+
+test('a holding too small to round to a weight is still a holding', () => {
+  // The one case where `w` and `codes` disagree, and the reason nothing decides
+  // "holds none" off `w`: the fund page would list TAHTA while the filter called
+  // the fund clean.
+  const out = speculativeExposure(new Map([['TAHTA', 0.004], ['SAFE', 90]]), new Set(['TAHTA']));
+  assert.equal(out.w, 0, 'two decimals cannot show it');
+  assert.deepEqual(out.codes, [['TAHTA', 0]], 'and it is held all the same');
+});
+
+test('the heavy threshold is one of the filter steps', () => {
+  // core.js imports nothing, so SPEC_STEPS repeats this number rather than
+  // importing it. Drift would leave the filter offering a step that no longer
+  // matches the panel it was meant to find, with nothing else failing.
+  assert.ok(SPEC_STEPS.includes(SPECULATIVE_HEAVY),
+    `SPEC_STEPS ${SPEC_STEPS} must offer SPECULATIVE_HEAVY (${SPECULATIVE_HEAVY})`);
 });

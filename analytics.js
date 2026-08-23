@@ -1442,16 +1442,27 @@ export function speculativeExposure(perTicker, flagged) {
   // gets a real answer with w: 0, which is what lets the filter offer "none"
   // without quietly counting the unknowns as clean.
   if (equity <= 0) return null;
+  // The clean answer is the short one. `ofEquity: 0` and `codes: []` say nothing
+  // an empty holdings list does not already say, and 397 copies of them is 21KB
+  // on the file every visitor downloads on boot. Everything downstream reads a
+  // missing `codes` as an empty one.
+  if (!codes.length) return { w: 0, equity: round2(equity) };
   codes.sort((a, b) => b[1] - a[1]);
   return {
     w: round2(weight),
     equity: round2(equity),
     // What share of the fund's EQUITY is in these, which is the figure a
-    // manager would be asked about.
+    // manager would be asked about. Always a number on this branch: no equity
+    // returned null above, and no flagged holdings returned the short shape.
     ofEquity: round2((weight / equity) * 100),
     codes,
   };
 }
 
-/** Above this share of a portfolio, the exposure is the fund's defining feature. */
+/**
+ * Above this share of a portfolio, the exposure is the fund's defining feature.
+ *
+ * SPEC_STEPS in core.js offers it as one of the filter steps so the two agree on
+ * which funds are heavy; core.js imports nothing, so a test holds them together.
+ */
 export const SPECULATIVE_HEAVY = 25;

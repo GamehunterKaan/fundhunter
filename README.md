@@ -1260,7 +1260,12 @@ one question:
 | | |
 |---|---|
 | **Holds none** | 352 funds — read, holding shares, and none of them flagged |
-| **Over 5 / 10 / 25 / 50%** | 30 · 20 · 9 · 3 funds |
+| **At least 5 / 10 / 25 / 50%** | 30 · 20 · 9 · 3 funds |
+
+The steps read "at least", not "over", because 25% is the same line the fund
+page draws in red: picking that step returns the funds whose own panel calls the
+exposure their defining feature, and a fund sitting exactly on it belongs in
+both.
 
 **"Holds none" needs a fund that was actually looked at.** A fund whose KAP
 filing could not be read is not clean, it is unknown, and it drops out of both

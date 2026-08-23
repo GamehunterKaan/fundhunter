@@ -388,21 +388,31 @@ export const STRINGS = {
     specFlagViolentNote: 'Günlük dalgalanma borsanın ortancasının iki katı.',
     // --- fon tarafı ---
     specFundPanel: 'Spekülatif görünümlü hisseler',
+    specFundClean: 'Spekülatif görünümlü hisse yok',
+    // The conditions live on the share pages, not this one, so the note cannot
+    // say "the ones above" — it has to name them.
     specFundNote:
-      'Fonun KAP bildirimindeki hisselerden kaçı yukarıdaki ölçütleri karşılıyor. ' +
-      'Bir endeks fonu bunları seçmiş olmayabilir — endekste oldukları için tutar ' +
-      '— ama tutan fonun yatırımcısı yine de bu fiyatlara maruz kalıyor.',
+      'Fonun KAP bildirimindeki hisselerden kaçı şu ölçütleri karşılıyor: sert bir ' +
+      'fiyat yükselişi ve buna eşlik eden en az iki koşul daha — ince halka açıklık, ' +
+      'tek bir fonun büyük payı, fiyatın arkasında kâr olmaması, defter değerinin çok ' +
+      'üstü bir fiyat, sert günlük hareketler. Hangileri olduğu her hissenin kendi ' +
+      'sayfasında yazıyor. Bir endeks fonu bunları seçmiş olmayabilir — endekste ' +
+      'oldukları için tutar — ama tutan fonun yatırımcısı yine de bu fiyatlara maruz ' +
+      'kalıyor.',
     specWeight: 'Portföydeki ağırlığı',
     specOfEquity: 'Hisse kısmının',
     specCount: 'Hisse sayısı',
     specFilter: 'Spekülatif hisse',
     specFilterNone: 'Hiç tutmayanlar',
-    specFilterOver: '%{n} üstü',
+    specFilterAtLeast: '%{n} ve üstü',
     specFilterNoneChip: 'Spekülatif hisse tutmayanlar',
     specFilterNote:
       'KAP portföy raporu okunabilen ve hisse tutan fonlarda. Raporu okunamayan ' +
       'bir fon “tutmayanlar” arasında sayılmaz: bilinmiyor olması temiz olması demek değil.',
-    specNoneFlagged: 'Bu fonun hisselerinden hiçbiri bu ölçütleri karşılamıyor.',
+    specNoneFlagged:
+      'Bu fon hisse tutuyor ve KAP bildirimindeki hisselerin hiçbiri spekülatif ' +
+      'görünümün ölçütlerini karşılamıyor: sert bir fiyat yükselişi ve buna eşlik ' +
+      'eden en az iki koşul daha. Ölçütlerin tamamı her hissenin kendi sayfasında.',
     // --- finansal tablolar ---
     financials: 'Finansal tablolar',
     financialsNote:
@@ -1094,21 +1104,30 @@ export const STRINGS = {
     specFlagViolentNote: 'Daily swings twice the exchange’s median.',
     // --- the fund side ---
     specFundPanel: 'Shares with a speculative profile',
+    specFundClean: 'No shares with a speculative profile',
+    // The conditions live on the share pages, not this one, so the fund-page note
+    // cannot say "above" — it has to name them.
     specFundNote:
-      'How much of the fund’s filed equity meets the conditions above. An index ' +
-      'fund may not have chosen them — it holds what the index holds — but its ' +
-      'investor is exposed to those prices either way.',
+      'How much of the fund’s filed equity meets these conditions: a sharp run-up, ' +
+      'plus at least two more of a thin free float, one fund holding a large stake, ' +
+      'no earnings behind the price, a price far above book value, and violent daily ' +
+      'moves. Each share’s own page says which. An index fund may not have chosen ' +
+      'them — it holds what the index holds — but its investor is exposed to those ' +
+      'prices either way.',
     specWeight: 'Of the portfolio',
     specOfEquity: 'Of its equity',
     specCount: 'How many',
     specFilter: 'Speculative shares',
     specFilterNone: 'Holds none',
-    specFilterOver: 'Over {n}%',
+    specFilterAtLeast: 'At least {n}%',
     specFilterNoneChip: 'Holds no speculative shares',
     specFilterNote:
       'Covers funds whose KAP filing could be read and which hold shares. A fund ' +
       'whose filing could not be read is not counted as holding none: unknown is not clean.',
-    specNoneFlagged: 'None of this fund’s shares meet those conditions.',
+    specNoneFlagged:
+      'This fund holds shares, and none of them meets the conditions for a ' +
+      'speculative profile: a sharp run-up plus at least two more of the conditions ' +
+      'listed on each share’s own page.',
     // --- the statements ---
     financials: 'Financial statements',
     financialsNote:
@@ -1800,11 +1819,19 @@ export const MIN_THEME = 10;
  */
 export const CRASH_PROOF_FROM = 100;
 
-/** Apply the filter bar to the fund index. Pure; returns a new array. */
 /** The "holds none of them" setting, kept out of the numeric thresholds. */
 export const SPEC_NONE = 'none';
 
-/** The thresholds the speculative filter offers, in per cent of the portfolio. */
+/**
+ * The thresholds the speculative filter offers, in per cent of the portfolio.
+ * Read as "at least", which is what the labels say and what the filter tests.
+ *
+ * 25 is SPECULATIVE_HEAVY from analytics.js, so that step lands exactly on the
+ * threshold that paints a fund's own panel red: a reader who picks it gets the
+ * funds the panel calls heavy, no more and no fewer. It is repeated rather than
+ * imported because core.js imports nothing, and a test asserts the two stay in
+ * step.
+ */
 export const SPEC_STEPS = [5, 10, 25, 50];
 
 /**
@@ -1817,6 +1844,7 @@ export const SPEC_STEPS = [5, 10, 25, 50];
  */
 export const SPEC_MIN_EQUITY = 5;
 
+/** Apply the filter bar to the fund index. Pure; returns a new array. */
 export function filterFunds(funds, query = {}) {
   const {
     search, kinds, categories, founders, exposure, minExposure = 50, minSize,
@@ -1855,8 +1883,13 @@ export function filterFunds(funds, query = {}) {
     // cleared of anything, so "none" needs a fund that was actually looked at
     // and found to hold shares — the same rule as the fee cap, where an unknown
     // fee is not a cheap one.
+    //
+    // "None" is the empty holdings list, never `w === 0`: the weight is rounded
+    // to two decimals, so a fund holding 0.004% of a flagged share rounds to a
+    // clean zero while its own page lists that share. The page and the filter
+    // have to answer the same question off the same fact.
     if (speculative === SPEC_NONE
-      && !(f.spec && f.spec.w === 0 && f.spec.equity >= SPEC_MIN_EQUITY)) return false;
+      && !(f.spec && !f.spec.codes?.length && f.spec.equity >= SPEC_MIN_EQUITY)) return false;
     if (typeof speculative === 'number' && !(f.spec?.w >= speculative)) return false;
     // An unknown fee cannot satisfy a fee cap: the whole point of the cap is to
     // exclude funds you would be overpaying, and "unknown" is not "cheap".

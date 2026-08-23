@@ -308,19 +308,22 @@ async function main() {
       }
     }
 
+    let answered = 0;
     let exposed = 0;
     let heavy = 0;
     for (const fund of funds) {
       const exposure = speculativeExposure(perFund.get(fund.c), flagged);
       if (exposure) {
         fund.spec = exposure;
-        if (exposure.w > 0) exposed++;
+        answered++;
+        // Counted off the holdings, not the rounded weight: a fund holding
+        // 0.004% of a flagged share rounds to w: 0 and still holds one.
+        if (exposure.codes?.length) exposed++;
         if (exposure.w >= SPECULATIVE_HEAVY) heavy++;
       } else {
         delete fund.spec;
       }
     }
-    const answered = funds.filter((f) => f.spec).length;
     log(`  speculative boards: ${flagged.size} listings meet ${MIN_BOARD_FLAGS}+ conditions ` +
       `including a run-up; of ${answered} funds whose shares could be read, ` +
       `${exposed} hold at least one and ${heavy} hold ${SPECULATIVE_HEAVY}% or more ` +

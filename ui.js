@@ -125,6 +125,21 @@ function h(tag, props = {}, ...children) {
   return el;
 }
 
+/**
+ * A label with the explanation of what it means, and the mark that advertises
+ * one exists.
+ *
+ * Both go on the SAME element: the tooltip has to belong to the thing carrying
+ * the `?`, or it pops up over whatever else happens to be in the row — over the
+ * dropdown the reader is trying to use, in the case of the filter strip. With no
+ * note it is a plain label, no mark and no title.
+ */
+function noted(tag, props, labelText, note) {
+  return h(tag, { ...props, title: note || null },
+    labelText,
+    note ? h('span', { class: 'figure-mark', 'aria-hidden': 'true' }, '?') : null);
+}
+
 const svg = (tag, props = {}, ...children) => {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
   for (const [k, v] of Object.entries(props)) {
@@ -1756,7 +1771,7 @@ function activeFilters() {
   if (p.speculative) {
     add(p.speculative === SPEC_NONE
       ? T('specFilterNoneChip')
-      : `${T('specFilter')}: ${T('specFilterOver', { n: p.speculative })}`,
+      : `${T('specFilter')}: ${T('specFilterAtLeast', { n: p.speculative })}`,
     () => { p.speculative = ''; });
   }
   if (p.retailOnly) add(T('hideQualified'), () => { p.retailOnly = false; });
@@ -1986,10 +2001,8 @@ function renderPrefs() {
   const cash = cashReturnFor(scoringContext(), hz.key);
 
   const pick = (id, labelText, options, current, onPick, note = null) =>
-    h('div', { class: 'field', title: note },
-      h('label', { for: `p-${id}` },
-        labelText,
-        note ? h('span', { class: 'figure-mark', 'aria-hidden': 'true' }, '?') : null),
+    h('div', { class: 'field' },
+      noted('label', { for: `p-${id}` }, labelText, note),
       h('select', {
         id: `p-${id}`,
         onChange: (e) => {
@@ -2041,7 +2054,7 @@ function renderPrefs() {
       // whose filing could be read.
       pick('speculative', T('specFilter'),
         [['', T('all')], [SPEC_NONE, T('specFilterNone')],
-          ...SPEC_STEPS.map((n) => [n, T('specFilterOver', { n })])],
+          ...SPEC_STEPS.map((n) => [n, T('specFilterAtLeast', { n })])],
         p.speculative ?? '', (v) => { p.speculative = v; }, T('specFilterNote')),
 
       h('label', { class: 'check' },
@@ -4006,9 +4019,7 @@ function sharePanel(titleKey, rows) {
     h('dl', { class: 'figure-list' },
       kept.map(([labelKey, value, noteKey]) =>
         h('div', { class: 'figure' },
-          h('dt', { title: noteKey ? T(noteKey) : null },
-            T(labelKey),
-            noteKey ? h('span', { class: 'figure-mark', 'aria-hidden': 'true' }, '?') : null),
+          noted('dt', {}, T(labelKey), noteKey ? T(noteKey) : null),
           h('dd', { class: 'num' }, value))))
   );
 }
@@ -4102,9 +4113,7 @@ function shareTrading(stock) {
       ].filter(([, value]) => value !== '—' && value !== '')
         .map(([labelKey, value, noteKey]) =>
           h('div', { class: 'figure' },
-            h('dt', { title: noteKey ? T(noteKey) : null },
-              T(labelKey),
-              noteKey ? h('span', { class: 'figure-mark', 'aria-hidden': 'true' }, '?') : null),
+            noted('dt', {}, T(labelKey), noteKey ? T(noteKey) : null),
             h('dd', { class: 'num' }, value))))
   );
 }
@@ -4198,10 +4207,14 @@ function renderSpeculative(fund) {
   // and the dashboard's overlap panel already sets the precedent for saying so.
   // A bond fund has not avoided these companies, it has avoided the market, so
   // it gets nothing.
-  if (!spec.codes.length) {
+  //
+  // `codes` is absent on a clean fund and on any older cached copy of the file,
+  // so it is read defensively: a missing field must render nothing, never blank
+  // the whole fund page from the render list this sits in.
+  if (!spec.codes?.length) {
     return spec.equity >= SPEC_MIN_EQUITY
       ? h('section', { class: 'panel spec-fund' },
-          h('h2', {}, T('specFundPanel')),
+          h('h2', {}, T('specFundClean')),
           h('p', { class: 'panel-note' }, T('specNoneFlagged')))
       : null;
   }
@@ -4213,7 +4226,7 @@ function renderSpeculative(fund) {
       h('div', { class: 'stat' },
         h('dt', {}, T('specWeight')),
         h('dd', { class: heavy ? 'delta down' : '' }, pct(spec.w, 1))),
-      spec.ofEquity == null ? null : h('div', { class: 'stat' },
+      h('div', { class: 'stat' },
         h('dt', {}, T('specOfEquity')),
         h('dd', {}, pct(spec.ofEquity, 1))),
       h('div', { class: 'stat' },
@@ -4605,9 +4618,7 @@ function shareHealth(stock) {
     h('h2', {}, T('shareHealth')),
     h('dl', { class: 'figure-list' }, rows.map(([labelKey, value, band, noteKey]) =>
       h('div', { class: 'figure' },
-        h('dt', { title: T(noteKey) },
-          T(labelKey),
-          h('span', { class: 'figure-mark', 'aria-hidden': 'true' }, '?')),
+        noted('dt', {}, T(labelKey), T(noteKey)),
         h('dd', { class: 'num' },
           value,
           h('span', { class: `band band-${band}` }, T(bandKey(band)))))))

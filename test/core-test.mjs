@@ -945,18 +945,35 @@ test('a treemap with nothing to lay out is empty, not broken', () => {
 test('the speculative filter runs in both directions', () => {
   const funds = [
     { c: 'HEAVY', spec: { w: 60, equity: 90, ofEquity: 66.7, codes: [['X', 60]] } },
+    { c: 'STEP', spec: { w: 25, equity: 90, ofEquity: 27.8, codes: [['X', 25]] } },
     { c: 'SOME', spec: { w: 8, equity: 80, ofEquity: 10, codes: [['X', 8]] } },
-    { c: 'CLEAN', spec: { w: 0, equity: 85, ofEquity: 0, codes: [] } },
-    { c: 'BONDS', spec: { w: 0, equity: 2, ofEquity: 0, codes: [] } },
+    // A clean fund is written in the short shape: no `codes`, no `ofEquity`.
+    { c: 'CLEAN', spec: { w: 0, equity: 85 } },
+    { c: 'BONDS', spec: { w: 0, equity: 2 } },
     { c: 'UNREAD' },
   ].map((f) => ({ n: '', f: '', ...f }));
 
   const codes = (q) => filterFunds(funds, q).map((x) => x.c);
-  assert.deepEqual(codes({}), ['HEAVY', 'SOME', 'CLEAN', 'BONDS', 'UNREAD'], 'no filter, no filtering');
-  assert.deepEqual(codes({ speculative: 5 }), ['HEAVY', 'SOME']);
-  assert.deepEqual(codes({ speculative: 25 }), ['HEAVY']);
+  assert.deepEqual(codes({}), ['HEAVY', 'STEP', 'SOME', 'CLEAN', 'BONDS', 'UNREAD'],
+    'no filter, no filtering');
+  assert.deepEqual(codes({ speculative: 5 }), ['HEAVY', 'STEP', 'SOME']);
+  // The steps read "at least", which is what the labels say and what puts the
+  // 25% step on exactly the funds the heavy panel calls heavy.
+  assert.deepEqual(codes({ speculative: 25 }), ['HEAVY', 'STEP'],
+    'a fund exactly at the step is in it');
   assert.deepEqual(codes({ speculative: SPEC_NONE }), ['CLEAN'],
     'the bond fund has avoided the market, not these companies');
+});
+
+test('"holds none" reads the holdings, not the rounded weight', () => {
+  // 0.004% of a flagged share rounds to w: 0 and is still a holding — the fund's
+  // own page lists it. The filter has to answer off the same fact, or the two
+  // contradict each other on the same fund.
+  const funds = [
+    { c: 'TINY', n: '', f: '', spec: { w: 0, equity: 90, ofEquity: 0, codes: [['TAHTA', 0]] } },
+    { c: 'CLEAN', n: '', f: '', spec: { w: 0, equity: 90 } },
+  ];
+  assert.deepEqual(filterFunds(funds, { speculative: SPEC_NONE }).map((f) => f.c), ['CLEAN']);
 });
 
 test('a fund nobody could read is never counted as holding none', () => {
@@ -969,7 +986,7 @@ test('a fund nobody could read is never counted as holding none', () => {
 
 test('the equity floor is what stops "holds none" meaning "holds no shares"', () => {
   const at = (equity) => filterFunds(
-    [{ c: 'F', n: '', f: '', spec: { w: 0, equity, ofEquity: 0, codes: [] } }],
+    [{ c: 'F', n: '', f: '', spec: { w: 0, equity } }],
     { speculative: SPEC_NONE }
   ).length;
   assert.equal(at(SPEC_MIN_EQUITY), 1, 'exactly at the floor is in');

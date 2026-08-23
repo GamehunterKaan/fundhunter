@@ -2857,7 +2857,11 @@ a.dash-row:hover {
   white-space: nowrap;
 }
 /* A definition that has one. Drawn as a mark rather than left to a bare tooltip,
- * because a tooltip nobody can see is not an explanation. */
+ * because a tooltip nobody can see is not an explanation.
+ *
+ * The type is set here rather than inherited: the mark also sits inside the
+ * filter strip's labels, which are uppercase, bold and letter-spaced, and a
+ * trailing 0.1em inside a fixed-width circle pushes the glyph off centre. */
 .figure-mark {
   display: inline-block;
   margin-left: 0.3rem;
@@ -2866,7 +2870,10 @@ a.dash-row:hover {
   border-radius: 50%;
   border: 1px solid var(--hairline);
   font-size: 0.6rem;
+  font-weight: 400;
   line-height: 0.85rem;
+  letter-spacing: normal;
+  text-transform: none;
   text-align: center;
   color: var(--ink-muted);
   cursor: help;
