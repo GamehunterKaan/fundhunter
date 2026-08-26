@@ -1466,3 +1466,190 @@ export function speculativeExposure(perTicker, flagged) {
  * which funds are heavy; core.js imports nothing, so a test holds them together.
  */
 export const SPECULATIVE_HEAVY = 25;
+
+// ---------------------------------------------------------------- a position
+//
+// A favourite with a date on it, and optionally a size. The two are one idea:
+// starring something records WHEN, which is enough to say what it has done
+// since; adding how much you hold turns the same row into a holding with a
+// value and a profit.
+//
+// Nothing here reaches a server. The whole portfolio lives in the browser's own
+// storage, which is also why none of it can be recovered if that is cleared —
+// the page says so rather than implying a safety it does not have.
+
+/**
+ * The price on a date, or the last one before it.
+ *
+ * Funds do not price at weekends and shares do not trade on holidays, so an
+ * exact-date lookup would answer null for a position opened on a Saturday. The
+ * last published price on or before the date is the one that was standing when
+ * the position was taken.
+ *
+ * Returns null when the series starts AFTER the date — a fund with twelve
+ * months of history cannot say what it was worth two years ago, and guessing
+ * from its earliest available price would silently measure the wrong window.
+ */
+export function priceEntryOn(series, iso) {
+  if (!series?.length || !iso) return null;
+  let found = null;
+  for (const [date, price] of series) {
+    if (date > iso) break;
+    if (price != null && Number.isFinite(price)) found = [date, price];
+  }
+  return found;
+}
+
+/**
+ * The price alone, for callers that do not need to say which day it came from.
+ *
+ * Anything that PRINTS the date should use priceEntryOn() and print the date it
+ * actually got. A position starred on a Saturday is measured from Friday's
+ * close, and a page that labels that "since Saturday" is stating a number
+ * against a day it was not measured from.
+ */
+export function priceOn(series, iso) {
+  return priceEntryOn(series, iso)?.[1] ?? null;
+}
+
+/** What a price has done between two points, in percent. */
+export function returnSince(now, then) {
+  if (now == null || then == null) return null;
+  if (!Number.isFinite(now) || !Number.isFinite(then) || then <= 0) return null;
+  return round2((now / then - 1) * 100);
+}
+
+/**
+ * One position, valued.
+ *
+ * `cost` is what was actually paid, when the holder knows it. When they do not,
+ * the position is valued from the price on the day it was added — which is the
+ * honest default for a portfolio built out of a watchlist, and is flagged as
+ * `assumed` so the page can say which of the two it is showing rather than
+ * presenting a guess as a receipt.
+ */
+export function positionValue({ units, cost, at } = {}, priceNow, priceAt) {
+  if (units == null || !Number.isFinite(units) || units <= 0) return null;
+  if (priceNow == null || !Number.isFinite(priceNow)) return null;
+
+  const value = units * priceNow;
+  const assumed = cost == null || !Number.isFinite(cost) || cost <= 0;
+  const basis = assumed
+    ? (priceAt != null && Number.isFinite(priceAt) ? units * priceAt : null)
+    : cost;
+  if (basis == null || basis <= 0) {
+    return { value: round2(value), basis: null, profit: null, pct: null, assumed, at };
+  }
+  return {
+    value: round2(value),
+    basis: round2(basis),
+    profit: round2(value - basis),
+    pct: round2((value / basis - 1) * 100),
+    assumed,
+    at,
+  };
+}
+
+/**
+ * The whole portfolio added up.
+ *
+ * A position whose basis could not be established still counts toward the value
+ * — it is money you hold — but is excluded from the profit, and the count of how
+ * many were excluded is returned so the page can say so. A total profit that
+ * quietly omitted a third of the holdings would be worse than no total at all.
+ */
+export function portfolioTotals(positions) {
+  let value = 0;
+  let basis = 0;
+  // The value of ONLY the positions that have a basis. Subtracting the total
+  // cost from the total value would credit a holding whose cost is unknown with
+  // its whole value as profit — ₺500 of somebody's money turning into ₺500 of
+  // somebody's gain.
+  let matched = 0;
+  let priced = 0;
+  let costed = 0;
+  for (const p of positions ?? []) {
+    if (!p) continue;
+    if (p.value != null) { value += p.value; priced++; }
+    if (p.basis != null && p.value != null) { basis += p.basis; matched += p.value; costed++; }
+  }
+  if (!priced) return null;
+  const withBasis = costed > 0 && basis > 0;
+  return {
+    value: round2(value),
+    basis: withBasis ? round2(basis) : null,
+    profit: withBasis ? round2(matched - basis) : null,
+    pct: withBasis ? round2((matched / basis - 1) * 100) : null,
+    priced,
+    costed,
+    of: (positions ?? []).length,
+  };
+}
+
+/**
+ * What the same money would have done in the money market instead.
+ *
+ * Not the headline cash return for the horizon: a position opened three weeks
+ * ago has to be compared against three weeks of cash, not a year of it. The
+ * money-market index series is read at the same two dates the position was.
+ */
+export function cashOver(series, from, to = null) {
+  const then = priceOn(series, from);
+  const now = to ? priceOn(series, to) : (series?.at(-1)?.[1] ?? null);
+  return returnSince(now, then);
+}
+
+/**
+ * What the same money would have earned in the money market instead.
+ *
+ * Money-weighted, and it has to be: positions are opened on different days, so
+ * one cash return taken over the earliest of them is not the alternative that
+ * was actually available. Each position's own basis is grown at the cash return
+ * over its OWN window, and the whole is compared with the whole — which is the
+ * question "should I have just left it in a money-market fund" asked properly.
+ *
+ * Positions with no basis are skipped rather than assumed, so this answers over
+ * exactly the same money the profit figure does.
+ */
+export function cashAlternative(positions, series) {
+  let basis = 0;
+  let grown = 0;
+  let counted = 0;
+  for (const p of positions ?? []) {
+    if (!p?.basis || !p.from) continue;
+    const ret = cashOver(series, p.from);
+    if (ret == null) continue;
+    basis += p.basis;
+    grown += p.basis * (1 + ret / 100);
+    counted++;
+  }
+  if (!counted || basis <= 0) return null;
+  return { pct: round2((grown / basis - 1) * 100), value: round2(grown), counted };
+}
+
+/**
+ * A portfolio's asset mix, weighted by what each holding is actually worth.
+ *
+ * The dashboard's version of this has to be equal-weighted because it only
+ * knows which funds you follow. Here the sizes are known, so the mix is the
+ * real one — which is the whole point of entering them.
+ */
+export function portfolioMix(rows) {
+  const totals = {};
+  let counted = 0;
+  for (const { value, groups } of rows ?? []) {
+    if (!value || !groups) continue;
+    counted += value;
+    for (const [id, pct] of Object.entries(groups)) {
+      if (pct == null || !Number.isFinite(pct)) continue;
+      totals[id] = (totals[id] ?? 0) + (value * pct) / 100;
+    }
+  }
+  if (!counted) return null;
+  const mix = {};
+  for (const [id, lira] of Object.entries(totals)) {
+    const share = round2((lira / counted) * 100);
+    if (share > 0) mix[id] = share;
+  }
+  return { mix, counted: round2(counted) };
+}

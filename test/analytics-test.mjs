@@ -17,6 +17,8 @@ import {
   overlapOf, weightsOf, overlappingPairs, sharedPositions,
   weightedMove, themeMoves, moversIn, versusCash,
   boardFlags, boardSummary, speculativeExposure, MIN_BOARD_FLAGS, SPECULATIVE_HEAVY,
+  priceOn, priceEntryOn, returnSince, positionValue, portfolioTotals,
+  cashOver, cashAlternative, portfolioMix,
 } from '../analytics.js';
 import { HORIZONS, SPEC_STEPS } from '../core.js';
 
@@ -1106,4 +1108,121 @@ test('the heavy threshold is one of the filter steps', () => {
   // matches the panel it was meant to find, with nothing else failing.
   assert.ok(SPEC_STEPS.includes(SPECULATIVE_HEAVY),
     `SPEC_STEPS ${SPEC_STEPS} must offer SPECULATIVE_HEAVY (${SPECULATIVE_HEAVY})`);
+});
+
+// ---------------------------------------------------------------- positions
+
+const SERIES = [
+  ['2026-06-01', 10],
+  ['2026-06-02', 11],
+  ['2026-06-05', 12],
+  ['2026-06-08', 15],
+];
+
+test('a price is read on the date, or the last one before it', () => {
+  assert.deepEqual(priceEntryOn(SERIES, '2026-06-02'), ['2026-06-02', 11]);
+  // Starred on a Saturday: the price that was standing is Friday's, and the
+  // entry says so, because a page that prints "since Saturday" over Friday's
+  // number is stating a figure against a day it was not measured from.
+  assert.deepEqual(priceEntryOn(SERIES, '2026-06-04'), ['2026-06-02', 11]);
+  assert.equal(priceOn(SERIES, '2026-06-04'), 11);
+  // Before the series begins there is nothing to measure from, and the earliest
+  // price on file would silently measure the wrong window.
+  assert.equal(priceEntryOn(SERIES, '2026-05-01'), null);
+  assert.equal(priceOn(SERIES, null), null);
+  assert.equal(priceOn([], '2026-06-02'), null);
+});
+
+test('a gap in the series does not become a missing price', () => {
+  const gappy = [['2026-06-01', 10], ['2026-06-02', null], ['2026-06-03', 12]];
+  assert.deepEqual(priceEntryOn(gappy, '2026-06-02'), ['2026-06-01', 10],
+    'a day the fund did not publish falls back to the one that did');
+});
+
+test('a return needs both ends and a base to divide by', () => {
+  assert.equal(returnSince(15, 10), 50);
+  assert.equal(returnSince(9, 10), -10);
+  assert.equal(returnSince(10, 0), null, 'nothing grows out of zero');
+  assert.equal(returnSince(10, null), null);
+  assert.equal(returnSince(null, 10), null);
+});
+
+test('a position with no cost is valued from the day it was starred', () => {
+  const p = positionValue({ units: 100, at: '2026-06-02' }, 15, 11);
+  assert.equal(p.value, 1500);
+  assert.equal(p.basis, 1100);
+  assert.equal(p.profit, 400);
+  assert.equal(p.pct, 36.36);
+  assert.ok(p.assumed, 'and the page has to say that is what it did');
+});
+
+test('a stated cost is used in preference to the assumed one', () => {
+  const p = positionValue({ units: 100, cost: 1200, at: '2026-06-02' }, 15, 11);
+  assert.equal(p.basis, 1200);
+  assert.equal(p.profit, 300);
+  assert.equal(p.assumed, false);
+});
+
+test('a position without a size is not a position', () => {
+  assert.equal(positionValue({ at: '2026-06-02' }, 15, 11), null);
+  assert.equal(positionValue({ units: 0 }, 15, 11), null);
+  assert.equal(positionValue({ units: -5 }, 15, 11), null);
+  assert.equal(positionValue({ units: 100 }, null, 11), null, 'and neither is one with no price');
+});
+
+test('a position with no basis still has a value', () => {
+  // Starred before the history window opens: how much it is worth is known,
+  // what it cost is not, and pretending otherwise would invent a profit.
+  const p = positionValue({ units: 100, at: '2020-01-01' }, 15, null);
+  assert.equal(p.value, 1500);
+  assert.equal(p.basis, null);
+  assert.equal(p.profit, null);
+  assert.equal(p.pct, null);
+});
+
+test('the totals count value over everything and profit only over what has a basis', () => {
+  const totals = portfolioTotals([
+    { value: 1500, basis: 1100 },
+    { value: 500, basis: null },
+    { value: 300, basis: 300 },
+    null,
+  ]);
+  assert.equal(totals.value, 2300, 'the unpriced-cost holding is still money you hold');
+  assert.equal(totals.basis, 1400);
+  assert.equal(totals.profit, 400);
+  assert.equal(totals.priced, 3);
+  assert.equal(totals.costed, 2, 'so the page can say one was left out of the profit');
+  assert.equal(portfolioTotals([]), null);
+});
+
+test('the cash alternative is money-weighted over each position\'s own window', () => {
+  const mmf = [['2026-06-01', 100], ['2026-06-02', 101], ['2026-06-08', 110]];
+  // One position opened on the 1st (cash +10%), one on the 2nd (+8.91%).
+  const out = cashAlternative([
+    { basis: 1000, from: '2026-06-01' },
+    { basis: 1000, from: '2026-06-02' },
+  ], mmf);
+  assert.equal(out.counted, 2);
+  // Not 10%: the second position only had cash from the 2nd, and taking the
+  // earliest date for the whole portfolio would credit it with a week it never
+  // had.
+  assert.ok(out.pct > 9.4 && out.pct < 9.5, `got ${out.pct}`);
+  // 1000 grown at 10% plus 1000 grown at 8.91% — the sum, not the average.
+  assert.equal(Math.round(out.value), 2189);
+  assert.equal(cashAlternative([{ basis: null, from: '2026-06-01' }], mmf), null);
+  assert.equal(cashAlternative([], mmf), null);
+});
+
+test('the portfolio mix is weighted by lira, not by holding count', () => {
+  const out = portfolioMix([
+    { value: 9000, groups: { equity: 100 } },
+    { value: 1000, groups: { cash: 100 } },
+  ]);
+  // Equal-weighted this would read 50/50, which is the whole reason entering
+  // the sizes is worth doing.
+  assert.equal(out.mix.equity, 90);
+  assert.equal(out.mix.cash, 10);
+  assert.equal(out.counted, 10000);
+  assert.equal(portfolioMix([{ value: 0, groups: { equity: 100 } }]), null);
+  assert.equal(portfolioMix([]), null);
 });

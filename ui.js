@@ -17,6 +17,8 @@ import {
   consensus, shareOfTotal, beatRecord, surpriseOf, peersOf, peerMedians,
   weightsOf, overlappingPairs, sharedPositions, themeMoves, moversIn, versusCash,
   boardFlags, SPECULATIVE_HEAVY,
+  priceOn, priceEntryOn, returnSince, positionValue, portfolioTotals,
+  cashOver, cashAlternative, portfolioMix,
 } from './analytics.js';
 import { LIVE_SOURCE, LIVE_REFRESH_MS, LIVE_TIMEOUT_MS, parseLiveQuotes, liveClock } from './live.js';
 import {
@@ -66,6 +68,8 @@ const state = {
   /** Exchange quotes for the securities funds hold. Shared by every fund page. */
   quotes: null,
   favs: new Set(),
+  /** Per favourite: when it was starred, and how much of it is held. */
+  positions: {},
   filters: { search: '', kinds: [], categories: [], founders: [] },
   prefs: {
     tax: 'default', horizon: 'y1', maxRisk: null,
@@ -232,6 +236,7 @@ const NAV = [
   { route: '/populer', key: 'navPopular' },
   { route: '/dusus', key: 'navCrash' },
   { route: '/favoriler', key: 'navFavorites' },
+  { route: '/portfoy', key: 'navPortfolio' },
 ];
 
 /** Label and highlight the section nav. A detail page belongs to its own list. */
@@ -255,24 +260,94 @@ function syncNav() {
 
 const FAVS_KEY = 'fh-favs';
 
+/**
+ * Favourites, and what is known about each of them.
+ *
+ * `state.favs` stays a Set of codes so that every `favs.has(code)` on the site
+ * goes on working untouched; `state.positions` carries the detail beside it:
+ *
+ *   { TLY: { at: '2026-08-22', units: 12.5, cost: 100000 } }
+ *
+ * `at` is the day the star went on, which is what makes "and what has it done
+ * since" answerable at all. `units` and `cost` are optional — enter them and
+ * the same row becomes a holding with a value and a profit.
+ *
+ * The file was an array of codes before this. A migrated list gets today's date
+ * rather than an invented one, and the page labels every figure with the date
+ * it is measured from, so a fund starred last year reads "since 22 August" and
+ * never "since you added it" about a day it was not added.
+ */
 function restoreFavorites() {
+  state.favs = new Set();
+  state.positions = {};
+  let raw;
   try {
-    const raw = JSON.parse(localStorage.getItem(FAVS_KEY) ?? '[]');
-    if (Array.isArray(raw)) state.favs = new Set(raw.filter((c) => typeof c === 'string'));
+    raw = JSON.parse(localStorage.getItem(FAVS_KEY) ?? '{}');
   } catch {
-    state.favs = new Set();
+    return;
+  }
+  if (Array.isArray(raw)) {
+    const today = todayIso();
+    for (const code of raw) {
+      if (typeof code !== 'string') continue;
+      state.favs.add(code);
+      state.positions[code] = { at: today };
+    }
+    saveFavorites();
+    return;
+  }
+  if (!raw || typeof raw !== 'object') return;
+  for (const [code, entry] of Object.entries(raw)) {
+    if (typeof code !== 'string' || !entry || typeof entry !== 'object') continue;
+    state.favs.add(code);
+    state.positions[code] = {
+      at: typeof entry.at === 'string' ? entry.at : null,
+      units: Number.isFinite(entry.units) && entry.units > 0 ? entry.units : undefined,
+      cost: Number.isFinite(entry.cost) && entry.cost > 0 ? entry.cost : undefined,
+    };
+  }
+}
+
+/** Today where the exchange is, not where the reader happens to be sitting. */
+const todayIso = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: MARKETS.bist.zone }).format(new Date());
+
+function saveFavorites() {
+  try {
+    const out = {};
+    for (const code of state.favs) {
+      const p = state.positions[code] ?? {};
+      out[code] = { at: p.at ?? todayIso() };
+      if (p.units > 0) out[code].units = p.units;
+      if (p.cost > 0) out[code].cost = p.cost;
+    }
+    localStorage.setItem(FAVS_KEY, JSON.stringify(out));
+  } catch {
+    // A full or blocked storage quota must not break the page; the change simply
+    // does not survive a reload.
   }
 }
 
 function toggleFavorite(code) {
-  if (state.favs.has(code)) state.favs.delete(code);
-  else state.favs.add(code);
-  try {
-    localStorage.setItem(FAVS_KEY, JSON.stringify([...state.favs]));
-  } catch {
-    // A full or blocked storage quota must not break the page; the toggle simply
-    // does not survive a reload.
+  if (state.favs.has(code)) {
+    state.favs.delete(code);
+    // Unstarring drops the position with it. Keeping the units around for a
+    // code no longer in the list would resurrect a holding the next time it was
+    // starred, which is not what unstarring looked like it did.
+    delete state.positions[code];
+  } else {
+    state.favs.add(code);
+    state.positions[code] = { at: todayIso() };
   }
+  saveFavorites();
+}
+
+/** Record how much is held, or clear it when the field is emptied. */
+function setPosition(code, field, value) {
+  const entry = state.positions[code] ?? (state.positions[code] = { at: todayIso() });
+  if (value == null || !Number.isFinite(value) || value <= 0) delete entry[field];
+  else entry[field] = value;
+  saveFavorites();
 }
 
 /**
@@ -588,6 +663,9 @@ let dashView = null;
  */
 let sharePage = null;
 
+/** Redraw for the portfolio page, so live share prices reach its totals. */
+let portfolioView = null;
+
 /** One scan in flight per market and ticker set; every caller shares its answer. */
 const quoteJobs = new Map();
 
@@ -660,6 +738,11 @@ function startQuotes() {
     if (sharePage) {
       await ensureQuotes(null);
       sharePage();
+      return;
+    }
+    if (portfolioView) {
+      await ensureQuotes(null);
+      portfolioView();
       return;
     }
     if (dashView) await loadEstimates(dashView.codes, dashView.draw);
@@ -799,6 +882,7 @@ function route() {
   // redrawing a page that is no longer there.
   if (hash !== '/') dashView = null;
   if (!share) sharePage = null;
+  if (hash !== '/portfoy') portfolioView = null;
   if (fund) renderDetail(fund[1].toUpperCase());
   else if (share) renderShare(share[1].toUpperCase());
   else if (hash === '/hisseler') renderShareList();
@@ -806,6 +890,7 @@ function route() {
   else if (hash === '/populer') renderPopular();
   else if (hash === '/dusus') renderCrashPage();
   else if (hash === '/favoriler') renderList('favs');
+  else if (hash === '/portfoy') renderPortfolio();
   else if (hash === '/fonlar') renderList('list');
   else renderDashboard();
   view.focus({ preventScroll: true });
@@ -1627,7 +1712,12 @@ function renderFavHead() {
       })
       : T('favoritesCount', { n: fmtInt(funds, state.lang) })),
     h('h1', { class: 'page-title' }, T('favorites')),
-    h('p', { class: 'page-lede' }, T('favoritesHint'))
+    h('p', { class: 'page-lede' },
+      T('favoritesHint'),
+      ' ',
+      // The portfolio is the same list with dates and sizes on it, so the place
+      // to find it is the page you already keep that list on.
+      h('a', { href: '#/portfoy' }, T('favoritesToPortfolio')))
   );
 }
 
@@ -4193,6 +4283,307 @@ function renderShareChart(stock, history) {
     ],
   });
 }
+
+// ---------------------------------------------------------------- portfolio
+//
+// Two questions that turned out to be one. "What has this done since I starred
+// it" needs the date; "what is my portfolio worth" needs the date and a size.
+// So a position is a favourite that knows when it arrived, and optionally how
+// much of it there is.
+
+/**
+ * The portfolio page.
+ *
+ * Everything starred, in one table, whether or not a size has been entered. A
+ * row with no size still answers the first question, which is why the page is
+ * worth opening before anybody has typed a number into it.
+ */
+async function renderPortfolio() {
+  state.page = 'portfolio';
+  const codes = [...state.favs];
+  if (!codes.length) {
+    view.replaceChildren(
+      renderPortfolioHead(),
+      h('div', { class: 'state-msg' },
+        h('p', {}, T('portfolioEmpty')),
+        h('p', { class: 'colophon-note' }, T('portfolioEmptyHint')))
+    );
+    return;
+  }
+
+  view.replaceChildren(renderPortfolioHead(), h('p', { class: 'state-msg' }, T('loading')));
+
+  // Shares need the index for their names, and every row needs its own history
+  // to be able to say what it was worth on the day it was starred.
+  const needsShares = codes.some(isShareCode);
+  const [, histories] = await Promise.all([
+    needsShares ? loadShares() : Promise.resolve(null),
+    Promise.all(codes.map(loadHistory)),
+  ]);
+  if (state.page !== 'portfolio') return;
+  const history = new Map(codes.map((c, i) => [c, histories[i]]));
+
+  const table = h('div', { class: 'table-wrap' });
+  const summary = h('div', { id: 'port-summary' });
+  const panels = h('div', { id: 'port-panels' });
+  view.replaceChildren(renderPortfolioHead(), summary, table, panels);
+
+  // Built once. The rows carry text inputs, and rebuilding the table on every
+  // keystroke would take the caret out of the field being typed into — the same
+  // trap the chart pickers and the search boxes each had to be written around.
+  const rows = codes.map((code) => portfolioRow(code, history.get(code), redraw));
+  table.replaceChildren(h('table', { class: 'funds port-table' },
+    h('thead', {}, h('tr', {},
+      h('th', { class: 'col-fav', 'aria-label': T('favorites') }, '★'),
+      h('th', {}, T('code')),
+      h('th', { class: 'num-cell' }, T('posSinceShort')),
+      h('th', { class: 'num-cell' }, T('posUnits')),
+      h('th', { class: 'num-cell' }, T('posCost')),
+      h('th', { class: 'num-cell' }, T('posPrice')),
+      h('th', { class: 'num-cell' }, T('posValue')),
+      h('th', { class: 'num-cell', title: T('posCostHint') }, T('posProfit')))),
+    h('tbody', {}, rows.map((r) => r.tr))
+  ));
+
+  function redraw() {
+    if (state.page !== 'portfolio') return;
+    const valued = rows.map((r) => r.refresh()).filter(Boolean);
+    summary.replaceChildren(...[portfolioSummary(valued, history)].filter(Boolean));
+    panels.replaceChildren(...portfolioPanels(valued).filter(Boolean));
+  }
+
+  redraw();
+  // Share prices arrive after the page is drawn, and again on every refresh.
+  portfolioView = redraw;
+  ensureQuotes(null).then(redraw);
+  window.scrollTo({ top: 0 });
+}
+
+function renderPortfolioHead() {
+  return h('section', { class: 'page-head' },
+    h('p', { class: 'eyebrow' }, T('portfolio')),
+    h('h1', { class: 'page-title' }, T('portfolio')),
+    h('p', { class: 'page-lede' }, T('portfolioLede')),
+    // Said plainly and up front. A page that looks like a broker account and is
+    // actually one browser's local storage has to say which it is BEFORE
+    // somebody types a year of trades into it.
+    h('p', { class: 'note' }, T('portfolioPrivate'))
+  );
+}
+
+/**
+ * One row: what it is, what it has done since it was starred, and — if a size
+ * has been entered — what it is worth.
+ *
+ * The two inputs are created once and never replaced. Everything derived from
+ * them is recomputed into cells that are.
+ */
+function portfolioRow(code, series, onChange) {
+  const share = isShareCode(code);
+  const entry = state.positions[code] ?? {};
+  const meta = share ? shareOf(code) : state.funds.find((f) => f.c === code);
+
+  const cell = (labelKey) => h('td', { class: 'num num-cell', 'data-label': T(labelKey) });
+  const sinceCell = cell('posSinceShort');
+  const priceCell = cell('posPrice');
+  const valueCell = cell('posValue');
+  const profitCell = cell('posProfit');
+
+  const field = (name, value, hint) => h('input', {
+    type: 'text', inputmode: 'decimal', class: 'port-input',
+    value: value ?? '', 'aria-label': `${T(name === 'units' ? 'posUnits' : 'posCost')} — ${code}`,
+    title: hint,
+    onInput: (e) => {
+      // Turkish keyboards produce a comma, and Number('12,5') is NaN. Both
+      // separators are accepted rather than the field silently clearing itself.
+      const raw = e.target.value.trim().replace(/\./g, '').replace(',', '.');
+      setPosition(code, name, raw === '' ? null : Number(raw));
+      onChange();
+    },
+  });
+
+  const unitsInput = field('units', entry.units, T('posUnitsHint'));
+  const costInput = field('cost', entry.cost, T('posCostHint'));
+
+  // Filled in by refresh(), because the date a figure is measured from is the
+  // last price on or before the day it was starred — Friday's close for a
+  // Saturday star — and the row has to say which day it actually used.
+  const fromLabel = h('span', { class: 'row-sub port-added' });
+
+  const tr = h('tr', {},
+    h('td', { class: 'col-fav' }, favButton(code, () => {
+      // Unstarring on this page removes the row it was on, rather than leaving
+      // an empty star behind on a position that no longer exists.
+      tr.remove();
+      onChange();
+    })),
+    h('td', {},
+      h('a', { class: 'code-link num', href: `#/${share ? 'hisse' : 'fon'}/${code}` }, code),
+      h('span', { class: 'row-sub' }, meta?.n ?? ''),
+      fromLabel),
+    sinceCell,
+    h('td', { class: 'num-cell', 'data-label': T('posUnits') }, unitsInput),
+    h('td', { class: 'num-cell', 'data-label': T('posCost') }, costInput),
+    priceCell,
+    valueCell,
+    profitCell
+  );
+
+  /** Recompute every derived cell, and hand the valuation back for the totals. */
+  function refresh() {
+    if (!tr.isConnected) return null;
+    const now = priceNow(code, share, meta, series);
+    const from = priceEntryOn(series, state.positions[code]?.at);
+    const then = from?.[1] ?? null;
+    const since = returnSince(now, then);
+
+    fromLabel.textContent = from
+      ? T('posSince', { date: fmtDate(from[0], state.lang) })
+      : (state.positions[code]?.at ? T('posNoPrice') : '');
+
+    sinceCell.className = `num num-cell delta ${signOf(since)}`;
+    sinceCell.textContent = since == null
+      ? '—'
+      : fmtPct(since, state.lang, { signed: true, digits: 1 });
+    sinceCell.title = since == null && state.positions[code]?.at ? T('posNoPrice') : '';
+
+    priceCell.textContent = now == null ? '—' : `₺${fmtNum(now, state.lang, priceDigits(now))}`;
+
+    const position = positionValue(state.positions[code], now, then);
+    valueCell.textContent = position?.value == null ? '—' : fmtMoney(position.value, state.lang);
+    profitCell.className = `num num-cell delta ${signOf(position?.profit)}`;
+    profitCell.replaceChildren(...(position?.profit == null
+      ? [text('—')]
+      : [
+          text(fmtMoney(position.profit, state.lang)),
+          h('span', { class: 'row-sub' },
+            fmtPct(position.pct, state.lang, { signed: true, digits: 1 })
+            + (position.assumed ? ` · ${T('posAssumed')}` : '')),
+        ]));
+
+    return position
+      ? {
+          code, share, ...position, from: from?.[0] ?? null,
+          groups: share ? null : meta?.g, spec: share ? null : meta?.spec,
+        }
+      : null;
+  }
+
+  return { tr, refresh };
+}
+
+/** The latest price for either kind: a share is live, a fund is last night's NAV. */
+function priceNow(code, share, meta, series) {
+  if (share) {
+    const quote = shareQuote(code);
+    if (quote?.price != null) return quote.price;
+    if (meta?.p != null) return meta.p;
+  } else if (meta?.p != null) {
+    return meta.p;
+  }
+  return series?.at(-1)?.[1] ?? null;
+}
+
+/**
+ * What it is all worth, and what the same money would have done in cash.
+ *
+ * The cash comparison is measured over each position's OWN period rather than
+ * against the headline one-year figure: a holding opened three weeks ago has to
+ * be judged against three weeks of the money market. The earliest position sets
+ * the window, and the page says which date that is.
+ */
+function portfolioSummary(valued, history) {
+  const totals = portfolioTotals(valued);
+  if (!totals) return null;
+
+  const mmf = state.benchmarks.filter((r) => r.mmf != null).map((r) => [r.d, r.mmf]);
+  const alternative = cashAlternative(valued, mmf);
+  const cash = alternative?.pct ?? null;
+  const gap = totals.pct != null && cash != null ? round1(totals.pct - cash) : null;
+
+  return h('section', { class: 'panel port-summary' },
+    h('dl', { class: 'stat-row' },
+      h('div', { class: 'stat' },
+        h('dt', {}, T('portTotalValue')),
+        h('dd', {}, fmtMoney(totals.value, state.lang))),
+      totals.basis == null ? null : h('div', { class: 'stat' },
+        h('dt', {}, T('portTotalCost')),
+        h('dd', {}, fmtMoney(totals.basis, state.lang))),
+      totals.profit == null ? null : h('div', { class: 'stat' },
+        h('dt', {}, T('portProfit')),
+        h('dd', { class: `delta ${signOf(totals.profit)}` },
+          fmtMoney(totals.profit, state.lang)),
+        h('span', { class: 'stat-sub num' },
+          fmtPct(totals.pct, state.lang, { signed: true, digits: 1 }))),
+      cash == null ? null : h('div', { class: 'stat' },
+        h('dt', {}, T('portVsCash')),
+        h('dd', { class: 'num' }, fmtPct(cash, state.lang, { digits: 1 })),
+        h('span', { class: 'stat-sub num' }, fmtMoney(alternative.value, state.lang))),
+      gap == null ? null : h('div', { class: 'stat' },
+        h('dt', {}, T('portVsCashGap')),
+        h('dd', { class: `delta ${signOf(gap)}` },
+          fmtPoints(gap, state.lang, { signed: true, digits: 1 })))
+    ),
+    // A total that quietly omitted a third of the holdings would be worse than
+    // no total, so what was left out is stated rather than absorbed.
+    totals.costed < totals.priced
+      ? h('p', { class: 'panel-note' },
+          T('portNoBasis', { n: totals.priced - totals.costed }))
+      : null
+  );
+}
+
+/** The aggregate views that only exist once the sizes are known. */
+function portfolioPanels(valued) {
+  const funds = valued.filter((p) => !p.share && p.value != null);
+  const mixed = portfolioMix(funds.map((p) => ({ value: p.value, groups: p.groups })));
+
+  // Speculative exposure, weighted by money rather than by fund count.
+  let specLira = 0;
+  let specBase = 0;
+  for (const p of funds) {
+    if (!p.spec) continue;
+    specBase += p.value;
+    specLira += (p.value * p.spec.w) / 100;
+  }
+  const specPct = specBase > 0 ? round1((specLira / specBase) * 100) : null;
+
+  return [
+    mixed ? portfolioMixPanel(mixed) : null,
+    specPct == null ? null : h('section', { class: 'panel' },
+      h('h2', {}, T('portSpec')),
+      h('dl', { class: 'stat-row stat-row-inset' },
+        h('div', { class: 'stat' },
+          h('dt', {}, T('specWeight')),
+          h('dd', { class: specPct >= SPECULATIVE_HEAVY ? 'delta down' : '' },
+            fmtPct(specPct, state.lang, { digits: 1 }))),
+        h('div', { class: 'stat' },
+          h('dt', {}, T('portSpecValue')),
+          h('dd', {}, fmtMoney(specLira, state.lang)))),
+      h('p', { class: 'panel-note' }, T('portSpecNote'))),
+  ];
+}
+
+/** The mix, with the legend that makes a bar of five colours readable. */
+function portfolioMixPanel(mixed) {
+  const segments = Object.entries(mixed.mix)
+    .sort((a, b) => b[1] - a[1])
+    .map(([id, pct]) => ({ id, pct, share: pct }));
+  const groups = state.meta.groups;
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('portMix')),
+    h('p', { class: 'panel-note' }, T('portMixNote')),
+    compBar(segments, 'comp-bar'),
+    h('ul', { class: 'comp-legend' },
+      segments.map((s) =>
+        h('li', {},
+          h('span', { class: 'swatch', style: `background:${groupColor(s.id)}` }),
+          h('span', {}, label(groups.find((g) => g.id === s.id), state.lang)),
+          h('span', { class: 'val num' }, fmtPct(s.pct, state.lang, { digits: 1 })))))
+  );
+}
+
+const round1 = (n) => (n == null ? null : Math.round(n * 10) / 10);
 
 // ------------------------------------------------------- speculative boards
 

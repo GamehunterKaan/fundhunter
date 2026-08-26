@@ -1188,6 +1188,83 @@ four or five, so **one favourites list holds both** and can never confuse them.
 Star a share and it joins your funds on the dashboard chart; the code decides
 which file its history comes from and which page it links to.
 
+## The portfolio
+
+`#/portfoy` is two questions that turned out to be one. "What has this done
+since I starred it" needs the date; "what is my portfolio worth" needs the date
+and a size. So **a position is a favourite that knows when it arrived**, and
+optionally how much of it there is.
+
+Starring anything now records the day. Type a number of units into the row and
+the same line becomes a real holding with a value, a cost and a profit; leave it
+empty and the row still answers the first question, which is why the page is
+worth opening before anybody has typed anything into it.
+
+```
+Total value  ₺310.1k     Cost  ₺213.5k     Profit  ₺96.6k  (+45.3%)
+The same money in cash  9.6%  (₺233.9k)    Gap  +35.7 points
+```
+
+### It is one browser's local storage, and the page says so
+
+Nothing leaves the machine. There is no account, no sync and no backup: clear
+your browser data and the portfolio is gone. That sentence sits at the top of
+the page, above the table, **before** anybody types a year of trades into
+something that looks like a broker account and is not one.
+
+### What it costs, when you do not say
+
+Leave the cost blank and the position is valued from the price on the day it was
+starred — the honest default for a portfolio built out of a watchlist. Rows
+priced that way are marked `assumed cost`, because a guess presented as a
+receipt is worse than either.
+
+A position starred before the price history reaches back that far keeps its
+value and loses its profit: how much it is worth is known, what it cost is not,
+and inventing the difference would be inventing a gain.
+
+**The total profit is taken over only the positions that have a basis.** Value
+minus cost across the whole portfolio would credit a holding whose cost is
+unknown with its entire value as profit — ₺500 of somebody's money turning into
+₺500 of somebody's gain. A test caught that one; the page now says how many
+positions were left out.
+
+### The date a figure is measured from is the date it says
+
+A position starred on a Saturday is measured from Friday's close, because that
+is the last price there was. `priceEntryOn()` returns the date it actually used
+and the row prints that date — the first version asked for Saturday, got
+Friday's number and labelled it "since Saturday", which is a figure stated
+against a day it was not measured from.
+
+### The cash comparison is money-weighted
+
+Not one cash return over the earliest position. Positions are opened on
+different days, so each one's basis is grown at the money-market return over
+**its own** window and the whole is compared with the whole. Taking the earliest
+date for everything credited later money with weeks it never had — in the
+example above that was the difference between 11.3% and 9.6%.
+
+### What the sizes unlock
+
+| | |
+|---|---|
+| **What you actually hold** | every fund's own composition, weighted by how much of it you hold. The dashboard's version has to be equal-weighted because it only knows *which* funds you follow; this is the real mix |
+| **Exposure to speculative shares** | the same [speculative-board](#speculative-boards) flags, weighted by your money rather than by fund count |
+
+### Typing into a live table
+
+Every row carries two text inputs, and the table recomputes on every keystroke.
+The inputs are built once and never replaced — only the derived cells are — for
+the same reason the chart pickers and both search boxes had to be: re-rendering
+an input takes the caret out of the field being typed into. Verified by
+dispatching real key events one at a time and checking `document.activeElement`
+and `selectionStart` after each.
+
+Both decimal separators are accepted. A Turkish keyboard produces `12,5`, and
+`Number('12,5')` is `NaN` — which would have silently cleared the field as you
+typed.
+
 ## Speculative boards
 
 "Tahta" is Turkish market slang for a share whose price board a small group can

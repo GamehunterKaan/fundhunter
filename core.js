@@ -365,6 +365,48 @@ export const STRINGS = {
     floatNote: 'Sermayenin borsada serbestçe işlem gören kısmı.',
     sharesOut: 'Toplam pay adedi',
     range52: '52 hafta',
+    // --- portföy ---
+    favoritesToPortfolio: 'Ne zaman eklediğinizi ve o günden beri ne yaptığını Portföy’de görün →',
+    navPortfolio: 'Portföy',
+    portfolio: 'Portföy',
+    portfolioLede:
+      'Yıldızladığınız her şey, ne zaman eklediğinizle ve o günden bu yana ne ' +
+      'yaptığıyla. Kaç adet tuttuğunuzu yazarsanız aynı satır gerçek bir ' +
+      'pozisyona dönüşür.',
+    portfolioPrivate:
+      'Bunların hepsi yalnızca bu tarayıcıda duruyor. Hiçbir yere gönderilmiyor, ' +
+      'hiçbir yerde yedeklenmiyor: tarayıcı verisini silerseniz geri gelmez.',
+    portfolioEmpty: 'Henüz hiçbir şey yıldızlamadınız.',
+    portfolioEmptyHint: 'Bir fon ya da hisse sayfasındaki ★ ile başlayın.',
+    posAdded: 'Eklendiği tarih',
+    posSince: '{date} tarihinden beri',
+    posSinceShort: 'Eklendiğinden beri',
+    posUnits: 'Adet',
+    posUnitsHint: 'Kaç pay tuttuğunuz',
+    posCost: 'Maliyet',
+    posCostHint: 'Toplam ödediğiniz tutar. Boş bırakırsanız eklediğiniz günün fiyatı kullanılır.',
+    posPrice: 'Güncel fiyat',
+    posValue: 'Değer',
+    posProfit: 'Kâr / zarar',
+    posAssumed: 'tahmini maliyet',
+    posNoPrice: 'Bu tarihe ait fiyat yok',
+    // --- toplamlar ---
+    portTotalValue: 'Toplam değer',
+    portTotalCost: 'Toplam maliyet',
+    portProfit: 'Kâr / zarar',
+    portVsCash: 'Aynı paranın para piyasasındaki hâli',
+    portVsCashGap: 'Fark',
+    portCounted: '{n}/{of} pozisyon değerlendi',
+    portNoBasis: '{n} pozisyonun maliyeti bilinmiyor, kâr hesabına katılmadı.',
+    portSpecValue: 'Bu hisselere denk gelen',
+    portMix: 'Portföyün gerçek dağılımı',
+    portMixNote:
+      'Her fonun içeriği, tuttuğunuz tutara göre ağırlıklandırıldı. Panodaki ' +
+      'eşit ağırlıklı hâlinin aksine bu sizin gerçek dağılımınız.',
+    portSpec: 'Spekülatif hisse maruziyeti',
+    portSpecNote: 'Tuttuğunuz fonların spekülatif görünümlü hisselere ağırlığı, tutarınıza göre.',
+    portOnlyWatching: 'Yalnızca izlediğiniz',
+    portHolding: 'Tuttuklarınız',
     // --- spekülatif tahtalar ---
     specPanel: 'Spekülatif görünüm',
     specChip: 'Spekülatif görünüm',
@@ -1080,6 +1122,48 @@ export const STRINGS = {
     floatNote: 'The share of the capital that trades freely on the exchange.',
     sharesOut: 'Shares outstanding',
     range52: '52 weeks',
+    // --- portfolio ---
+    favoritesToPortfolio: 'See when you added them and what they have done since, in Portfolio →',
+    navPortfolio: 'Portfolio',
+    portfolio: 'Portfolio',
+    portfolioLede:
+      'Everything you have starred, with the day you starred it and what it has ' +
+      'done since. Enter how many units you hold and the same row becomes a real ' +
+      'position.',
+    portfolioPrivate:
+      'All of this lives in this browser and nowhere else. Nothing is sent ' +
+      'anywhere and nothing is backed up: clear your browser data and it is gone.',
+    portfolioEmpty: 'You have not starred anything yet.',
+    portfolioEmptyHint: 'Start with the ★ on any fund or share page.',
+    posAdded: 'Added',
+    posSince: 'since {date}',
+    posSinceShort: 'Since added',
+    posUnits: 'Units',
+    posUnitsHint: 'How many units you hold',
+    posCost: 'Cost',
+    posCostHint: 'What you paid in total. Left empty, the price on the day you added it is used.',
+    posPrice: 'Price now',
+    posValue: 'Value',
+    posProfit: 'Profit / loss',
+    posAssumed: 'assumed cost',
+    posNoPrice: 'No price on file for that date',
+    // --- totals ---
+    portTotalValue: 'Total value',
+    portTotalCost: 'Total cost',
+    portProfit: 'Profit / loss',
+    portVsCash: 'The same money, in cash',
+    portVsCashGap: 'Gap',
+    portCounted: '{n} of {of} positions valued',
+    portNoBasis: '{n} positions have no known cost and are left out of the profit.',
+    portSpecValue: 'Your money in them',
+    portMix: 'What you actually hold',
+    portMixNote:
+      'Each fund’s own composition, weighted by how much of it you hold. Unlike ' +
+      'the equal-weighted version on the dashboard, this is your real mix.',
+    portSpec: 'Exposure to speculative shares',
+    portSpecNote: 'What your funds hold in shares with a speculative profile, weighted by your money.',
+    portOnlyWatching: 'Watching only',
+    portHolding: 'Held',
     // --- speculative boards ---
     specPanel: 'Speculative profile',
     specChip: 'Speculative profile',
