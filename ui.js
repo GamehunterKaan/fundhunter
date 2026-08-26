@@ -7,6 +7,7 @@ import {
   assetBreakdown, alignAndIndex, returnOver, HORIZONS, horizonOf, LEVERED_FROM,
   CRASH_PROOF_FROM, THEME_IDS, MIN_THEME,
   aggregateHoldings, groupHoldings, queryMatcher, squarify,
+  ringGeometry, ringPoint, ringPath, spreadLabels, svgN, TURN,
   SPEC_NONE, SPEC_STEPS, SPEC_MIN_EQUITY,
 } from './core.js';
 import {
@@ -18,7 +19,7 @@ import {
   weightsOf, overlappingPairs, sharedPositions, themeMoves, moversIn, versusCash,
   boardFlags, SPECULATIVE_HEAVY,
   priceOn, priceEntryOn, returnSince, positionValue, portfolioTotals,
-  cashOver, cashAlternative, portfolioMix,
+  cashOver, cashAlternative, portfolioMix, portfolioSlices, portfolioDayMove,
 } from './analytics.js';
 import { LIVE_SOURCE, LIVE_REFRESH_MS, LIVE_TIMEOUT_MS, parseLiveQuotes, liveClock } from './live.js';
 import {
@@ -163,7 +164,7 @@ const T = (key, vars) => t(state.lang, key, vars);
 
 async function boot() {
   restorePreferences();
-  restoreFavorites();
+  restoreSaved();
   wireChrome();
 
   try {
@@ -259,95 +260,137 @@ function syncNav() {
 // not something you link to. Nothing leaves the browser.
 
 const FAVS_KEY = 'fh-favs';
+const POSITIONS_KEY = 'fh-positions';
 
 /**
- * Favourites, and what is known about each of them.
+ * Two lists, kept apart.
  *
- * `state.favs` stays a Set of codes so that every `favs.has(code)` on the site
- * goes on working untouched; `state.positions` carries the detail beside it:
+ * A favourite is something you want to keep an eye on. A position is something
+ * you actually hold, with the day it was opened and how much of it there is.
+ * They were one list — the portfolio was "everything you starred" — and they are
+ * not the same question: you can follow a fund for a year without owning any of
+ * it, and you can hold something you have no interest in watching.
  *
- *   { TLY: { at: '2026-08-22', units: 12.5, cost: 100000 } }
+ *   fh-favs       ["TLY", "ASELS"]
+ *   fh-positions  { TLY: { at: "2026-08-22", units: 12.5, cost: 100000 } }
  *
- * `at` is the day the star went on, which is what makes "and what has it done
- * since" answerable at all. `units` and `cost` are optional — enter them and
- * the same row becomes a holding with a value and a profit.
- *
- * The file was an array of codes before this. A migrated list gets today's date
- * rather than an invented one, and the page labels every figure with the date
- * it is measured from, so a fund starred last year reads "since 22 August" and
- * never "since you added it" about a day it was not added.
+ * `at` is the day the position was opened, which is what makes "and what has it
+ * done since" answerable at all. `units` and `cost` are optional: without a cost
+ * the position is valued from the price on the day it was opened, and the row
+ * says so rather than presenting a guess as a receipt.
  */
-function restoreFavorites() {
+function restoreSaved() {
   state.favs = new Set();
   state.positions = {};
-  let raw;
-  try {
-    raw = JSON.parse(localStorage.getItem(FAVS_KEY) ?? '{}');
-  } catch {
-    return;
-  }
-  if (Array.isArray(raw)) {
-    const today = todayIso();
-    for (const code of raw) {
+  const favs = readStored(FAVS_KEY);
+
+  // Both lists used to live in this one key, as an object mapping code to
+  // detail. Everything in it is still a favourite; the entries carrying a size
+  // are what somebody actually typed in, so those — and only those — become
+  // positions. An entry with no size was never a holding.
+  if (favs && typeof favs === 'object' && !Array.isArray(favs)) {
+    for (const [code, entry] of Object.entries(favs)) {
       if (typeof code !== 'string') continue;
       state.favs.add(code);
-      state.positions[code] = { at: today };
+      if (entry && typeof entry === 'object' && entry.units > 0) {
+        state.positions[code] = readPosition(entry);
+      }
     }
     saveFavorites();
+    savePositions();
     return;
   }
-  if (!raw || typeof raw !== 'object') return;
-  for (const [code, entry] of Object.entries(raw)) {
+
+  if (Array.isArray(favs)) {
+    for (const code of favs) if (typeof code === 'string') state.favs.add(code);
+  }
+  const held = readStored(POSITIONS_KEY);
+  if (!held || typeof held !== 'object' || Array.isArray(held)) return;
+  for (const [code, entry] of Object.entries(held)) {
     if (typeof code !== 'string' || !entry || typeof entry !== 'object') continue;
-    state.favs.add(code);
-    state.positions[code] = {
-      at: typeof entry.at === 'string' ? entry.at : null,
-      units: Number.isFinite(entry.units) && entry.units > 0 ? entry.units : undefined,
-      cost: Number.isFinite(entry.cost) && entry.cost > 0 ? entry.cost : undefined,
-    };
+    state.positions[code] = readPosition(entry);
   }
 }
 
-/** Today where the exchange is, not where the reader happens to be sitting. */
-const todayIso = () =>
-  new Intl.DateTimeFormat('en-CA', { timeZone: MARKETS.bist.zone }).format(new Date());
-
-function saveFavorites() {
+/** Whatever is under a key, or null — a corrupt value must not break the boot. */
+function readStored(key) {
   try {
-    const out = {};
-    for (const code of state.favs) {
-      const p = state.positions[code] ?? {};
-      out[code] = { at: p.at ?? todayIso() };
-      if (p.units > 0) out[code].units = p.units;
-      if (p.cost > 0) out[code].cost = p.cost;
-    }
-    localStorage.setItem(FAVS_KEY, JSON.stringify(out));
+    return JSON.parse(localStorage.getItem(key) ?? 'null');
+  } catch {
+    return null;
+  }
+}
+
+function writeStored(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // A full or blocked storage quota must not break the page; the change simply
     // does not survive a reload.
   }
 }
 
-function toggleFavorite(code) {
-  if (state.favs.has(code)) {
-    state.favs.delete(code);
-    // Unstarring drops the position with it. Keeping the units around for a
-    // code no longer in the list would resurrect a holding the next time it was
-    // starred, which is not what unstarring looked like it did.
-    delete state.positions[code];
-  } else {
-    state.favs.add(code);
-    state.positions[code] = { at: todayIso() };
+const readPosition = (entry) => ({
+  at: typeof entry.at === 'string' ? entry.at : todayIso(),
+  units: Number.isFinite(entry.units) && entry.units > 0 ? entry.units : undefined,
+  cost: Number.isFinite(entry.cost) && entry.cost > 0 ? entry.cost : undefined,
+});
+
+/** Today where the exchange is, not where the reader happens to be sitting. */
+const todayIso = () =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: MARKETS.bist.zone }).format(new Date());
+
+function saveFavorites() {
+  writeStored(FAVS_KEY, [...state.favs]);
+}
+
+function savePositions() {
+  const out = {};
+  for (const [code, p] of Object.entries(state.positions)) {
+    out[code] = { at: p.at ?? todayIso() };
+    if (p.units > 0) out[code].units = p.units;
+    if (p.cost > 0) out[code].cost = p.cost;
   }
+  writeStored(POSITIONS_KEY, out);
+}
+
+/** Star on, star off. It no longer touches what you hold — that is its own list. */
+function toggleFavorite(code) {
+  if (state.favs.has(code)) state.favs.delete(code);
+  else state.favs.add(code);
   saveFavorites();
+}
+
+/**
+ * Open a position, dated today.
+ *
+ * Today is the only date this page can honestly claim for something somebody
+ * has just typed in. Returns false when there is already a position in that
+ * code, so the caller can say so rather than silently overwriting a size.
+ */
+function addPosition(code, units, cost) {
+  if (state.positions[code]) return false;
+  state.positions[code] = {
+    at: todayIso(),
+    units: units > 0 ? units : undefined,
+    cost: cost > 0 ? cost : undefined,
+  };
+  savePositions();
+  return true;
+}
+
+function removePosition(code) {
+  delete state.positions[code];
+  savePositions();
 }
 
 /** Record how much is held, or clear it when the field is emptied. */
 function setPosition(code, field, value) {
-  const entry = state.positions[code] ?? (state.positions[code] = { at: todayIso() });
+  const entry = state.positions[code];
+  if (!entry) return;
   if (value == null || !Number.isFinite(value) || value <= 0) delete entry[field];
   else entry[field] = value;
-  saveFavorites();
+  savePositions();
 }
 
 /**
@@ -665,6 +708,16 @@ let sharePage = null;
 
 /** Redraw for the portfolio page, so live share prices reach its totals. */
 let portfolioView = null;
+
+/** Below this width the ring drops its outside labels and uses a legend. */
+const RING_TIGHT = '(max-width: 620px)';
+
+// The ring is drawn in one of two layouts and a media query picks which, so the
+// page has to be redrawn when that flips — rotating a phone would otherwise
+// leave the wide layout squeezed into a narrow screen until something else
+// happened to redraw it. `portfolioView` is null unless the page is open, so
+// this one listener costs nothing anywhere else.
+window.matchMedia?.(RING_TIGHT)?.addEventListener?.('change', () => portfolioView?.());
 
 /** One scan in flight per market and ticker set; every caller shares its answer. */
 const quoteJobs = new Map();
@@ -1712,12 +1765,7 @@ function renderFavHead() {
       })
       : T('favoritesCount', { n: fmtInt(funds, state.lang) })),
     h('h1', { class: 'page-title' }, T('favorites')),
-    h('p', { class: 'page-lede' },
-      T('favoritesHint'),
-      ' ',
-      // The portfolio is the same list with dates and sizes on it, so the place
-      // to find it is the page you already keep that list on.
-      h('a', { href: '#/portfoy' }, T('favoritesToPortfolio')))
+    h('p', { class: 'page-lede' }, T('favoritesHint'))
   );
 }
 
@@ -4300,13 +4348,12 @@ function renderShareChart(stock, history) {
  */
 async function renderPortfolio() {
   state.page = 'portfolio';
-  const codes = [...state.favs];
+  const codes = Object.keys(state.positions);
   if (!codes.length) {
     view.replaceChildren(
       renderPortfolioHead(),
-      h('div', { class: 'state-msg' },
-        h('p', {}, T('portfolioEmpty')),
-        h('p', { class: 'colophon-note' }, T('portfolioEmptyHint')))
+      portfolioAdd(),
+      h('div', { class: 'state-msg' }, h('p', {}, T('portfolioEmpty')))
     );
     return;
   }
@@ -4326,7 +4373,10 @@ async function renderPortfolio() {
   const table = h('div', { class: 'table-wrap' });
   const summary = h('div', { id: 'port-summary' });
   const panels = h('div', { id: 'port-panels' });
-  view.replaceChildren(renderPortfolioHead(), summary, table, panels);
+  // The add control is built once and sits outside everything redraw() replaces,
+  // for the same reason the rows do: a live quote arriving must not take the
+  // caret out of a field somebody is typing a code into.
+  view.replaceChildren(renderPortfolioHead(), summary, portfolioAdd(), table, panels);
 
   // Built once. The rows carry text inputs, and rebuilding the table on every
   // keystroke would take the caret out of the field being typed into — the same
@@ -4334,7 +4384,7 @@ async function renderPortfolio() {
   const rows = codes.map((code) => portfolioRow(code, history.get(code), redraw));
   table.replaceChildren(h('table', { class: 'funds port-table' },
     h('thead', {}, h('tr', {},
-      h('th', { class: 'col-fav', 'aria-label': T('favorites') }, '★'),
+      h('th', { class: 'col-fav', 'aria-label': T('portRemove') }, ''),
       h('th', {}, T('code')),
       h('th', { class: 'num-cell' }, T('posSinceShort')),
       h('th', { class: 'num-cell' }, T('posUnits')),
@@ -4348,7 +4398,8 @@ async function renderPortfolio() {
   function redraw() {
     if (state.page !== 'portfolio') return;
     const valued = rows.map((r) => r.refresh()).filter(Boolean);
-    summary.replaceChildren(...[portfolioSummary(valued, history)].filter(Boolean));
+    summary.replaceChildren(
+      ...[portfolioDonut(valued), portfolioSummary(valued, history)].filter(Boolean));
     panels.replaceChildren(...portfolioPanels(valued).filter(Boolean));
   }
 
@@ -4362,12 +4413,7 @@ async function renderPortfolio() {
 function renderPortfolioHead() {
   return h('section', { class: 'page-head' },
     h('p', { class: 'eyebrow' }, T('portfolio')),
-    h('h1', { class: 'page-title' }, T('portfolio')),
-    h('p', { class: 'page-lede' }, T('portfolioLede')),
-    // Said plainly and up front. A page that looks like a broker account and is
-    // actually one browser's local storage has to say which it is BEFORE
-    // somebody types a year of trades into it.
-    h('p', { class: 'note' }, T('portfolioPrivate'))
+    h('h1', { class: 'page-title' }, T('portfolio'))
   );
 }
 
@@ -4394,10 +4440,7 @@ function portfolioRow(code, series, onChange) {
     value: value ?? '', 'aria-label': `${T(name === 'units' ? 'posUnits' : 'posCost')} — ${code}`,
     title: hint,
     onInput: (e) => {
-      // Turkish keyboards produce a comma, and Number('12,5') is NaN. Both
-      // separators are accepted rather than the field silently clearing itself.
-      const raw = e.target.value.trim().replace(/\./g, '').replace(',', '.');
-      setPosition(code, name, raw === '' ? null : Number(raw));
+      setPosition(code, name, decimal(e.target.value));
       onChange();
     },
   });
@@ -4411,12 +4454,19 @@ function portfolioRow(code, series, onChange) {
   const fromLabel = h('span', { class: 'row-sub port-added' });
 
   const tr = h('tr', {},
-    h('td', { class: 'col-fav' }, favButton(code, () => {
-      // Unstarring on this page removes the row it was on, rather than leaving
-      // an empty star behind on a position that no longer exists.
-      tr.remove();
-      onChange();
-    })),
+    h('td', { class: 'col-fav' }, h('button', {
+      type: 'button',
+      class: 'port-remove',
+      title: T('portRemove'),
+      'aria-label': `${T('portRemove')} — ${code}`,
+      onClick: () => {
+        // Closing a position says nothing about whether you still want to watch
+        // the thing. The star is its own list and is left alone.
+        removePosition(code);
+        tr.remove();
+        onChange();
+      },
+    }, '×')),
     h('td', {},
       h('a', { class: 'code-link num', href: `#/${share ? 'hisse' : 'fon'}/${code}` }, code),
       h('span', { class: 'row-sub' }, meta?.n ?? ''),
@@ -4464,12 +4514,117 @@ function portfolioRow(code, series, onChange) {
     return position
       ? {
           code, share, ...position, from: from?.[0] ?? null,
+          change: dayChangeOf(code, share, meta),
           groups: share ? null : meta?.g, spec: share ? null : meta?.spec,
         }
       : null;
   }
 
   return { tr, refresh };
+}
+
+/**
+ * A number typed on either kind of keyboard.
+ *
+ * Turkish keyboards produce a comma, and `Number('12,5')` is `NaN` — which would
+ * silently clear the field as you typed. The dot is the thousands separator in
+ * the same convention, so it goes. Null means "nothing usable here", which is
+ * how both callers clear a value.
+ */
+function decimal(raw) {
+  const clean = String(raw ?? '').trim().replace(/\./g, '').replace(',', '.');
+  if (!clean) return null;
+  const n = Number(clean);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/** Is this a code the site actually has a page for? */
+async function resolvesToPage(code) {
+  if (state.funds.some((f) => f.c === code)) return true;
+  if (!isShareCode(code)) return false;
+  await loadShares();
+  return !!shareOf(code);
+}
+
+/**
+ * What the code field offers.
+ *
+ * Funds are already in memory. Shares are only offered once their index has been
+ * fetched for something else — pulling 450KB to fill an autocomplete nobody has
+ * typed into yet is not a trade worth making, and typing a share code that is
+ * not on the list still works.
+ */
+function addOptions() {
+  const out = state.funds.map((f) => h('option', { value: f.c, label: f.n }));
+  for (const s of shares?.list ?? []) out.push(h('option', { value: s.c, label: s.n }));
+  return out;
+}
+
+/**
+ * The control that opens a position.
+ *
+ * The portfolio is its own list, so something has to put things in it. A code
+ * and a size is the whole of it; the date is today, because that is the only
+ * date this page can honestly claim for something just typed in.
+ */
+function portfolioAdd() {
+  const field = (extra, labelKey, hintKey) => h('input', {
+    type: 'text', class: 'port-input', autocomplete: 'off',
+    'aria-label': T(labelKey), placeholder: T(labelKey),
+    title: hintKey ? T(hintKey) : null, ...extra,
+  });
+
+  const codeInput = field(
+    { list: 'port-add-list', spellcheck: 'false', class: 'port-input port-add-code' },
+    'portAddCode', null);
+  const unitsInput = field({ inputmode: 'decimal' }, 'posUnits', 'posUnitsHint');
+  const costInput = field({ inputmode: 'decimal' }, 'posCost', 'posCostHint');
+  const error = h('p', { class: 'port-add-error', role: 'alert' });
+
+  const form = h('form', {
+    class: 'port-add',
+    onSubmit: async (e) => {
+      e.preventDefault();
+      const code = codeInput.value.trim().toUpperCase();
+      if (!code) return;
+      if (state.positions[code]) {
+        error.textContent = T('portAddDuplicate');
+        return;
+      }
+      if (!(await resolvesToPage(code))) {
+        error.textContent = T('portAddUnknown');
+        return;
+      }
+      error.textContent = '';
+      addPosition(code, decimal(unitsInput.value), decimal(costInput.value));
+      // The new row needs its own price history, so the page is rebuilt rather
+      // than the row spliced in against data that has not been fetched.
+      renderPortfolio();
+    },
+  },
+    h('div', { class: 'port-add-fields' },
+      codeInput, unitsInput, costInput,
+      h('button', { type: 'submit', class: 'control port-add-go' }, T('portAddButton'))),
+    h('datalist', { id: 'port-add-list' }, addOptions()),
+    error
+  );
+
+  return h('section', { class: 'panel port-add-panel' }, form);
+}
+
+/**
+ * What this position has done since the last close, in per cent.
+ *
+ * A share is the delayed live quote, falling back to its own last close when the
+ * scan has not answered yet. A fund is the last net asset value TEFAS published
+ * and nothing else: a fund's move today CAN be estimated from what its shares
+ * are trading at, and the dashboard shows exactly that — but an estimate has no
+ * business inside a lira figure printed under a total, so the ring takes the
+ * last price and its note says that half runs a business day behind.
+ */
+function dayChangeOf(code, share, meta) {
+  if (share) return shareQuote(code)?.change ?? meta?.ch ?? null;
+  return meta?.ch ?? null;
 }
 
 /** The latest price for either kind: a share is live, a fund is last night's NAV. */
@@ -4531,6 +4686,141 @@ function portfolioSummary(valued, history) {
           T('portNoBasis', { n: totals.priced - totals.costed }))
       : null
   );
+}
+
+// ------------------------------------------------------------------- the ring
+//
+// One holding, one slice, largest first, clockwise from twelve — and in the
+// hole in the middle the two numbers the page exists to answer: what it is all
+// worth, and what it has done since the last close.
+
+/** The ring's palette. The collected tail is always the grey, whatever its size. */
+const sliceColor = (i, rest) => (rest
+  ? 'var(--slice-rest, var(--ink-muted))'
+  : `var(--slice-${(i % 8) + 1}, var(--ink-muted))`);
+
+/**
+ * What you hold, drawn as a ring, with the total in the hole in the middle.
+ *
+ * The figure in the middle is why this is a ring and not a bar: a total that
+ * reads as money, and under it what that money has done since the last close.
+ * The two halves of that move come from different places, and the note says so
+ * rather than letting one number imply a single source — shares are live, funds
+ * are the price TEFAS published last night.
+ */
+function portfolioDonut(valued) {
+  const cut = portfolioSlices(valued);
+  if (!cut) return null;
+  const move = portfolioDayMove(valued);
+  const tight = window.matchMedia?.(RING_TIGHT)?.matches ?? false;
+  const g = ringGeometry(tight);
+
+  const nameOf = (s) => (s.rest ? T('portOthers', { n: fmtInt(s.rest, state.lang) }) : s.code);
+  const figureOf = (s) =>
+    `${fmtMoney(s.value, state.lang)} · ${fmtPct(s.share, state.lang, { digits: 1 })}`;
+
+  // Angles are taken from the values, never from the rounded shares: eight
+  // roundings of two decimals leave a visible wedge of unpainted ring at the end.
+  let sum = 0;
+  for (const s of cut.slices) sum += s.value;
+  let turn = 0;
+  const placed = cut.slices.map((s, i) => {
+    const from = turn;
+    turn = i === cut.slices.length - 1 ? 1 : turn + s.value / sum;
+    return { s, i, from, to: turn, mid: (from + turn) / 2 };
+  });
+
+  // One holding is the whole ring, and an arc from nought to one turn starts and
+  // ends at the same point — which draws nothing at all. A stroked circle is the
+  // same shape without the degenerate path. It carries its own class because on
+  // a slice the stroke is the gap between neighbours, and here the stroke IS the
+  // ring — `.donut-slice` would paint it 1.5 units wide in the page's own colour.
+  const ring = placed.length === 1
+    ? svg('circle', {
+        class: 'donut-whole', cx: g.cx, cy: g.cy, r: (g.outer + g.inner) / 2,
+        stroke: sliceColor(0, 0), 'stroke-width': g.outer - g.inner,
+      }, svg('title', {}, text(`${nameOf(cut.slices[0])} — ${figureOf(cut.slices[0])}`)))
+    : placed.map(({ s, i, from, to }) =>
+        svg('path', { class: 'donut-slice', d: ringPath(g, from, to), fill: sliceColor(i, s.rest) },
+          svg('title', {}, text(`${nameOf(s)} — ${figureOf(s)}`))));
+
+  const centre = svg('g', { class: 'donut-centre', 'text-anchor': 'middle' },
+    svg('text', { class: 'donut-eyebrow', x: g.cx, y: g.cy - (tight ? 36 : 42) },
+      text(T('portTotalValue'))),
+    svg('text', { class: 'donut-total', x: g.cx, y: g.cy - (tight ? 8 : 12) },
+      text(fmtMoney(cut.total, state.lang))),
+    move == null ? null : svg('text',
+      { class: 'donut-eyebrow', x: g.cx, y: g.cy + (tight ? 18 : 16) }, text(T('portToday'))),
+    move == null ? null : svg('text', {
+      class: `donut-move ${signOf(move.pct)}`, x: g.cx, y: g.cy + (tight ? 40 : 38),
+    },
+      // Where the two halves of this number come from, on hover rather than in a
+      // paragraph under the chart. The same place the dashboard puts it.
+      svg('title', {}, text(T('portTodayNote'))),
+      text(`${fmtPct(move.pct, state.lang, { signed: true, digits: 2 })}`
+        + ` · ${fmtMoney(move.gain, state.lang)}`))
+  );
+
+  const legend = h('ul', { class: 'comp-legend donut-legend' },
+    cut.slices.map((s, i) =>
+      h('li', {},
+        h('span', { class: 'swatch', style: `background:${sliceColor(i, s.rest)}` }),
+        h('span', {}, nameOf(s)),
+        h('span', { class: 'val num' }, fmtPct(s.share, state.lang, { digits: 1 })))));
+
+  // What a screen reader is given instead of the picture: the same two figures,
+  // then the holdings in the order they are drawn.
+  const spoken = [
+    `${T('portTotalValue')} ${fmtMoney(cut.total, state.lang)}`,
+    move == null
+      ? null
+      : `${T('portToday')} ${fmtPct(move.pct, state.lang, { signed: true, digits: 2 })}`,
+    ...cut.slices.map((s) => `${nameOf(s)} ${figureOf(s)}`),
+  ].filter(Boolean).join('. ');
+
+  return h('section', { class: 'panel port-ring' },
+    h('h2', {}, T('portRing')),
+    svg('svg', {
+      class: `donut ${tight ? 'is-tight' : ''}`, viewBox: `0 0 ${g.w} ${g.h}`,
+      role: 'img', 'aria-label': spoken,
+    }, ring, tight ? null : ringTags(g, placed, nameOf, figureOf), centre),
+    legend,
+    // A move measured over four fifths of the money is not the portfolio's move,
+    // so the part that could not be priced is named rather than quietly folded
+    // in as flat. Nothing else is said: the ring explains itself.
+    move == null || move.covered >= move.of ? null : h('p', { class: 'panel-note' },
+      T('portRingPartial', { v: fmtMoney(move.of - move.covered, state.lang) }))
+  );
+}
+
+/** The labels around the ring, each on a leader line back to its own slice. */
+function ringTags(g, placed, nameOf, figureOf) {
+  const sides = { left: [], right: [] };
+  for (const p of placed) {
+    const right = Math.sin(p.mid * TURN) >= 0;
+    const [ax, ay] = ringPoint(g, g.outer + 4, p.mid);
+    const [bx, by] = ringPoint(g, g.bend, p.mid);
+    sides[right ? 'right' : 'left'].push({ ...p, right, ax, ay, bx, by, y: by });
+  }
+  const GAP = 34;
+  spreadLabels(sides.left, GAP, 24, g.h - 18);
+  spreadLabels(sides.right, GAP, 24, g.h - 18);
+
+  return svg('g', { class: 'donut-tags' }, [...sides.left, ...sides.right].map((p) => {
+    const x = p.right ? g.cx + g.label : g.cx - g.label;
+    const tip = p.right ? x - 8 : x + 8;
+    return svg('g', {},
+      svg('polyline', {
+        class: 'donut-leader',
+        points: `${svgN(p.ax)},${svgN(p.ay)} ${svgN(p.bx)},${svgN(p.by)} ${svgN(tip)},${svgN(p.y)}`,
+      }),
+      svg('text', {
+        class: 'donut-label', x, y: svgN(p.y - 4), 'text-anchor': p.right ? 'start' : 'end',
+      },
+        svg('tspan', { class: 'donut-code', x }, text(nameOf(p.s))),
+        svg('tspan', { class: 'donut-figure', x, dy: 15 }, text(figureOf(p.s))))
+    );
+  }));
 }
 
 /** The aggregate views that only exist once the sizes are known. */

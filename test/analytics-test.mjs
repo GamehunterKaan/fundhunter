@@ -19,6 +19,7 @@ import {
   boardFlags, boardSummary, speculativeExposure, MIN_BOARD_FLAGS, SPECULATIVE_HEAVY,
   priceOn, priceEntryOn, returnSince, positionValue, portfolioTotals,
   cashOver, cashAlternative, portfolioMix,
+  portfolioSlices, portfolioDayMove, SLICE_MAX,
 } from '../analytics.js';
 import { HORIZONS, SPEC_STEPS } from '../core.js';
 
@@ -1225,4 +1226,101 @@ test('the portfolio mix is weighted by lira, not by holding count', () => {
   assert.equal(out.counted, 10000);
   assert.equal(portfolioMix([{ value: 0, groups: { equity: 100 } }]), null);
   assert.equal(portfolioMix([]), null);
+});
+
+// ---------------------------------------------------------------- the ring
+
+test('the ring is drawn from what each holding is worth, largest first', () => {
+  const out = portfolioSlices([
+    { code: 'SMALL', value: 1000 },
+    { code: 'BIG', value: 7000 },
+    { code: 'MID', value: 2000 },
+  ]);
+  assert.deepEqual(out.slices.map((s) => s.code), ['BIG', 'MID', 'SMALL']);
+  assert.deepEqual(out.slices.map((s) => s.share), [70, 20, 10]);
+  assert.equal(out.total, 10000);
+  assert.equal(out.of, 3);
+});
+
+test('a starred fund with no size entered is not part of what you hold', () => {
+  // It belongs on the page — it answers "what has this done since I starred it"
+  // — but giving it a slice would be inventing money.
+  const out = portfolioSlices([
+    { code: 'HELD', value: 500 },
+    { code: 'WATCHED', value: null },
+    { code: 'ZERO', value: 0 },
+  ]);
+  assert.deepEqual(out.slices.map((s) => s.code), ['HELD']);
+  assert.equal(out.of, 1);
+  assert.equal(portfolioSlices([{ code: 'WATCHED', value: null }]), null);
+  assert.equal(portfolioSlices([]), null);
+  assert.equal(portfolioSlices(null), null);
+});
+
+test('the tail past the palette becomes one slice that says how many', () => {
+  const many = Array.from({ length: 20 }, (_, i) => ({ code: `F${i}`, value: 100 - i }));
+  const out = portfolioSlices(many);
+  assert.equal(out.slices.length, SLICE_MAX, 'never more slices than colours');
+  const last = out.slices.at(-1);
+  assert.equal(last.code, null);
+  assert.equal(last.rest, 20 - (SLICE_MAX - 1), 'and it says how many are in it');
+  // The tail is the rest of the money, not a leftover: the shares still total
+  // the whole portfolio.
+  const sum = out.slices.reduce((a, s) => a + s.value, 0);
+  assert.equal(Math.round(sum), Math.round(out.total));
+  assert.ok(Math.abs(out.slices.reduce((a, s) => a + s.share, 0) - 100) < 0.05);
+});
+
+test('exactly a ringful of holdings is not collected into "others"', () => {
+  const eight = Array.from({ length: SLICE_MAX }, (_, i) => ({ code: `F${i}`, value: 10 }));
+  const out = portfolioSlices(eight);
+  assert.equal(out.slices.length, SLICE_MAX);
+  assert.ok(out.slices.every((s) => s.code && !s.rest), 'all eight keep their names');
+});
+
+test("the day's move runs backwards, from today's value to yesterday's", () => {
+  // ₺102 after a 2% day gained ₺2, not ₺2.04. Taking 2% of today's value is the
+  // easy mistake and it overstates every green day.
+  const out = portfolioDayMove([{ value: 102, change: 2 }]);
+  assert.equal(out.gain, 2);
+  assert.equal(out.pct, 2);
+  assert.equal(out.covered, 102);
+});
+
+test("the day's move is weighted by money, not by position", () => {
+  const out = portfolioDayMove([
+    { value: 9000, change: 1 },
+    { value: 1000, change: -1 },
+  ]);
+  // 9000/1.01 + 1000/0.99 = 8910.89 + 1010.10 = 9920.99 at the last close.
+  assert.equal(out.pct, 0.8);
+  assert.equal(out.gain, 79.01);
+});
+
+test('a position nobody could price is left out of the move, not counted as flat', () => {
+  const out = portfolioDayMove([
+    { value: 100, change: 5 },
+    { value: 900, change: null },
+  ]);
+  assert.equal(out.pct, 5, 'the move is over what could be measured');
+  assert.equal(out.covered, 100);
+  assert.equal(out.of, 1000, 'and the page is told how much that leaves out');
+  assert.equal(out.counted, 1);
+});
+
+test('nothing priceable is no move at all, rather than zero', () => {
+  assert.equal(portfolioDayMove([{ value: 100, change: null }]), null);
+  assert.equal(portfolioDayMove([]), null);
+  assert.equal(portfolioDayMove(null), null);
+  // A price of zero has no previous value to divide by; past it is bad data
+  // rather than a very bad day.
+  assert.equal(portfolioDayMove([{ value: 100, change: -100 }]), null);
+  assert.equal(portfolioDayMove([{ value: 100, change: -120 }]), null);
+});
+
+test('a flat day is a real answer and says so', () => {
+  const out = portfolioDayMove([{ value: 100, change: 0 }]);
+  assert.equal(out.pct, 0);
+  assert.equal(out.gain, 0);
+  assert.equal(out.counted, 1);
 });

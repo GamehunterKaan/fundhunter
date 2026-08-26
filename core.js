@@ -366,18 +366,14 @@ export const STRINGS = {
     sharesOut: 'Toplam pay adedi',
     range52: '52 hafta',
     // --- portföy ---
-    favoritesToPortfolio: 'Ne zaman eklediğinizi ve o günden beri ne yaptığını Portföy’de görün →',
     navPortfolio: 'Portföy',
     portfolio: 'Portföy',
-    portfolioLede:
-      'Yıldızladığınız her şey, ne zaman eklediğinizle ve o günden bu yana ne ' +
-      'yaptığıyla. Kaç adet tuttuğunuzu yazarsanız aynı satır gerçek bir ' +
-      'pozisyona dönüşür.',
-    portfolioPrivate:
-      'Bunların hepsi yalnızca bu tarayıcıda duruyor. Hiçbir yere gönderilmiyor, ' +
-      'hiçbir yerde yedeklenmiyor: tarayıcı verisini silerseniz geri gelmez.',
-    portfolioEmpty: 'Henüz hiçbir şey yıldızlamadınız.',
-    portfolioEmptyHint: 'Bir fon ya da hisse sayfasındaki ★ ile başlayın.',
+    portfolioEmpty: 'Burada henüz bir şey yok.',
+    portAddCode: 'Kod',
+    portAddButton: 'Ekle',
+    portAddUnknown: 'Bu kodda bir fon ya da hisse yok.',
+    portAddDuplicate: 'Bu kod portföyünüzde zaten var.',
+    portRemove: 'Portföyden çıkar',
     posAdded: 'Eklendiği tarih',
     posSince: '{date} tarihinden beri',
     posSinceShort: 'Eklendiğinden beri',
@@ -407,6 +403,11 @@ export const STRINGS = {
     portSpecNote: 'Tuttuğunuz fonların spekülatif görünümlü hisselere ağırlığı, tutarınıza göre.',
     portOnlyWatching: 'Yalnızca izlediğiniz',
     portHolding: 'Tuttuklarınız',
+    portRing: 'Paranın dağılımı',
+    portToday: 'Son kapanıştan beri',
+    portTodayNote: 'Hisseler canlı, fonlar TEFAS’ın yayımladığı son fiyattan.',
+    portOthers: 'Diğerleri ({n})',
+    portRingPartial: '{v} hesaba katılmadı: önceki kapanışı yok.',
     // --- spekülatif tahtalar ---
     specPanel: 'Spekülatif görünüm',
     specChip: 'Spekülatif görünüm',
@@ -1123,18 +1124,14 @@ export const STRINGS = {
     sharesOut: 'Shares outstanding',
     range52: '52 weeks',
     // --- portfolio ---
-    favoritesToPortfolio: 'See when you added them and what they have done since, in Portfolio →',
     navPortfolio: 'Portfolio',
     portfolio: 'Portfolio',
-    portfolioLede:
-      'Everything you have starred, with the day you starred it and what it has ' +
-      'done since. Enter how many units you hold and the same row becomes a real ' +
-      'position.',
-    portfolioPrivate:
-      'All of this lives in this browser and nowhere else. Nothing is sent ' +
-      'anywhere and nothing is backed up: clear your browser data and it is gone.',
-    portfolioEmpty: 'You have not starred anything yet.',
-    portfolioEmptyHint: 'Start with the ★ on any fund or share page.',
+    portfolioEmpty: 'Nothing here yet.',
+    portAddCode: 'Code',
+    portAddButton: 'Add',
+    portAddUnknown: 'No fund or share with that code.',
+    portAddDuplicate: 'That code is already in your portfolio.',
+    portRemove: 'Remove from portfolio',
     posAdded: 'Added',
     posSince: 'since {date}',
     posSinceShort: 'Since added',
@@ -1164,6 +1161,11 @@ export const STRINGS = {
     portSpecNote: 'What your funds hold in shares with a speculative profile, weighted by your money.',
     portOnlyWatching: 'Watching only',
     portHolding: 'Held',
+    portRing: 'Where your money is',
+    portToday: 'Since the last close',
+    portTodayNote: 'Shares live, funds at the last price TEFAS published.',
+    portOthers: 'Others ({n})',
+    portRingPartial: '{v} left out: no previous close.',
     // --- speculative boards ---
     specPanel: 'Speculative profile',
     specChip: 'Speculative profile',
@@ -1707,6 +1709,75 @@ export function squarify(items, rect, weightOf = (d) => d.weight) {
   }
 
   return out;
+}
+
+// ------------------------------------------------------------ the ring
+//
+// The portfolio's donut. Here for the same reason squarify() is: it is
+// arithmetic over a circle with no opinion about money, and a label column that
+// silently overlaps itself is exactly the kind of thing a test should catch
+// rather than an eye.
+
+/** A full circle in radians. Angles here are turns, which is the readable unit. */
+export const TURN = Math.PI * 2;
+
+/**
+ * The two layouts, and every number in one of them is relative to another.
+ *
+ * The wide one spends its sides on labels around the ring. The tight one has no
+ * room for them, so it drops them, hands the naming to the legend underneath,
+ * and spends the width it saves on a bigger ring instead of on empty margins.
+ */
+export const ringGeometry = (tight) => (tight
+  ? { w: 320, h: 320, cx: 160, cy: 160, outer: 146, inner: 104, bend: 0, label: 0 }
+  : { w: 600, h: 352, cx: 300, cy: 172, outer: 132, inner: 96, bend: 147, label: 164 });
+
+/** A tenth of a unit is plenty of precision in a path, and keeps the markup readable. */
+export const svgN = (n) => Math.round(n * 10) / 10;
+
+/** A point on a circle, measured in turns clockwise from twelve o'clock. */
+export const ringPoint = (g, r, turn) => [
+  g.cx + r * Math.sin(turn * TURN),
+  g.cy - r * Math.cos(turn * TURN),
+];
+
+/** One slice of the ring: out along one radius, round, and back along the other. */
+export function ringPath(g, from, to) {
+  const wide = to - from > 0.5 ? 1 : 0;
+  const [x1, y1] = ringPoint(g, g.outer, from);
+  const [x2, y2] = ringPoint(g, g.outer, to);
+  const [x3, y3] = ringPoint(g, g.inner, to);
+  const [x4, y4] = ringPoint(g, g.inner, from);
+  return `M${svgN(x1)} ${svgN(y1)}`
+    + `A${g.outer} ${g.outer} 0 ${wide} 1 ${svgN(x2)} ${svgN(y2)}`
+    + `L${svgN(x3)} ${svgN(y3)}`
+    + `A${g.inner} ${g.inner} 0 ${wide} 0 ${svgN(x4)} ${svgN(y4)}Z`;
+}
+
+/**
+ * Push a column of labels apart so two neighbouring slices do not print on top
+ * of each other.
+ *
+ * A pass down the column opens every gap to the minimum; if that runs the last
+ * label off the bottom, the whole column shifts up and a pass back up reopens
+ * the gaps it just closed. Two thin slices side by side is the normal case
+ * rather than the exception — a portfolio is usually one or two big holdings
+ * and a row of small ones.
+ */
+export function spreadLabels(items, gap, top, bottom) {
+  items.sort((a, b) => a.y - b.y);
+  for (let i = 1; i < items.length; i++) {
+    items[i].y = Math.max(items[i].y, items[i - 1].y + gap);
+  }
+  const over = items.length ? items.at(-1).y - bottom : 0;
+  if (over > 0) {
+    for (const it of items) it.y -= over;
+    for (let i = items.length - 2; i >= 0; i--) {
+      items[i].y = Math.min(items[i].y, items[i + 1].y - gap);
+    }
+  }
+  for (const it of items) it.y = Math.max(it.y, top);
+  return items;
 }
 
 // ---------------------------------------------------------------- formatting

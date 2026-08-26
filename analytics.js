@@ -1653,3 +1653,94 @@ export function portfolioMix(rows) {
   }
   return { mix, counted: round2(counted) };
 }
+
+/**
+ * How many slices a ring can carry before it stops being a chart.
+ *
+ * Eight is the palette, and it is also about the limit of what anyone can hold
+ * against a legend. A portfolio of thirty positions drawn as thirty slices is a
+ * colour wheel: the tail past this is collected into one slice that says how
+ * many positions are in it, which is the honest way to draw a long tail.
+ */
+export const SLICE_MAX = 8;
+
+/**
+ * The portfolio as slices of a ring, largest first.
+ *
+ * Only positions carrying a value can be drawn. A starred fund with no size
+ * entered still belongs on the page — it answers "what has this done since I
+ * starred it" — but it is not part of what you hold, and a ring that gave it a
+ * slice would be inventing money.
+ *
+ * `share` is rounded for printing and does not necessarily total 100. Anything
+ * drawing the ring must divide `value` by `total` itself, or eight roundings
+ * leave a wedge of empty ring at the end.
+ */
+export function portfolioSlices(positions, max = SLICE_MAX) {
+  const held = (positions ?? [])
+    .filter((p) => p?.value != null && Number.isFinite(p.value) && p.value > 0)
+    .sort((a, b) => b.value - a.value);
+  let total = 0;
+  for (const p of held) total += p.value;
+  if (!held.length || total <= 0) return null;
+
+  const keep = held.length > max ? max - 1 : held.length;
+  const slices = held.slice(0, keep).map((p) => ({
+    code: p.code,
+    share: round2((p.value / total) * 100),
+    value: round2(p.value),
+    rest: 0,
+  }));
+  const tail = held.slice(keep);
+  if (tail.length) {
+    let value = 0;
+    for (const p of tail) value += p.value;
+    slices.push({
+      code: null, share: round2((value / total) * 100), value: round2(value), rest: tail.length,
+    });
+  }
+  return { slices, total: round2(total), of: held.length };
+}
+
+/**
+ * What the whole portfolio has done since the last close.
+ *
+ * Each position brings its own `change` in per cent, and the two kinds get it
+ * from different places: a share from the delayed live quote, a fund from the
+ * last net asset value TEFAS published. A fund's move today CAN be estimated
+ * from what its shares are trading at, and the dashboard does exactly that —
+ * but an estimate has no business inside a figure printed in lira beside a
+ * total, so this takes the last published price and the page says it runs a
+ * business day behind.
+ *
+ * The arithmetic runs backwards, from what a holding is worth now to what it
+ * was worth at the last close: ₺102 after a 2% day gained ₺2, not ₺2.04.
+ * Positions with no move are left out of both sides rather than counted as
+ * flat — a fund nobody could price did not stand still — and how much value
+ * that leaves covered is returned so the page can say so.
+ */
+export function portfolioDayMove(positions) {
+  let now = 0;
+  let before = 0;
+  let counted = 0;
+  let of = 0;
+  for (const p of positions ?? []) {
+    if (p?.value == null || !Number.isFinite(p.value)) continue;
+    of += p.value;
+    const ch = p.change;
+    // -100% is a price of zero: there is no previous value to divide by, and a
+    // move past it is bad data rather than a very bad day.
+    if (ch == null || !Number.isFinite(ch) || ch <= -100) continue;
+    now += p.value;
+    before += p.value / (1 + ch / 100);
+    counted++;
+  }
+  if (!counted || before <= 0) return null;
+  return {
+    pct: round2((now / before - 1) * 100),
+    gain: round2(now - before),
+    covered: round2(now),
+    of: round2(of),
+    counted,
+  };
+}

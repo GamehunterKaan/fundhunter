@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import {
   fold, fmtMoney, fmtPct, fmtPoints, fmtInt, parseJsonl, filterFunds, sortFunds, LEVERED_FROM, CRASH_PROOF_FROM, THEME_IDS, MIN_THEME,
+  ringGeometry, ringPoint, ringPath, spreadLabels, TURN,
   compositionSegments, industryComposition, assetBreakdown,
   returnOver, returnYtd, returnForHorizon, volatility, maxDrawdown, indexSeries,
   alignAndIndex, signOf, HORIZONS, horizonOf, SORTS, STRINGS, LANGS,
@@ -940,6 +941,70 @@ test('a treemap with nothing to lay out is empty, not broken', () => {
   assert.deepEqual(squarify(null, RECT), []);
   assert.deepEqual(squarify([{ weight: 1 }], { x: 0, y: 0, w: 0, h: 100 }), [],
     'a box with no width holds nothing');
+});
+
+// ---------------------------------------------------------------- the ring
+
+test('a slice starts at twelve and runs clockwise', () => {
+  const g = ringGeometry(false);
+  // Zero turns is straight up, a quarter is to the right. Drawn the other way
+  // round, the biggest holding would start at three o'clock and read as second.
+  const [tx, ty] = ringPoint(g, g.outer, 0);
+  assert.equal(Math.round(tx), g.cx);
+  assert.equal(Math.round(ty), g.cy - g.outer);
+  const [rx, ry] = ringPoint(g, g.outer, 0.25);
+  assert.equal(Math.round(rx), g.cx + g.outer);
+  assert.equal(Math.round(ry), g.cy);
+});
+
+test('a slice bigger than half the ring takes the long way round', () => {
+  const g = ringGeometry(false);
+  // The large-arc flag. Without it an arc of 200 degrees is drawn as the 160
+  // degrees on the other side, and a fund that is most of the portfolio comes
+  // out as the minority of the ring.
+  const outer = new RegExp(`A${g.outer} ${g.outer} 0 1 1`);
+  const inner = new RegExp(`A${g.outer} ${g.outer} 0 0 1`);
+  assert.match(ringPath(g, 0, 0.6), outer, 'over half is the long arc');
+  assert.match(ringPath(g, 0, 0.4), inner, 'under half is the short one');
+  // Out along one radius, round the outside, in along the other, back round the
+  // inside — so the slice is a band and not a wedge to the centre.
+  const d = ringPath(g, 0.1, 0.2);
+  assert.equal((d.match(/A/g) ?? []).length, 2, 'two arcs, outer and inner');
+  assert.ok(d.endsWith('Z'), 'and closed');
+});
+
+test('the ring geometry fits inside its own frame', () => {
+  for (const tight of [false, true]) {
+    const g = ringGeometry(tight);
+    assert.ok(g.inner < g.outer, 'the hole has to be smaller than the ring');
+    assert.ok(g.cx - g.outer >= 0 && g.cx + g.outer <= g.w, 'ring is inside the box');
+    assert.ok(g.cy - g.outer >= 0 && g.cy + g.outer <= g.h);
+    if (!tight) assert.ok(g.cx + g.label < g.w, 'labels need room to the side');
+  }
+});
+
+test('labels are pushed apart rather than printed on top of each other', () => {
+  // Four slices in a row, all tiny, all wanting the same 6mm of ring: the case
+  // that draws four names on top of one another if nothing separates them.
+  const items = [{ y: 100 }, { y: 104 }, { y: 108 }, { y: 112 }];
+  const out = spreadLabels(items, 30, 24, 326);
+  for (let i = 1; i < out.length; i++) {
+    assert.ok(out[i].y - out[i - 1].y >= 30 - 1e-9, `gap ${i} is ${out[i].y - out[i - 1].y}`);
+  }
+});
+
+test('a column too low to fit is lifted, not run off the bottom', () => {
+  const items = [{ y: 300 }, { y: 305 }, { y: 310 }];
+  const out = spreadLabels(items, 30, 24, 326);
+  assert.ok(out.at(-1).y <= 326, 'the last one is inside the frame');
+  assert.ok(out[0].y >= 24, 'and the first has not been pushed off the top');
+  for (let i = 1; i < out.length; i++) {
+    assert.ok(out[i].y - out[i - 1].y >= 30 - 1e-9, 'the gaps survived the lift');
+  }
+});
+
+test('a full turn is a full circle', () => {
+  assert.equal(TURN, Math.PI * 2);
 });
 
 test('the speculative filter runs in both directions', () => {

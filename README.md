@@ -1190,36 +1190,88 @@ which file its history comes from and which page it links to.
 
 ## The portfolio
 
-`#/portfoy` is two questions that turned out to be one. "What has this done
-since I starred it" needs the date; "what is my portfolio worth" needs the date
-and a size. So **a position is a favourite that knows when it arrived**, and
-optionally how much of it there is.
+`#/portfoy` is its own list. **A favourite and a position are not the same
+thing** — you can follow a fund for a year without owning any of it, and you can
+hold something you have no interest in watching — so the star and the portfolio
+are two lists in two storage keys:
 
-Starring anything now records the day. Type a number of units into the row and
-the same line becomes a real holding with a value, a cost and a profit; leave it
-empty and the row still answers the first question, which is why the page is
-worth opening before anybody has typed anything into it.
+```
+fh-favs       ["TLY", "ASELS"]
+fh-positions  { TLY: { at: "2026-08-22", units: 12.5, cost: 100000 } }
+```
+
+A code and a size opens a position, dated today, which is the only date the page
+can honestly claim for something just typed in. A `×` on the row closes it, and
+leaves the star alone.
+
+They were one list before this, keyed by code and carrying the sizes. The
+migration keeps every code as a favourite and promotes only the entries that
+actually carried units — an entry with no size was never a holding.
 
 ```
 Total value  ₺310.1k     Cost  ₺213.5k     Profit  ₺96.6k  (+45.3%)
 The same money in cash  9.6%  (₺233.9k)    Gap  +35.7 points
 ```
 
-### It is one browser's local storage, and the page says so
+### The ring
+
+The page opens on what you hold, drawn as one ring — a slice per position,
+largest first, clockwise from twelve — with the two figures the page exists to
+answer in the hole in the middle:
+
+```
+                 TOTAL VALUE
+                   ₺1.8 M
+              SINCE THE LAST CLOSE
+              ▲ 1.05%  ·  ₺18.8 K
+```
+
+**The move is measured backwards, from today's value to the last close.** A
+holding worth ₺102 after a 2% day gained ₺2, not ₺2.04. Taking two per cent of
+what something is worth *now* is the easy version and it overstates every green
+day; the ring divides today's value by the move to recover the previous close
+and subtracts.
+
+**Shares are live; funds are the last published price.** A fund's move today can
+be estimated from what its shares are trading at — the dashboard does exactly
+that, and says how much of the portfolio it could price. That estimate has no
+business inside a figure printed in lira next to a total, so the ring takes the
+last net asset value TEFAS published instead. It runs a business day behind, and
+which half is which is a tooltip on the figure rather than a paragraph under the
+chart.
+
+A position nobody could price is left out of both sides rather than counted as
+flat, and the value that leaves out is named underneath. A fund that could not
+be priced did not stand still.
+
+**Angles come from the values, never from the rounded shares.** Eight roundings
+of two decimals leave a visible wedge of unpainted ring at the end.
+
+Past eight holdings the tail becomes one grey slice that says how many are in
+it. Eight is the palette and roughly the limit of what anyone can hold against a
+legend; a portfolio of thirty positions drawn as thirty slices is a colour
+wheel. The geometry lives in `core.js` beside `squarify()` for the same reason
+that does — a label column that silently prints two names on top of each other
+is something a test should catch rather than an eye.
+
+Two layouts, picked off one media query that both the stylesheet and `ui.js`
+read. Wide, the ring puts its labels around the outside on leader lines. Narrow,
+there is no room for them, so it drops them, hands the naming to a legend and
+spends the width on a bigger ring instead of on empty margins.
+
+### It is one browser's local storage
 
 Nothing leaves the machine. There is no account, no sync and no backup: clear
-your browser data and the portfolio is gone. That sentence sits at the top of
-the page, above the table, **before** anybody types a year of trades into
-something that looks like a broker account and is not one.
+your browser data and the portfolio is gone.
 
 ### What it costs, when you do not say
 
 Leave the cost blank and the position is valued from the price on the day it was
-starred — the honest default for a portfolio built out of a watchlist. Rows
+added — the honest default for a portfolio typed in from a watchlist. Rows
 priced that way are marked `assumed cost`, because a guess presented as a
 receipt is worse than either.
 
-A position starred before the price history reaches back that far keeps its
+A position dated before the price history reaches back that far keeps its
 value and loses its profit: how much it is worth is known, what it cost is not,
 and inventing the difference would be inventing a gain.
 
@@ -1231,11 +1283,11 @@ positions were left out.
 
 ### The date a figure is measured from is the date it says
 
-A position starred on a Saturday is measured from Friday's close, because that
-is the last price there was. `priceEntryOn()` returns the date it actually used
-and the row prints that date — the first version asked for Saturday, got
-Friday's number and labelled it "since Saturday", which is a figure stated
-against a day it was not measured from.
+A position dated to a Saturday is measured from Friday's close, because that is
+the last price there was. `priceEntryOn()` returns the date it actually used and
+the row prints that date — the first version asked for Saturday, got Friday's
+number and labelled it "since Saturday", which is a figure stated against a day
+it was not measured from.
 
 ### The cash comparison is money-weighted
 

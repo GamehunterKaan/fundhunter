@@ -46,6 +46,18 @@
   --g-metals: #008300;
   --g-foreign: #4a3aa7;
   --g-other: #e34948;
+  /* The ring's slots. Held apart from the asset-group palette on purpose: a
+   * holding is not an asset class, and a share drawn in the metals green beside
+   * a mix bar that means metals by it would be reading a colour as a fact. */
+  --slice-1: #2a78d6;
+  --slice-2: #eb6834;
+  --slice-3: #1baf7a;
+  --slice-4: #eda100;
+  --slice-5: #6b4fbb;
+  --slice-6: #e87ba4;
+  --slice-7: #0f8f95;
+  --slice-8: #c0392e;
+  --slice-rest: #9aa2b1;
 
   --font-ui: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -85,6 +97,17 @@
     --g-metals: #008300;
     --g-foreign: #9085e9;
     --g-other: #e66767;
+
+    --slice-1: #3987e5;
+    --slice-2: #d95926;
+    --slice-3: #199e70;
+    --slice-4: #c98500;
+    --slice-5: #9085e9;
+    --slice-6: #d55181;
+    --slice-7: #3fb9bd;
+    --slice-8: #e66767;
+    --slice-rest: #6f7889;
+
   }
 }
 
@@ -115,6 +138,15 @@
   --g-metals: #008300;
   --g-foreign: #9085e9;
   --g-other: #e66767;
+  --slice-1: #3987e5;
+  --slice-2: #d95926;
+  --slice-3: #199e70;
+  --slice-4: #c98500;
+  --slice-5: #9085e9;
+  --slice-6: #d55181;
+  --slice-7: #3fb9bd;
+  --slice-8: #e66767;
+  --slice-rest: #6f7889;
 }
 
 /* ---------------------------------------------------------------- base */
@@ -633,6 +665,170 @@ ul.comp-legend {
   list-style: none;
   margin: 0.85rem 0 0;
   padding: 0;
+}
+
+/* ------------------------------------------------------------ the portfolio */
+
+/* Opening a position: a code, a size, and the button. One row on a desktop,
+ * wrapping to as many as it needs on a phone. */
+.port-add-panel {
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+.port-add-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+/* The table's inputs are right-aligned because they sit under numeric columns.
+ * These sit on their own and are read left to right, placeholder included. */
+.port-add-fields .port-input {
+  flex: 1 1 7rem;
+  min-width: 0;
+  text-align: left;
+}
+.port-add-fields .port-add-code {
+  flex: 1 1 9rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+}
+.port-add-go {
+  flex: 0 0 auto;
+  padding-inline: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.port-add-error:empty {
+  display: none;
+}
+.port-add-error {
+  margin: 0.55rem 0 0;
+  font-size: 0.83rem;
+  color: var(--down);
+}
+
+/* Closing a position. Deliberately quiet until the row is under the pointer:
+ * it is the one destructive control on the page. */
+.port-remove {
+  border: 0;
+  background: none;
+  padding: 0.1rem 0.3rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--ink-muted);
+  cursor: pointer;
+  border-radius: 6px;
+}
+.port-remove:hover,
+.port-remove:focus-visible {
+  color: var(--down);
+  background: color-mix(in srgb, var(--down) 12%, transparent);
+}
+
+/* ---------------------------------------------------------------- the ring */
+
+/* One holding per slice, the total in the hole in the middle. Two layouts, and
+ * ui.js picks between them off the same media query written here: outside
+ * labels need side room a phone does not have, so the narrow one drops them,
+ * hands the naming to the legend, and spends the width on a bigger ring. */
+.donut {
+  display: block;
+  width: 100%;
+  max-width: 42rem;
+  height: auto;
+  margin: 0.2rem auto 0;
+}
+.donut.is-tight {
+  max-width: 21rem;
+}
+.donut-slice {
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+/* One holding is the whole ring. It takes its colour and its width from its own
+ * attributes, so it must not inherit the slice rule's hairline — on a slice the
+ * stroke is the gap between neighbours; here the stroke is the ring itself. */
+.donut-whole {
+  fill: none;
+}
+.donut-leader {
+  fill: none;
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.donut-label {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  fill: var(--ink-muted);
+}
+.donut-code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+.donut-figure {
+  font-variant-numeric: tabular-nums;
+}
+.donut-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  fill: var(--ink-muted);
+}
+.donut-total {
+  font-family: var(--font-ui);
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  fill: var(--ink);
+}
+.donut-move {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  fill: var(--ink-2);
+}
+/* SVG text takes its colour from `fill`, so the up/down classes cannot be the
+ * ones the rest of the site uses on HTML deltas. */
+.donut-move.up {
+  fill: var(--up);
+}
+.donut-move.down {
+  fill: var(--down);
+}
+/* The tight ring is drawn in a narrower viewBox, so the same unit renders
+ * larger. The centre is set back down to the size it had in the wide one. */
+.donut.is-tight .donut-total {
+  font-size: 24px;
+}
+.donut.is-tight .donut-eyebrow {
+  font-size: 8.5px;
+}
+.donut.is-tight .donut-move {
+  font-size: 12.5px;
+}
+
+/* The legend names what the labels around the ring cannot fit, so it appears
+ * only in the layout that has no labels. */
+.donut-legend {
+  display: none;
+}
+.donut.is-tight ~ .donut-legend {
+  display: flex;
+  margin-bottom: 0.9rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .donut-slice {
+    transition: opacity 0.12s ease;
+  }
+}
+.port-ring:hover .donut-slice:hover {
+  opacity: 0.82;
 }
 
 /* ---------------------------------------------------------------- highlights */
