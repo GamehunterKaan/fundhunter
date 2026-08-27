@@ -5,6 +5,7 @@
 //   node scripts/fetch-holdings.mjs --month 2026-07
 //   node scripts/fetch-holdings.mjs --no-previous  # skip the comparison month
 //   node scripts/fetch-holdings.mjs --report     # coverage only, writes nothing
+//   node scripts/fetch-holdings.mjs --force      # re-ask for filings we already have
 //
 // The latest month is what gets published — this answers "what does it hold now",
 // not "what did it hold". The month before is fetched too, but only its WEIGHTS
@@ -14,8 +15,10 @@
 // Holdings are written one file per fund so a re-run rewrites only the funds that
 // actually changed.
 //
-// Downloads are cached on disk, so the expensive first pass happens once and
-// later runs re-fetch only reports that are new.
+// A fund is asked for a report only when it might have a new one: a filing is
+// left alone for four weeks, and one we already hold is never fetched twice. On
+// most days that is the whole universe skipped in a few seconds, which is what
+// makes this safe to run daily rather than by hand once a month.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -54,6 +57,65 @@ function filingDays(month) {
     days.push(at.toISOString().slice(0, 10));
   }
   return days;
+}
+
+/**
+ * Days a fund is left alone after it files.
+ *
+ * A portfolio report is monthly and never changes once filed, and the deadline
+ * is the tenth of the following month. So a fund that filed on the 4th has
+ * nothing new to say until about the 1st of the month after — four weeks is the
+ * shortest wait that never asks a fund for a report it cannot have yet.
+ */
+const RECHECK_AFTER_DAYS = 28;
+
+/** KAP dates its filings the Turkish way: "04.08.2026 16:12:34". */
+function kapDate(text) {
+  const m = /^(\d{2})\.(\d{2})\.(\d{4})/.exec(String(text ?? ''));
+  return m ? new Date(Date.UTC(Number(m[3]), Number(m[2]) - 1, Number(m[1]))) : null;
+}
+
+/**
+ * What we already hold for a fund: which disclosure, and when it was filed.
+ *
+ * Read from the file the last run wrote rather than from a ledger kept beside
+ * it. The filing IS the state — a second copy of it could go stale, and this one
+ * cannot disagree with what the site is serving.
+ */
+async function heldFiling(code) {
+  try {
+    const f = JSON.parse(await fs.readFile(path.join(OUT, `${code}.json`), 'utf8'));
+    return { disclosure: f.disclosure ?? null, filedAt: kapDate(f.publishedAt) };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether this filing is worth downloading, and why not when it is not.
+ *
+ * The run's expensive half is one PDF per fund, fetched and parsed against KAP's
+ * throttle — hours of it across the universe. Two things make that waste:
+ *
+ *   we already hold the disclosure being listed   nothing has changed
+ *   it was filed less than four weeks ago         the next one is not due yet
+ *
+ * The first is exact and catches a re-run the same day. The second is what makes
+ * a DAILY run cheap: a fund is left alone until its next report is plausible,
+ * then asked for every day until the new one appears, at which point the clock
+ * starts again. A fund that re-files inside its four weeks is still picked up,
+ * because a disclosure we have never seen is never skipped.
+ */
+function dueFor(held, row, now) {
+  if (!held) return null;
+  if (held.disclosure != null && String(held.disclosure) === String(row.disclosureIndex)) {
+    return 'already have this filing';
+  }
+  if (!held.filedAt) return null;
+  const days = (now - held.filedAt) / 86400000;
+  return days < RECHECK_AFTER_DAYS
+    ? `filed ${Math.floor(days)} days ago, next one not due`
+    : null;
 }
 
 /** The month before `month`, as YYYY-MM. */
@@ -143,6 +205,9 @@ async function main() {
   const month = arg('month', lastMonth());
   const only = arg('codes')?.split(',').map((s) => s.trim().toUpperCase()).filter(Boolean) ?? null;
   const reportOnly = has('report');
+  // Ignore the four-week rule and re-ask for everything. For a re-parse after
+  // the reader changes, when what is on disk is the thing being replaced.
+  const force = has('force');
   const limit = Number(arg('limit', '0')) || 0;
   // On by default: the fund page shows how each position moved since the last
   // filing, and after the first run the earlier month is already cached.
@@ -184,7 +249,11 @@ async function main() {
   if (limit) targets = targets.slice(0, limit);
   console.log(`  ${targets.length} of them are funds we cover\n`);
 
-  const stats = { ok: 0, flagged: 0, empty: 0, failed: 0, skipped: 0, holdings: 0, written: 0, compared: 0 };
+  const stats = {
+    ok: 0, flagged: 0, empty: 0, failed: 0, skipped: 0, holdings: 0, written: 0,
+    compared: 0, fresh: 0,
+  };
+  const now = new Date();
   const reasons = new Map();
   const failures = [];
   let done = 0;
@@ -192,6 +261,14 @@ async function main() {
   for (const r of targets) {
     let outcome;
     try {
+      // Before anything is downloaded: most of the universe has nothing new to
+      // say on most days, and asking anyway is the whole cost of the run.
+      const why = force ? null : dueFor(await heldFiling(r.fundCode), r, now);
+      if (why) {
+        stats.fresh++;
+        if (++done % 50 === 0) console.log(`  …${done}/${targets.length}`);
+        continue;
+      }
       if (!r.attachmentCount) {
         outcome = ['failed', 'Disclosure has no attachment'];
       } else {
@@ -220,6 +297,10 @@ async function main() {
   if (compare) console.log(`  compared to ${compare}: ${stats.compared} funds`);
   console.log(`not held           : ${stats.empty} funds hold nothing`);
   console.log(`could not read     : ${stats.failed}`);
+  if (stats.fresh) {
+    console.log(`up to date, not asked for: ${stats.fresh} of ${targets.length} ` +
+      `(a filing is left alone for ${RECHECK_AFTER_DAYS} days)`);
+  }
   if (stats.skipped) console.log(`outside our universe: ${stats.skipped}`);
   for (const [reason, n] of [...reasons].sort((a, b) => b[1] - a[1])) {
     console.log(`    ${String(n).padStart(4)}  ${reason}`);

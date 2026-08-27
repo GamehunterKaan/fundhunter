@@ -1,0 +1,91 @@
+name: Prices and contents
+
+# What every page opens on: today's NAV for every fund, what each one holds by
+# asset class, the benchmarks the tape runs, and the share index. Everything
+# here is cheap against a warm cache — TEFAS is asked by date range, and only
+# the newest range is ever new — so this is the job that runs every day.
+#
+# What is NOT here: the falls (weekly, in crashes.yml, because past falls do not
+# change) and the KAP portfolio reports (holdings.yml, because a filing is
+# monthly and the run only asks for the ones that could have moved).
+
+on:
+  schedule:
+    # 06:15 UTC ≈ 09:15 Europe/Istanbul — TEFAS publishes the previous trading
+    # day's valuations overnight, so this picks them up once they are settled.
+    - cron: '15 6 * * 1-6'
+  workflow_dispatch:
+    inputs:
+      months:
+        description: 'Months of history to fetch'
+        required: false
+        default: '12'
+
+permissions:
+  contents: write
+
+# One data job at a time across all three workflows. They each run
+# build-analytics and commit the funds.json it writes, so two of them finishing
+# together would be two rewrites of the same lines and a rebase that cannot
+# resolve itself.
+concurrency:
+  group: fundhunter-data
+  cancel-in-progress: false
+
+jobs:
+  prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # The fetches cache every response by the date range it covers, and a past
+      # range never changes. Without this the runner starts cold every night and
+      # re-fetches a year of history to learn one new day — which is where the
+      # 32 minutes went. KAP's PDFs are excluded: they are 1.3GB, and the
+      # holdings job is built not to want them.
+      - name: Restore the response cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache
+            !.cache/kap
+          key: tefas-${{ github.run_id }}
+          restore-keys: |
+            tefas-
+
+      - name: Verify core logic before touching data
+        run: npm test
+
+      - name: Fetch TEFAS funds and history
+        run: node scripts/fetch-tefas.mjs --months=${{ github.event.inputs.months || '12' }}
+
+      - name: Fetch benchmarks (BIST, FX, gold, money-market)
+        run: node scripts/fetch-benchmarks.mjs
+
+      # One request per market for the sector and the dividend yield of every
+      # listing the funds hold. Optional by design — without data/sectors.json
+      # the themes and yields are left out — so a bad minute here does not throw
+      # away the history above.
+      - name: Fetch sectors and dividend yields
+        continue-on-error: true
+        run: node scripts/fetch-sectors.mjs
+
+      # One scanner request for the whole exchange, then one Yahoo request per
+      # share for its history. Everything is cached by date, so a re-run in the
+      # same day is free.
+      - name: Fetch Borsa İstanbul shares and their history
+        continue-on-error: true
+        run: node scripts/fetch-stocks.mjs
+
+      - name: Build analytics
+        run: node scripts/build-analytics.mjs
+
+      - uses: ./.github/actions/commit-data
+        with:
+          message: update fund prices and contents

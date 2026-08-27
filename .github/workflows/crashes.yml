@@ -1,0 +1,66 @@
+name: Falls
+
+# What every fund did while the market was falling. Weekly, not daily, for the
+# reason the script itself gives: a fall that has already happened does not
+# change, and every NAV at either end of one is cached by date. Running it every
+# night was eight minutes a day spent re-learning the same past — the cache was
+# being thrown away by the runner, so "fetched once" became "fetched nightly".
+#
+# A new episode only appears when BIST falls far enough for crashEpisodes() to
+# cut a new one out of the benchmark series, which is a thing that happens a few
+# times a year rather than a few times a week.
+
+on:
+  schedule:
+    # Sunday lunchtime: nothing else is running, and the week's benchmarks have
+    # all landed by then.
+    - cron: '0 12 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fundhunter-data
+  cancel-in-progress: false
+
+jobs:
+  crashes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      # The whole point of the weekly cadence: with the cache restored, a run
+      # that finds no new episode is a few seconds of cache hits.
+      - name: Restore the response cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache
+            !.cache/kap
+          key: tefas-${{ github.run_id }}
+          restore-keys: |
+            tefas-
+
+      - name: Verify core logic before touching data
+        run: npm test
+
+      # Reads the BIST series from data/benchmarks.jsonl, which the daily job
+      # commits, so this does not have to fetch it again.
+      - name: Measure what funds did through BIST's falls
+        run: node scripts/fetch-crashes.mjs
+
+      # The per-fund `cr` figure is derived, so the falls only reach the site
+      # through another analytics pass.
+      - name: Build analytics
+        run: node scripts/build-analytics.mjs
+
+      - uses: ./.github/actions/commit-data
+        with:
+          message: update crash protection

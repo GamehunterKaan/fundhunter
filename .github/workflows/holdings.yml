@@ -1,0 +1,66 @@
+name: Holdings
+
+# Every fund's individual positions, from its monthly KAP portfolio report.
+#
+# This used to be a thing run by hand, because asking 880 funds for a PDF and
+# parsing each one takes hours against KAP's throttle. It does not any more: a
+# filing is left alone for four weeks and one we already hold is never fetched
+# twice, so on most days the run asks for nothing and finishes in seconds. It is
+# only in the first days of a month — when the previous month's reports are
+# actually being filed — that there is work to do, and then it picks them up the
+# day they appear rather than whenever somebody remembers to run it.
+#
+# Nothing is cached: the PDFs are 1.3GB and the rule above means the ones we
+# already have are never requested, which is the same saving without the storage.
+
+on:
+  schedule:
+    # Late morning Istanbul time. Filings go up through the working day, and the
+    # prices job has finished by now.
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      month:
+        description: 'Report month, YYYY-MM (default: last month)'
+        required: false
+      force:
+        description: 'Re-ask for filings we already hold'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fundhunter-data
+  cancel-in-progress: false
+
+jobs:
+  holdings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Verify core logic before touching data
+        run: npm test
+
+      - name: Fetch the KAP portfolio reports that are due
+        run: |
+          node scripts/fetch-holdings.mjs \
+            ${{ github.event.inputs.month && format('--month {0}', github.event.inputs.month) || '' }} \
+            ${{ github.event.inputs.force == 'true' && '--force' || '' }}
+
+      # The holdings feed the speculative-exposure figures, the themes and the
+      # share-ownership tables, all of which live in funds.json and stocks.json.
+      - name: Build analytics
+        run: node scripts/build-analytics.mjs
+
+      - uses: ./.github/actions/commit-data
+        with:
+          message: update fund holdings

@@ -328,6 +328,65 @@ upper-case one, which cost the net asset value across a whole template.
 
 ---
 
+## Three jobs, three cadences
+
+The data is refreshed by GitHub Actions and committed as JSON. Not by one job:
+the work divides on how often it can possibly change.
+
+| Workflow | When | What |
+|---|---|---|
+| `prices.yml` | daily, 06:15 UTC | NAVs, what each fund holds by asset class, benchmarks, the share index |
+| `holdings.yml` | daily, 10:00 UTC | the KAP portfolio reports that are due — usually none |
+| `crashes.yml` | Sundays | what every fund did through BIST's falls |
+
+They share one `concurrency` group, because each ends with a `build-analytics`
+pass that rewrites `funds.json`, and two of those finishing together is a rebase
+that cannot resolve itself. The commit-and-push step is a composite action they
+all call rather than three copies of a retry loop that has to get "rebase, then
+push again" right.
+
+### Why the daily job is minutes and not most of an hour
+
+**Every response is cached by the date range it covers, and a past range never
+changes.** The year of history is fetched in fixed windows, so of 106 allocation
+requests exactly one is new on any given day.
+
+None of which helped, because `.cache/` is git-ignored and nothing restored it
+between runs. Every night the runner started cold and re-fetched a year to learn
+one day: 32 minutes for TEFAS and 8 more for the falls, which the crash script's
+own comment describes as "only ever fetched once". An `actions/cache` step is the
+whole fix. KAP's PDFs are excluded from it — they are 1.3GB, and the holdings job
+is built not to want them.
+
+### Why the falls are weekly
+
+A fall that has already happened does not change. A new episode appears only when
+BIST drops far enough for `crashEpisodes()` to cut one out of the benchmark
+series, which happens a few times a year. Measuring it nightly was eight minutes
+a day spent re-learning the same past.
+
+### Why the holdings job can run daily at all
+
+A KAP portfolio report is monthly, and the deadline is the tenth of the following
+month. Asking 880 funds for a PDF and parsing each one takes hours against KAP's
+throttle, which is why this used to be run by hand.
+
+It is not run by hand any more, because **a fund is only asked for a report when
+it could plausibly have a new one**:
+
+- the disclosure being listed is one we already hold → skip, nothing has changed
+- it was filed less than 28 days ago → skip, the next one is not due
+
+The state is the filing itself — every `data/holdings/CODE.json` already records
+its `publishedAt` and `disclosure` — rather than a ledger kept beside it that
+could go stale and disagree with what the site is serving.
+
+So on most days the job asks for nothing and finishes in seconds. In the first
+days of a month, when the previous month's reports are actually being filed, it
+picks each one up the day it appears and then leaves that fund alone for four
+weeks. A fund that re-files inside its four weeks is still caught, because a
+disclosure we have never seen is never skipped.
+
 ## Data model
 
 History is **cumulative and append-only**. The fetch window slides forward, but
