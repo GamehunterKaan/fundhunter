@@ -296,6 +296,12 @@ button {
   background: var(--accent-soft);
 }
 
+/* Drawn only by the bottom tab bar. On a desktop the nav is five words and an
+ * icon beside each would be decoration. */
+.nav-icon {
+  display: none;
+}
+
 .masthead-actions {
   display: flex;
   align-items: center;
@@ -735,37 +741,188 @@ ul.comp-legend {
   color: var(--down);
 }
 
-/* The cost field and the button that fills it from today's price. */
-.port-cost {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.25rem;
-}
-.port-cost .port-input {
-  min-width: 0;
-}
-.port-mini {
-  flex: 0 0 auto;
-  width: 1.5rem;
-  height: 1.5rem;
-  padding: 0;
-  border: 1px solid var(--hairline);
-  border-radius: 6px;
-  background: var(--surface);
-  color: var(--ink-2);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
+/* The triangle that opens a row's drawer. Quiet until the row is under the
+ * pointer, and turned when it is open — the row itself is the affordance. */
+.port-open {
+  border: 0;
+  background: none;
+  padding: 0.1rem 0.25rem;
+  font-size: 0.7rem;
   line-height: 1;
+  color: var(--ink-muted);
   cursor: pointer;
+  transition: transform 0.12s ease, color 0.12s ease;
 }
-.port-mini:hover:not(:disabled) {
-  border-color: var(--accent);
+.port-row:hover .port-open {
+  color: var(--ink);
+}
+.port-row.is-open .port-open {
+  transform: rotate(90deg);
   color: var(--accent);
 }
-.port-mini:disabled {
-  opacity: 0.35;
-  cursor: default;
+.port-row.is-open > td {
+  background: var(--surface);
+}
+
+/* The drawer. A row of its own behind the summary row, so the table keeps one
+ * set of columns and the editor is free of them. */
+.port-drawer-row > td {
+  padding: 0;
+  border-top: 0;
+  background: var(--surface);
+}
+.port-drawer {
+  padding: 0.85rem 1rem 1rem;
+  border-left: 2px solid var(--accent);
+}
+.lot-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.6rem;
+}
+.lot-head h3 {
+  margin: 0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.lot-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+
+/* One grid for the lots and the two forms under them, so the day, the size and
+ * the money line up down the whole drawer instead of drifting a few pixels
+ * between the list and the thing that adds to it.
+ *
+ * Capped: the drawer is as wide as the table, and a box for a number stretched
+ * across a thousand pixels reads as a mistake rather than as a field. */
+.lot-list,
+.lot-forms {
+  max-width: 44rem;
+}
+.lot-row,
+.lot-form {
+  display: grid;
+  /* The last column carries both the delete cross and the submit button, so it
+   * is sized for the wider of the two — otherwise the button overhangs the
+   * field beside it. Both sit at its right edge, so the cross does not drift. */
+  grid-template-columns: 3.2rem 8.5rem minmax(0, 1fr) minmax(0, 1.4fr) 4rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+}
+.lot-row + .lot-row {
+  border-top: 1px solid var(--hairline);
+}
+.lot-kind {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.lot-row.is-sale .lot-kind,
+.lot-form.is-sale .lot-kind {
+  color: var(--down);
+}
+/* `.port-input` is 7rem wide because it used to sit in a table cell. In the
+ * drawer the grid owns the widths, so the field fills the column it was given
+ * and the delete button lands beside it instead of a hand's width away. */
+.lot-row .port-input,
+.lot-form .port-input {
+  width: 100%;
+  min-width: 0;
+}
+.lot-row .port-date,
+.lot-form .port-date {
+  width: 100%;
+}
+.lot-date {
+  margin-top: 0;
+}
+.lot-remove {
+  justify-self: end;
+}
+
+.lot-forms {
+  margin-top: 0.7rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--rule);
+}
+.lot-go {
+  grid-column: 5 / span 1;
+  justify-self: end;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+/* "sell all" is a sentence, not a button: it fills a box in, it does not sell
+ * anything, and dressing it as a button would say otherwise. */
+.lot-all {
+  grid-column: 3 / span 2;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.74rem;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.lot-form .lot-go {
+  grid-row: 1;
+}
+
+/* Too narrow for five columns, so the entry becomes two lines: what and when
+ * on the first, how much and for how much on the second. Every part is placed
+ * by name — a grid area cannot be given to "the second input". */
+@media (max-width: 620px) {
+  .lot-row,
+  .lot-form {
+    grid-template-columns: 3.4rem minmax(0, 1fr) minmax(0, 1fr) 2.2rem;
+    row-gap: 0.35rem;
+    padding: 0.5rem 0;
+  }
+  .lot-kind {
+    grid-area: 1 / 1;
+  }
+  .lot-date {
+    grid-area: 1 / 2 / auto / 4;
+  }
+  .lot-remove {
+    grid-area: 1 / 4;
+  }
+  .lot-units {
+    grid-area: 2 / 1 / auto / 3;
+  }
+  .lot-money {
+    grid-area: 2 / 3 / auto / 5;
+  }
+  /* Written as specifically as the desktop rule that places these, or that one
+   * wins on specificity whatever the order and the button lands above its own
+   * fields. */
+  .lot-form .lot-go {
+    grid-area: 3 / 1 / auto / 5;
+    justify-self: stretch;
+    text-align: center;
+  }
+  .lot-form .lot-all {
+    grid-area: 4 / 1 / auto / 5;
+    justify-self: center;
+  }
 }
 
 /* The day it was bought, under the return measured from it. */
@@ -3416,33 +3573,14 @@ a.dash-row:hover {
 
 /* ---------------------------------------------------------------- responsive */
 
-/* Two rows at phone widths, never more: mark, nav and controls on the first,
- * the search across the second.
- *
- * The nav is what decides this. Left at its content width it does not fit
- * beside the controls, so flex wrapped it onto a line of its own and pushed the
- * controls onto a third — 167px of masthead over a 54px tape, a quarter of the
- * screen spent before a single figure. Giving it `flex: 1 1 0` makes it shrink
- * and scroll instead of wrap, which is also what makes the fade below honest:
- * a nav with room to spare grows past its links, so the fade falls on empty
- * space and cannot be seen; only one whose links overrun it shows the fade. */
+/* Two rows at phone widths, never more: mark and controls on the first, the
+ * search across the second. The nav is not up here at all below this width —
+ * see the tab bar at the end of the file — which is what leaves room for them. */
 @media (max-width: 760px) {
   .masthead {
     flex-wrap: wrap;
     row-gap: 0.5rem;
     column-gap: 0.5rem;
-  }
-  .masthead-nav {
-    flex: 1 1 0;
-    min-width: 0;
-    margin-left: 0.35rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
-  }
-  .masthead-nav::-webkit-scrollbar {
-    display: none;
   }
   .nav-search {
     order: 3;
@@ -3652,9 +3790,6 @@ a.dash-row:hover {
 
 }
 
-/* Below this the masthead runs out of room even scrolling: the controls are
- * fixed-size, so the nav tightens its own padding to keep more of itself in
- * view before the swipe is needed. */
 @media (max-width: 420px) {
   .masthead {
     padding-left: 0.75rem;
@@ -3665,12 +3800,168 @@ a.dash-row:hover {
     width: 18px;
     height: 18px;
   }
+}
+
+/* --- trending -------------------------------------------------------------- */
+
+/* The week, under the three panels about today. Two lists in one panel, so each
+ * half is labelled: sector names and share codes read differently enough to
+ * tell apart, but not at a glance on a phone. */
+.trend-window {
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+.trend-half + .trend-half {
+  margin-top: 1rem;
+}
+.trend-half h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.trend-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.trend-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.32rem 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.86rem;
+}
+.trend-list li:first-child {
+  border-top: 0;
+}
+/* The name takes the slack, so every figure lands on the same right edge. */
+.trend-list .trend-name,
+.trend-list .trend-share-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trend-list .delta {
+  flex: none;
+  margin-left: auto;
+}
+.trend-name {
+  color: var(--ink);
+  text-decoration: none;
+}
+.trend-name:hover {
+  color: var(--accent);
+}
+.trend-share-name {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+.trend-flag {
+  flex: none;
+  padding: 0.02rem 0.34rem;
+  font-size: 0.62rem;
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------ the tab bar */
+/*
+ * On a phone the sections move off the masthead and onto the bottom of the
+ * screen, where a thumb is. Five words scrolling sideways behind a fade was the
+ * worst of both: it spent the top of the screen and still hid half of itself.
+ *
+ * It comes after the 860px and 760px blocks on purpose. Those tighten the
+ * in-masthead nav for the band between 760 and 860 where it is still up there,
+ * and equal specificity means the later rule is the one that wins below 760.
+ */
+@media (max-width: 760px) {
+  /* A backdrop-filter makes an element a containing block for anything fixed
+   * inside it, so with the blur left on, `bottom: 0` pinned the bar to the
+   * bottom of the MASTHEAD and it sat there covering the search box. The bar
+   * carries its own blur; up here a plain background does the same job. */
+  .masthead {
+    background: var(--plane);
+    backdrop-filter: none;
+  }
   .masthead-nav {
-    margin-left: 0.2rem;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 50;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    gap: 0.15rem;
+    margin: 0;
+    padding: 0.3rem 0.4rem;
+    padding-bottom: calc(0.3rem + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--plane) 92%, transparent);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--hairline);
+    overflow: visible;
+    mask-image: none;
   }
   .masthead-nav a {
-    padding: 0.35rem 0.4rem;
-    font-size: 0.76rem;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.42rem 0.15rem 0.34rem;
+    border-radius: 14px;
+    font-size: 0.56rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .masthead-nav a:hover {
+    background: none;
+    color: var(--ink-2);
+  }
+  /* The pill behind the section you are on, which is the whole reason the bar
+   * reads at a glance: colour alone is a 10px label on a moving bus. */
+  .masthead-nav a[aria-current='page'] {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .nav-icon {
+    display: block;
+    width: 22px;
+    height: 22px;
+    flex: none;
+  }
+  .nav-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The bar floats over the page, so the page has to end above it. The
+   * colophon is the last thing on every route, so it carries the clearance. */
+  .colophon {
+    padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* One row is enough on a narrow phone: the masthead keeps the wordmark and the
+ * controls, and the search takes the line under them. */
+@media (max-width: 420px) {
+  .masthead-nav a {
+    font-size: 0.52rem;
+    letter-spacing: 0.06em;
+  }
+  .nav-icon {
+    width: 21px;
+    height: 21px;
   }
 }
 

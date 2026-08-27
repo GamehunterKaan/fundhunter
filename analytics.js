@@ -915,6 +915,9 @@ export function median(values) {
 }
 
 const round2 = (n) => (n == null ? null : Math.round((n + Number.EPSILON) * 100) / 100);
+// Units are not money: a fund pays out fractional shares to six figures, and
+// rounding a holding to kuruş would lose some of it on every sale.
+const round4 = (n) => (n == null ? null : Math.round((n + Number.EPSILON) * 1e4) / 1e4);
 
 // ---------------------------------------------------------------- statements
 //
@@ -1241,6 +1244,85 @@ export function themeMoves(themeWeights, quotes, minCoverage = MIN_THEME_COVERAG
   return out.sort((a, b) => Math.abs(b.move) - Math.abs(a.move));
 }
 
+/** How many shares a trending list carries. Eight rows read; twenty are a table. */
+export const TREND_SIZE = 8;
+
+/**
+ * Below this a theme is not a sector average, it is one company wearing the
+ * name of one. Cap-weighting a group of two makes the bigger of them the whole
+ * answer.
+ */
+export const MIN_TREND_MEMBERS = 3;
+
+/**
+ * What an average day trades, in lira.
+ *
+ * Not the same question as how big the company is: a large company nobody
+ * trades still cannot absorb an order, and its price over a quiet week says
+ * more about the last few buyers than about the company.
+ */
+const turnoverOf = (s) => (s?.p > 0 && s?.avgVol > 0 ? s.p * s.avgVol : 0);
+
+/**
+ * What has been going up over the last few days, by sector and by share.
+ *
+ * Two answers to one question, because they fail differently. A sector is
+ * cap-weighted across its members, so no single listing can carry it; a share
+ * is itself, and the danger there is the opposite — the biggest movers on the
+ * whole exchange are always its smallest listings, where a few thousand lira of
+ * trade walks the price to its limit.
+ *
+ * So the share half runs over the half of the exchange that trades at least as
+ * much as the typical listed company does. A median rather than a number
+ * somebody picked: the floor moves with the exchange, and what it excludes is
+ * the half that could not absorb an order rather than the half below an
+ * arbitrary line. Today it drops a listing up 33% on ₺0 a day.
+ *
+ * `spec` is carried through from the speculative-board scan, unchanged. A list
+ * of what is running is exactly where a name that is running for the wrong
+ * reasons turns up, and this site says elsewhere which those are; printing it
+ * here without the mark would be the site contradicting itself.
+ */
+export function trending(stocks, over = 'w1', size = TREND_SIZE) {
+  const companies = (stocks ?? []).filter((s) =>
+    s?.kind === 'stock' && s.cap > 0 && Number.isFinite(s.r?.[over]));
+  if (!companies.length) return null;
+
+  const byTheme = new Map();
+  for (const s of companies) {
+    if (!s.th) continue;
+    const t = byTheme.get(s.th) ?? { cap: 0, sum: 0, of: 0 };
+    t.cap += s.cap;
+    t.sum += s.cap * s.r[over];
+    t.of += 1;
+    byTheme.set(s.th, t);
+  }
+  const sectors = [...byTheme]
+    .filter(([, t]) => t.cap > 0 && t.of >= MIN_TREND_MEMBERS)
+    .map(([id, t]) => ({ id, move: round2(t.sum / t.cap), of: t.of }))
+    .sort((a, b) => b.move - a.move);
+
+  const turnovers = companies.map(turnoverOf).filter((v) => v > 0).sort((a, b) => a - b);
+  const floor = turnovers.length ? turnovers[Math.floor(turnovers.length / 2)] : 0;
+  const liquid = companies.filter((s) => turnoverOf(s) >= floor);
+
+  const shares = [...liquid]
+    .sort((a, b) => b.r[over] - a.r[over])
+    .slice(0, size)
+    // Only what is actually up. On a week the whole exchange fell, the least
+    // bad company is not trending — and a green heading over a red list would
+    // be the panel lying about its own subject.
+    .filter((s) => s.r[over] > 0)
+    .map((s) => {
+      const row = { c: s.c, n: s.n ?? '', move: round2(s.r[over]) };
+      if (s.th) row.th = s.th;
+      if (s.spec) row.spec = 1;
+      return row;
+    });
+
+  return { over, sectors, shares, floor: Math.round(floor), of: liquid.length };
+}
+
 /**
  * The best and worst of a named universe today.
  *
@@ -1520,33 +1602,104 @@ export function returnSince(now, then) {
 }
 
 /**
- * One position, valued.
+ * A holding, built out of the lots it was bought in.
  *
- * `cost` is what was actually paid, when the holder knows it. When they do not,
- * the position is valued from the price on the day it was added — which is the
- * honest default for a portfolio built out of a watchlist, and is flagged as
- * `assumed` so the page can say which of the two it is showing rather than
- * presenting a guess as a receipt.
+ * **Average cost, not FIFO.** Ten units at ₺100 and twenty at ₺90 is thirty
+ * units at ₺93.33, and a sale takes units off at that average — which is what
+ * leaves the average where it was, because selling some of something does not
+ * change what the rest of it cost you. FIFO answers a different question, which
+ * specific units left, and nobody buying a fund on TEFAS is tracking share
+ * certificates.
+ *
+ * Lots are read in date order, because a sale can only come out of what had been
+ * bought by the time it happened. One shape carries both directions: `units` is
+ * negative on a sale and `cost` is what came back for it.
+ *
+ * A buy with no cost recorded is valued at the price on its own day — the honest
+ * default for a position typed in from a watchlist, flagged as `assumed`. A buy
+ * whose day has no price on file cannot be valued at all, and then the WHOLE
+ * position reports no basis rather than an average over the lots that happened
+ * to be answerable: an average missing a third of what was paid is not an
+ * average, it is a wrong number.
+ *
+ * @param {{at?: string, units: number, cost?: number}[]} lots
+ * @param {number|null} priceNow
+ * @param {(iso: string) => number|null} [priceAt] the price on a past day
  */
-export function positionValue({ units, cost, at } = {}, priceNow, priceAt) {
-  if (units == null || !Number.isFinite(units) || units <= 0) return null;
-  if (priceNow == null || !Number.isFinite(priceNow)) return null;
+export function positionOf(lots, priceNow, priceAt = null) {
+  const rows = (lots ?? [])
+    .filter((l) => l && Number.isFinite(l.units) && l.units !== 0)
+    .map((l) => ({
+      at: typeof l.at === 'string' ? l.at : null,
+      units: l.units,
+      cost: Number.isFinite(l.cost) && l.cost > 0 ? l.cost : null,
+    }))
+    .sort((a, b) => String(a.at ?? '').localeCompare(String(b.at ?? '')));
+  if (!rows.length) return null;
 
-  const value = units * priceNow;
-  const assumed = cost == null || !Number.isFinite(cost) || cost <= 0;
-  const basis = assumed
-    ? (priceAt != null && Number.isFinite(priceAt) ? units * priceAt : null)
-    : cost;
-  if (basis == null || basis <= 0) {
-    return { value: round2(value), basis: null, profit: null, pct: null, assumed, at };
+  let units = 0;
+  let cost = 0;
+  let realised = 0;
+  let realisedKnown = true;
+  let assumed = false;
+  let unknown = false;
+  let at = null;
+  let buys = 0;
+  let sells = 0;
+
+  for (const lot of rows) {
+    if (lot.units > 0) {
+      buys += 1;
+      if (at == null) at = lot.at;
+      let basis = lot.cost;
+      if (basis == null) {
+        const then = lot.at == null ? null : priceAt?.(lot.at) ?? null;
+        if (Number.isFinite(then) && then > 0) {
+          basis = lot.units * then;
+          assumed = true;
+        } else {
+          unknown = true;
+        }
+      }
+      units += lot.units;
+      cost += basis ?? 0;
+    } else {
+      sells += 1;
+      const asked = -lot.units;
+      // Selling more than was ever bought is bad data, not a short position.
+      // The quantity is clamped to what is held and the proceeds are scaled with
+      // it, so the arithmetic stays internally consistent; the page does not
+      // offer the reader a way to get here in the first place.
+      const sold = Math.min(asked, units);
+      const share = asked > 0 ? sold / asked : 0;
+      const out = units > 0 ? (cost / units) * sold : 0;
+      if (lot.cost == null) realisedKnown = false;
+      else realised += lot.cost * share - out;
+      units -= sold;
+      cost -= out;
+    }
   }
+
+  const priced = priceNow != null && Number.isFinite(priceNow) && priceNow > 0;
+  const basis = unknown ? null : round2(cost);
+  const value = priced ? round2(units * priceNow) : null;
   return {
-    value: round2(value),
-    basis: round2(basis),
-    profit: round2(value - basis),
-    pct: round2((value / basis - 1) * 100),
-    assumed,
+    units: round4(units),
     at,
+    buys,
+    sells,
+    assumed,
+    // Left unrounded: a fund priced at ₺0.637108 has an average cost that two
+    // decimals would print as ₺0.64 and the row formats to the price's own
+    // precision.
+    avg: !unknown && units > 0 ? cost / units : null,
+    basis,
+    value,
+    profit: value != null && basis != null ? round2(value - basis) : null,
+    pct: value != null && basis != null && basis > 0
+      ? round2((value / basis - 1) * 100)
+      : null,
+    realised: realisedKnown && sells ? round2(realised) : null,
   };
 }
 

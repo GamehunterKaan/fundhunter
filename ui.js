@@ -18,7 +18,7 @@ import {
   consensus, shareOfTotal, beatRecord, surpriseOf, peersOf, peerMedians,
   weightsOf, overlappingPairs, sharedPositions, themeMoves, moversIn, versusCash,
   boardFlags, SPECULATIVE_HEAVY,
-  priceOn, priceEntryOn, returnSince, positionValue, portfolioTotals,
+  priceOn, priceEntryOn, returnSince, positionOf, portfolioTotals,
   cashOver, cashAlternative, portfolioMix, portfolioSlices, portfolioDayMove,
 } from './analytics.js';
 import { LIVE_SOURCE, LIVE_REFRESH_MS, LIVE_TIMEOUT_MS, parseLiveQuotes, liveClock } from './live.js';
@@ -289,7 +289,9 @@ function syncNav() {
   const current = parentRoute(hash);
   for (const a of document.querySelectorAll('#main-nav a[data-route]')) {
     const item = NAV.find((n) => n.route === a.dataset.route);
-    if (item) a.textContent = T(item.key);
+    // Into the span, not the link: the link also holds the icon the bottom tab
+    // bar draws, and `textContent =` would delete it.
+    if (item) a.querySelector('.nav-label').textContent = T(item.key);
     if (a.dataset.route === current) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   }
@@ -307,18 +309,20 @@ const POSITIONS_KEY = 'fh-positions';
  * Two lists, kept apart.
  *
  * A favourite is something you want to keep an eye on. A position is something
- * you actually hold, with the day it was opened and how much of it there is.
- * They were one list — the portfolio was "everything you starred" — and they are
- * not the same question: you can follow a fund for a year without owning any of
- * it, and you can hold something you have no interest in watching.
+ * you actually hold. They are not the same question: you can follow a fund for a
+ * year without owning any of it, and you can hold something you have no interest
+ * in watching.
  *
  *   fh-favs       ["TLY", "ASELS"]
- *   fh-positions  { TLY: { at: "2026-08-22", units: 12.5, cost: 100000 } }
+ *   fh-positions  { TLY: [ { at: "2026-08-22", units: 12.5, cost: 100000 },
+ *                          { at: "2026-09-01", units: -5,   cost: 42000 } ] }
  *
- * `at` is the day the position was opened, which is what makes "and what has it
- * done since" answerable at all. `units` and `cost` are optional: without a cost
- * the position is valued from the price on the day it was opened, and the row
- * says so rather than presenting a guess as a receipt.
+ * **A position is a list of lots, not a number.** You buy the same fund twice at
+ * two prices, and one `units` field can only answer that by throwing away what
+ * each of them cost. Each lot is a day, a size and what changed hands; `units`
+ * is negative on a sale and `cost` is then what came back. What the page shows —
+ * how much is held, at what average, and what it is worth — is derived from the
+ * list every time rather than stored beside it, so the two can never disagree.
  */
 function restoreSaved() {
   state.favs = new Set();
@@ -334,7 +338,7 @@ function restoreSaved() {
       if (typeof code !== 'string') continue;
       state.favs.add(code);
       if (entry && typeof entry === 'object' && entry.units > 0) {
-        state.positions[code] = readPosition(entry);
+        state.positions[code] = [readLot(entry)];
       }
     }
     saveFavorites();
@@ -348,8 +352,12 @@ function restoreSaved() {
   const held = readStored(POSITIONS_KEY);
   if (!held || typeof held !== 'object' || Array.isArray(held)) return;
   for (const [code, entry] of Object.entries(held)) {
-    if (typeof code !== 'string' || !entry || typeof entry !== 'object') continue;
-    state.positions[code] = readPosition(entry);
+    if (typeof code !== 'string' || !entry) continue;
+    // A position was one lot before it was a list of them. Both shapes read.
+    const lots = (Array.isArray(entry) ? entry : [entry])
+      .filter((l) => l && typeof l === 'object' && Number.isFinite(l.units) && l.units !== 0)
+      .map(readLot);
+    if (lots.length) state.positions[code] = lots;
   }
 }
 
@@ -371,10 +379,10 @@ function writeStored(key, value) {
   }
 }
 
-const readPosition = (entry) => ({
-  at: typeof entry.at === 'string' ? entry.at : todayIso(),
-  units: Number.isFinite(entry.units) && entry.units > 0 ? entry.units : undefined,
-  cost: Number.isFinite(entry.cost) && entry.cost > 0 ? entry.cost : undefined,
+const readLot = (l) => ({
+  at: typeof l.at === 'string' ? l.at : todayIso(),
+  units: Number.isFinite(l.units) && l.units !== 0 ? l.units : 0,
+  cost: Number.isFinite(l.cost) && l.cost > 0 ? l.cost : undefined,
 });
 
 /** Today where the exchange is, not where the reader happens to be sitting. */
@@ -387,10 +395,14 @@ function saveFavorites() {
 
 function savePositions() {
   const out = {};
-  for (const [code, p] of Object.entries(state.positions)) {
-    out[code] = { at: p.at ?? todayIso() };
-    if (p.units > 0) out[code].units = p.units;
-    if (p.cost > 0) out[code].cost = p.cost;
+  for (const [code, lots] of Object.entries(state.positions)) {
+    const kept = (lots ?? []).filter((l) => Number.isFinite(l.units) && l.units !== 0);
+    if (!kept.length) continue;
+    out[code] = kept.map((l) => {
+      const row = { at: l.at ?? todayIso(), units: l.units };
+      if (l.cost > 0) row.cost = l.cost;
+      return row;
+    });
   }
   writeStored(POSITIONS_KEY, out);
 }
@@ -403,42 +415,42 @@ function toggleFavorite(code) {
 }
 
 /**
- * Open a position, dated today.
+ * Add a lot to a position, opening one if there is none.
  *
- * Today is the only date this page can honestly claim for something somebody
- * has just typed in. Returns false when there is already a position in that
- * code, so the caller can say so rather than silently overwriting a size.
+ * Buying more of something you already hold is a second lot rather than a
+ * correction of the first: the page has to be able to say that ten came at ₺100
+ * and twenty at ₺90, because that is what makes the average an average.
  */
-function addPosition(code, units, cost) {
-  if (state.positions[code]) return false;
-  state.positions[code] = {
-    at: todayIso(),
-    units: units > 0 ? units : undefined,
-    cost: cost > 0 ? cost : undefined,
-  };
+function addLot(code, lot) {
+  (state.positions[code] ??= []).push({
+    at: lot.at || todayIso(),
+    units: lot.units,
+    cost: lot.cost > 0 ? lot.cost : undefined,
+  });
   savePositions();
-  return true;
+}
+
+/** Edit one field of one lot. A cleared field is an unknown, not a zero. */
+function setLot(code, index, field, value) {
+  const lot = state.positions[code]?.[index];
+  if (!lot) return;
+  if (field === 'at') lot.at = value || todayIso();
+  else if (value == null || !Number.isFinite(value)) delete lot[field];
+  else lot[field] = value;
+  savePositions();
+}
+
+/** Drop one lot, and the position with it when it was the last one. */
+function removeLot(code, index) {
+  const lots = state.positions[code];
+  if (!lots?.[index]) return;
+  lots.splice(index, 1);
+  if (!lots.length) delete state.positions[code];
+  savePositions();
 }
 
 function removePosition(code) {
   delete state.positions[code];
-  savePositions();
-}
-
-/** Move a position to the day it was actually bought. */
-function setPositionAt(code, iso) {
-  const entry = state.positions[code];
-  if (!entry) return;
-  entry.at = iso || null;
-  savePositions();
-}
-
-/** Record how much is held, or clear it when the field is emptied. */
-function setPosition(code, field, value) {
-  const entry = state.positions[code];
-  if (!entry) return;
-  if (value == null || !Number.isFinite(value) || value <= 0) delete entry[field];
-  else entry[field] = value;
   savePositions();
 }
 
@@ -1246,9 +1258,10 @@ function renderDashboard() {
   // What goes where is editorial, and it also happens to balance. The rail is
   // money: where the week's went, and where yours is — both lists of codes,
   // which read the same at 340px as at 900px. The column is the market: what
-  // you follow, then the day by sector, then the day's extremes — all three
-  // want width, for a sparkline, nineteen labelled chips and a three-figure
-  // row respectively.
+  // you follow, then the day by sector, then the day's extremes, then the week
+  // — the first three want width, for a sparkline, nineteen labelled chips and
+  // a three-figure row respectively, and the last belongs under the day it is
+  // the longer view of.
   // Only your own funds are worth checking for duplication: the popular rail is
   // a list of strangers and two of them overlapping is not your problem.
   const overlap = renderOverlap(favourites.map((f) => f.c));
@@ -1258,7 +1271,10 @@ function renderDashboard() {
       h('div', { class: 'dash-col' },
         watchlist.panel,
         market.themes,
-        market.movers),
+        market.movers,
+        // Off meta.json rather than the scan, so it is on screen before the
+        // first quote arrives.
+        renderTrending()),
       h('div', { class: 'dash-col dash-rail' },
         flows.panel,
         favouritesPane)
@@ -1523,6 +1539,70 @@ function renderMarketPanels() {
   };
 
   return { themes, movers, draw };
+}
+
+/** How many sectors the trending panel lists. Six is what fits without scrolling. */
+const TREND_SECTORS = 6;
+
+/**
+ * What has been going up over the last few days.
+ *
+ * The panels above it are about today, which is the question the live scan can
+ * answer. A week is not: it needs a price from a week ago for every listing on
+ * the exchange, so it is computed once a day into meta.json — 1.5KB in a file
+ * the page already loads — and this draws it with no request of its own and no
+ * waiting for quotes.
+ *
+ * Both halves are rising things only. "Trending" over a week the whole market
+ * fell is the least bad company, which is not what the heading says.
+ */
+function renderTrending() {
+  const t = state.meta?.trending;
+  const sectors = (t?.sectors ?? []).filter((s) => s.move > 0).slice(0, TREND_SECTORS);
+  const shares = t?.shares ?? [];
+  if (!sectors.length && !shares.length) return null;
+
+  return h('section', { class: 'panel trend-panel' },
+    h('div', { class: 'dash-pane-head' },
+      h('h2', {}, T('trendPanel')),
+      h('span', { class: 'trend-window' }, T('trendWindow'))),
+
+    sectors.length ? h('div', { class: 'trend-half' },
+      h('h3', {}, T('trendSectors')),
+      h('ul', { class: 'trend-list' }, sectors.map((s) => h('li', {},
+        h('a', {
+          class: 'trend-name',
+          href: '#/fonlar',
+          // The same handoff the themes strip makes: set the filter, let the
+          // router take the route.
+          onClick: () => {
+            state.filters.theme = s.id;
+            state.filters.minTheme = MIN_THEME;
+          },
+        }, themeName(s.id)),
+        h('span', { class: `num delta ${signOf(s.move)}` },
+          fmtPct(s.move, state.lang, { signed: true, digits: 1 })))))
+    ) : null,
+
+    shares.length ? h('div', { class: 'trend-half' },
+      h('h3', {}, T('trendShares')),
+      h('ul', { class: 'trend-list trend-shares' }, shares.map((s) => h('li', {},
+        h('a', { class: 'code-link num', href: `#/hisse/${s.c}` }, s.c),
+        h('span', { class: 'trend-share-name' }, s.n),
+        // Carried through from the board scan. A list of what is running is
+        // exactly where a name running for the wrong reasons turns up, and the
+        // site says elsewhere which those are.
+        s.spec
+          ? h('a', {
+              class: 'chip chip-warn trend-flag',
+              href: `#/hisse/${s.c}`,
+              title: T('specNote'),
+            }, T('specChip'))
+          : null,
+        h('span', { class: `num delta ${signOf(s.move)}` },
+          fmtPct(s.move, state.lang, { signed: true, digits: 1 })))))
+    ) : null
+  );
 }
 
 /** One side of the movers panel, or nothing when the market went one way. */
@@ -4439,15 +4519,17 @@ async function renderPortfolio() {
   const rows = codes.map((code) => portfolioRow(code, history.get(code), redraw));
   table.replaceChildren(h('table', { class: 'funds port-table' },
     h('thead', {}, h('tr', {},
-      h('th', { class: 'col-fav', 'aria-label': T('portRemove') }, ''),
+      h('th', { class: 'col-fav', 'aria-label': T('posLots') }, ''),
       h('th', {}, T('code')),
       h('th', { class: 'num-cell' }, T('posSinceShort')),
       h('th', { class: 'num-cell' }, T('posUnits')),
-      h('th', { class: 'num-cell' }, T('posCost')),
+      h('th', { class: 'num-cell' }, T('posAvg')),
       h('th', { class: 'num-cell' }, T('posPrice')),
       h('th', { class: 'num-cell' }, T('posValue')),
       h('th', { class: 'num-cell', title: T('posCostHint') }, T('posProfit')))),
-    h('tbody', {}, rows.map((r) => r.tr))
+    // The drawer is a row of its own behind each one, so opening it does not
+    // have to nest a second table inside a cell.
+    h('tbody', {}, rows.map((r) => [r.tr, r.drawerRow]))
   ));
 
   function redraw() {
@@ -4473,173 +4555,318 @@ function renderPortfolioHead() {
 }
 
 /**
- * One row: what it is, what it has done since it was starred, and — if a size
- * has been entered — what it is worth.
+ * One row: what you hold, at what average, and what it has done.
  *
- * The two inputs are created once and never replaced. Everything derived from
- * them is recomputed into cells that are.
+ * No inputs. A row is a summary of its lots, and the lots are edited in the
+ * drawer it opens — putting a units box on the row was fine while a position
+ * WAS a units box, and stopped being fine the moment it became a list of buys
+ * at different prices.
  */
 function portfolioRow(code, series, onChange) {
   const share = isShareCode(code);
-  const entry = state.positions[code] ?? {};
   const meta = share ? shareOf(code) : state.funds.find((f) => f.c === code);
+  const priceThen = (iso) => priceOn(series, iso);
 
-  const cell = (labelKey) => h('td', { class: 'num num-cell', 'data-label': T(labelKey) });
-  // A span rather than a cell: the date picker shares the column with it.
-  const sinceCell = h('span', { class: 'num' });
+  const cell = (labelKey, cls = 'num num-cell') =>
+    h('td', { class: cls, 'data-label': T(labelKey) });
+  const sinceCell = cell('posSinceShort');
+  const unitsCell = cell('posUnits');
+  const avgCell = cell('posAvg');
   const priceCell = cell('posPrice');
   const valueCell = cell('posValue');
   const profitCell = cell('posProfit');
+  const lotsLabel = h('span', { class: 'row-sub port-added' });
 
-  const field = (name, value, hint) => h('input', {
-    type: 'text', inputmode: 'decimal', class: 'port-input',
-    value: toField(value), 'aria-label': `${T(name === 'units' ? 'posUnits' : 'posCost')} — ${code}`,
-    title: hint,
-    onInput: (e) => {
-      setPosition(code, name, decimal(e.target.value));
-      onChange();
-    },
-  });
+  // The drawer is built once and kept: it holds the fields somebody edits, and
+  // rebuilding it on a quote refresh would take the caret out of one of them.
+  let drawer = null;
+  const drawerRow = h('tr', { class: 'port-drawer-row', hidden: true },
+    h('td', { colspan: 8 }));
 
-  const unitsInput = field('units', entry.units, T('posUnitsHint'));
-  const costInput = field('cost', entry.cost, T('posCostHint'));
-
-  // The price the row is currently showing, kept for the button that costs the
-  // position at it. refresh() owns it; nothing else may set it.
-  let priceLatest = null;
-
-  /**
-   * Cost the position at a price: units times that price, written into the field
-   * in the notation the field reads back.
-   *
-   * Silent when there is nothing to work from. Both callers are buttons or
-   * pickers the reader pressed on purpose, so a cost they typed is theirs to
-   * replace — but a cost cannot be invented out of a size nobody has entered.
-   */
-  const costAt = (price) => {
-    const units = decimal(unitsInput.value);
-    if (!(units > 0) || price == null || !Number.isFinite(price)) return false;
-    const cost = Math.round(units * price * 100) / 100;
-    costInput.value = toField(cost);
-    setPosition(code, 'cost', cost);
-    return true;
-  };
-
-  const nowButton = h('button', {
-    type: 'button', class: 'port-mini',
-    title: T('posCostNow'), 'aria-label': `${T('posCostNow')} — ${code}`,
+  const toggle = h('button', {
+    type: 'button', class: 'port-open', 'aria-expanded': 'false',
+    'aria-label': `${T('posLots')} — ${code}`,
     onClick: () => {
-      if (costAt(priceLatest)) onChange();
+      const open = drawerRow.hidden;
+      drawerRow.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+      tr.classList.toggle('is-open', open);
+      if (open && !drawer) {
+        drawer = lotEditor(code, meta, series, () => {
+          // A lot changed: the row, the totals and the drawer's own figures all
+          // read the same list, so one redraw settles all three.
+          onChange();
+          drawer.refresh();
+        });
+        drawerRow.firstChild.replaceChildren(drawer.el);
+      }
+      if (open) drawer.refresh();
     },
-  }, '=');
+  }, '▸');
 
-  /**
-   * The day it was bought.
-   *
-   * Picking one moves the position AND costs it at that day's price, which is
-   * the whole reason to offer the field: somebody who knows when they bought
-   * usually does not remember what they paid, and the price on the day is on
-   * file. `priceOn` answers with the last price on or before the date, so a
-   * Saturday resolves to Friday's close rather than to nothing.
-   */
-  const dateInput = h('input', {
-    type: 'date', class: 'port-date', value: entry.at ?? '', max: todayIso(),
-    'aria-label': `${T('posAdded')} — ${code}`, title: T('posDateHint'),
-    onChange: (e) => {
-      const iso = e.target.value || null;
-      setPositionAt(code, iso);
-      if (iso) costAt(priceOn(series, iso));
-      onChange();
-    },
-  });
-
-  // Filled in by refresh(), because the date a figure is measured from is the
-  // last price on or before the day it was bought — Friday's close for a
-  // Saturday — and the row has to say which day it actually used.
-  const fromLabel = h('span', { class: 'row-sub port-added' });
-
-  const tr = h('tr', {},
-    h('td', { class: 'col-fav' }, h('button', {
-      type: 'button',
-      class: 'port-remove',
-      title: T('portRemove'),
-      'aria-label': `${T('portRemove')} — ${code}`,
-      onClick: () => {
-        // Closing a position says nothing about whether you still want to watch
-        // the thing. The star is its own list and is left alone.
-        removePosition(code);
-        tr.remove();
-        onChange();
-      },
-    }, '×')),
+  const tr = h('tr', { class: 'port-row' },
+    h('td', { class: 'col-fav' }, toggle),
     h('td', {},
       h('a', { class: 'code-link num', href: `#/${share ? 'hisse' : 'fon'}/${code}` }, code),
       h('span', { class: 'row-sub' }, meta?.n ?? ''),
-      fromLabel),
-    h('td', { class: 'num-cell', 'data-label': T('posSinceShort') }, sinceCell, dateInput),
-    h('td', { class: 'num-cell', 'data-label': T('posUnits') }, unitsInput),
-    h('td', { class: 'num-cell', 'data-label': T('posCost') },
-      h('div', { class: 'port-cost' }, costInput, nowButton)),
+      lotsLabel),
+    sinceCell,
+    unitsCell,
+    avgCell,
     priceCell,
     valueCell,
     profitCell
   );
 
-  /** Recompute every derived cell, and hand the valuation back for the totals. */
+  /** Recompute every cell from the lots, and hand the valuation to the totals. */
   function refresh() {
     if (!tr.isConnected) return null;
+    const lots = state.positions[code];
+    if (!lots?.length) return null;
     const now = priceNow(code, share, meta, series);
-    priceLatest = now;
-    // Nothing to cost a position at, or no size to cost: the button says so by
-    // being unavailable rather than by doing nothing when pressed.
-    nowButton.disabled = now == null || !(decimal(unitsInput.value) > 0);
-    const from = priceEntryOn(series, state.positions[code]?.at);
-    const then = from?.[1] ?? null;
-    const since = returnSince(now, then);
+    const pos = positionOf(lots, now, priceThen);
+    if (!pos) return null;
 
-    fromLabel.textContent = from
-      ? T('posSince', { date: fmtDate(from[0], state.lang) })
-      : (state.positions[code]?.at ? T('posNoPrice') : '');
+    const from = priceEntryOn(series, pos.at);
+    const since = returnSince(now, from?.[1] ?? null);
 
-    sinceCell.className = `num delta ${signOf(since)}`;
+    lotsLabel.textContent = [
+      from ? T('posSince', { date: fmtDate(from[0], state.lang) }) : null,
+      pos.buys + pos.sells > 1 ? T('posLotCount', { n: pos.buys + pos.sells }) : null,
+    ].filter(Boolean).join(' · ');
+
+    sinceCell.className = `num num-cell delta ${signOf(since)}`;
     sinceCell.textContent = since == null
-      ? '—'
-      : fmtPct(since, state.lang, { signed: true, digits: 1 });
-    sinceCell.title = since == null && state.positions[code]?.at ? T('posNoPrice') : '';
+      ? '—' : fmtPct(since, state.lang, { signed: true, digits: 1 });
 
-    priceCell.textContent = now == null ? '—' : `₺${fmtNum(now, state.lang, priceDigits(now))}`;
+    unitsCell.textContent = fmtNum(pos.units, state.lang, pos.units % 1 ? 2 : 0);
+    avgCell.textContent = pos.avg == null ? '—' : money(pos.avg, priceDigits(pos.avg));
+    priceCell.textContent = now == null ? '—' : money(now, priceDigits(now));
+    valueCell.textContent = pos.value == null ? '—' : fmtMoney(pos.value, state.lang);
 
-    const position = positionValue(state.positions[code], now, then);
-    valueCell.textContent = position?.value == null ? '—' : fmtMoney(position.value, state.lang);
-    profitCell.className = `num num-cell delta ${signOf(position?.profit)}`;
-    profitCell.replaceChildren(...(position?.profit == null
+    // Unrealised on top, and what selling already banked underneath it. Adding
+    // the two into one figure would put money you have been paid and money you
+    // might yet be paid behind the same number.
+    profitCell.className = `num num-cell delta ${signOf(pos.profit)}`;
+    profitCell.replaceChildren(...(pos.profit == null
       ? [text('—')]
       : [
-          text(fmtMoney(position.profit, state.lang)),
+          text(fmtMoney(pos.profit, state.lang)),
           h('span', { class: 'row-sub' },
-            fmtPct(position.pct, state.lang, { signed: true, digits: 1 })
-            + (position.assumed ? ` · ${T('posAssumed')}` : '')),
+            fmtPct(pos.pct, state.lang, { signed: true, digits: 1 })
+            + (pos.assumed ? ` · ${T('posAssumed')}` : '')),
         ]));
+    if (pos.realised != null && pos.realised !== 0) {
+      profitCell.append(h('span', { class: `row-sub delta ${signOf(pos.realised)}` },
+        T('posRealised', { v: fmtMoney(pos.realised, state.lang) })));
+    }
 
-    return position
-      ? {
-          code, share, ...position, from: from?.[0] ?? null,
-          change: dayChangeOf(code, share, meta),
-          groups: share ? null : meta?.g, spec: share ? null : meta?.spec,
-        }
-      : null;
+    if (drawer && !drawerRow.hidden) drawer.refresh();
+
+    return {
+      code, share, ...pos, from: from?.[0] ?? null,
+      change: dayChangeOf(code, share, meta),
+      groups: share ? null : meta?.g, spec: share ? null : meta?.spec,
+    };
   }
 
-  return { tr, refresh };
+  return { tr, drawerRow, refresh };
 }
 
 /**
- * A number written the way `decimal()` reads it back.
+ * The drawer: every lot the position is made of, and the two ways to change it.
  *
- * Not `fmtNum`: that groups thousands with the dot, and the dot is what
- * `decimal()` strips. A value put into one of these fields has to survive being
- * read out of it again, which "1.234,5" does and "1,234.5" does not.
+ * Editable in place, because a mistyped cost is the most likely reason anybody
+ * opens this at all. Deleting a lot is a `×` per row rather than one control
+ * that clears the position: the whole point of keeping the lots is that they are
+ * separately wrong.
  */
+function lotEditor(code, meta, series, onChange) {
+  const share = isShareCode(code);
+  const priceThen = (iso) => priceOn(series, iso);
+  const lotList = h('div', { class: 'lot-list' });
+  const summary = h('p', { class: 'lot-summary' });
+
+  const buy = lotForm(code, meta, series, 'buy', onChange);
+  const sell = lotForm(code, meta, series, 'sell', onChange);
+  // The rows are rebuilt only when the LIST changed — one added, one deleted,
+  // one moved to another day. Rebuilding them on every keystroke would replace
+  // the input being typed into, which is the trap every other live-editing
+  // surface on this site had to be written around.
+  let listing = null;
+
+  const el = h('div', { class: 'port-drawer' },
+    h('div', { class: 'lot-head' },
+      h('h3', {}, T('posLots')),
+      summary),
+    lotList,
+    h('div', { class: 'lot-forms' }, buy.el, sell.el)
+  );
+
+  function refresh() {
+    const lots = state.positions[code] ?? [];
+    const now = priceNow(code, share, meta, series);
+    const pos = positionOf(lots, now, priceThen);
+
+    summary.replaceChildren(...(pos
+      ? [
+          h('span', {}, T('posHeld', {
+            n: fmtNum(pos.units, state.lang, pos.units % 1 ? 2 : 0),
+          })),
+          pos.avg == null ? null : h('span', {},
+            `${T('posAvg')} ${money(pos.avg, priceDigits(pos.avg))}`),
+          pos.realised == null || pos.realised === 0 ? null : h('span',
+            { class: `delta ${signOf(pos.realised)}` },
+            T('posRealised', { v: fmtMoney(pos.realised, state.lang) })),
+        ].filter(Boolean)
+      : []));
+
+    // Newest first, which is the order somebody looking for the one they just
+    // typed expects. The index into the stored list travels with the row, so
+    // the display order cannot edit the wrong lot.
+    const signature = `${lots.length}|${lots.map((l) => l.at).join(',')}`;
+    if (signature !== listing) {
+      listing = signature;
+      const ordered = lots
+        .map((lot, index) => ({ lot, index }))
+        .sort((a, b) => String(b.lot.at ?? '').localeCompare(String(a.lot.at ?? '')));
+      lotList.replaceChildren(
+        ...ordered.map(({ lot, index }) => lotRow(code, lot, index, onChange)));
+    }
+    sell.setMax(pos?.units ?? 0);
+  }
+
+  return { el, refresh };
+}
+
+/** One lot, editable: the day, the size, and what changed hands. */
+function lotRow(code, lot, index, onChange) {
+  const sale = lot.units < 0;
+  const field = (props) => h('input', {
+    type: 'text', inputmode: 'decimal', class: 'port-input', ...props,
+  });
+
+  return h('div', { class: `lot-row ${sale ? 'is-sale' : ''}` },
+    h('span', { class: 'lot-kind' }, T(sale ? 'posSell' : 'posBuy')),
+    h('input', {
+      type: 'date', class: 'port-date lot-date', value: lot.at ?? '', max: todayIso(),
+      'aria-label': `${T('posAdded')} — ${code}`,
+      onChange: (e) => { setLot(code, index, 'at', e.target.value); onChange(); },
+    }),
+    field({
+      class: 'port-input lot-units',
+      value: toField(Math.abs(lot.units)), 'aria-label': T('posUnits'), title: T('posUnitsHint'),
+      onInput: (e) => {
+        const n = decimal(e.target.value);
+        // The sign is the lot's kind and is not something a text box may flip.
+        setLot(code, index, 'units', n == null ? null : (sale ? -n : n));
+        onChange();
+      },
+    }),
+    field({
+      class: 'port-input lot-money',
+      value: toField(lot.cost), 'aria-label': T(sale ? 'posProceeds' : 'posCost'),
+      title: T(sale ? 'posProceedsHint' : 'posCostHint'),
+      onInput: (e) => { setLot(code, index, 'cost', decimal(e.target.value)); onChange(); },
+    }),
+    h('button', {
+      type: 'button', class: 'port-remove lot-remove',
+      title: T('posLotRemove'), 'aria-label': `${T('posLotRemove')} — ${code}`,
+      onClick: () => { removeLot(code, index); onChange(); },
+    }, '×')
+  );
+}
+
+/**
+ * The buy and sell forms, which are the same three fields twice.
+ *
+ * Both default what changed hands to the size times today's price, because that
+ * is what it is unless you say otherwise — and both let you say otherwise, after
+ * which they stop guessing. Sell adds "all of it", which is the amount nobody
+ * wants to look up and retype.
+ */
+function lotForm(code, meta, series, kind, onChange) {
+  const sale = kind === 'sell';
+  const share = isShareCode(code);
+  let held = 0;
+  let touched = false;
+
+  const unitsInput = h('input', {
+    type: 'text', inputmode: 'decimal', class: 'port-input lot-units',
+    'aria-label': T('posUnits'), placeholder: T('posUnits'),
+    onInput: () => { if (!touched) fillMoney(); },
+  });
+  const moneyInput = h('input', {
+    type: 'text', inputmode: 'decimal', class: 'port-input lot-money',
+    'aria-label': T(sale ? 'posProceeds' : 'posCost'),
+    placeholder: T(sale ? 'posProceeds' : 'posCost'),
+    title: T(sale ? 'posProceedsHint' : 'posCostHint'),
+    // Once it has been typed into, it is the reader's number and the form stops
+    // writing over it. Emptying it hands the guess back.
+    onInput: (e) => { touched = e.target.value.trim() !== ''; },
+  });
+  const dateInput = h('input', {
+    type: 'date', class: 'port-date lot-date', value: todayIso(), max: todayIso(),
+    'aria-label': T('posAdded'),
+    onChange: () => { if (!touched) fillMoney(); },
+  });
+
+  const fillMoney = () => {
+    const units = decimal(unitsInput.value);
+    const at = dateInput.value;
+    const price = at && at !== todayIso()
+      ? priceOn(series, at)
+      : priceNow(code, share, meta, series);
+    moneyInput.value = units > 0 && price != null
+      ? toField(Math.round(units * price * 100) / 100)
+      : '';
+  };
+
+  const all = h('button', {
+    type: 'button', class: 'lot-all',
+    onClick: () => {
+      unitsInput.value = toField(held);
+      if (!touched) fillMoney();
+      unitsInput.focus();
+    },
+  }, T('posSellAll'));
+
+  const el = h('form', {
+    class: `lot-form ${sale ? 'is-sale' : ''}`,
+    onSubmit: (e) => {
+      e.preventDefault();
+      const units = decimal(unitsInput.value);
+      if (!(units > 0)) return;
+      // Never more than is held: a sale of what you do not have is not a short
+      // position here, it is a typo.
+      const size = sale ? -Math.min(units, held) : units;
+      if (!size) return;
+      addLot(code, { at: dateInput.value, units: size, cost: decimal(moneyInput.value) });
+      unitsInput.value = '';
+      moneyInput.value = '';
+      touched = false;
+      onChange();
+    },
+  },
+    h('span', { class: 'lot-kind' }, T(sale ? 'posSell' : 'posBuy')),
+    dateInput,
+    unitsInput,
+    moneyInput,
+    h('button', { type: 'submit', class: 'control lot-go' }, T(sale ? 'posSell' : 'posAdd')),
+    sale ? all : null
+  );
+
+  return {
+    el,
+    setMax: (n) => {
+      held = n > 0 ? n : 0;
+      // Nothing to sell, nothing to offer: the form is gone rather than sitting
+      // there refusing everything typed into it.
+      el.hidden = sale && !held;
+    },
+  };
+}
+
 const toField = (n) =>
   (n == null || !Number.isFinite(n) ? '' : String(Math.round(n * 100) / 100).replace('.', ','));
 
@@ -4681,13 +4908,32 @@ function addOptions() {
 }
 
 /**
+ * The latest price for a code the page has not loaded a history for.
+ *
+ * The add form needs it before anything else about the code is on hand, which is
+ * why it does not take the series the row helper does: a share falls back to its
+ * own last close when the scan has not answered, and a fund is last night's NAV
+ * either way.
+ */
+function currentPriceOf(code) {
+  if (isShareCode(code)) return shareQuote(code)?.price ?? shareOf(code)?.p ?? null;
+  return state.funds.find((f) => f.c === code)?.p ?? null;
+}
+
+/**
  * The control that opens a position.
  *
- * The portfolio is its own list, so something has to put things in it. A code
- * and a size is the whole of it; the date is today, because that is the only
- * date this page can honestly claim for something just typed in.
+ * The cost fills itself in at what the thing costs right now, because that is
+ * what it cost if you are buying it now — which is when somebody is most likely
+ * to be typing here. Type your own number and it stops guessing; clear yours and
+ * it starts again.
+ *
+ * A code already in the portfolio is not refused. Buying more of something is a
+ * second lot, and the row it lands in works out the average.
  */
 function portfolioAdd() {
+  let touched = false;
+
   const field = (extra, labelKey, hintKey) => h('input', {
     type: 'text', class: 'port-input', autocomplete: 'off',
     'aria-label': T(labelKey), placeholder: T(labelKey),
@@ -4695,11 +4941,29 @@ function portfolioAdd() {
   });
 
   const codeInput = field(
-    { list: 'port-add-list', spellcheck: 'false', class: 'port-input port-add-code' },
+    {
+      list: 'port-add-list', spellcheck: 'false', class: 'port-input port-add-code',
+      onInput: () => { if (!touched) fillCost(); },
+    },
     'portAddCode', null);
-  const unitsInput = field({ inputmode: 'decimal' }, 'posUnits', 'posUnitsHint');
-  const costInput = field({ inputmode: 'decimal' }, 'posCost', 'posCostHint');
+  const unitsInput = field(
+    { inputmode: 'decimal', onInput: () => { if (!touched) fillCost(); } },
+    'posUnits', 'posUnitsHint');
+  const costInput = field(
+    {
+      inputmode: 'decimal',
+      onInput: (e) => { touched = e.target.value.trim() !== ''; },
+    },
+    'posCost', 'posCostHint');
   const error = h('p', { class: 'port-add-error', role: 'alert' });
+
+  const fillCost = () => {
+    const units = decimal(unitsInput.value);
+    const price = currentPriceOf(codeInput.value.trim().toUpperCase());
+    costInput.value = units > 0 && price != null
+      ? toField(Math.round(units * price * 100) / 100)
+      : '';
+  };
 
   const form = h('form', {
     class: 'port-add',
@@ -4707,16 +4971,24 @@ function portfolioAdd() {
       e.preventDefault();
       const code = codeInput.value.trim().toUpperCase();
       if (!code) return;
-      if (state.positions[code]) {
-        error.textContent = T('portAddDuplicate');
-        return;
-      }
       if (!(await resolvesToPage(code))) {
         error.textContent = T('portAddUnknown');
         return;
       }
       error.textContent = '';
-      addPosition(code, decimal(unitsInput.value), decimal(costInput.value));
+      const units = decimal(unitsInput.value);
+      // A share's price may only have arrived with the index the check above
+      // just fetched, so the guess is made again here rather than left empty
+      // because it could not be made while the code was being typed.
+      if (!touched && !costInput.value.trim()) fillCost();
+      addLot(code, { at: todayIso(), units: units ?? 0, cost: decimal(costInput.value) });
+      // Nothing to add without a size: the code alone is a favourite, and there
+      // is a star for that.
+      if (!(units > 0)) {
+        removeLot(code, (state.positions[code]?.length ?? 1) - 1);
+        error.textContent = T('portAddNoUnits');
+        return;
+      }
       // The new row needs its own price history, so the page is rebuilt rather
       // than the row spliced in against data that has not been fetched.
       renderPortfolio();

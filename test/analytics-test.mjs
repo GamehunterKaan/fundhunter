@@ -17,9 +17,10 @@ import {
   overlapOf, weightsOf, overlappingPairs, sharedPositions,
   weightedMove, themeMoves, moversIn, versusCash,
   boardFlags, boardSummary, speculativeExposure, MIN_BOARD_FLAGS, SPECULATIVE_HEAVY,
-  priceOn, priceEntryOn, returnSince, positionValue, portfolioTotals,
+  priceOn, priceEntryOn, returnSince, positionOf, portfolioTotals,
   cashOver, cashAlternative, portfolioMix,
   portfolioSlices, portfolioDayMove, SLICE_MAX,
+  trending, TREND_SIZE, MIN_TREND_MEMBERS,
 } from '../analytics.js';
 import { HORIZONS, SPEC_STEPS } from '../core.js';
 
@@ -1148,8 +1149,11 @@ test('a return needs both ends and a base to divide by', () => {
   assert.equal(returnSince(null, 10), null);
 });
 
-test('a position with no cost is valued from the day it was starred', () => {
-  const p = positionValue({ units: 100, at: '2026-06-02' }, 15, 11);
+/** The price on a past day, the way the page hands it in. */
+const on = (prices) => (iso) => prices[iso] ?? null;
+
+test('a buy with no cost is valued from the price on its own day', () => {
+  const p = positionOf([{ units: 100, at: '2026-06-02' }], 15, on({ '2026-06-02': 11 }));
   assert.equal(p.value, 1500);
   assert.equal(p.basis, 1100);
   assert.equal(p.profit, 400);
@@ -1158,27 +1162,108 @@ test('a position with no cost is valued from the day it was starred', () => {
 });
 
 test('a stated cost is used in preference to the assumed one', () => {
-  const p = positionValue({ units: 100, cost: 1200, at: '2026-06-02' }, 15, 11);
+  const p = positionOf([{ units: 100, cost: 1200, at: '2026-06-02' }], 15, on({ '2026-06-02': 11 }));
   assert.equal(p.basis, 1200);
   assert.equal(p.profit, 300);
   assert.equal(p.assumed, false);
 });
 
-test('a position without a size is not a position', () => {
-  assert.equal(positionValue({ at: '2026-06-02' }, 15, 11), null);
-  assert.equal(positionValue({ units: 0 }, 15, 11), null);
-  assert.equal(positionValue({ units: -5 }, 15, 11), null);
-  assert.equal(positionValue({ units: 100 }, null, 11), null, 'and neither is one with no price');
+test('two buys at two prices average out', () => {
+  // The example everybody has: ten at ₺100 yesterday, twenty at ₺90 today. Thirty
+  // units at ₺93.33, not "the last price you paid" and not the mean of 100 and 90.
+  const p = positionOf([
+    { units: 10, cost: 1000, at: '2026-08-25' },
+    { units: 20, cost: 1800, at: '2026-08-26' },
+  ], 95);
+  assert.equal(p.units, 30);
+  assert.equal(p.basis, 2800);
+  assert.equal(Math.round(p.avg * 100) / 100, 93.33);
+  assert.equal(p.value, 2850);
+  assert.equal(p.profit, 50);
+  assert.equal(p.buys, 2);
+  assert.equal(p.at, '2026-08-25', 'measured from the first of them');
 });
 
-test('a position with no basis still has a value', () => {
-  // Starred before the history window opens: how much it is worth is known,
-  // what it cost is not, and pretending otherwise would invent a profit.
-  const p = positionValue({ units: 100, at: '2020-01-01' }, 15, null);
-  assert.equal(p.value, 1500);
+test('a sale takes units off at the average and leaves the average alone', () => {
+  // Selling some of something does not change what the rest of it cost you.
+  const p = positionOf([
+    { units: 10, cost: 1000, at: '2026-08-25' },
+    { units: 20, cost: 1800, at: '2026-08-26' },
+    { units: -12, cost: 1200, at: '2026-08-27' },
+  ], 95);
+  assert.equal(p.units, 18);
+  assert.equal(Math.round(p.avg * 100) / 100, 93.33, 'unchanged by the sale');
+  assert.equal(p.basis, 1680, '18 units of a ₺93.33 average');
+  // Sold 12 that had cost 1120 for 1200.
+  assert.equal(p.realised, 80);
+  assert.equal(p.value, 1710);
+  assert.equal(p.profit, 30, 'and the unrealised half is only about what is left');
+});
+
+test('lots are read in date order however they were entered', () => {
+  // A sale can only come out of what had been bought by the time it happened,
+  // so entering yesterday's buy after today's sale must not change the answer.
+  const ordered = positionOf([
+    { units: 10, cost: 1000, at: '2026-08-25' },
+    { units: -10, cost: 1200, at: '2026-08-26' },
+  ], 95);
+  const shuffled = positionOf([
+    { units: -10, cost: 1200, at: '2026-08-26' },
+    { units: 10, cost: 1000, at: '2026-08-25' },
+  ], 95);
+  assert.deepEqual(shuffled, ordered);
+  assert.equal(ordered.units, 0, 'sold out');
+  assert.equal(ordered.realised, 200);
+});
+
+test('selling more than is held is clamped, not a short position', () => {
+  const p = positionOf([
+    { units: 10, cost: 1000, at: '2026-08-25' },
+    { units: -25, cost: 2500, at: '2026-08-26' },
+  ], 95);
+  assert.equal(p.units, 0, 'you cannot sell what you never had');
+  // Ten of the twenty-five went through, so ₺1,000 of the ₺2,500 came with them.
+  assert.equal(p.realised, 0);
+});
+
+test('a sale with no price recorded cannot report what it made', () => {
+  const p = positionOf([
+    { units: 10, cost: 1000, at: '2026-08-25' },
+    { units: -5, at: '2026-08-26' },
+  ], 95);
+  assert.equal(p.units, 5);
+  assert.equal(p.basis, 500, 'the units still leave at what they cost');
+  assert.equal(p.realised, null, 'but what they sold for is not something to invent');
+});
+
+test('one unanswerable lot leaves the whole position without a basis', () => {
+  // An average missing a third of what was paid is not an average, it is a
+  // wrong number — so the position reports value and no cost at all.
+  const p = positionOf([
+    { units: 100, cost: 1000, at: '2026-06-02' },
+    { units: 100, at: '2020-01-01' },
+  ], 15, on({ '2026-06-02': 11 }));
+  assert.equal(p.units, 200);
+  assert.equal(p.value, 3000);
   assert.equal(p.basis, null);
+  assert.equal(p.avg, null);
   assert.equal(p.profit, null);
   assert.equal(p.pct, null);
+});
+
+test('a position without a size is not a position', () => {
+  assert.equal(positionOf([], 15), null);
+  assert.equal(positionOf(null, 15), null);
+  assert.equal(positionOf([{ at: '2026-06-02' }], 15), null);
+  assert.equal(positionOf([{ units: 0 }], 15), null);
+});
+
+test('no price is no value, but the lots are still a holding', () => {
+  const p = positionOf([{ units: 100, cost: 1000, at: '2026-06-02' }], null);
+  assert.equal(p.units, 100);
+  assert.equal(p.basis, 1000);
+  assert.equal(p.value, null, 'nothing to mark it against');
+  assert.equal(p.profit, null);
 });
 
 test('the totals count value over everything and profit only over what has a basis', () => {
@@ -1323,4 +1408,101 @@ test('a flat day is a real answer and says so', () => {
   assert.equal(out.pct, 0);
   assert.equal(out.gain, 0);
   assert.equal(out.counted, 1);
+});
+
+// ---------------------------------------------------------------- trending
+
+/** A listing that trades: cap, a week's move, and enough turnover to count. */
+const listing = (over = {}) => ({
+  c: 'AAAA', n: 'A COMPANY', kind: 'stock', th: 'tech',
+  cap: 10e9, p: 100, avgVol: 1e6, r: { w1: 1 }, ...over,
+});
+
+test('a sector is cap-weighted, so no one listing carries it', () => {
+  // A tiny company up 100% and a huge one flat is a flat sector, not a sector
+  // up fifty per cent.
+  const out = trending([
+    listing({ c: 'BIG', cap: 99e9, r: { w1: 0 } }),
+    listing({ c: 'SMALL', cap: 1e9, r: { w1: 100 } }),
+    listing({ c: 'MID', cap: 1e9, r: { w1: 0 } }),
+  ]);
+  assert.equal(out.sectors.length, 1);
+  assert.equal(out.sectors[0].id, 'tech');
+  assert.equal(out.sectors[0].of, 3);
+  assert.ok(out.sectors[0].move < 2, `cap-weighted, got ${out.sectors[0].move}`);
+});
+
+test('a theme too small to average is not published as a sector', () => {
+  const two = Array.from({ length: MIN_TREND_MEMBERS - 1 }, (_, i) =>
+    listing({ c: `T${i}`, th: 'semis' }));
+  const enough = Array.from({ length: MIN_TREND_MEMBERS }, (_, i) =>
+    listing({ c: `E${i}`, th: 'banks' }));
+  const out = trending([...two, ...enough]);
+  assert.deepEqual(out.sectors.map((s) => s.id), ['banks'],
+    'one company wearing a sector name is not a sector average');
+});
+
+test('the share half runs over what actually trades', () => {
+  // The biggest movers on the whole exchange are its smallest listings, walked
+  // to their limit on a few thousand lira. This is that listing.
+  const out = trending([
+    listing({ c: 'GHOST', avgVol: 1, r: { w1: 90 } }),
+    listing({ c: 'REALA', avgVol: 1e6, r: { w1: 20 } }),
+    listing({ c: 'REALB', avgVol: 1e6, r: { w1: 10 } }),
+    listing({ c: 'REALC', avgVol: 1e6, r: { w1: 5 } }),
+  ]);
+  assert.ok(!out.shares.some((s) => s.c === 'GHOST'), 'the untraded one is out');
+  assert.deepEqual(out.shares.map((s) => s.c), ['REALA', 'REALB', 'REALC'],
+    'and the rest are ranked on the move, not on the volume that let them in');
+  assert.equal(out.of, 3, 'so the page can say how many it ranked over');
+});
+
+test('only what is actually up is trending', () => {
+  // A week the whole market fell: the least bad company is not trending, and a
+  // green heading over a red list would be the panel lying about its subject.
+  const out = trending([
+    listing({ c: 'LESSBAD', r: { w1: -1 } }),
+    listing({ c: 'BAD', r: { w1: -12 } }),
+    listing({ c: 'WORSE', r: { w1: -20 } }),
+  ]);
+  assert.deepEqual(out.shares, []);
+  assert.ok(out.sectors[0].move < 0, 'the sector still reports the fall');
+});
+
+test('the speculative flag travels with the share', () => {
+  // A list of what is running is exactly where a name running for the wrong
+  // reasons turns up, and this site says elsewhere which those are.
+  const out = trending([
+    listing({ c: 'FLAGGED', r: { w1: 30 }, spec: { f: ['runUp'], of: 6 } }),
+    listing({ c: 'PLAIN', r: { w1: 20 } }),
+  ]);
+  assert.equal(out.shares[0].c, 'FLAGGED');
+  assert.equal(out.shares[0].spec, 1, 'carried through as a marker, not the whole scan');
+  assert.equal(out.shares[1].spec, undefined);
+});
+
+test('trending never returns more shares than it was asked for', () => {
+  const many = Array.from({ length: 40 }, (_, i) =>
+    listing({ c: `S${i}`, r: { w1: 40 - i } }));
+  assert.equal(trending(many).shares.length, TREND_SIZE);
+  assert.equal(trending(many, 'w1', 3).shares.length, 3);
+});
+
+test('nothing to rank is null, not an empty answer', () => {
+  assert.equal(trending([]), null);
+  assert.equal(trending(null), null);
+  // An exchange-traded fund is not a company and has no sector here.
+  assert.equal(trending([listing({ kind: 'etf' })]), null);
+  // A listing the index carries no weekly return for cannot be ranked on one.
+  assert.equal(trending([listing({ r: {} })]), null);
+});
+
+test('the window is an argument, so the panel can name what it read', () => {
+  const out = trending([
+    listing({ c: 'AAAA', r: { w1: 1, m1: 50 } }),
+    listing({ c: 'BBBB', r: { w1: 9, m1: 2 } }),
+    listing({ c: 'CCCC', r: { w1: 5, m1: 8 } }),
+  ], 'm1');
+  assert.equal(out.over, 'm1');
+  assert.deepEqual(out.shares.map((s) => s.c), ['AAAA', 'CCCC', 'BBBB']);
 });

@@ -737,6 +737,7 @@ Three panes across the top, one question each, and three more below them:
 | **Portfolio overlap** | whether two funds you hold are the same fund |
 | **Themes today** | what each line of business did, weighted by market value |
 | **Movers today** | the best and worst of the BIST 100 |
+| **Trending** | the sectors and shares that have been going up over the past week |
 
 The three below are the ones a fund page cannot answer, because each needs more
 than one fund — or more than one company — at a time.
@@ -874,6 +875,37 @@ theme with less than half of itself priced reports nothing.
 Worth knowing when reading it: some themes are one company. ASELS is 96% of
 defence by market value, so "defence today" is very nearly "ASELS today" — which
 is true of the sector itself, not an artefact of the measure.
+
+### Trending, which is the week rather than the day
+
+The three panels above it are about today, which is what a live quote can
+answer. A week is not: it needs a price from a week ago for every listing on the
+exchange. So it is computed once a day into `meta.json` — about 1.5KB in a file
+the page already loads — and draws before the first quote arrives.
+
+**A sector is cap-weighted; a share is itself**, and the two fail in opposite
+directions. No single listing can carry a sector, which is why that half needs
+no filter beyond a three-member floor: cap-weighting a group of two makes the
+bigger of them the whole answer. The share half has the opposite problem, the
+same one the movers list has — the biggest movers on the exchange are always its
+smallest listings.
+
+So the share half runs over **the half of the exchange that trades at least as
+much as the typical listed company**, by average daily turnover. A median rather
+than a number somebody picked: it moves with the exchange, and what it excludes
+is the half that could not absorb an order rather than the half below an
+arbitrary line. Today it sits at ₺71m a day, keeps 307 of 615 companies, and
+drops a listing up 33% on a turnover of zero.
+
+**Only what is actually up.** Over a week the whole market fell, the least bad
+company is not trending, and a green heading over a red list would be the panel
+lying about its own subject.
+
+Three of today's eight carry the **[speculative-board](#speculative-boards)
+mark**, and that is the point of carrying it through. A list of what is running
+is exactly where a name that is running for the wrong reasons turns up, and a
+site that flags GUNDG on its own page and then prints it here unmarked would be
+contradicting itself.
 
 The movers list is deliberately **confined to the BIST 100**. The biggest movers
 on the whole exchange are always its smallest listings, hitting their price limit
@@ -1197,16 +1229,62 @@ are two lists in two storage keys:
 
 ```
 fh-favs       ["TLY", "ASELS"]
-fh-positions  { TLY: { at: "2026-08-22", units: 12.5, cost: 100000 } }
+fh-positions  { TLY: [ { at: "2026-08-22", units: 12.5, cost: 100000 },
+                       { at: "2026-09-01", units: -5,   cost: 42000 } ] }
 ```
 
-A code and a size opens a position, dated today, which is the only date the page
-can honestly claim for something just typed in. A `×` on the row closes it, and
-leaves the star alone.
+**A position is a list of lots, not a number.** You buy the same fund twice at
+two prices, and one `units` field can only answer that by throwing away what
+each of them cost. Each lot is a day, a size and what changed hands; `units` is
+negative on a sale and `cost` is then what came back. Everything the page shows
+— how much is held, at what average, what it is worth — is derived from the list
+on every draw rather than stored beside it, so the two cannot disagree.
 
-They were one list before this, keyed by code and carrying the sizes. The
-migration keeps every code as a favourite and promotes only the entries that
-actually carried units — an entry with no size was never a holding.
+They were one list before this, keyed by code and carrying one size each. The
+migration keeps every code as a favourite and promotes the entries that carried
+units into a single-lot position — an entry with no size was never a holding.
+
+### Average cost, and what a sale does to it
+
+**Average cost, not FIFO.** Ten units at ₺100 and twenty at ₺90 is thirty units
+at ₺93.33. A sale takes units off at that average, which is what leaves the
+average where it was: selling some of something does not change what the rest of
+it cost you. FIFO answers a different question — which specific units left — and
+nobody buying a fund on TEFAS is tracking share certificates.
+
+Lots are read in **date order**, because a sale can only come out of what had
+been bought by the time it happened. Entering yesterday's buy after today's sale
+gives the same answer as entering them the other way round, and a test pins that.
+
+The row shows the unrealised profit on what is still held, with what selling
+already banked underneath it rather than added to it. Money you have been paid
+and money you might yet be paid do not belong behind one number.
+
+Two things it refuses to invent. A sale with no price recorded reports no
+realised gain rather than assuming it went out at cost. And a buy whose day has
+no price on file leaves the **whole** position without a basis rather than an
+average over the lots that happened to be answerable — an average missing a
+third of what was paid is not an average, it is a wrong number.
+
+### Opening, editing and closing
+
+The add form fills the cost in at **what the thing costs right now**, because
+that is what it cost if you are buying it now, which is when somebody is most
+likely to be typing there. Type your own number and it stops guessing; clear
+yours and it starts again. A code already held is not refused — that is the
+second lot.
+
+The row itself carries no inputs. Clicking it opens a drawer with every lot in
+it, each editable in place, each with its own `×`: the whole point of keeping
+the lots is that they are separately wrong. Under them are the two forms that
+change the position, and **sell all** fills the units box with everything held,
+which is the number nobody wants to look up and retype. A sale is capped at what
+is held — a sale of what you do not have is a typo, not a short position.
+
+The drawer's rows are rebuilt only when the *list* changes: one added, one
+deleted, one moved to another day. Rebuilding them on every keystroke would
+replace the input being typed into, which is the trap every other live-editing
+surface here had to be written around.
 
 ```
 Total value  ₺310.1k     Cost  ₺213.5k     Profit  ₺96.6k  (+45.3%)
@@ -1264,31 +1342,27 @@ spends the width on a bigger ring instead of on empty margins.
 Nothing leaves the machine. There is no account, no sync and no backup: clear
 your browser data and the portfolio is gone.
 
-### What it costs, and the two ways not to type it
+### What it costs, when you do not type it
 
-The row carries the day it was bought, and **picking a day costs the position at
-that day's price** — units times the close on file. Somebody who remembers when
-they bought usually does not remember what they paid, and the price is on file
-either way. `priceOn()` answers with the last price on or before the date, so a
-Saturday resolves to Friday's close rather than to nothing.
+**Picking a day costs the lot at that day's price** — units times the close on
+file. Somebody who remembers when they bought usually does not remember what
+they paid, and the price is on file either way. `priceOn()` answers with the
+last price on or before the date, so a Saturday resolves to Friday's close
+rather than to nothing. With no day picked, it is today's price, which is what a
+lot being typed in right now cost.
 
-The `=` beside the cost box does the same thing at today's price, for a position
-opened just now. Both are unavailable until a size is entered: a cost cannot be
-computed out of units nobody has typed.
+Every number written into one of these fields goes in **in the notation the
+field reads back** — comma decimal, no grouping. That is not cosmetic: the
+reader strips the dot as a thousands separator, so `1.234,5` survives a round
+trip and `1,234.5` would come back as twelve thousand.
 
-Both write a real cost into the field rather than leaving one implied, and they
-write it in the notation the field reads back — comma decimal, no grouping. That
-is not cosmetic: the reader strips the dot as a thousands separator, so a value
-put in as `1.234,5` survives a round trip and `1,234.5` would come back as
-twelve thousand.
-
-Leave the cost blank anyway and the position is valued from the price on the day
+Leave the cost blank anyway and the lot is valued from the price on the day
 it was added — the honest default for a portfolio typed in from a watchlist.
 Rows priced that way are marked `assumed cost`, because a guess presented as a
 receipt is worse than either.
 
-A position dated before the price history reaches back that far keeps its
-value and loses its profit: how much it is worth is known, what it cost is not,
+A lot dated before the price history reaches back that far leaves its position
+with a value and no profit: how much it is worth is known, what it cost is not,
 and inventing the difference would be inventing a gain.
 
 **The total profit is taken over only the positions that have a basis.** Value
@@ -1480,7 +1554,11 @@ never disagrees with a fund page about what a share did today.
 
 ## Pages
 
-Ten routes, all client-side off the same data, under five nav entries.
+Ten routes, all client-side off the same data, under five nav entries — a row
+in the masthead on a desktop, a **bottom tab bar** on a phone, where a thumb
+is. Icon over label, and a pill behind the section you are on, because colour
+alone on a 10px label is not a signal on a moving bus.
+
 **Popular and Market falls are two questions about the fund list**, and the
 market is a question about the shares, so each sits behind a strip of tabs on
 the page it belongs to rather than on a masthead carrying eight names. Every
@@ -1497,6 +1575,13 @@ route still resolves on its own — links to them are out in the world.
 | `#/favoriler` | your starred **funds and shares** — the fund list with a code restriction, so the filter bar and preferences apply inside it, and a panel of shares under it |
 | `#/fon/CODE` | one fund: composition, **which lines of business it is in**, **what it actually holds**, quality, prediction, **its record through every fall**, price and benchmarks |
 | `#/hisse/CODE` | one company: **which funds hold it and which way they moved**, valuation, the business, trading, price against BIST 100 |
+
+The tab bar is the same five `<a>` elements, moved by CSS rather than built
+twice. It cost one thing worth writing down: `backdrop-filter` on the masthead
+makes it a containing block for anything `position: fixed` inside it, so the
+first version pinned the bar to the bottom of the *masthead* and it sat there
+covering the search box. The blur comes off up there on a phone; the bar
+carries its own.
 
 "Popular" ranks on **net flow, not growth in size**: a fund whose size doubled
 because its price doubled took in nothing. The page also says outright that it

@@ -30,6 +30,7 @@ import {
   allocationTurnover, ridgeFit, dailyReturns, factorReader, median,
   crashProtection, themeExposure, ownership,
   boardSummary, speculativeExposure, MIN_BOARD_FLAGS, SPECULATIVE_HEAVY,
+  trending, TREND_SIZE,
 } from '../analytics.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -366,6 +367,21 @@ async function main() {
     // smallest listings on it, hitting their price limit on a few thousand lira
     // of trade, which says nothing about the day.
     meta.bist100 = companies.filter((s) => s.bx != null).map((s) => s.c).sort();
+
+    // What has been running over the last few days. A week is not a figure the
+    // quote scan carries — it prices today — so unlike the two maps above this
+    // is an answer rather than a membership, computed here once a day and read
+    // straight off meta.json. It is about a kilobyte, and the alternative is the
+    // 900KB share index on the home page.
+    meta.trending = trending(stockFile.stocks, 'w1', TREND_SIZE);
+    if (meta.trending) {
+      const top = meta.trending.sectors[0];
+      log(`  trending over a week: ${meta.trending.sectors.length} sectors ` +
+        `(${top.id} ${top.move > 0 ? '+' : ''}${top.move}%), ` +
+        `${meta.trending.shares.length} shares from the ${meta.trending.of} that trade ` +
+        `at least ₺${Math.round(meta.trending.floor / 1e6)}m a day` +
+        `${meta.trending.shares.some((s) => s.spec) ? ', some of them flagged' : ''}`);
+    }
 
     await fs.writeFile(path.join(DATA, 'stocks.json'), JSON.stringify(stockFile) + '\n');
     log(`  membership: ${Object.keys(meta.themeWeights).length} themes carry ` +
