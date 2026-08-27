@@ -1229,16 +1229,22 @@ are two lists in two storage keys:
 
 ```
 fh-favs       ["TLY", "ASELS"]
-fh-positions  { TLY: [ { at: "2026-08-22", units: 12.5, cost: 100000 },
-                       { at: "2026-09-01", units: -5,   cost: 42000 } ] }
+fh-positions  { TLY: [ { at: "2026-08-22", units: 12.5, price: 8000 },
+                       { at: "2026-09-01", units: -5,   price: 8400 } ] }
 ```
 
 **A position is a list of lots, not a number.** You buy the same fund twice at
 two prices, and one `units` field can only answer that by throwing away what
-each of them cost. Each lot is a day, a size and what changed hands; `units` is
-negative on a sale and `cost` is then what came back. Everything the page shows
-— how much is held, at what average, what it is worth — is derived from the list
-on every draw rather than stored beside it, so the two cannot disagree.
+each of them cost. Each lot is a day, a size, and what **one unit** changed
+hands at — `units` is negative on a sale, where `price` is what it sold at.
+Everything the page shows — how much is held, at what average, what it is worth
+— is derived from the list on every draw rather than stored beside it, so the
+two cannot disagree.
+
+**A unit price, not a total.** It is the number on the confirmation, it is what
+the row already prints as an average, and it is the one that survives editing:
+correct the size of a lot and what you paid per unit is still what you paid per
+unit, where a stored total would silently restate it as something else.
 
 They were one list before this, keyed by code and carrying one size each. The
 migration keeps every code as a favourite and promotes the entries that carried

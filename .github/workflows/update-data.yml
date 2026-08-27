@@ -43,13 +43,21 @@ jobs:
       # Reads the BIST series the previous step wrote, and asks TEFAS for each
       # fund's price at the two ends of every fall it finds. Around 40 small
       # requests, all cached by date, so past falls are only ever fetched once.
+      # Optional by design — without data/crashes.json the crash figures are
+      # simply left out — so a bad day at TEFAS must not throw away the half
+      # hour of fund history already fetched above. The file keeps its previous
+      # contents and the run goes on, flagged.
       - name: Measure what funds did through BIST's falls
+        continue-on-error: true
         run: node scripts/fetch-crashes.mjs
 
       # One request per market for the sector and the dividend yield of every
       # listing the funds hold. Cheap, and the foreign half is asked for by
       # ticker, so it only covers what is actually in a filing.
+      # Optional on the same terms: without data/sectors.json the themes and
+      # dividend yields are left out rather than the run being lost.
       - name: Fetch sectors and dividend yields
+        continue-on-error: true
         run: node scripts/fetch-sectors.mjs
 
       # One scanner request for the whole exchange, then one Yahoo request per

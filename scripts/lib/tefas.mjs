@@ -225,7 +225,13 @@ export class TefasClient {
         clearTimeout(timer);
       }
     }
-    throw new Error(`${method} failed after ${this.maxRetry} attempts: ${lastErr?.message}`);
+    // `postUrl` takes a URL, not a method name — naming `method` here threw a
+    // ReferenceError instead of this message every time a request ran out of
+    // retries, which killed the nightly run and hid the reason it had failed.
+    // `post()` builds the URL as `${API}/${method}`, so the last segment is the
+    // method name it would have printed.
+    const what = url.split('/').pop() || url;
+    throw new Error(`${what} failed after ${this.maxRetry} attempts: ${lastErr?.message}`);
   }
 }
 

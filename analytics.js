@@ -1613,16 +1613,21 @@ export function returnSince(now, then) {
  *
  * Lots are read in date order, because a sale can only come out of what had been
  * bought by the time it happened. One shape carries both directions: `units` is
- * negative on a sale and `cost` is what came back for it.
+ * negative on a sale, and `price` is what one unit changed hands at either way.
  *
- * A buy with no cost recorded is valued at the price on its own day — the honest
- * default for a position typed in from a watchlist, flagged as `assumed`. A buy
- * whose day has no price on file cannot be valued at all, and then the WHOLE
- * position reports no basis rather than an average over the lots that happened
- * to be answerable: an average missing a third of what was paid is not an
- * average, it is a wrong number.
+ * **A unit price, not a total.** It is the number on the confirmation, it is
+ * what the row already prints as an average, and it is the one that survives
+ * editing: change the size of a lot and what you paid per unit is still what you
+ * paid per unit, where a stored total would silently restate it.
  *
- * @param {{at?: string, units: number, cost?: number}[]} lots
+ * A buy with no price recorded is valued at the price on its own day — the
+ * honest default for a position typed in from a watchlist, flagged as
+ * `assumed`. A buy whose day has no price on file cannot be valued at all, and
+ * then the WHOLE position reports no basis rather than an average over the lots
+ * that happened to be answerable: an average missing a third of what was paid is
+ * not an average, it is a wrong number.
+ *
+ * @param {{at?: string, units: number, price?: number}[]} lots
  * @param {number|null} priceNow
  * @param {(iso: string) => number|null} [priceAt] the price on a past day
  */
@@ -1632,7 +1637,7 @@ export function positionOf(lots, priceNow, priceAt = null) {
     .map((l) => ({
       at: typeof l.at === 'string' ? l.at : null,
       units: l.units,
-      cost: Number.isFinite(l.cost) && l.cost > 0 ? l.cost : null,
+      price: Number.isFinite(l.price) && l.price > 0 ? l.price : null,
     }))
     .sort((a, b) => String(a.at ?? '').localeCompare(String(b.at ?? '')));
   if (!rows.length) return null;
@@ -1651,30 +1656,28 @@ export function positionOf(lots, priceNow, priceAt = null) {
     if (lot.units > 0) {
       buys += 1;
       if (at == null) at = lot.at;
-      let basis = lot.cost;
-      if (basis == null) {
+      let paid = lot.price;
+      if (paid == null) {
         const then = lot.at == null ? null : priceAt?.(lot.at) ?? null;
         if (Number.isFinite(then) && then > 0) {
-          basis = lot.units * then;
+          paid = then;
           assumed = true;
         } else {
           unknown = true;
         }
       }
       units += lot.units;
-      cost += basis ?? 0;
+      cost += lot.units * (paid ?? 0);
     } else {
       sells += 1;
-      const asked = -lot.units;
-      // Selling more than was ever bought is bad data, not a short position.
-      // The quantity is clamped to what is held and the proceeds are scaled with
-      // it, so the arithmetic stays internally consistent; the page does not
-      // offer the reader a way to get here in the first place.
-      const sold = Math.min(asked, units);
-      const share = asked > 0 ? sold / asked : 0;
+      // Selling more than was ever bought is bad data, not a short position, so
+      // the quantity is clamped to what is held. A unit price needs no scaling
+      // to go with it — that is the other thing a total made awkward. The page
+      // does not offer the reader a way to get here in the first place.
+      const sold = Math.min(-lot.units, units);
       const out = units > 0 ? (cost / units) * sold : 0;
-      if (lot.cost == null) realisedKnown = false;
-      else realised += lot.cost * share - out;
+      if (lot.price == null) realisedKnown = false;
+      else realised += lot.price * sold - out;
       units -= sold;
       cost -= out;
     }

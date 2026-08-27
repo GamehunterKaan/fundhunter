@@ -1152,7 +1152,7 @@ test('a return needs both ends and a base to divide by', () => {
 /** The price on a past day, the way the page hands it in. */
 const on = (prices) => (iso) => prices[iso] ?? null;
 
-test('a buy with no cost is valued from the price on its own day', () => {
+test('a buy with no price is valued from the price on its own day', () => {
   const p = positionOf([{ units: 100, at: '2026-06-02' }], 15, on({ '2026-06-02': 11 }));
   assert.equal(p.value, 1500);
   assert.equal(p.basis, 1100);
@@ -1161,19 +1161,19 @@ test('a buy with no cost is valued from the price on its own day', () => {
   assert.ok(p.assumed, 'and the page has to say that is what it did');
 });
 
-test('a stated cost is used in preference to the assumed one', () => {
-  const p = positionOf([{ units: 100, cost: 1200, at: '2026-06-02' }], 15, on({ '2026-06-02': 11 }));
+test('a stated price is used in preference to the assumed one', () => {
+  const p = positionOf([{ units: 100, price: 12, at: '2026-06-02' }], 15, on({ '2026-06-02': 11 }));
   assert.equal(p.basis, 1200);
   assert.equal(p.profit, 300);
   assert.equal(p.assumed, false);
 });
 
 test('two buys at two prices average out', () => {
-  // The example everybody has: ten at ₺100 yesterday, twenty at ₺90 today. Thirty
-  // units at ₺93.33, not "the last price you paid" and not the mean of 100 and 90.
+  // The example everybody has: ten at ₺100 yesterday, twenty at ₺90 today.
+  // Thirty units at ₺93.33 — not the last price paid, and not the mean of the two.
   const p = positionOf([
-    { units: 10, cost: 1000, at: '2026-08-25' },
-    { units: 20, cost: 1800, at: '2026-08-26' },
+    { units: 10, price: 100, at: '2026-08-25' },
+    { units: 20, price: 90, at: '2026-08-26' },
   ], 95);
   assert.equal(p.units, 30);
   assert.equal(p.basis, 2800);
@@ -1184,12 +1184,22 @@ test('two buys at two prices average out', () => {
   assert.equal(p.at, '2026-08-25', 'measured from the first of them');
 });
 
+test('the size of a lot can be corrected without restating what it cost', () => {
+  // The reason the lot stores a unit price and not a total: doubling the size
+  // doubles the basis and leaves the price paid alone.
+  const ten = positionOf([{ units: 10, price: 100, at: '2026-08-25' }], 95);
+  const twenty = positionOf([{ units: 20, price: 100, at: '2026-08-25' }], 95);
+  assert.equal(ten.avg, 100);
+  assert.equal(twenty.avg, 100);
+  assert.equal(twenty.basis, 2 * ten.basis);
+});
+
 test('a sale takes units off at the average and leaves the average alone', () => {
   // Selling some of something does not change what the rest of it cost you.
   const p = positionOf([
-    { units: 10, cost: 1000, at: '2026-08-25' },
-    { units: 20, cost: 1800, at: '2026-08-26' },
-    { units: -12, cost: 1200, at: '2026-08-27' },
+    { units: 10, price: 100, at: '2026-08-25' },
+    { units: 20, price: 90, at: '2026-08-26' },
+    { units: -12, price: 100, at: '2026-08-27' },
   ], 95);
   assert.equal(p.units, 18);
   assert.equal(Math.round(p.avg * 100) / 100, 93.33, 'unchanged by the sale');
@@ -1204,12 +1214,12 @@ test('lots are read in date order however they were entered', () => {
   // A sale can only come out of what had been bought by the time it happened,
   // so entering yesterday's buy after today's sale must not change the answer.
   const ordered = positionOf([
-    { units: 10, cost: 1000, at: '2026-08-25' },
-    { units: -10, cost: 1200, at: '2026-08-26' },
+    { units: 10, price: 100, at: '2026-08-25' },
+    { units: -10, price: 120, at: '2026-08-26' },
   ], 95);
   const shuffled = positionOf([
-    { units: -10, cost: 1200, at: '2026-08-26' },
-    { units: 10, cost: 1000, at: '2026-08-25' },
+    { units: -10, price: 120, at: '2026-08-26' },
+    { units: 10, price: 100, at: '2026-08-25' },
   ], 95);
   assert.deepEqual(shuffled, ordered);
   assert.equal(ordered.units, 0, 'sold out');
@@ -1218,17 +1228,17 @@ test('lots are read in date order however they were entered', () => {
 
 test('selling more than is held is clamped, not a short position', () => {
   const p = positionOf([
-    { units: 10, cost: 1000, at: '2026-08-25' },
-    { units: -25, cost: 2500, at: '2026-08-26' },
+    { units: 10, price: 100, at: '2026-08-25' },
+    { units: -25, price: 100, at: '2026-08-26' },
   ], 95);
   assert.equal(p.units, 0, 'you cannot sell what you never had');
-  // Ten of the twenty-five went through, so ₺1,000 of the ₺2,500 came with them.
+  // Only the ten that existed went through, at the price they went at.
   assert.equal(p.realised, 0);
 });
 
 test('a sale with no price recorded cannot report what it made', () => {
   const p = positionOf([
-    { units: 10, cost: 1000, at: '2026-08-25' },
+    { units: 10, price: 100, at: '2026-08-25' },
     { units: -5, at: '2026-08-26' },
   ], 95);
   assert.equal(p.units, 5);
@@ -1240,7 +1250,7 @@ test('one unanswerable lot leaves the whole position without a basis', () => {
   // An average missing a third of what was paid is not an average, it is a
   // wrong number — so the position reports value and no cost at all.
   const p = positionOf([
-    { units: 100, cost: 1000, at: '2026-06-02' },
+    { units: 100, price: 10, at: '2026-06-02' },
     { units: 100, at: '2020-01-01' },
   ], 15, on({ '2026-06-02': 11 }));
   assert.equal(p.units, 200);
@@ -1259,7 +1269,7 @@ test('a position without a size is not a position', () => {
 });
 
 test('no price is no value, but the lots are still a holding', () => {
-  const p = positionOf([{ units: 100, cost: 1000, at: '2026-06-02' }], null);
+  const p = positionOf([{ units: 100, price: 10, at: '2026-06-02' }], null);
   assert.equal(p.units, 100);
   assert.equal(p.basis, 1000);
   assert.equal(p.value, null, 'nothing to mark it against');

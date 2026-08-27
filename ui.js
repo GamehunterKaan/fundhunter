@@ -314,15 +314,16 @@ const POSITIONS_KEY = 'fh-positions';
  * in watching.
  *
  *   fh-favs       ["TLY", "ASELS"]
- *   fh-positions  { TLY: [ { at: "2026-08-22", units: 12.5, cost: 100000 },
- *                          { at: "2026-09-01", units: -5,   cost: 42000 } ] }
+ *   fh-positions  { TLY: [ { at: "2026-08-22", units: 12.5, price: 8000 },
+ *                          { at: "2026-09-01", units: -5,   price: 8400 } ] }
  *
  * **A position is a list of lots, not a number.** You buy the same fund twice at
  * two prices, and one `units` field can only answer that by throwing away what
- * each of them cost. Each lot is a day, a size and what changed hands; `units`
- * is negative on a sale and `cost` is then what came back. What the page shows —
- * how much is held, at what average, and what it is worth — is derived from the
- * list every time rather than stored beside it, so the two can never disagree.
+ * each of them cost. Each lot is a day, a size, and what ONE unit changed hands
+ * at — the number on the confirmation, and the one that survives editing the
+ * size. `units` is negative on a sale, where `price` is what it sold at. What
+ * the page shows is derived from the list every time rather than stored beside
+ * it, so the two can never disagree.
  */
 function restoreSaved() {
   state.favs = new Set();
@@ -351,14 +352,21 @@ function restoreSaved() {
   }
   const held = readStored(POSITIONS_KEY);
   if (!held || typeof held !== 'object' || Array.isArray(held)) return;
+  let old = false;
   for (const [code, entry] of Object.entries(held)) {
     if (typeof code !== 'string' || !entry) continue;
-    // A position was one lot before it was a list of them. Both shapes read.
-    const lots = (Array.isArray(entry) ? entry : [entry])
+    // A position was one lot before it was a list of them, and a lot carried a
+    // total before it carried a unit price. Every shape reads.
+    const rows = Array.isArray(entry) ? entry : [entry];
+    if (!Array.isArray(entry) || rows.some((l) => l?.cost != null)) old = true;
+    const lots = rows
       .filter((l) => l && typeof l === 'object' && Number.isFinite(l.units) && l.units !== 0)
       .map(readLot);
     if (lots.length) state.positions[code] = lots;
   }
+  // Written back once, so what is on disk is what this version writes rather
+  // than a shape that only survives because the reader still understands it.
+  if (old) savePositions();
 }
 
 /** Whatever is under a key, or null — a corrupt value must not break the boot. */
@@ -379,11 +387,13 @@ function writeStored(key, value) {
   }
 }
 
-const readLot = (l) => ({
-  at: typeof l.at === 'string' ? l.at : todayIso(),
-  units: Number.isFinite(l.units) && l.units !== 0 ? l.units : 0,
-  cost: Number.isFinite(l.cost) && l.cost > 0 ? l.cost : undefined,
-});
+const readLot = (l) => {
+  const units = Number.isFinite(l.units) && l.units !== 0 ? l.units : 0;
+  // `cost` was the total for the lot before the field became a unit price.
+  const price = Number.isFinite(l.price) && l.price > 0 ? l.price
+    : (Number.isFinite(l.cost) && l.cost > 0 && units ? l.cost / Math.abs(units) : undefined);
+  return { at: typeof l.at === 'string' ? l.at : todayIso(), units, price };
+};
 
 /** Today where the exchange is, not where the reader happens to be sitting. */
 const todayIso = () =>
@@ -400,7 +410,7 @@ function savePositions() {
     if (!kept.length) continue;
     out[code] = kept.map((l) => {
       const row = { at: l.at ?? todayIso(), units: l.units };
-      if (l.cost > 0) row.cost = l.cost;
+      if (l.price > 0) row.price = l.price;
       return row;
     });
   }
@@ -425,7 +435,7 @@ function addLot(code, lot) {
   (state.positions[code] ??= []).push({
     at: lot.at || todayIso(),
     units: lot.units,
-    cost: lot.cost > 0 ? lot.cost : undefined,
+    price: lot.price > 0 ? lot.price : undefined,
   });
   savePositions();
 }
@@ -4755,7 +4765,7 @@ function lotRow(code, lot, index, onChange) {
     }),
     field({
       class: 'port-input lot-units',
-      value: toField(Math.abs(lot.units)), 'aria-label': T('posUnits'), title: T('posUnitsHint'),
+      value: toField(Math.abs(lot.units), 4), 'aria-label': T('posUnits'), title: T('posUnitsHint'),
       onInput: (e) => {
         const n = decimal(e.target.value);
         // The sign is the lot's kind and is not something a text box may flip.
@@ -4765,9 +4775,9 @@ function lotRow(code, lot, index, onChange) {
     }),
     field({
       class: 'port-input lot-money',
-      value: toField(lot.cost), 'aria-label': T(sale ? 'posProceeds' : 'posCost'),
-      title: T(sale ? 'posProceedsHint' : 'posCostHint'),
-      onInput: (e) => { setLot(code, index, 'cost', decimal(e.target.value)); onChange(); },
+      value: toField(lot.price, 6), 'aria-label': T(sale ? 'posSellPrice' : 'posUnitPrice'),
+      title: T(sale ? 'posSellPriceHint' : 'posUnitPriceHint'),
+      onInput: (e) => { setLot(code, index, 'price', decimal(e.target.value)); onChange(); },
     }),
     h('button', {
       type: 'button', class: 'port-remove lot-remove',
@@ -4780,10 +4790,10 @@ function lotRow(code, lot, index, onChange) {
 /**
  * The buy and sell forms, which are the same three fields twice.
  *
- * Both default what changed hands to the size times today's price, because that
- * is what it is unless you say otherwise — and both let you say otherwise, after
- * which they stop guessing. Sell adds "all of it", which is the amount nobody
- * wants to look up and retype.
+ * Both open with today's price already in them, because that is what a lot
+ * being entered right now went for unless you say otherwise — and both let you
+ * say otherwise, after which they stop guessing. Sell adds "all of it", which is
+ * the amount nobody wants to look up and retype.
  */
 function lotForm(code, meta, series, kind, onChange) {
   const sale = kind === 'sell';
@@ -4794,13 +4804,12 @@ function lotForm(code, meta, series, kind, onChange) {
   const unitsInput = h('input', {
     type: 'text', inputmode: 'decimal', class: 'port-input lot-units',
     'aria-label': T('posUnits'), placeholder: T('posUnits'),
-    onInput: () => { if (!touched) fillMoney(); },
   });
   const moneyInput = h('input', {
     type: 'text', inputmode: 'decimal', class: 'port-input lot-money',
-    'aria-label': T(sale ? 'posProceeds' : 'posCost'),
-    placeholder: T(sale ? 'posProceeds' : 'posCost'),
-    title: T(sale ? 'posProceedsHint' : 'posCostHint'),
+    'aria-label': T(sale ? 'posSellPrice' : 'posUnitPrice'),
+    placeholder: T(sale ? 'posSellPrice' : 'posUnitPrice'),
+    title: T(sale ? 'posSellPriceHint' : 'posUnitPriceHint'),
     // Once it has been typed into, it is the reader's number and the form stops
     // writing over it. Emptying it hands the guess back.
     onInput: (e) => { touched = e.target.value.trim() !== ''; },
@@ -4812,21 +4821,17 @@ function lotForm(code, meta, series, kind, onChange) {
   });
 
   const fillMoney = () => {
-    const units = decimal(unitsInput.value);
     const at = dateInput.value;
     const price = at && at !== todayIso()
       ? priceOn(series, at)
       : priceNow(code, share, meta, series);
-    moneyInput.value = units > 0 && price != null
-      ? toField(Math.round(units * price * 100) / 100)
-      : '';
+    moneyInput.value = toField(price, 6);
   };
 
   const all = h('button', {
     type: 'button', class: 'lot-all',
     onClick: () => {
-      unitsInput.value = toField(held);
-      if (!touched) fillMoney();
+      unitsInput.value = toField(held, 4);
       unitsInput.focus();
     },
   }, T('posSellAll'));
@@ -4841,7 +4846,7 @@ function lotForm(code, meta, series, kind, onChange) {
       // position here, it is a typo.
       const size = sale ? -Math.min(units, held) : units;
       if (!size) return;
-      addLot(code, { at: dateInput.value, units: size, cost: decimal(moneyInput.value) });
+      addLot(code, { at: dateInput.value, units: size, price: decimal(moneyInput.value) });
       unitsInput.value = '';
       moneyInput.value = '';
       touched = false;
@@ -4856,6 +4861,8 @@ function lotForm(code, meta, series, kind, onChange) {
     sale ? all : null
   );
 
+  fillMoney();
+
   return {
     el,
     setMax: (n) => {
@@ -4867,8 +4874,9 @@ function lotForm(code, meta, series, kind, onChange) {
   };
 }
 
-const toField = (n) =>
-  (n == null || !Number.isFinite(n) ? '' : String(Math.round(n * 100) / 100).replace('.', ','));
+const toField = (n, dp = 2) => (n == null || !Number.isFinite(n)
+  ? ''
+  : String(Math.round(n * 10 ** dp) / 10 ** dp).replace('.', ','));
 
 /**
  * A number typed on either kind of keyboard.
@@ -4923,10 +4931,11 @@ function currentPriceOf(code) {
 /**
  * The control that opens a position.
  *
- * The cost fills itself in at what the thing costs right now, because that is
+ * The price fills itself in at what one unit costs right now, because that is
  * what it cost if you are buying it now — which is when somebody is most likely
- * to be typing here. Type your own number and it stops guessing; clear yours and
- * it starts again.
+ * to be typing here. A price, not a total: it is the number on the confirmation,
+ * and it does not change when you correct the size beside it. Type your own and
+ * it stops guessing; clear yours and it starts again.
  *
  * A code already in the portfolio is not refused. Buying more of something is a
  * second lot, and the row it lands in works out the average.
@@ -4946,23 +4955,17 @@ function portfolioAdd() {
       onInput: () => { if (!touched) fillCost(); },
     },
     'portAddCode', null);
-  const unitsInput = field(
-    { inputmode: 'decimal', onInput: () => { if (!touched) fillCost(); } },
-    'posUnits', 'posUnitsHint');
+  const unitsInput = field({ inputmode: 'decimal' }, 'posUnits', 'posUnitsHint');
   const costInput = field(
     {
       inputmode: 'decimal',
       onInput: (e) => { touched = e.target.value.trim() !== ''; },
     },
-    'posCost', 'posCostHint');
+    'posUnitPrice', 'posUnitPriceHint');
   const error = h('p', { class: 'port-add-error', role: 'alert' });
 
   const fillCost = () => {
-    const units = decimal(unitsInput.value);
-    const price = currentPriceOf(codeInput.value.trim().toUpperCase());
-    costInput.value = units > 0 && price != null
-      ? toField(Math.round(units * price * 100) / 100)
-      : '';
+    costInput.value = toField(currentPriceOf(codeInput.value.trim().toUpperCase()), 6);
   };
 
   const form = h('form', {
@@ -4981,7 +4984,7 @@ function portfolioAdd() {
       // just fetched, so the guess is made again here rather than left empty
       // because it could not be made while the code was being typed.
       if (!touched && !costInput.value.trim()) fillCost();
-      addLot(code, { at: todayIso(), units: units ?? 0, cost: decimal(costInput.value) });
+      addLot(code, { at: todayIso(), units: units ?? 0, price: decimal(costInput.value) });
       // Nothing to add without a size: the code alone is a favourite, and there
       // is a star for that.
       if (!(units > 0)) {
