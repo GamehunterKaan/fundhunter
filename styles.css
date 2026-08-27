@@ -667,6 +667,34 @@ ul.comp-legend {
   padding: 0;
 }
 
+/* The pages that sit under one nav entry, switched between at the top of each.
+ * A row of links rather than a second masthead: it belongs to the page, and it
+ * scrolls away with it. */
+.sub-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  margin: 0 0 1.4rem;
+  border-bottom: 1px solid var(--hairline);
+}
+.sub-nav-link {
+  padding: 0.5rem 0.85rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sub-nav-link:hover {
+  color: var(--ink);
+}
+.sub-nav-link.is-on {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
 /* ------------------------------------------------------------ the portfolio */
 
 /* Opening a position: a code, a size, and the button. One row on a desktop,
@@ -705,6 +733,59 @@ ul.comp-legend {
   margin: 0.55rem 0 0;
   font-size: 0.83rem;
   color: var(--down);
+}
+
+/* The cost field and the button that fills it from today's price. */
+.port-cost {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+.port-cost .port-input {
+  min-width: 0;
+}
+.port-mini {
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.port-mini:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.port-mini:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* The day it was bought, under the return measured from it. */
+.port-date {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-align: right;
+}
+.port-date:hover,
+.port-date:focus-visible {
+  color: var(--ink);
+  border-color: var(--rule);
 }
 
 /* Closing a position. Deliberately quiet until the row is under the pointer:

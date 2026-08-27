@@ -1264,11 +1264,27 @@ spends the width on a bigger ring instead of on empty margins.
 Nothing leaves the machine. There is no account, no sync and no backup: clear
 your browser data and the portfolio is gone.
 
-### What it costs, when you do not say
+### What it costs, and the two ways not to type it
 
-Leave the cost blank and the position is valued from the price on the day it was
-added — the honest default for a portfolio typed in from a watchlist. Rows
-priced that way are marked `assumed cost`, because a guess presented as a
+The row carries the day it was bought, and **picking a day costs the position at
+that day's price** — units times the close on file. Somebody who remembers when
+they bought usually does not remember what they paid, and the price is on file
+either way. `priceOn()` answers with the last price on or before the date, so a
+Saturday resolves to Friday's close rather than to nothing.
+
+The `=` beside the cost box does the same thing at today's price, for a position
+opened just now. Both are unavailable until a size is entered: a cost cannot be
+computed out of units nobody has typed.
+
+Both write a real cost into the field rather than leaving one implied, and they
+write it in the notation the field reads back — comma decimal, no grouping. That
+is not cosmetic: the reader strips the dot as a thousands separator, so a value
+put in as `1.234,5` survives a round trip and `1,234.5` would come back as
+twelve thousand.
+
+Leave the cost blank anyway and the position is valued from the price on the day
+it was added — the honest default for a portfolio typed in from a watchlist.
+Rows priced that way are marked `assumed cost`, because a guess presented as a
 receipt is worse than either.
 
 A position dated before the price history reaches back that far keeps its
@@ -1464,16 +1480,20 @@ never disagrees with a fund page about what a share did today.
 
 ## Pages
 
-Eight routes, all client-side off the same data:
+Ten routes, all client-side off the same data, under five nav entries.
+**Popular and Market falls are two questions about the fund list**, and the
+market is a question about the shares, so each sits behind a strip of tabs on
+the page it belongs to rather than on a masthead carrying eight names. Every
+route still resolves on its own — links to them are out in the world.
 
 | Route | What it is |
 |---|---|
 | `#/` | **[the dashboard](#the-dashboard)** — what you follow, and what took money in this week |
 | `#/fonlar` | the full universe, filtered and ranked |
+| `#/populer` | *(under Funds)* biggest 30-day net inflow, most new investors, newest launches — **traded on TEFAS, risk 4 and above** |
+| `#/dusus` | *(under Funds)* BIST's ten falls of the last three years, and which funds came through them — **[crash protection](#crash-protection)** |
 | `#/hisseler` | **[Borsa İstanbul shares](#shares)** — sortable on any column, filterable by theme |
-| `#/piyasa` | **[the market](#the-market)** — index, gold, dollar and euro on one chart, and BIST as a heat map |
-| `#/populer` | biggest 30-day net inflow, most new investors, newest launches — **traded on TEFAS, risk 4 and above** |
-| `#/dusus` | BIST's ten falls of the last three years, and which funds came through them — **[crash protection](#crash-protection)** |
+| `#/piyasa` | *(under Shares)* **[the market](#the-market)** — index, gold, dollar and euro on one chart, and BIST as a heat map |
 | `#/favoriler` | your starred **funds and shares** — the fund list with a code restriction, so the filter bar and preferences apply inside it, and a panel of shares under it |
 | `#/fon/CODE` | one fund: composition, **which lines of business it is in**, **what it actually holds**, quality, prediction, **its record through every fall**, price and benchmarks |
 | `#/hisse/CODE` | one company: **which funds hold it and which way they moved**, valuation, the business, trading, price against BIST 100 |

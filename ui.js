@@ -233,19 +233,60 @@ const NAV = [
   { route: '/', key: 'navDash' },
   { route: '/fonlar', key: 'navFunds' },
   { route: '/hisseler', key: 'navShares' },
-  { route: '/piyasa', key: 'navMarket' },
-  { route: '/populer', key: 'navPopular' },
-  { route: '/dusus', key: 'navCrash' },
   { route: '/favoriler', key: 'navFavorites' },
   { route: '/portfoy', key: 'navPortfolio' },
 ];
 
-/** Label and highlight the section nav. A detail page belongs to its own list. */
+/**
+ * The pages that sit under one nav entry.
+ *
+ * "Which funds is everyone buying" and "which funds held their value in a fall"
+ * are two questions about the fund list, not two sections of the site; the
+ * market is a question about the shares. They keep their own routes, because
+ * links to them are out in the world, and the top nav that used to carry all
+ * five now carries two.
+ */
+const SUB_NAV = {
+  '/fonlar': [
+    { route: '/fonlar', key: 'navFunds' },
+    { route: '/populer', key: 'navPopular' },
+    { route: '/dusus', key: 'navCrash' },
+  ],
+  '/hisseler': [
+    { route: '/hisseler', key: 'navShares' },
+    { route: '/piyasa', key: 'navMarket' },
+  ],
+};
+
+/** Which nav entry a route belongs under. A detail page belongs to its own list. */
+function parentRoute(hash) {
+  if (hash.startsWith('/fon/')) return '/fonlar';
+  if (hash.startsWith('/hisse/')) return '/hisseler';
+  return Object.keys(SUB_NAV).find((p) => SUB_NAV[p].some((s) => s.route === hash)) ?? hash;
+}
+
+/**
+ * The strip of sibling pages, drawn at the top of each of them.
+ *
+ * Nothing for a page with no siblings, and nothing for a detail page: a fund
+ * page belongs under Funds for the purpose of highlighting the nav, but it is
+ * not one of the three lists you switch between.
+ */
+function subNav(current) {
+  const items = SUB_NAV[parentRoute(current)];
+  if (!items?.some((s) => s.route === current)) return null;
+  return h('nav', { class: 'sub-nav', 'aria-label': T(parentRoute(current) === '/fonlar' ? 'navFunds' : 'navShares') },
+    items.map((s) => h('a', {
+      class: `sub-nav-link${s.route === current ? ' is-on' : ''}`,
+      href: `#${s.route}`,
+      'aria-current': s.route === current ? 'page' : null,
+    }, T(s.key))));
+}
+
+/** Label and highlight the section nav. */
 function syncNav() {
   const hash = location.hash.slice(1) || '/';
-  const current = hash.startsWith('/fon/') ? '/fonlar'
-    : hash.startsWith('/hisse/') ? '/hisseler'
-      : hash;
+  const current = parentRoute(hash);
   for (const a of document.querySelectorAll('#main-nav a[data-route]')) {
     const item = NAV.find((n) => n.route === a.dataset.route);
     if (item) a.textContent = T(item.key);
@@ -381,6 +422,14 @@ function addPosition(code, units, cost) {
 
 function removePosition(code) {
   delete state.positions[code];
+  savePositions();
+}
+
+/** Move a position to the day it was actually bought. */
+function setPositionAt(code, iso) {
+  const entry = state.positions[code];
+  if (!entry) return;
+  entry.at = iso || null;
   savePositions();
 }
 
@@ -1721,7 +1770,8 @@ function renderList(page = state.page) {
       ...(hasFunds || shareCodes.length ? [] : [emptyFavs()])
     );
   } else {
-    view.replaceChildren(renderHighlights(), renderToolbar(), renderTable());
+    view.replaceChildren(
+      subNav('/fonlar'), renderHighlights(), renderToolbar(), renderTable());
   }
   window.scrollTo({ top: 0 });
   measureChrome();
@@ -2491,6 +2541,7 @@ function renderPopular() {
     .slice(0, RANK_SIZE);
 
   view.replaceChildren(
+    subNav('/populer'),
     h('section', { class: 'page-head' },
       h('p', { class: 'eyebrow' }, T('asOf', { date: fmtDate(state.meta.latestDate, state.lang) })),
       h('h1', { class: 'page-title' }, T('popular')),
@@ -2798,7 +2849,8 @@ function renderCrashPage() {
   const pool = state.funds.filter((f) => f.cr && f.tefas === true);
 
   if (!episodes.length || !pool.length) {
-    view.replaceChildren(h('div', { class: 'state-msg' }, h('p', {}, T('crashEmpty'))));
+    view.replaceChildren(
+      subNav('/dusus'), h('div', { class: 'state-msg' }, h('p', {}, T('crashEmpty'))));
     return;
   }
 
@@ -2811,6 +2863,7 @@ function renderCrashPage() {
   };
 
   view.replaceChildren(
+    subNav('/dusus'),
     h('section', { class: 'page-head' },
       h('p', { class: 'eyebrow' }, T('crashEyebrow', {
         n: fmtInt(episodes.length, state.lang), y: fmtInt(years, state.lang),
@@ -3603,6 +3656,7 @@ async function renderMarket() {
   );
 
   view.replaceChildren(
+    subNav('/piyasa'),
     renderChart({
       raw,
       titleKey: 'marketChart',
@@ -3902,6 +3956,7 @@ async function renderShareList() {
   // a paragraph explaining what a share is spends the top of the screen on
   // something nobody reads twice.
   view.replaceChildren(
+    subNav('/hisseler'),
     shareBar(),
     h('div', { id: 'share-rows' }),
     h('p', { class: 'panel-note', id: 'share-stamp' })
@@ -4430,14 +4485,15 @@ function portfolioRow(code, series, onChange) {
   const meta = share ? shareOf(code) : state.funds.find((f) => f.c === code);
 
   const cell = (labelKey) => h('td', { class: 'num num-cell', 'data-label': T(labelKey) });
-  const sinceCell = cell('posSinceShort');
+  // A span rather than a cell: the date picker shares the column with it.
+  const sinceCell = h('span', { class: 'num' });
   const priceCell = cell('posPrice');
   const valueCell = cell('posValue');
   const profitCell = cell('posProfit');
 
   const field = (name, value, hint) => h('input', {
     type: 'text', inputmode: 'decimal', class: 'port-input',
-    value: value ?? '', 'aria-label': `${T(name === 'units' ? 'posUnits' : 'posCost')} — ${code}`,
+    value: toField(value), 'aria-label': `${T(name === 'units' ? 'posUnits' : 'posCost')} — ${code}`,
     title: hint,
     onInput: (e) => {
       setPosition(code, name, decimal(e.target.value));
@@ -4448,9 +4504,58 @@ function portfolioRow(code, series, onChange) {
   const unitsInput = field('units', entry.units, T('posUnitsHint'));
   const costInput = field('cost', entry.cost, T('posCostHint'));
 
+  // The price the row is currently showing, kept for the button that costs the
+  // position at it. refresh() owns it; nothing else may set it.
+  let priceLatest = null;
+
+  /**
+   * Cost the position at a price: units times that price, written into the field
+   * in the notation the field reads back.
+   *
+   * Silent when there is nothing to work from. Both callers are buttons or
+   * pickers the reader pressed on purpose, so a cost they typed is theirs to
+   * replace — but a cost cannot be invented out of a size nobody has entered.
+   */
+  const costAt = (price) => {
+    const units = decimal(unitsInput.value);
+    if (!(units > 0) || price == null || !Number.isFinite(price)) return false;
+    const cost = Math.round(units * price * 100) / 100;
+    costInput.value = toField(cost);
+    setPosition(code, 'cost', cost);
+    return true;
+  };
+
+  const nowButton = h('button', {
+    type: 'button', class: 'port-mini',
+    title: T('posCostNow'), 'aria-label': `${T('posCostNow')} — ${code}`,
+    onClick: () => {
+      if (costAt(priceLatest)) onChange();
+    },
+  }, '=');
+
+  /**
+   * The day it was bought.
+   *
+   * Picking one moves the position AND costs it at that day's price, which is
+   * the whole reason to offer the field: somebody who knows when they bought
+   * usually does not remember what they paid, and the price on the day is on
+   * file. `priceOn` answers with the last price on or before the date, so a
+   * Saturday resolves to Friday's close rather than to nothing.
+   */
+  const dateInput = h('input', {
+    type: 'date', class: 'port-date', value: entry.at ?? '', max: todayIso(),
+    'aria-label': `${T('posAdded')} — ${code}`, title: T('posDateHint'),
+    onChange: (e) => {
+      const iso = e.target.value || null;
+      setPositionAt(code, iso);
+      if (iso) costAt(priceOn(series, iso));
+      onChange();
+    },
+  });
+
   // Filled in by refresh(), because the date a figure is measured from is the
-  // last price on or before the day it was starred — Friday's close for a
-  // Saturday star — and the row has to say which day it actually used.
+  // last price on or before the day it was bought — Friday's close for a
+  // Saturday — and the row has to say which day it actually used.
   const fromLabel = h('span', { class: 'row-sub port-added' });
 
   const tr = h('tr', {},
@@ -4471,9 +4576,10 @@ function portfolioRow(code, series, onChange) {
       h('a', { class: 'code-link num', href: `#/${share ? 'hisse' : 'fon'}/${code}` }, code),
       h('span', { class: 'row-sub' }, meta?.n ?? ''),
       fromLabel),
-    sinceCell,
+    h('td', { class: 'num-cell', 'data-label': T('posSinceShort') }, sinceCell, dateInput),
     h('td', { class: 'num-cell', 'data-label': T('posUnits') }, unitsInput),
-    h('td', { class: 'num-cell', 'data-label': T('posCost') }, costInput),
+    h('td', { class: 'num-cell', 'data-label': T('posCost') },
+      h('div', { class: 'port-cost' }, costInput, nowButton)),
     priceCell,
     valueCell,
     profitCell
@@ -4483,6 +4589,10 @@ function portfolioRow(code, series, onChange) {
   function refresh() {
     if (!tr.isConnected) return null;
     const now = priceNow(code, share, meta, series);
+    priceLatest = now;
+    // Nothing to cost a position at, or no size to cost: the button says so by
+    // being unavailable rather than by doing nothing when pressed.
+    nowButton.disabled = now == null || !(decimal(unitsInput.value) > 0);
     const from = priceEntryOn(series, state.positions[code]?.at);
     const then = from?.[1] ?? null;
     const since = returnSince(now, then);
@@ -4491,7 +4601,7 @@ function portfolioRow(code, series, onChange) {
       ? T('posSince', { date: fmtDate(from[0], state.lang) })
       : (state.positions[code]?.at ? T('posNoPrice') : '');
 
-    sinceCell.className = `num num-cell delta ${signOf(since)}`;
+    sinceCell.className = `num delta ${signOf(since)}`;
     sinceCell.textContent = since == null
       ? '—'
       : fmtPct(since, state.lang, { signed: true, digits: 1 });
@@ -4522,6 +4632,16 @@ function portfolioRow(code, series, onChange) {
 
   return { tr, refresh };
 }
+
+/**
+ * A number written the way `decimal()` reads it back.
+ *
+ * Not `fmtNum`: that groups thousands with the dot, and the dot is what
+ * `decimal()` strips. A value put into one of these fields has to survive being
+ * read out of it again, which "1.234,5" does and "1,234.5" does not.
+ */
+const toField = (n) =>
+  (n == null || !Number.isFinite(n) ? '' : String(Math.round(n * 100) / 100).replace('.', ','));
 
 /**
  * A number typed on either kind of keyboard.
