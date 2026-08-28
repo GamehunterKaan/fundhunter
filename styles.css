@@ -2914,6 +2914,14 @@ a.dash-row:hover {
   color: var(--ink-muted);
 }
 
+/* A second line inside the one sub-line a `.stat` has room for. The stat is a
+ * three-row subgrid, so a fourth child would be drawn over the third rather
+ * than under it — this nests instead of adding a sibling. */
+.hit-median {
+  display: block;
+  margin-top: 0.1rem;
+}
+
 /* ---------------------------------------------------------------- analysts */
 
 /* One bar, three segments, each labelled with its own count — a legend for

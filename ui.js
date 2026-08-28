@@ -3374,20 +3374,27 @@ function renderConsistency(prices) {
   const windows = consistency(prices, mmf);
   if (!windows) return null;
 
+  const tile = (w) => h('div', { class: 'stat' },
+    h('dt', { title: T('consistencyHint') }, T(w.labelKey)),
+    // The rate leads, but never without its denominator: an overlapping window
+    // is not an independent trial and the count is what says so.
+    h('dd', { class: `delta ${w.rate >= 50 ? 'up' : 'down'}` },
+      fmtPct(w.rate, state.lang, { digits: 0 })),
+    // Both sub-lines live inside ONE `.stat-sub`. A `.stat` spans three subgrid
+    // rows, so it has room for exactly three children — a dt, a dd and one
+    // sub-line. A fourth lands back in the third row and draws on top of the
+    // third, which is precisely what these two did.
+    h('span', { class: 'stat-sub num' },
+      T('consistencyOf', { n: w.wins, of: w.windows }),
+      h('span', { class: `hit-median delta ${signOf(w.median)}` },
+        T('consistencyMedian', {
+          v: fmtPoints(w.median, state.lang, { signed: true, digits: 1 }),
+        })))
+  );
+
   return h('section', { class: 'panel' },
     h('h2', {}, T('consistency')),
-    h('dl', { class: 'stat-row stat-row-inset' }, windows.map((w) => h('div', { class: 'stat' },
-      h('dt', { title: T('consistencyHint') }, T(w.labelKey)),
-      // The rate leads, but never without its denominator: an overlapping
-      // window is not an independent trial and the count is what says so.
-      h('dd', { class: `delta ${w.rate >= 50 ? 'up' : 'down'}` },
-        fmtPct(w.rate, state.lang, { digits: 0 })),
-      h('span', { class: 'stat-sub num' },
-        T('consistencyOf', { n: w.wins, of: w.windows })),
-      h('span', { class: `stat-sub num delta ${signOf(w.median)}` },
-        T('consistencyMedian', {
-          v: fmtPoints(w.median, state.lang, { signed: true, digits: 1 }) })))
-    )),
+    h('dl', { class: 'stat-row stat-row-inset' }, windows.map(tile)),
     h('p', { class: 'panel-note' }, T('consistencyNote'))
   );
 }
