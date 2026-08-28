@@ -10,7 +10,7 @@
     "url": "https://github.com/GamehunterKaan/fundhunter.git"
   },
   "scripts": {
-    "test": "node --test test/core-test.mjs test/analytics-test.mjs test/pdf-test.mjs test/portfolio-test.mjs test/quotes-test.mjs",
+    "test": "node --test test/core-test.mjs test/analytics-test.mjs test/pdf-test.mjs test/portfolio-test.mjs test/quotes-test.mjs test/sw-test.mjs",
     "fetch": "node scripts/fetch-tefas.mjs",
     "fetch:benchmarks": "node scripts/fetch-benchmarks.mjs",
     "analytics": "node scripts/build-analytics.mjs",
@@ -18,7 +18,8 @@
     "fetch:crashes": "node scripts/fetch-crashes.mjs",
     "fetch:sectors": "node scripts/fetch-sectors.mjs",
     "fetch:stocks": "node scripts/fetch-stocks.mjs",
-    "build:data": "npm run fetch && npm run fetch:benchmarks && npm run fetch:crashes && npm run fetch:sectors && npm run fetch:stocks && npm run analytics",
+    "fetch:cpi": "node scripts/fetch-cpi.mjs",
+    "build:data": "npm run fetch && npm run fetch:benchmarks && npm run fetch:crashes && npm run fetch:sectors && npm run fetch:stocks && npm run fetch:cpi && npm run analytics",
     "serve": "node scripts/serve.mjs"
   }
 }

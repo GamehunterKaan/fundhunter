@@ -412,6 +412,124 @@ export const STRINGS = {
       'eşit ağırlıklı hâlinin aksine bu sizin gerçek dağılımınız.',
     portSpec: 'Spekülatif hisse maruziyeti',
     portSpecNote: 'Tuttuğunuz fonların spekülatif görünümlü hisselere ağırlığı, tutarınıza göre.',
+    // --- içine bakış ---
+    portLook: 'Gerçekte neye sahipsiniz',
+    portLookConc: 'Etkin pozisyon',
+    portLookConcHint:
+      'Aynı yoğunluktaki eşit büyüklükte pozisyon sayısı. Otuz pozisyonun hepsi ' +
+      'tek bir bahisse, bu sayı bire yaklaşır.',
+    portLookEquity: 'Hisse tarafında',
+    portLookEquityHint: 'Yalnızca hisseler üzerinden. Tahvil, mevduat ve kıymetli maden sayılmaz.',
+    portLookNames: 'Farklı pozisyon',
+    portLookPosition: 'Pozisyon',
+    portLookValue: 'Tutarınız',
+    portLookWeight: 'Payı',
+    portLookVia: 'Fonlar',
+    portLookDirect: 'Doğrudan',
+    portLookUncovered: '{v} açılamadı: bu fonların KAP bildirimi yok.',
+    portLookUnnamed: '{v} kodsuz bildirildi; aynı varlık olarak birleştirilmedi.',
+    portLookHidden: 'En büyük {n} pozisyon gösteriliyor.',
+    // --- kayıtlı ekranlar ---
+    screenName: 'Ekran adı',
+    screenSave: 'Kaydet',
+    screenCopy: 'Bağlantıyı kopyala',
+    screenCopied: 'Kopyalandı',
+    screenDelete: 'Sil',
+    // --- karşılaştırma ---
+    compare: 'Karşılaştır',
+    compareN: 'Karşılaştır ({n})',
+    compareAdd: 'Karşılaştırmaya ekle',
+    compareRemove: 'Karşılaştırmadan çıkar',
+    comparePickTwo: 'Karşılaştırmak için en az iki fon seçin.',
+    compareUnknown: 'Böyle bir fon kodu yok.',
+    compareFull: 'Aynı anda en fazla {n} fon karşılaştırılabilir.',
+    compareChart: 'Aynı günden başlayarak 100’e endekslenmiş',
+    compareMix: 'Dağılımları',
+    compareFigures: 'Rakamlar',
+    compareOverlap: 'Aynı şeyi mi tutuyorlar',
+    compareNoShared: 'Ortak pozisyon yok.',
+    compareUnfiled: '{n} fonun KAP bildirimi okunamadı; bu tablo onları kapsamıyor.',
+    // --- yıllık getiri oranı ve ücret ---
+    portRate: 'Yıllık getiri oranı',
+    portRateHint:
+      'Her alımın ne kadar süredir portföyde olduğuna göre hesaplanan iç verim ' +
+      'oranı (XIRR). Bir yıllık paranız ile iki haftalık paranız aynı sayılmaz.',
+    portRatePartial: '{n}/{of} pozisyon üzerinden; maliyeti bilinmeyenler dışarıda.',
+    portFees: 'Fonların aldığı yönetim ücreti',
+    portFeesNote:
+      'Bu tutar ödenecek bir masraf değil: ücret fon fiyatının içinden kesiliyor, ' +
+      'yani zaten ödendi. Alış ile bugünkü değerin ortalaması üzerinden hesaplandı.',
+    portFeesTotal: 'Bugüne kadar',
+    portFeesYears: '{n} yıl',
+    portFeesPartial: '{n} pozisyonun gider oranı yayımlanmamış; hesaba katılmadı.',
+    // --- stopaj ---
+    portTax: 'Bugün satsanız stopaj',
+    portTaxGain: 'Kâğıt üstündeki kazanç',
+    portTaxDue: 'Kesilecek stopaj',
+    portTaxNet: 'Elinize geçecek',
+    portTaxHint:
+      'Kazançlı pozisyonların her biri kendi oranından hesaplandı. Zarardaki ' +
+      'pozisyonlar kazançtan düşülmedi: mahsup edilip edilemeyeceği tüm yıllık ' +
+      'kazancınıza bağlı ve burası onu bilemez.',
+    portTaxNote:
+      'Hisse senedi yoğun fonlarda kazanç stopajdan muaf, süre şartı yok. Bu bilgi ' +
+      'TEFAS’ın yayımladığı resmî fon unvanından okunuyor, tahmin edilmiyor. ' +
+      'İzahnamesinde %51 taahhüdü olup 1 yıl sonra muaf olan fonlar burada tespit ' +
+      'edilemiyor ve vergili görünür. Oranlar varsayımdır, vergi tavsiyesi değildir.',
+    portTaxPartial: '{n} pozisyonun maliyeti bilinmiyor ya da fon değil; hesaba katılmadı.',
+    taxPrefNote:
+      'Türkiye’de fon kazancında iki oran var: %17,5 ve sıfır. Hisse senedi yoğun ' +
+      'fonlarda kazanç süre şartı olmadan muaf; bu, fonun resmî unvanından okunuyor. ' +
+      'Kesin bilgi için fonun KAP’taki izahnamesine bakın.',
+    taxBucket_exempt: 'Hisse senedi yoğun fon — muaf',
+    taxBucket_standard: 'Stopaja tabi',
+    posHeldDays: '{n} gün',
+    posTurnsOn: 'Bir yılı {date} tarihinde doluyor.',
+    posOverYear: 'Bir yıldan uzun süredir elinizde.',
+    // --- istikrar ---
+    consistency: 'Para piyasasını ne sıklıkla geçti',
+    consistencyHint:
+      'Geçmişteki her başlangıç tarihinden itibaren bu uzunluktaki pencerelerin ' +
+      'kaçında fon, para piyasası fonlarının önünde bitirdi. Pencereler üst üste ' +
+      'biner; bu bir isabet oranıdır, istatistiksel bir testin sonucu değil.',
+    consistencyOf: '{n}/{of} pencere',
+    consistencyMedian: 'ortanca {v}',
+    consistencyNote:
+      'Tek bir dönemin getirisi şansa bağlı olabilir; her pencerede önde bitirmek ' +
+      'daha zordur. Ortanca fark, pencerelerin yarısında bundan iyi, yarısında ' +
+      'bundan kötü olduğunu söyler.',
+    // --- reel ---
+    realTerms: 'Reel',
+    realTermsHint:
+      'Tüm lira tutarlarını, en son yayımlanan yılın parasına çevirir. Yıllık TÜFE ' +
+      'kullanılır; yıl içinde ara değer üretilmez, her dönem kendi yılının ' +
+      'endeksinden hesaplanır. Endeks yıllık ortalamadır.',
+    realTermsNote: '{year} yılı lirasıyla, Dünya Bankası TÜFE verisine göre.',
+    realTermsPartial:
+      'Grafikteki {n} dönem {year} sonrasına ait; çevrilecek endeks yok, nominal bırakıldı.',
+    // --- son ziyaretten beri ---
+    sinceVisit: 'Son ziyaretinizden beri',
+    sinceVisitDays: '{n} gün',
+    sinceVisitMedian: 'Fonlarınızın ortancası',
+    sinceVisitHint:
+      'Takip ettiğiniz fonların bu süredeki getirilerinin ortancası. Ortalama ' +
+      'değil: birkaç fonluk bir listede tek bir fonun sıçraması diğerleri ' +
+      'hakkında hiçbir şey söylemez.',
+    sinceVisitOf: '{n} fon',
+    sinceVisitBest: 'En iyisi',
+    sinceVisitWorst: 'En kötüsü',
+    sinceVisitNew: 'Yeni fon',
+    // --- birlikte hareket ---
+    portTogether: 'Gerçekten farklı bahisler mi',
+    portTogetherBets: 'Bağımsız pozisyon sayısı',
+    portTogetherHint:
+      'Fonlarınızın günlük getirileri birbirine ne kadar benziyorsa, portföy o ' +
+      'kadar az sayıda bahis gibi davranır. Aynı hisseleri tutmasalar bile iki ' +
+      'Türk hisse fonu aynı bahistir; üstteki panel neyi iki kez tuttuğunuzu, ' +
+      'bu panel neyin birlikte hareket ettiğini söyler.',
+    portTogetherOf: '{n} fon',
+    portTogetherAvg: 'Ortalama korelasyon',
+    portTogetherPartial: '{n} pozisyon için yeterli ortak fiyat geçmişi yok.',
     portOnlyWatching: 'Yalnızca izlediğiniz',
     portHolding: 'Tuttuklarınız',
     portRing: 'Paranın dağılımı',
@@ -1185,6 +1303,123 @@ export const STRINGS = {
       'the equal-weighted version on the dashboard, this is your real mix.',
     portSpec: 'Exposure to speculative shares',
     portSpecNote: 'What your funds hold in shares with a speculative profile, weighted by your money.',
+    // --- look-through ---
+    portLook: 'What you actually own',
+    portLookConc: 'Effective positions',
+    portLookConcHint:
+      'The number of equal-sized positions that would be exactly this concentrated. ' +
+      'Thirty holdings that are really one bet come out near one.',
+    portLookEquity: 'Among the shares',
+    portLookEquityHint: 'Counted over shares alone. Bonds, deposits and metals are left out.',
+    portLookNames: 'Distinct positions',
+    portLookPosition: 'Position',
+    portLookValue: 'Your money',
+    portLookWeight: 'Share',
+    portLookVia: 'Through',
+    portLookDirect: 'Held directly',
+    portLookUncovered: '{v} could not be opened up: those funds have no KAP filing.',
+    portLookUnnamed: '{v} was filed with no code and is not pooled with the same holding elsewhere.',
+    portLookHidden: 'Showing the largest {n} positions.',
+    // --- saved screens ---
+    screenName: 'Screen name',
+    screenSave: 'Save',
+    screenCopy: 'Copy link',
+    screenCopied: 'Copied',
+    screenDelete: 'Remove',
+    // --- comparison ---
+    compare: 'Compare',
+    compareN: 'Compare ({n})',
+    compareAdd: 'Add to comparison',
+    compareRemove: 'Remove from comparison',
+    comparePickTwo: 'Pick at least two funds to compare.',
+    compareUnknown: 'No fund has that code.',
+    compareFull: 'At most {n} funds can be compared at once.',
+    compareChart: 'Indexed to 100 from the same day',
+    compareMix: 'What each one holds',
+    compareFigures: 'The figures',
+    compareOverlap: 'Are they the same thing',
+    compareNoShared: 'No position is held by more than one of them.',
+    compareUnfiled: '{n} of them have no readable KAP filing and are not in this table.',
+    // --- annualised rate and fees ---
+    portRate: 'Annualised rate',
+    portRateHint:
+      'The internal rate of return (XIRR), weighted by how long each purchase ' +
+      'has been in. Money in for a year does not count the same as money in for a fortnight.',
+    portRatePartial: 'Over {n} of {of} positions; those with no known cost are left out.',
+    portFees: 'What the fees have taken',
+    portFeesNote:
+      'Not a bill: a fund’s expense ratio is deducted inside the unit price, so this ' +
+      'has already been paid. Charged against the mean of what you paid and what you hold.',
+    portFeesTotal: 'So far',
+    portFeesYears: '{n} yr',
+    portFeesPartial: '{n} positions publish no expense ratio and are left out.',
+    // --- withholding ---
+    portTax: 'If you sold today',
+    portTaxGain: 'Gain on paper',
+    portTaxDue: 'Withheld',
+    portTaxNet: 'What reaches you',
+    portTaxHint:
+      'Each position that is up is taxed at its own rate. Positions at a loss are ' +
+      'not set against them: whether they can be depends on your whole year, which ' +
+      'this page does not know.',
+    portTaxNote:
+      'A hisse senedi yoğun fon is exempt outright, with no holding period. That is ' +
+      'read from the official fund title TEFAS publishes, not inferred. Funds exempt ' +
+      'after a year under a 51% izahname commitment are not detected here and show ' +
+      'as taxed. The rates are assumptions, not tax advice.',
+    portTaxPartial: '{n} positions have no known cost or are not funds, and are left out.',
+    taxPrefNote:
+      'Turkish fund gains carry two rates: 17.5% and nothing. A hisse senedi yoğun ' +
+      'fon is exempt with no holding period, read from the fund’s official title. ' +
+      'Check the izahname on KAP to be certain.',
+    taxBucket_exempt: 'Equity-intensive — exempt',
+    taxBucket_standard: 'Taxed',
+    posHeldDays: '{n} days',
+    posTurnsOn: 'Turns a year on {date}.',
+    posOverYear: 'Held for more than a year.',
+    // --- consistency ---
+    consistency: 'How often it beat the money market',
+    consistencyHint:
+      'Of every window of this length starting anywhere in the history, how many ' +
+      'the fund finished ahead of money-market funds. Windows overlap, so this is ' +
+      'a hit rate rather than the result of a significance test.',
+    consistencyOf: '{n} of {of} windows',
+    consistencyMedian: 'median {v}',
+    consistencyNote:
+      'One period’s return can be luck; finishing ahead in window after window is ' +
+      'harder to arrive at by accident. The median gap says the fund did better ' +
+      'than that in half its windows and worse in the other half.',
+    // --- real terms ---
+    realTerms: 'Real',
+    realTermsHint:
+      'Restates every lira figure in the latest published year’s money. The index ' +
+      'is annual: nothing is interpolated inside a year, so each period is ' +
+      'deflated at its own year’s figure. The index is an annual average.',
+    realTermsNote: 'In {year} lira, using World Bank CPI.',
+    realTermsPartial:
+      '{n} of the periods shown fall after {year}; there is no index for them yet, so they are left nominal.',
+    // --- since your last visit ---
+    sinceVisit: 'Since you last looked',
+    sinceVisitDays: '{n} days',
+    sinceVisitMedian: 'Median of your funds',
+    sinceVisitHint:
+      'The median return of the funds you follow over this gap. Not the average: ' +
+      'in a list of a handful, one fund jumping says nothing about the rest.',
+    sinceVisitOf: '{n} funds',
+    sinceVisitBest: 'Best',
+    sinceVisitWorst: 'Worst',
+    sinceVisitNew: 'New funds',
+    // --- moving together ---
+    portTogether: 'Are these different bets',
+    portTogetherBets: 'Independent positions',
+    portTogetherHint:
+      'The more alike your funds’ daily returns are, the fewer bets the portfolio ' +
+      'behaves like. Two Turkish equity funds are one bet even if they hold no ' +
+      'share in common: the panel above says what you own twice, this one says ' +
+      'what moves together.',
+    portTogetherOf: 'of {n} funds',
+    portTogetherAvg: 'Average correlation',
+    portTogetherPartial: '{n} positions have too little shared price history.',
     portOnlyWatching: 'Watching only',
     portHolding: 'Held',
     portRing: 'Where your money is',
@@ -2130,6 +2365,46 @@ export const SORTS = {
   fee: (f) => (f.expenseRatio == null ? Infinity : f.expenseRatio),
 };
 
+/**
+ * Which of a row of values wins, when funds are put side by side.
+ *
+ * Returned as a set of indexes rather than one, because a tie is a real answer:
+ * two funds charging the same fee are equally cheap and marking one of them the
+ * winner would be inventing a difference. A row where every value is the same is
+ * nobody's win, and neither is a row with only one fund in it — highlighting the
+ * sole value as "best" says nothing.
+ *
+ * `dir` is which direction is better: 'high' for a return, 'low' for a fee. A
+ * maximum drawdown is 'high', because -4% is a better result than -22%.
+ *
+ * It has no default, and that is the point. Defaulting to 'high' meant a row
+ * that simply forgot to say — a unit price, a fund's size, its volatility — got
+ * a tick beside its largest value, and `undefined` silently took the default
+ * while an explicit `null` did not. Saying which way is better is now the
+ * caller's job, and a row that has no answer marks nothing.
+ *
+ * @returns {Set<number>} indexes of the winning values
+ */
+export function bestIndexes(values, dir = null) {
+  // A measure with no better direction marks nothing. Most of the rows in a
+  // comparison are like that — a unit price, a fund's size, its investor count,
+  // its volatility — and defaulting them to "highest wins" would put a tick
+  // beside the biggest fund as though bigger were a result.
+  if (dir !== 'high' && dir !== 'low') return new Set();
+  const usable = [];
+  for (let i = 0; i < (values?.length ?? 0); i++) {
+    const v = values[i];
+    if (v != null && Number.isFinite(v)) usable.push([i, v]);
+  }
+  if (usable.length < 2) return new Set();
+  const best = usable.reduce((acc, [, v]) =>
+    (dir === 'low' ? Math.min(acc, v) : Math.max(acc, v)), usable[0][1]);
+  const winners = usable.filter(([, v]) => v === best);
+  // Every fund tying is not a comparison, so nothing is marked.
+  if (winners.length === usable.length) return new Set();
+  return new Set(winners.map(([i]) => i));
+}
+
 /** Sort a fund list. `dir` is 'asc' | 'desc'. Pure; returns a new array. */
 export function sortFunds(funds, key = 'size', dir = 'desc') {
   const get = SORTS[key] ?? SORTS.size;
@@ -2143,6 +2418,287 @@ export function sortFunds(funds, key = 'size', dir = 'desc') {
     if (x === y) return String(a.c).localeCompare(String(b.c), 'tr');
     return (x < y ? -1 : 1) * sign;
   });
+}
+
+// ---------------------------------------------------------------- real terms
+//
+// Every lira series on a share page is nominal, and saying so in a note was
+// never enough: the twenty-year dividend chart has fifteen invisible bars
+// because a 2005 lira is 27 of today's, and a reader looking at it concludes the
+// company stopped paying.
+//
+// The deflator is annual, because the only free, keyless, authoritative Turkish
+// CPI is annual. That is a real constraint and the arithmetic here is shaped by
+// refusing to paper over it:
+//
+//   - a figure is deflated at ITS OWN YEAR's index. Nothing is interpolated
+//     inside a year, so four quarters of 2019 all carry 2019's index. Sliding
+//     between two annual points to make quarters look smooth would be a
+//     judgement no reader could see had been made.
+//   - the series lags. A period after the last published year cannot be deflated
+//     at all, and comes back untouched and flagged rather than deflated against
+//     the newest year that happens to exist.
+
+/**
+ * A period label's year, or null.
+ *
+ * The statement periods arrive as ISO dates ("2026-03-31") and the chart labels
+ * as short dates, so this reads the year off the front and accepts nothing else.
+ */
+export function yearOf(period) {
+  const match = /^(\d{4})/.exec(String(period ?? ''));
+  if (!match) return null;
+  const year = Number(match[1]);
+  return year >= 1900 && year <= 2999 ? year : null;
+}
+
+/**
+ * One nominal lira figure restated in the latest published year's money.
+ *
+ * @param {number|null} value
+ * @param {string|number} period anything carrying a four-digit year
+ * @param {{years: Record<string, number>, latest: number}} cpi
+ * @returns {{value:number|null, real:boolean}} `real` false means it could not
+ *   be deflated and `value` is the untouched nominal figure
+ */
+export function deflate(value, period, cpi) {
+  if (value == null || !Number.isFinite(value)) return { value, real: false };
+  const year = yearOf(period);
+  const base = cpi?.years?.[cpi?.latest];
+  const then = year == null ? null : cpi?.years?.[year];
+  // Past the last published year there is no index to deflate against. The
+  // figure is returned as it came, and the caller marks it.
+  if (!(base > 0) || !(then > 0)) return { value, real: false };
+  return { value: (value * base) / then, real: true };
+}
+
+/**
+ * A whole series deflated, keeping the shape the chart already expects.
+ *
+ * Returns the values in the same order with the same holes, plus how many could
+ * be restated — a chart that silently mixed deflated and nominal bars would be
+ * worse than one that was nominal throughout.
+ *
+ * @returns {{values:(number|null)[], real:boolean[], deflated:number, nominal:number}}
+ */
+export function deflateSeries(values, periods, cpi) {
+  const out = [];
+  const real = [];
+  let deflated = 0;
+  let nominal = 0;
+  for (let i = 0; i < (values?.length ?? 0); i++) {
+    const hit = deflate(values[i], periods?.[i], cpi);
+    out.push(hit.value == null ? null : hit.value);
+    real.push(hit.real);
+    if (values[i] == null) continue;
+    if (hit.real) deflated++;
+    else nominal++;
+  }
+  return { values: out, real, deflated, nominal };
+}
+
+// ---------------------------------------------------------------- the screen
+//
+// A screen is the whole question the list is answering: what is being filtered,
+// how it is ranked, and over which window and tax treatment. It used to live
+// only in memory, which meant a reload lost it and there was no way to send
+// anybody "risk 4 or under, defensive, beats cash, fee under 1.5%" — the sort of
+// thing this site exists to let you find and therefore the sort of thing worth
+// being able to hand to someone.
+//
+// It goes in the hash, after the route, so the URL stays the one piece of state
+// that travels. Favourites deliberately do NOT: a favourites list is personal,
+// and a link that quietly carried one would be a different thing entirely.
+//
+// Only what differs from the default is written, so an untouched list has a
+// clean `#/fonlar` and every parameter present in a link is one somebody chose.
+
+/** The boolean preferences, and the short tag each travels under. */
+export const SCREEN_FLAGS = {
+  cash: 'beatsCash',
+  retail: 'retailOnly',
+  tefas: 'tradeableOnly',
+  new: 'onlyNew',
+  lev: 'levered',
+  crash: 'crashProof',
+};
+
+/** The three stances a fund can be filtered to. */
+export const STANCES = ['aggressive', 'balanced', 'defensive'];
+
+/**
+ * A screen with nothing set.
+ *
+ * The single definition of "no filter". It used to be written twice in ui.js —
+ * once building the state object and once in the reset — and the two had already
+ * drifted: one carried an `exposure` key and the other did not.
+ */
+export function defaultScreen() {
+  return {
+    filters: {
+      search: '', kinds: [], categories: [], founders: [],
+      exposure: undefined, minExposure: undefined,
+      theme: undefined, minTheme: undefined,
+    },
+    prefs: {
+      tax: 'default', horizon: 'y1', maxRisk: null,
+      beatsCash: false, retailOnly: false, tradeableOnly: false,
+      onlyNew: false, stance: '', maxFee: null, levered: false, crashProof: false,
+      minDividend: null, speculative: '',
+    },
+    sort: { key: 'size', dir: 'desc' },
+  };
+}
+
+/**
+ * Which keys a "clear all" clears.
+ *
+ * The tax treatment and the return window are not filters: they are how the list
+ * is read, and clearing a filter chip has no business resetting them. This is
+ * what keeps the reset honest about that.
+ */
+export const SCREEN_FILTER_PREFS = [
+  'maxRisk', 'beatsCash', 'retailOnly', 'tradeableOnly', 'onlyNew', 'stance',
+  'maxFee', 'levered', 'crashProof', 'minDividend', 'speculative',
+];
+
+/**
+ * A screen as a query string — the part of the hash after `?`.
+ *
+ * @param {{filters?:object, prefs?:object, sort?:object}} screen
+ * @returns {string} '' when nothing is set
+ */
+export function encodeScreen(screen) {
+  const base = defaultScreen();
+  const f = screen?.filters ?? {};
+  const p = screen?.prefs ?? {};
+  const s = screen?.sort ?? {};
+  const q = new URLSearchParams();
+
+  if (f.search) q.set('q', f.search);
+  if (f.kinds?.length) q.set('kind', f.kinds.join(','));
+  // Categories and managers are names out of meta.json, not a vocabulary this
+  // file controls, so they get a parameter each rather than being joined on a
+  // separator one of them could one day contain. No manager is called
+  // "X, Y & Co" today; the encoding should not be what stops one from being.
+  for (const cat of f.categories ?? []) q.append('cat', cat);
+  for (const mgr of f.founders ?? []) q.append('mgr', mgr);
+  if (f.exposure) {
+    q.set('holds', f.exposure);
+    // The threshold rides with the filter it belongs to, and only when it is not
+    // the default — "in equities" at 50% is the filter, not a choice.
+    if (f.minExposure != null && f.minExposure !== 50) q.set('holdsmin', String(f.minExposure));
+  }
+  if (f.theme) {
+    q.set('theme', f.theme);
+    if (f.minTheme != null && f.minTheme !== MIN_THEME) q.set('thememin', String(f.minTheme));
+  }
+
+  if (p.maxRisk != null) q.set('risk', String(p.maxRisk));
+  if (p.maxFee != null) q.set('fee', String(p.maxFee));
+  if (p.stance) q.set('stance', p.stance);
+  if (p.minDividend != null) q.set('div', String(p.minDividend));
+  if (p.speculative) q.set('spec', String(p.speculative));
+
+  // One parameter for the six switches rather than six of `x=1`, which is both
+  // shorter and readable at a glance in a pasted link.
+  const on = Object.entries(SCREEN_FLAGS).filter(([, key]) => p[key]).map(([tag]) => tag);
+  if (on.length) q.set('on', on.join(','));
+
+  if (p.horizon && p.horizon !== base.prefs.horizon) q.set('hz', p.horizon);
+  if (p.tax && p.tax !== base.prefs.tax) q.set('tax', p.tax);
+
+  // The direction rides on the key, because a sort is one choice: `sort=fee-asc`
+  // rather than a pair that can arrive half-set.
+  if (s.key && (s.key !== base.sort.key || s.dir !== base.sort.dir)) {
+    q.set('sort', s.dir === 'asc' ? `${s.key}-asc` : s.key);
+  }
+  // A comma is legal in a query value, and `on=retail,lev,crash` is the whole
+  // point of packing the switches into one parameter — `on=retail%2Clev%2Ccrash`
+  // is not a link anybody reads. Safe as a blanket replacement because nothing
+  // here splits a value on a comma any more except the two closed vocabularies,
+  // whose members cannot contain one.
+  return q.toString().replace(/%2C/g, ',');
+}
+
+/**
+ * A query string back into a screen, with everything it cannot vouch for dropped.
+ *
+ * A hash is typed, edited and truncated by hand, so nothing here trusts its
+ * input: a value that is not one of the things the control could have produced
+ * is discarded and the default stands. The alternative is a list silently
+ * filtered by a category that does not exist, which looks exactly like a list
+ * with no matches.
+ *
+ * Two things are deliberately NOT validated here, because core.js has no way to:
+ * category names and manager names come from `meta.json`. An unknown one matches
+ * no fund, which is the same visible outcome as a typo in the search box.
+ */
+export function decodeScreen(query) {
+  const out = defaultScreen();
+  if (!query) return out;
+  const q = new URLSearchParams(String(query).replace(/^[?#]/, ''));
+  const { filters: f, prefs: p, sort } = out;
+
+  const list = (key) => (q.get(key) ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  /** A number inside its own range, or null. Anything else is not a control value. */
+  const num = (key, lo, hi) => {
+    const raw = q.get(key);
+    if (raw == null || raw === '') return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= lo && n <= hi ? n : null;
+  };
+
+  f.search = q.get('q') ?? '';
+  f.kinds = list('kind').filter((k) => k === 'YAT' || k === 'BYF');
+  f.categories = q.getAll('cat').filter(Boolean);
+  f.founders = q.getAll('mgr').filter(Boolean);
+
+  const holds = q.get('holds');
+  if (holds) {
+    f.exposure = holds;
+    f.minExposure = num('holdsmin', 0, 100) ?? undefined;
+  }
+  const theme = q.get('theme');
+  if (theme && THEME_IDS.includes(theme)) {
+    f.theme = theme;
+    f.minTheme = num('thememin', 0, 100) ?? MIN_THEME;
+  }
+
+  p.maxRisk = num('risk', 1, 7);
+  p.maxFee = num('fee', 0, 100);
+  p.minDividend = num('div', 0, 100);
+  const stance = q.get('stance');
+  if (STANCES.includes(stance)) p.stance = stance;
+
+  // "none" and a threshold are the same control, so they arrive under one key
+  // and only the values the control actually offers are honoured.
+  const spec = q.get('spec');
+  if (spec === SPEC_NONE) p.speculative = SPEC_NONE;
+  else if (spec != null && SPEC_STEPS.includes(Number(spec))) p.speculative = Number(spec);
+
+  const on = new Set(list('on'));
+  for (const [tag, key] of Object.entries(SCREEN_FLAGS)) if (on.has(tag)) p[key] = true;
+
+  const hz = q.get('hz');
+  if (hz && HORIZONS.some((h) => h.key === hz)) p.horizon = hz;
+  // The tax control is either the published defaults or one flat rate somebody
+  // typed. `taxRatesFor` already falls back safely, but an unrecognised value
+  // would still sit in the URL and in the control looking like a setting.
+  const tax = q.get('tax');
+  if (tax === 'default') p.tax = tax;
+  else if (tax != null && tax !== '' && Number(tax) >= 0 && Number(tax) <= 1) p.tax = tax;
+
+  const raw = q.get('sort');
+  if (raw) {
+    const asc = raw.endsWith('-asc');
+    const key = asc ? raw.slice(0, -4) : raw;
+    if (Object.hasOwn(SORTS, key)) {
+      sort.key = key;
+      sort.dir = asc ? 'asc' : 'desc';
+    }
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------- holdings

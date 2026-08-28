@@ -52,6 +52,9 @@ analytics.js        tax model, peer groups, risk bands, fund flows, factor
                     models and ranking. Same three consumers.
 ui.js               browser layer: routing, rendering, inline-SVG charts
 styles.css          design tokens + layout
+sw.js               service worker: the document network-first, everything else
+                    same-origin from cache while it refreshes behind, and the
+                    two market feeds never touched at all
 
 data/               committed output of the daily cron
   meta.json           taxonomy, categories, managers, colours, peer stats
@@ -68,6 +71,8 @@ data/               committed output of the daily cron
   stocks/<CODE>.jsonl per-share daily adjusted close and volume
   stocks/<CODE>.fin.json  the company's own statements — 32 quarters and 20
                         years. Fetched only on that company's page
+  cpi.json            Turkish CPI by year, from the World Bank. 2KB, and fetched
+                      only when somebody asks a share page for real terms
   holdings/<CODE>.json  individual positions, from the monthly KAP filing, each
                         with what it weighed the month before
   holdings/index.json   which funds have holdings, and the coverage figures
@@ -102,7 +107,7 @@ test/               node:test suites over core.js and analytics.js
 ### Running it
 
 ```bash
-npm test              # 156 tests, no dependencies
+npm test              # 342 tests, no dependencies
 npm run build:data    # all five stages in order
 npm run serve         # http://localhost:8080
 ```
@@ -1640,6 +1645,16 @@ route still resolves on its own — links to them are out in the world.
 | `#/favoriler` | your starred **funds and shares** — the fund list with a code restriction, so the filter bar and preferences apply inside it, and a panel of shares under it |
 | `#/fon/CODE` | one fund: composition, **which lines of business it is in**, **what it actually holds**, quality, prediction, **its record through every fall**, price and benchmarks |
 | `#/hisse/CODE` | one company: **which funds hold it and which way they moved**, valuation, the business, trading, price against BIST 100 |
+| `#/karsilastir/A,B,C` | **[two to six funds side by side](#comparing-funds)** — one indexed axis, their mixes stacked, every figure that differs, and whether they are actually the same bet |
+| `#/portfoy` | what you hold: value, cost, **[the rate it earned](#the-rate-and-the-fees)**, **[what you own once the funds are opened up](#what-you-actually-own)**, and whether those funds are different bets |
+
+Everything the filter bar is set to rides in the hash after the route —
+`#/fonlar?risk=4&fee=1.5&stance=defensive&on=cash` — so a screen is a link you
+can bookmark or send. Nothing in it is trusted on the way back in: a value that
+is not one the control could have produced is dropped, and the URL is rewritten
+to match what is actually on screen, so a link carrying `risk=99` becomes a
+plain `#/fonlar` rather than claiming a filter that was refused. Favourites
+deliberately do not travel; they stay in `localStorage`.
 
 The tab bar is the same five `<a>` elements, moved by CSS rather than built
 twice. It cost one thing worth writing down: `backdrop-filter` on the masthead
@@ -1839,19 +1854,174 @@ every viewport and scrolled sideways even on a 1600px screen. Optional columns
 drop at 1200px; below 820px each row becomes a card, because eight columns on a
 phone leave the fund name at 38px.
 
+## What you actually own
+
+Every other page here answers "what does this fund hold". The portfolio page
+answers "what do **I** hold", which is not the same question and is the one
+nobody else can answer: it needs the KAP filings and your own position sizes at
+the same time.
+
+Four funds bought for four different reasons are routinely the same six
+companies. Opened up, one row per company, they say so — ASELS at 7.2% of the
+money, arriving through two funds that looked unrelated on the shelf.
+
+Three things are counted rather than assumed away, because each would otherwise
+turn a partial answer into a confident one. **Coverage**: a fund with no filing
+is still money you hold and still counts toward the total, but the percentages
+are shares of what could actually be seen into, and the difference is printed in
+lira. **Funds inside funds** are followed through a second filing on the build's
+own resolution, with a cycle guard, because "you own 42% of another fund" answers
+nothing. **A holding with no code** is a stated residual, never pooled by name —
+the same refusal the overlap panel already makes.
+
+Concentration is published as a count, not an index: the number of equal-sized
+positions your money is really spread over. Reported twice, over everything and
+over the shares alone, because forty government bonds are not diversification in
+any sense worth printing.
+
+### Are those funds different bets
+
+A second panel answers the other half, and they are genuinely different
+questions. Two funds can share no position at all and still be one bet: a Turkish
+equity fund and a Turkish equity fund are both a bet on Turkish equity whichever
+companies they picked. Correlating their daily returns — on the days both
+actually printed, never on a carried-forward price — gives the number that can be
+acted on: **four funds averaging 0.46 behave like 1.7 independent positions.**
+
+## The rate, and the fees
+
+Value over cost says 38.4% on a portfolio whose money actually earned 58.4%,
+because half of it had only been in a few months. Every lot is a cash flow on the
+day it was bought or sold, what is still held is one closing flow, and the
+internal rate of return is what a platform would call your return. Newton first,
+bisection second — and the fallback is load-bearing rather than decorative,
+because this market prints 684% years.
+
+Beside it, in lira: what the management fees have already taken. Not a bill — a
+Turkish fund's expense ratio comes out inside the unit price, so the money has
+gone — but 2.56% on a fund page reads as nothing and ₺433 against a real holding
+does not. Charged against the mean of what you paid and what you hold, because it
+accrued daily on a value that moved between the two.
+
+And what selling today would cost in withholding. Turkish fund gains carry two
+rates and nothing between them: **17.5%, or nothing at all.**
+
+Nothing is inferred about which applies. A **hisse senedi yoğun fon** is a
+designation the fund holds, and TEFAS states it in the fund's official title:
+
+```
+PUSULA PORTFÖY HİSSE SENEDİ FONU (HİSSE SENEDİ YOĞUN FON)
+```
+
+Gains on one of those are exempt **outright** — no holding period, no conditions.
+Bought this morning and sold this afternoon, the gain is untaxed. **459 of 2,067
+funds** carry the designation, and the title was already in `funds.json`, so
+reading it costs nothing.
+
+Two earlier attempts at this were wrong, and instructively so — both tried to
+re-derive a legal status from data that only describes a portfolio:
+
+1. **Requiring the gain to be held a year.** That is a different exemption. An
+   HSYF needs no holding period, and demanding one billed funds that owe nothing.
+2. **Deriving the designation from composition** — "an equity-umbrella fund at
+   80% equity every week". Wrong twice over. **286 of the 459 designated funds
+   sit under the *Serbest* umbrella**, not the equity one, so a category test
+   drops them outright; and PHE files one week at 62% and THF one at 66% in the
+   middle of years spent above 90%, because funds park cash before redemptions
+   and hold equity through instruments TEFAS files elsewhere. A weekly
+   allocation snapshot is a noisy observation of a portfolio. It is not a
+   licence, and it cannot be read as one.
+
+| | designated | rate |
+|---|---|---|
+| PHE, THF, TTE, GAF | yes | **0%** |
+| AFA — 96.9% equity, all American | no | 17.5% |
+| TLY — serbest | no | 17.5% |
+
+What is **not** modelled: the izahname clause under which a fund committing to at
+least 51% Borsa İstanbul equity is exempt on units held over a year. It is real,
+and detecting it means reading each fund's izahname off KAP — a fetch stage of
+its own, like the holdings were. Until that exists those funds show as taxed,
+which overstates what is owed rather than understating it.
+
+Lot ages are still printed in the position drawer, but as plain facts: the
+exemption modelled here has no holding period, so a countdown to it would invent
+a decision nobody has.
+
+A loss is not netted against another position's gain — whether it can be depends
+on the holder's whole year, which a page about four funds does not know.
+
+## Comparing funds
+
+Two to six funds on one axis, indexed to 100 from a shared date — which is the
+one thing three browser tabs cannot do. The chart needed nothing added to it: it
+was written knowing about series rather than about funds, and a comparison is
+that function handed more than one.
+
+Underneath: their composition bars stacked so the shapes line up, every figure
+that differs with the best in each row marked, and the panel that matters most —
+whether they are the same thing. The pairwise overlap says how much is
+duplicated; the list under it says what, ordered by how many of them hold each
+name, because three funds can overlap 8% pair by pair and still be one bet
+between them.
+
+A row is only marked "best" where better has a direction. Returns over a stated
+window, the money-market excess, the expense ratio and the crash figure do.
+Price, size, investor count, volatility, risk value and stance deliberately do
+not — somebody comparing two equity funds may well want the livelier one, and a
+tick beside the calmer one would be a taste presented as a finding. Winners are
+decided at the precision the cell prints, so two funds both showing ▲%5,3 are
+both marked.
+
+## How often, not how much
+
+A trailing return is one window, chosen by the calendar, and it is the easiest
+number on a fund page to be fooled by: eleven months behind the money market and
+one enormous fortnight prints the same figure as a fund that was ahead the whole
+way.
+
+So every fund page also asks the question at every start date. **AFA finished
+ahead of cash in 4 of 28 six-month windows** — with a positive trailing return.
+Windows overlap, so the count is not a count of independent trials and nothing
+is dressed up as a significance test; the denominator is printed beside every
+percentage, which is what lets it be read as the hit rate it is. The median
+excess sits under it, because a fund can win 60% of its windows by a hair and
+lose the other 40% badly.
+
+## Real terms
+
+Every lira series on a share page was nominal, and for Turkey that is not a
+footnote: a 2005 lira is 27 of today's, which is why a twenty-year dividend chart
+has fifteen invisible bars.
+
+The deflator is annual, because the only free, keyless, authoritative Turkish CPI
+is annual — OECD carries no Türkiye series in its prices dataflow, IMF's
+endpoints have moved, TÜİK publishes bulletins rather than a series, and TCMB's
+EVDS wants an API key this project will not take. That constraint shapes the
+arithmetic rather than being papered over: **nothing is interpolated inside a
+year**, so all four quarters of 2019 carry 2019's index, and periods after the
+last published year cannot be deflated at all — they stay nominal and the note
+counts how many of the bars on screen they are.
+
+ASELS reports 2025 revenue up 50.1% nominal and 11.3% real. That the two differ
+is also what confirms the model: had the stored series already been restated into
+one year's lira throughout, they would be equal.
+
 ## Roadmap
 
-Fund-vs-fund comparison, "tahta" detection (now unblocked — it was waiting on the
-KAP holdings, which landed), and inflation-adjusted statements on the share pages
-— every lira series is nominal today and says so, which for Turkey is a real gap
-rather than a footnote.
+"Tahta" detection landed with the KAP holdings. What is left: individual holdings
+still cover 881 funds of 2,063, which is the ceiling on the look-through, the
+themes and the overlap panels alike — every one of them gets better the same way,
+by reading more filings. Monthly CPI would sharpen the deflator if TÜİK or EVDS
+ever serves plain JSON.
 
 ---
 
 ## Data & disclaimer
 
 Fund data from [TEFAS](https://www.tefas.gov.tr) (Takasbank). Benchmark history
-from Yahoo Finance. Tape quotes from [Truncgil](https://finans.truncgil.com);
+from Yahoo Finance. Consumer prices from the
+[World Bank](https://data.worldbank.org/indicator/FP.CPI.TOTL?locations=TR). Tape quotes from [Truncgil](https://finans.truncgil.com);
 share prices from [TradingView](https://www.tradingview.com/markets/stocks-turkey/),
 delayed 15 minutes as Borsa İstanbul's real-time feed is licensed. This is an
 independent project with no affiliation to any of them.

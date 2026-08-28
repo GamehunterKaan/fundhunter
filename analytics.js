@@ -8,44 +8,86 @@
 
 // ---------------------------------------------------------------- tax
 //
-// Turkish withholding (stopaj) on fund gains differs by fund type and has been
-// amended repeatedly. These are DEFAULTS, exposed as editable preferences and
-// labelled in the UI as assumptions — never presented as tax advice. Verify
-// current rates before relying on them.
+// Turkish withholding (stopaj) on fund gains. Two rates exist and nothing in
+// between: 17.5%, or nothing at all.
+//
+// Nothing is inferred about which applies. A "hisse senedi yoğun fon" is a
+// designation the fund holds, and TEFAS states it in the fund's official title:
+//
+//   PUSULA PORTFÖY HİSSE SENEDİ FONU (HİSSE SENEDİ YOĞUN FON)
+//
+// That is the source, and it is already in `funds.json` because the title always
+// was. Gains on one of these are exempt outright — no holding period, no
+// conditions. Bought this morning and sold this afternoon, the gain is untaxed.
+//
+// Two earlier attempts at this got it wrong in instructive ways, and the reason
+// both failed is the same: they tried to re-derive a legal status from data that
+// only describes a portfolio.
+//
+//   1. Requiring the gain to be held a year. That is a different exemption; an
+//      HSYF needs no holding period, and demanding one billed funds that owe
+//      nothing.
+//   2. Deriving the designation from composition — "an equity-umbrella fund at
+//      80% equity every week". It reads the wrong things twice over. 286 of the
+//      458 designated funds sit under the SERBEST umbrella, not the equity one,
+//      so the category test alone drops them; and PHE files one week at 62% and
+//      THF one at 66% in the middle of years spent above 90, because funds park
+//      cash before redemptions and hold equity through instruments TEFAS files
+//      elsewhere. A weekly allocation snapshot is a noisy observation of a
+//      portfolio. It is not a licence, and it cannot be read as one.
+//
+// What is NOT modelled: the izahname clause under which a fund committing to at
+// least 51% Borsa İstanbul equity is exempt on units held over a year. It is
+// real, and detecting it means reading each fund's izahname off KAP — a fetch
+// stage of its own. Until that exists those funds show as taxed, which
+// overstates what is owed rather than understating it.
 
 export const TAX_DEFAULTS = {
-  /** Equity-intensive funds (>=80% domestic equity) have historically been exempt. */
-  equityIntensive: 0,
-  /** Money-market and short-term debt funds have carried a reduced rate. */
-  moneyMarket: 0.075,
+  /** A hisse senedi yoğun fon. Exempt outright. */
+  exempt: 0,
   /** Everything else. */
-  standard: 0.1,
+  standard: 0.175,
 };
 
-/** Which default bucket a fund falls into. */
+/**
+ * How TEFAS marks the designation in a fund's official title.
+ *
+ * Spacing varies between filings, so runs of whitespace are matched rather than
+ * single spaces, and the Turkish dotted İ is matched explicitly — `/i` does not
+ * fold it, which is the same trap the holdings classifier documents.
+ */
+export const HSYF_MARK = /H[İI]SSE\s*SENED[İI]\s*YO[ĞG]UN\s*FON/i;
+
+/**
+ * Whether a fund is officially a hisse senedi yoğun fon.
+ *
+ * Read from the title TEFAS publishes, never inferred from what the fund
+ * happens to hold this week. 458 of 2,067 funds carry it.
+ */
+export const isHsyf = (fund) => HSYF_MARK.test(String(fund?.n ?? ''));
+
+/**
+ * Which rate a holding falls under.
+ *
+ * No holding period is consulted, because the exemption does not have one.
+ */
 export function taxBucket(fund) {
-  if ((fund.g?.equity ?? 0) >= 80) return 'equityIntensive';
-  if ((fund.g?.cash ?? 0) >= 75) return 'moneyMarket';
-  return 'standard';
+  return isHsyf(fund) ? 'exempt' : 'standard';
 }
 
 /**
  * Turn a UI preset into a full rate table.
- * `default` keeps the per-type defaults; any other value is a flat override the
+ * `default` keeps the published rates; any other value is a flat override the
  * user has chosen because they know their own situation better than we do.
  */
 export function taxRatesFor(preset) {
   if (preset == null || preset === 'default') return TAX_DEFAULTS;
   const rate = Number(preset);
   if (!Number.isFinite(rate)) return TAX_DEFAULTS;
-  return {
-    equityIntensive: rate,
-    moneyMarket: rate,
-    standard: rate,
-  };
+  return { exempt: rate, standard: rate };
 }
 
-/** Effective withholding rate for a fund, honouring user overrides. */
+/** Effective withholding rate for a holding, honouring user overrides. */
 export function taxRateFor(fund, rates = TAX_DEFAULTS) {
   const bucket = taxBucket(fund);
   return rates[bucket] ?? TAX_DEFAULTS[bucket] ?? 0;
@@ -853,10 +895,15 @@ export function scoreFund(fund, ctx) {
   const cashGross = cashReturnFor(ctx, horizon);
   if (cashGross == null) return null;
 
+  // Over a window shorter than a year even a qualifying fund is taxed, so the
+  // horizon being ranked over decides the rate — which is the whole point of the
+  // exemption having a holding period attached to it.
   const rate = taxRateFor(fund, taxRates);
   const net = afterTax(gross, rate);
   // The hurdle is taxed too: compare net to net, or cash looks worse than it is.
-  const cashNet = afterTax(cashGross, taxRates.moneyMarket ?? TAX_DEFAULTS.moneyMarket);
+  // A money-market fund holds no Borsa Istanbul equity and so is never exempt,
+  // whatever window it is read over.
+  const cashNet = afterTax(cashGross, taxRates.standard ?? TAX_DEFAULTS.standard);
   const excess = net - cashNet;
   // Volatility floor: a fund with 0.1% volatility would otherwise show an
   // enormous ratio from a rounding-level excess.
@@ -1199,6 +1246,55 @@ export function sharedPositions(a, b, limit = 6) {
     rows.push({ code, weight: round2(Math.min(weight, other)), a: weight, b: other });
   }
   return rows.sort((x, y) => y.weight - x.weight).slice(0, limit);
+}
+
+// ------------------------------------------------------- comparing funds
+//
+// `sharedPositions` answers this for a pair, which is what the overlap panel
+// needs. A comparison is between three or four, and "what do these three have in
+// common" is not the same question asked three times — the answer is one list,
+// ordered by how many of them hold each name.
+
+/**
+ * The positions held by at least `min` of the funds given.
+ *
+ * The point of putting funds side by side is usually to find out whether they
+ * are actually different, and the pairwise figure does not say it: three funds
+ * can overlap 20% pair by pair and still be the same six companies between them.
+ *
+ * Ordered by how many hold it first and total weight second, so the names every
+ * fund on the page owns come out on top — which is the answer to "am I buying
+ * the same thing three times".
+ *
+ * @param {Record<string, Record<string, number>>} weightsByCode fund code -> weightsOf()
+ * @returns {{code:string, held:number, total:number, weights:Record<string,number>}[]}
+ */
+export function sharedAcross(weightsByCode, { min = 2, limit = 12 } = {}) {
+  const codes = Object.keys(weightsByCode ?? {}).filter((c) => weightsByCode[c]);
+  if (codes.length < 2) return [];
+
+  const found = new Map();
+  for (const fund of codes) {
+    for (const [position, weight] of Object.entries(weightsByCode[fund] ?? {})) {
+      if (!Number.isFinite(weight) || weight <= 0) continue;
+      let row = found.get(position);
+      if (!row) {
+        row = { code: position, held: 0, total: 0, weights: {} };
+        found.set(position, row);
+      }
+      // A fund filing the same position twice was already summed by `weightsOf`,
+      // so a second sighting here is genuinely a second fund.
+      if (row.weights[fund] == null) row.held++;
+      row.weights[fund] = (row.weights[fund] ?? 0) + weight;
+      row.total += weight;
+    }
+  }
+
+  return [...found.values()]
+    .filter((r) => r.held >= min)
+    .map((r) => ({ ...r, total: round2(r.total) }))
+    .sort((a, b) => b.held - a.held || b.total - a.total)
+    .slice(0, limit);
 }
 
 /**
@@ -1898,5 +1994,848 @@ export function portfolioDayMove(positions) {
     covered: round2(now),
     of: round2(of),
     counted,
+  };
+}
+
+// ------------------------------------------------------- do they move together
+//
+// The overlap panel answers "do these funds hold the same things", and it
+// deliberately refuses to answer it with a correlation: two funds holding
+// entirely different banks would score as similar, which is not what "the same
+// holding twice" means.
+//
+// This is the other question, and it does not replace that one. Two funds can
+// share no position at all and still be one bet — a Turkish equity fund and a
+// Turkish equity fund are both a bet on Turkish equity whether or not they
+// picked the same twelve companies. A portfolio can look diversified on the
+// holdings and behave as a single position.
+//
+// So the two panels sit side by side and answer different halves: overlap is
+// about what you own twice, this is about what moves together.
+
+/** Below this many shared days a correlation is noise with a decimal point. */
+export const MIN_CORRELATION_DAYS = 30;
+
+/** Above this two funds are, for practical purposes, the same holding. */
+export const CORRELATION_HIGH = 0.9;
+
+/**
+ * Pearson correlation of two aligned return series.
+ *
+ * Returns null rather than a number when either series never moves: a
+ * money-market fund with a flat week has no variance, the denominator is zero,
+ * and "undefined" is the honest answer rather than 0 or 1.
+ */
+export function correlationOf(a, b) {
+  const n = Math.min(a?.length ?? 0, b?.length ?? 0);
+  if (n < 2) return null;
+  let sumA = 0;
+  let sumB = 0;
+  for (let i = 0; i < n; i++) { sumA += a[i]; sumB += b[i]; }
+  const meanA = sumA / n;
+  const meanB = sumB / n;
+  let cov = 0;
+  let varA = 0;
+  let varB = 0;
+  for (let i = 0; i < n; i++) {
+    const da = a[i] - meanA;
+    const db = b[i] - meanB;
+    cov += da * db;
+    varA += da * da;
+    varB += db * db;
+  }
+  if (varA <= 0 || varB <= 0) return null;
+  const r = cov / Math.sqrt(varA * varB);
+  // Floating point can push a perfect correlation a hair past 1.
+  return round2(Math.max(-1, Math.min(1, r)));
+}
+
+/**
+ * How much of a portfolio's diversification is real.
+ *
+ * Every pair of the funds given, correlated on the days BOTH of them printed a
+ * price — not on a carried-forward value, because carrying yesterday's price
+ * into a holiday invents a zero return and drags every correlation toward each
+ * other. A pair with too few shared days is left out rather than reported at a
+ * precision it does not have.
+ *
+ * `effective` is the number of independent positions the portfolio behaves like,
+ * under the usual equicorrelation reading: N funds averaging correlation r act
+ * like N / (1 + (N-1)r) of them. Four funds that all move together are one bet,
+ * and that is a more useful sentence than a matrix of decimals.
+ *
+ * @param {{code:string, series:[string,number][]}[]} rows
+ */
+export function correlationMatrix(rows, { min = MIN_CORRELATION_DAYS } = {}) {
+  const usable = (rows ?? []).filter((r) => r?.code && r.series?.length > min);
+  if (usable.length < 2) return null;
+
+  const returns = new Map(usable.map((r) => [r.code, dailyReturns(r.series)]));
+  const pairs = [];
+  let total = 0;
+
+  for (let i = 0; i < usable.length; i++) {
+    for (let j = i + 1; j < usable.length; j++) {
+      const a = returns.get(usable[i].code);
+      const b = returns.get(usable[j].code);
+      // The days both funds actually printed on. A fund that did not publish is
+      // not a fund that did not move.
+      const left = [];
+      const right = [];
+      for (const [date, value] of a) {
+        const other = b.get(date);
+        if (other == null) continue;
+        left.push(value);
+        right.push(other);
+      }
+      if (left.length < min) continue;
+      const r = correlationOf(left, right);
+      if (r == null) continue;
+      pairs.push({ a: usable[i].code, b: usable[j].code, r, days: left.length });
+      total += r;
+    }
+  }
+  if (!pairs.length) return null;
+
+  const codes = [...new Set(pairs.flatMap((p) => [p.a, p.b]))];
+  const average = total / pairs.length;
+  const n = codes.length;
+  // Equicorrelation reading. A negative average would push this past N, which is
+  // real but not a claim worth printing, so it is floored at one bet.
+  // Bounded at both ends. Funds that all move together are one bet, and funds
+  // that hedge each other cannot be MORE bets than there are funds — a pair
+  // averaging -0.95 puts the raw formula at 40, which is not a sentence about a
+  // portfolio of two.
+  const denominator = 1 + (n - 1) * average;
+  const effective = denominator > 0 ? Math.min(n, Math.max(1, n / denominator)) : n;
+
+  return {
+    codes,
+    pairs: pairs.sort((x, y) => y.r - x.r),
+    average: round2(average),
+    effective: round2(effective),
+    counted: n,
+    of: (rows ?? []).length,
+  };
+}
+
+// --------------------------------------------------------- since you last looked
+//
+// The data changes every night and the page looks identical, which is a strange
+// property for something worth opening daily. The dashboard can answer "what
+// happened while I was away" from what it already has — a date in localStorage
+// and the price histories it loads anyway — and that is a better reason to come
+// back than a chart that was already there yesterday.
+
+/** Under this many days there is nothing to report; you were here this morning. */
+export const VISIT_MIN_DAYS = 1;
+
+/**
+ * What the funds you follow did between two dates.
+ *
+ * Read off each fund's own history at the last print on or before each end, so a
+ * fund that did not publish on the exact day you last looked is measured from
+ * the price you actually saw rather than skipped.
+ *
+ * The median leads because a handful of funds is a small sample and one of them
+ * doubling says nothing about the rest — the same reason the dashboard's cash
+ * comparison is a median and says so.
+ *
+ * @param {{code:string, series:[string,number][]}[]} rows
+ * @param {string} from ISO date of the previous visit
+ * @param {string} [asOf] ISO date to measure to; defaults to each fund's last print
+ */
+export function sinceVisit(rows, from, asOf = null) {
+  const start = Date.parse(from);
+  if (!Number.isFinite(start)) return null;
+
+  const moves = [];
+  for (const row of rows ?? []) {
+    const series = row?.series;
+    if (!series?.length || !row.code) continue;
+    const then = priceOn(series, from);
+    const now = asOf ? priceOn(series, asOf) : (series.at(-1)?.[1] ?? null);
+    const pct = returnSince(now, then);
+    // A fund whose history does not reach back that far has not "not moved";
+    // it simply cannot answer, and counting it as flat would drag the median.
+    if (pct == null) continue;
+    moves.push({ code: row.code, pct });
+  }
+  if (!moves.length) return null;
+
+  const sorted = [...moves].sort((a, b) => b.pct - a.pct);
+  // Dates against dates. Falling back to `Date.now()` compared midnight on the
+  // stored date against the current clock, so opening the page in the afternoon
+  // of the day you last opened it rounded to "1 day" and reported a panel of
+  // zeroes. With no `asOf` the newest print anybody has is the end.
+  const ends = (rows ?? []).map((r) => r?.series?.at(-1)?.[0]).filter(Boolean).sort();
+  const last = Date.parse(asOf ?? ends.at(-1) ?? from);
+  return {
+    days: Math.max(0, Math.round((last - start) / 86400000)),
+    moves: sorted,
+    median: round2(median(moves.map((m) => m.pct))),
+    best: sorted[0],
+    worst: sorted.at(-1),
+    counted: moves.length,
+  };
+}
+
+/**
+ * Which funds have appeared since a visit.
+ *
+ * `age` is how many days of price history a fund has, so a fund younger than the
+ * gap is one that did not exist last time. It is a proxy rather than a launch
+ * date — TEFAS publishes no launch field — and it is the same figure the "new
+ * funds" filter already ranks on, so the two cannot disagree.
+ */
+export function newSince(funds, days) {
+  if (!(days > 0)) return [];
+  return (funds ?? []).filter((f) => Number.isFinite(f?.age) && f.age <= days);
+}
+
+// ------------------------------------------------------------- consistency
+//
+// A trailing return is one window, chosen by the calendar, and it is the number
+// every fund page on the internet leads with. It is also the easiest number here
+// to be misled by: a fund that spent eleven months behind the money market and
+// had one enormous fortnight reports the same 684% as one that was ahead the
+// whole way, and the two are not the same fund to own.
+//
+// Rolling windows ask the question repeatedly instead. "Beat the money market in
+// 34 of 39 three-month windows" is harder to arrive at by luck than any single
+// figure, and it is the closest thing to a track record this data can support.
+
+/** How far apart two window starts are. Weekly: daily starts differ by noise. */
+export const HIT_STEP = 7;
+
+/** Below this a hit rate is an anecdote with a percent sign on it. */
+export const MIN_HIT_WINDOWS = 8;
+
+/**
+ * How often a fund beat a benchmark over every window of a given length.
+ *
+ * Both series are read on the SAME two dates for every window, so a holiday that
+ * moved one of them cannot hand the fund a window the benchmark never had. The
+ * benchmark is read at the last value on or before each date, which is what
+ * `priceOn` already does for every other comparison here.
+ *
+ * Windows overlap, and that is the point of them — but it also means the count
+ * is not a count of independent trials, and nothing here is dressed up as a
+ * significance test. It is a hit rate, and the panel prints the denominator so
+ * it can be read as one.
+ *
+ * @param {[string, number][]} series ascending [date, price]
+ * @param {[string, number][]} benchmark ascending [date, value]
+ * @param {{days?:number, step?:number}} opts window length and start spacing
+ * @returns {{windows:number, wins:number, rate:number, median:number,
+ *            best:number, worst:number, days:number}|null}
+ */
+export function hitRate(series, benchmark, { days = 91, step = HIT_STEP } = {}) {
+  if (!series?.length || !benchmark?.length || !(days > 0)) return null;
+
+  const excesses = [];
+  let wins = 0;
+  let cursor = 0;
+
+  for (let i = 0; i < series.length; i += 1) {
+    const [startDate, startPrice] = series[i];
+    const start = Date.parse(startDate);
+    if (!Number.isFinite(start) || !(startPrice > 0)) continue;
+    // Starts are spaced by `step` days of calendar time, not by `step` rows:
+    // a fund that stopped printing for a fortnight would otherwise get its
+    // windows bunched around the gap.
+    if (cursor && start < cursor) continue;
+
+    const target = start + days * 86400000;
+    const end = series.find(([d]) => Date.parse(d) >= target);
+    // Past the end of the history there are no more complete windows.
+    if (!end) break;
+    const [endDate, endPrice] = end;
+    if (!(endPrice > 0)) continue;
+
+    const fund = (endPrice / startPrice - 1) * 100;
+    const from = priceOn(benchmark, startDate);
+    const to = priceOn(benchmark, endDate);
+    // A window the benchmark cannot answer for is not a window the fund won.
+    if (from == null || to == null || !(from > 0)) continue;
+    const bench = (to / from - 1) * 100;
+
+    const excess = fund - bench;
+    excesses.push(excess);
+    if (excess > 0) wins++;
+    cursor = start + step * 86400000;
+  }
+
+  if (!excesses.length) return null;
+  const sorted = [...excesses].sort((a, b) => a - b);
+  return {
+    windows: excesses.length,
+    wins,
+    rate: round2((wins / excesses.length) * 100),
+    // The median rather than the mean: one extraordinary fortnight is exactly
+    // the thing this measure exists to stop from carrying a whole record.
+    median: round2(median(excesses)),
+    best: round2(sorted.at(-1)),
+    worst: round2(sorted[0]),
+    days,
+  };
+}
+
+/** The windows the consistency panel reports over, shortest first. */
+export const HIT_WINDOWS = [
+  { key: 'm1', days: 30, labelKey: 'return1m' },
+  { key: 'm3', days: 91, labelKey: 'return3m' },
+  { key: 'm6', days: 182, labelKey: 'return6m' },
+];
+
+/**
+ * The hit rate over each window a fund has enough history for.
+ *
+ * A window longer than the history returns nothing rather than a rate over one
+ * sample, which would print "100%" off a single lucky quarter.
+ */
+export function consistency(series, benchmark, windows = HIT_WINDOWS) {
+  const out = [];
+  for (const window of windows) {
+    const hit = hitRate(series, benchmark, { days: window.days });
+    // Under this many windows the figure is an anecdote with a percent sign.
+    if (hit && hit.windows >= MIN_HIT_WINDOWS) out.push({ ...window, ...hit });
+  }
+  return out.length ? out : null;
+}
+
+// ------------------------------------------------- tax on what you actually hold
+//
+// The tax model above is used to rank funds: a gross return becomes a net one so
+// that two funds taxed differently can be compared. It has never been pointed at
+// the holding itself, and "your gain is ₺10,600, of which ₺1,060 is withholding
+// if you sell today" is a more useful sentence than any ranking.
+//
+// It is computed on the position's average cost, not lot by lot, because that is
+// how the rest of this page accounts for a holding — a sale takes the average
+// down with it, and a per-lot tax figure would disagree with the profit printed
+// beside it.
+//
+// What is deliberately NOT modelled here: a holding-period schedule. Turkish
+// withholding has carried one at various times, and the rate that applies after
+// a year is exactly the sort of thing that has been amended repeatedly. Encoding
+// a schedule would mean publishing a figure nobody here can verify, dressed up
+// as arithmetic. The ages of the lots are shown as plain facts instead, and what
+// they mean for anybody's tax is left to them.
+
+/**
+ * The withholding due on every position if it were sold today.
+ *
+ * A loss is not taxed and does not offset another position's gain: whether it
+ * can depends on the holder's whole return for the year, which is not something
+ * a page about four funds knows. Each position is answered on its own and the
+ * total is the sum of what is due, never a netted figure that would understate
+ * it.
+ *
+ * A position with no known basis has no known gain, so it is skipped rather than
+ * counted at zero, and `counted` says how many.
+ *
+ * @param {{code:string, fund:object, value:number, basis:number}[]} positions
+ * @param {object} rates a table from taxRatesFor()
+ */
+export function taxIfSold(positions, rates = TAX_DEFAULTS) {
+  const rows = [];
+  let gain = 0;
+  let tax = 0;
+  let counted = 0;
+  let of = 0;
+
+  for (const position of positions ?? []) {
+    if (!position) continue;
+    of++;
+    const { value, basis, fund } = position;
+    if (!Number.isFinite(value) || !Number.isFinite(basis) || basis <= 0) continue;
+    // A share is not a fund and carries none of these rates. Saying nothing
+    // about it is correct; assuming it is exempt is not.
+    if (!fund) continue;
+
+    const profit = value - basis;
+    const rate = taxRateFor(fund, rates);
+    const due = profit > 0 ? profit * rate : 0;
+    rows.push({
+      code: position.code,
+      gain: round2(profit),
+      rate,
+      tax: round2(due),
+      bucket: taxBucket(fund),
+    });
+    gain += profit;
+    tax += due;
+    counted++;
+  }
+
+  if (!counted) return null;
+  return {
+    rows: rows.sort((a, b) => b.tax - a.tax),
+    gain: round2(gain),
+    tax: round2(tax),
+    // What would actually reach you. The gain net of what is withheld on the
+    // positions that are up — losses are in `gain` and not in `tax`, which is
+    // the asymmetry the note has to explain.
+    net: round2(gain - tax),
+    counted,
+    of,
+  };
+}
+
+/**
+ * A year, in days, as the lot ages are measured against it.
+ *
+ * Not a tax rule and not published as one. It is the line people themselves draw
+ * around a holding, and the only reason it is here rather than in the UI is that
+ * the arithmetic below is the sort that gets a test.
+ */
+export const LOT_YEAR = 365;
+
+/**
+ * How long each lot has been held, oldest first.
+ *
+ * A sale is not a holding and is left out — its clock stopped when it was sold,
+ * and printing an age beside it would suggest otherwise.
+ *
+ * @param {{at:string, units:number}[]} lots
+ * @param {string} asOf
+ */
+export function lotAges(lots, asOf, { year = LOT_YEAR } = {}) {
+  const end = Date.parse(asOf);
+  if (!Number.isFinite(end)) return [];
+  const rows = [];
+  for (const lot of lots ?? []) {
+    const at = Date.parse(lot?.at);
+    if (!Number.isFinite(at) || !(lot.units > 0)) continue;
+    const days = Math.floor((end - at) / 86400000);
+    if (days < 0) continue;
+    rows.push({
+      at: lot.at,
+      units: lot.units,
+      days,
+      past: days >= year,
+      // When it crosses, for the ones that have not. Null once they have, so a
+      // date in the past can never be printed as something to wait for.
+      on: days >= year ? null : new Date(at + year * 86400000).toISOString().slice(0, 10),
+    });
+  }
+  return rows.sort((a, b) => b.days - a.days);
+}
+
+// ------------------------------------------------- what the money actually did
+//
+// The profit figure answers "how much am I up". It cannot answer "at what rate",
+// because the money did not all arrive on the same day: ₺10,000 that has been in
+// for a year and ₺10,000 that has been in for a fortnight are not the same
+// ₺20,000, and a simple value-over-cost figure treats them as though they were.
+//
+// The per-position cash comparison is already money-weighted for exactly this
+// reason. This is the same idea over the whole portfolio at once, and it is the
+// number a fund platform would call your return.
+
+/** Below this the net present value is close enough to zero to stop. */
+const XIRR_TOLERANCE = 1e-7;
+
+/** A rate past this is not a portfolio, it is bad data. Still finite, on purpose. */
+export const XIRR_CEILING = 1e6;
+
+/**
+ * The internal rate of return of a set of dated cash flows, annualised, in per
+ * cent.
+ *
+ * `amount` is negative for money going in and positive for money coming back —
+ * including the closing value of whatever is still held, which is the flow that
+ * makes an open position answerable at all.
+ *
+ * Returns null rather than a number whenever the question has no answer: fewer
+ * than two flows, everything on one day (no time for a rate to act over), or
+ * money going only one way. A portfolio that has only ever been bought into has
+ * no rate of return until you say what it is worth now.
+ *
+ * Newton first because it converges in a handful of steps on anything
+ * well-behaved, then bisection over a bracket that is grown until it straddles
+ * a root. The fallback is not decoration: Turkish funds have printed 684% over a
+ * year, so the useful range here runs far past where Newton stays stable.
+ *
+ * @param {{at:string, amount:number}[]} flows
+ * @returns {number|null} annualised rate in per cent
+ */
+export function xirr(flows) {
+  const rows = [];
+  for (const f of flows ?? []) {
+    const at = Date.parse(f?.at);
+    if (!Number.isFinite(at) || !Number.isFinite(f.amount) || f.amount === 0) continue;
+    rows.push({ at, amount: f.amount });
+  }
+  if (rows.length < 2) return null;
+
+  const t0 = Math.min(...rows.map((r) => r.at));
+  // Every flow on one day: money went in and came back out the same afternoon,
+  // and there is no period for a rate to be annualised over.
+  if (rows.every((r) => r.at === t0)) return null;
+  // A rate needs money to have gone both ways. Buys alone have no return until
+  // the closing value is added as a flow, which is the caller's job.
+  if (!rows.some((r) => r.amount < 0) || !rows.some((r) => r.amount > 0)) return null;
+
+  // Actual/365. The alternative is a calendar convention that would move the
+  // figure by less than the rounding does.
+  const years = rows.map((r) => (r.at - t0) / (365 * 86400000));
+  const npv = (rate) => {
+    let sum = 0;
+    for (let i = 0; i < rows.length; i++) sum += rows[i].amount / (1 + rate) ** years[i];
+    return sum;
+  };
+
+  let rate = 0.1;
+  for (let i = 0; i < 64; i++) {
+    const value = npv(rate);
+    if (!Number.isFinite(value)) break;
+    if (Math.abs(value) < XIRR_TOLERANCE) return round2(rate * 100);
+    let slope = 0;
+    for (let j = 0; j < rows.length; j++) {
+      slope -= (years[j] * rows[j].amount) / (1 + rate) ** (years[j] + 1);
+    }
+    if (!Number.isFinite(slope) || slope === 0) break;
+    const next = rate - value / slope;
+    // Past -100% the discounting is meaningless rather than merely extreme.
+    if (!Number.isFinite(next) || next <= -1) break;
+    if (Math.abs(next - rate) < 1e-12) { rate = next; break; }
+    rate = next;
+  }
+  if (Math.abs(npv(rate)) < XIRR_TOLERANCE) return round2(rate * 100);
+
+  // Bisection. The low end is just above total loss, and the high end is grown
+  // until the sign flips or the answer stops being about a portfolio.
+  let lo = -0.999999;
+  let hi = 1;
+  const atLo = npv(lo);
+  if (!Number.isFinite(atLo)) return null;
+  while (npv(hi) * atLo > 0) {
+    hi *= 4;
+    if (hi > XIRR_CEILING) return null;
+  }
+  for (let i = 0; i < 200; i++) {
+    const mid = (lo + hi) / 2;
+    const value = npv(mid);
+    if (Math.abs(value) < XIRR_TOLERANCE) return round2(mid * 100);
+    if (value * atLo > 0) lo = mid;
+    else hi = mid;
+  }
+  return round2(((lo + hi) / 2) * 100);
+}
+
+/**
+ * The whole portfolio as one money-weighted rate.
+ *
+ * Every lot is a flow on the day it was bought or sold, and what is still held
+ * is one closing flow on `asOf`. A sale needs no special case: `units` is
+ * negative on one and `price` is what it sold at, so `-(units * price)` is money
+ * out on a buy and money in on a sale from the same expression.
+ *
+ * A position is counted only when EVERY one of its lots carries a price. Half a
+ * position's cost is not a cost, and a rate computed over a basis that is partly
+ * guessed would be a confident number about money nobody entered — the same rule
+ * the profit total already follows, and `counted` is returned so the page can
+ * say how much it left out.
+ *
+ * @param {{code:string, lots:object[], value:number}[]} holdings
+ * @param {string} asOf ISO date the closing values are taken at
+ */
+export function portfolioXirr(holdings, asOf) {
+  const flows = [];
+  let counted = 0;
+  let of = 0;
+  let value = 0;
+
+  for (const holding of holdings ?? []) {
+    if (!holding) continue;
+    of++;
+    const lots = holding.lots ?? [];
+    if (!lots.length || !Number.isFinite(holding.value)) continue;
+    if (!lots.every((l) => Number.isFinite(l?.price) && l.price > 0
+      && Number.isFinite(l?.units) && l.units !== 0 && typeof l?.at === 'string')) continue;
+
+    for (const lot of lots) flows.push({ at: lot.at, amount: -(lot.units * lot.price) });
+    flows.push({ at: asOf, amount: holding.value });
+    value += holding.value;
+    counted++;
+  }
+
+  if (!counted) return null;
+  const pct = xirr(flows);
+  if (pct == null) return null;
+  return { pct, counted, of, value: round2(value) };
+}
+
+/**
+ * What the management fee has already taken out of what you hold.
+ *
+ * The figure is NOT an extra cost waiting to be paid: a Turkish fund's expense
+ * ratio is deducted inside the unit price, so this is money that has already
+ * left, and the page has to say so or the number reads as a bill.
+ *
+ * The fee accrues daily on a value that moved from what you paid to what it is
+ * worth, so it is charged against the mean of the two rather than against either
+ * end. Charging it on today's value overstates the fee on anything that grew,
+ * which for this market is nearly everything.
+ *
+ * A fund with no published expense ratio is skipped rather than assumed cheap —
+ * the same rule the fee filter follows.
+ *
+ * @param {{code:string, basis:number, value:number, from:string, rate:number}[]} holdings
+ * @param {string} asOf
+ */
+export function feeDrag(holdings, asOf) {
+  const end = Date.parse(asOf);
+  if (!Number.isFinite(end)) return null;
+
+  const rows = [];
+  let total = 0;
+  let counted = 0;
+  let of = 0;
+
+  for (const holding of holdings ?? []) {
+    if (!holding) continue;
+    of++;
+    const { rate, value, basis, from } = holding;
+    if (!Number.isFinite(rate) || rate <= 0 || !Number.isFinite(value)) continue;
+    const start = Date.parse(from);
+    if (!Number.isFinite(start) || end <= start) continue;
+    const years = (end - start) / (365 * 86400000);
+    const base = Number.isFinite(basis) && basis > 0 ? (basis + value) / 2 : value;
+    const lira = base * (rate / 100) * years;
+    if (!(lira > 0)) continue;
+    rows.push({ code: holding.code, lira: round2(lira), rate, years: round2(years) });
+    total += lira;
+    counted++;
+  }
+
+  if (!counted) return null;
+  return {
+    rows: rows.sort((a, b) => b.lira - a.lira),
+    total: round2(total),
+    counted,
+    of,
+  };
+}
+
+// ------------------------------------------------------------- look-through
+//
+// Every other page here asks what a fund holds. This asks what YOU hold, which
+// is not the same question and is the one nobody answers: four funds bought for
+// four different reasons are routinely the same six companies, and no statement
+// anywhere says so. It needs the KAP filings and the position sizes at once,
+// which is why it can only exist on this page.
+//
+// The arithmetic is one multiplication — your money in a fund, times each of its
+// weights — and everything difficult about it is the honesty. A fund with no
+// filing cannot be opened up and must not be quietly dropped, a fund inside a
+// fund has to be followed rather than reported as an opaque unit, and a holding
+// with no code cannot be pooled with the same holding under another manager's
+// spelling.
+
+/** How many underlying positions are listed before the tail stops informing. */
+export const LOOK_THROUGH_ROWS = 20;
+
+/**
+ * How far a fund holding a fund is followed.
+ *
+ * Two levels, because that is as deep as the filings themselves go: a fund of
+ * funds files its holdings, and the funds it names file theirs. Past that the
+ * chain is only ever a cycle, and the guard below would stop it anyway.
+ */
+export const LOOK_THROUGH_DEPTH = 2;
+
+/**
+ * How concentrated a set of weighted rows is.
+ *
+ * The Herfindahl index is the standard measure and is unreadable as a figure —
+ * 1,240 means nothing to anybody. Its reciprocal does mean something: the number
+ * of EQUAL positions that would be exactly this concentrated. Thirty holdings
+ * that are really one bet come back as one, which is the sentence the panel
+ * wants to be able to say.
+ */
+export function concentrationOf(rows) {
+  let total = 0;
+  for (const r of rows ?? []) if (r?.value > 0) total += r.value;
+  if (total <= 0) return { hhi: null, effective: null };
+  let sum = 0;
+  for (const r of rows ?? []) {
+    if (!(r?.value > 0)) continue;
+    const share = r.value / total;
+    sum += share * share;
+  }
+  return { hhi: Math.round(sum * 1e4), effective: round2(1 / sum) };
+}
+
+/** The groups whose rows are a company rather than a debt, a deposit or a metal. */
+const EQUITY_GROUPS = new Set(['equityTr', 'equityFx']);
+
+/**
+ * What you own, once every fund on the page has been opened up.
+ *
+ * `positions` are the valued rows — a code, what it is worth, and whether it is
+ * a share you bought yourself. `filings` maps a fund code to its aggregated
+ * holdings, one row per position, as `aggregateHoldings` leaves them.
+ *
+ * Three things are counted rather than assumed away, because each of them would
+ * otherwise turn a partial answer into a confident one:
+ *
+ *   covered       lira that could actually be seen into. A fund with no filing
+ *                 still counts toward `total` — it is money you hold — but the
+ *                 percentages are shares of `covered`, never of `total`.
+ *   unidentified  lira sitting in filed rows carrying neither ISIN nor code.
+ *                 They cannot be pooled with the same holding filed under
+ *                 another manager's spelling, and matching them by name is what
+ *                 the overlap panel deliberately refuses to do.
+ *   nested        lira that had to be followed through a second filing.
+ *
+ * A fund's unit inside another fund is followed only on the build's own
+ * resolution (`ref`), the same one the holdings table links out on. An
+ * unresolved fund unit is credited as the position it is, which is honest: a
+ * fund nobody filed for really is what you own.
+ *
+ * @param {{code:string, value:number, share?:boolean, name?:string}[]} positions
+ * @param {Record<string, object[]>} filings
+ */
+export function lookThrough(positions, filings, { depth = LOOK_THROUGH_DEPTH } = {}) {
+  const found = new Map();
+  let total = 0;
+  let covered = 0;
+  let unidentified = 0;
+  let nested = 0;
+
+  const credit = (key, position, lira, holder) => {
+    if (!(lira > 0)) return;
+    let row = found.get(key);
+    if (!row) {
+      row = {
+        key,
+        code: position.code ?? null,
+        ref: position.ref ?? null,
+        isin: position.isin ?? null,
+        name: position.name ?? null,
+        // How split the filing this name came from was. Not published; it only
+        // decides which of several spellings survives.
+        split: position.rows ?? 1,
+        group: position.group ?? 'other',
+        // The filing's own wording, carried through untouched. Whether a row can
+        // be priced and which exchange lists it are read off these three and not
+        // off the bucket the row was sorted into — the same rule the holdings
+        // table follows, so a link here can never disagree with the one there.
+        filedGroup: position.filedGroup ?? null,
+        subgroup: position.subgroup ?? null,
+        currency: position.currency ?? null,
+        direct: position.direct ?? false,
+        value: 0,
+        holders: [],
+      };
+      found.set(key, row);
+    }
+    row.value += lira;
+    // Which of two funds' spellings of the same company to keep.
+    //
+    // Inside one filing the longest name wins, because a manager files a company
+    // as "ASELS" on one line and by its legal name on another. Across filings
+    // that rule alone picks disastrously: a position split over three lines is
+    // exactly where the extractor mis-assigns a name, and one fund's ASELS
+    // carries the legal name of an entirely different company that happened to
+    // be filed beside it. So an unsplit row is preferred over any longer name
+    // taken from a split one, and length only breaks the tie.
+    const split = position.rows ?? 1;
+    const name = position.name ?? null;
+    if (name && (split < row.split
+      || (split === row.split && name.length > (row.name?.length ?? 0)))) {
+      row.name = name;
+      row.split = split;
+    }
+    row.code ??= position.code ?? null;
+    row.isin ??= position.isin ?? null;
+    const held = row.holders.find((x) => x.code === holder);
+    if (held) held.value += lira;
+    else row.holders.push({ code: holder, value: lira });
+  };
+
+  /**
+   * Spend one holding's lira across the filing underneath it.
+   *
+   * Returns whether there was a filing to spend it over — the caller needs that
+   * to know whether the money was seen into or merely counted.
+   */
+  const walk = (code, lira, holder, left, seen) => {
+    const filing = filings?.[code];
+    if (!filing?.length || left <= 0 || seen.has(code)) return false;
+    const next = new Set(seen).add(code);
+
+    for (const position of filing) {
+      const weight = position?.weight;
+      if (!Number.isFinite(weight) || weight <= 0) continue;
+      const own = (lira * weight) / 100;
+
+      // A fund inside a fund is followed, not credited — otherwise a fund of
+      // funds reports as "you own 40% of a fund", which answers nothing.
+      if (position.group === 'funds' && position.ref
+        && walk(position.ref, own, holder, left - 1, next)) {
+        nested += own;
+        continue;
+      }
+
+      const key = String(position.isin || position.code || '').trim().toUpperCase();
+      if (!key) { unidentified += own; continue; }
+      credit(key, position, own, holder);
+    }
+    return true;
+  };
+
+  for (const p of positions ?? []) {
+    const lira = p?.value;
+    if (!p?.code || !Number.isFinite(lira) || lira <= 0) continue;
+    total += lira;
+
+    if (p.share) {
+      // A share bought directly needs no opening up: it already IS the thing
+      // every fund on this page is being reduced to, and it pools with the same
+      // company reached through a fund.
+      credit(p.code,
+        { code: p.code, name: p.name ?? p.code, group: 'equityTr', direct: true },
+        lira, p.code);
+      covered += lira;
+      continue;
+    }
+    if (walk(p.code, lira, p.code, depth, new Set())) covered += lira;
+  }
+
+  if (!covered) return null;
+
+  const rows = [...found.values()]
+    .sort((a, b) => b.value - a.value)
+    .map(({ split, ...r }) => ({
+      ...r,
+      value: round2(r.value),
+      pct: round2((r.value / covered) * 100),
+      holders: r.holders
+        .sort((a, b) => b.value - a.value)
+        .map((x) => ({ code: x.code, value: round2(x.value) })),
+    }));
+
+  const equity = rows.filter((r) => EQUITY_GROUPS.has(r.group));
+  let equityValue = 0;
+  for (const r of equity) equityValue += r.value;
+
+  return {
+    rows,
+    total: round2(total),
+    covered: round2(covered),
+    unidentified: round2(unidentified),
+    nested: round2(nested),
+    ...concentrationOf(rows),
+    // Concentration where it actually bites. A money-market fund's forty
+    // government bonds are not a diversified portfolio in any sense worth
+    // printing, and averaging them in with the shares hides the one number that
+    // answers "how many companies am I really betting on".
+    equity: equityValue > 0
+      ? { value: round2(equityValue), count: equity.length, ...concentrationOf(equity) }
+      : null,
   };
 }

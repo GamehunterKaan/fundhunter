@@ -7,7 +7,9 @@ import {
   compositionSegments, industryComposition, assetBreakdown,
   returnOver, returnYtd, returnForHorizon, volatility, maxDrawdown, indexSeries,
   alignAndIndex, signOf, HORIZONS, horizonOf, SORTS, STRINGS, LANGS,
-  SPEC_NONE, SPEC_MIN_EQUITY,
+  SPEC_NONE, SPEC_MIN_EQUITY, SPEC_STEPS,
+  defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
+  deflate, deflateSeries, yearOf,
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
   squarify,
@@ -1056,4 +1058,189 @@ test('the equity floor is what stops "holds none" meaning "holds no shares"', ()
   ).length;
   assert.equal(at(SPEC_MIN_EQUITY), 1, 'exactly at the floor is in');
   assert.equal(at(SPEC_MIN_EQUITY - 0.1), 0);
+});
+
+// ---------------------------------------------------------------- the screen
+
+test('a screen with nothing set encodes to nothing', () => {
+  // An untouched list has a clean `#/fonlar`, so every parameter that IS in a
+  // link is one somebody chose.
+  assert.equal(encodeScreen(defaultScreen()), '');
+  assert.equal(encodeScreen({}), '');
+  assert.equal(encodeScreen(null), '');
+});
+
+test('the screen survives a round trip through the hash', () => {
+  const screen = defaultScreen();
+  screen.filters.search = 'garanti';
+  screen.filters.kinds = ['YAT'];
+  screen.filters.categories = ['Serbest Şemsiye Fonu'];
+  screen.filters.founders = ['AK PORTFÖY'];
+  screen.prefs.maxRisk = 4;
+  screen.prefs.maxFee = 1.5;
+  screen.prefs.stance = 'defensive';
+  screen.prefs.beatsCash = true;
+  screen.prefs.tradeableOnly = true;
+  screen.prefs.horizon = 'm3';
+  screen.sort = { key: 'fee', dir: 'asc' };
+  assert.deepEqual(decodeScreen(encodeScreen(screen)), screen);
+});
+
+test('the readable link is the one the example promised', () => {
+  const screen = defaultScreen();
+  screen.prefs.maxRisk = 4;
+  screen.prefs.stance = 'defensive';
+  screen.prefs.beatsCash = true;
+  screen.prefs.maxFee = 1.5;
+  assert.equal(encodeScreen(screen), 'risk=4&fee=1.5&stance=defensive&on=cash');
+});
+
+test('the six switches travel as one parameter', () => {
+  const screen = defaultScreen();
+  screen.prefs.levered = true;
+  screen.prefs.crashProof = true;
+  screen.prefs.retailOnly = true;
+  assert.equal(encodeScreen(screen), 'on=retail,lev,crash');
+  const back = decodeScreen('on=retail,lev,crash');
+  assert.equal(back.prefs.levered, true);
+  assert.equal(back.prefs.crashProof, true);
+  assert.equal(back.prefs.retailOnly, true);
+  assert.equal(back.prefs.beatsCash, false);
+});
+
+test('a hand-edited hash cannot put a value into state that no control makes', () => {
+  // A list silently filtered by a category that does not exist looks exactly
+  // like a list with no matches, so nothing here is taken on trust.
+  const out = decodeScreen(
+    'risk=99&fee=-3&stance=reckless&hz=decade&sort=nonsense&spec=7&theme=unicorns&kind=ETF');
+  const base = defaultScreen();
+  assert.equal(out.prefs.maxRisk, null);
+  assert.equal(out.prefs.maxFee, null);
+  assert.equal(out.prefs.stance, '');
+  assert.equal(out.prefs.horizon, base.prefs.horizon);
+  assert.deepEqual(out.sort, base.sort);
+  assert.equal(out.prefs.speculative, '');
+  assert.equal(out.filters.theme, undefined);
+  assert.deepEqual(out.filters.kinds, []);
+});
+
+test('a risk of 7 is a real cap and 0 is not', () => {
+  // 7 is qualified-investors-only, which is a legitimate ceiling to ask for.
+  assert.equal(decodeScreen('risk=7').prefs.maxRisk, 7);
+  assert.equal(decodeScreen('risk=0').prefs.maxRisk, null);
+});
+
+test('the speculative control keeps its two shapes apart', () => {
+  assert.equal(decodeScreen(`spec=${SPEC_NONE}`).prefs.speculative, SPEC_NONE);
+  assert.equal(decodeScreen(`spec=${SPEC_STEPS[0]}`).prefs.speculative, SPEC_STEPS[0]);
+  // Not a step the control offers.
+  assert.equal(decodeScreen('spec=13').prefs.speculative, '');
+});
+
+test('a theme carries the share that makes it mean something', () => {
+  const screen = defaultScreen();
+  screen.filters.theme = THEME_IDS[0];
+  screen.filters.minTheme = 25;
+  assert.equal(encodeScreen(screen), `theme=${THEME_IDS[0]}&thememin=25`);
+  const back = decodeScreen(`theme=${THEME_IDS[0]}`);
+  // Absent, the default share applies rather than zero — "in defence" at 0%
+  // would match every fund holding a single share of it.
+  assert.equal(back.filters.minTheme, MIN_THEME);
+});
+
+test('the default sort is not written, and its reverse is', () => {
+  const screen = defaultScreen();
+  assert.equal(encodeScreen(screen), '');
+  screen.sort = { key: 'size', dir: 'asc' };
+  assert.equal(encodeScreen(screen), 'sort=size-asc');
+  assert.deepEqual(decodeScreen('sort=size-asc').sort, { key: 'size', dir: 'asc' });
+  assert.deepEqual(decodeScreen('sort=fee').sort, { key: 'fee', dir: 'desc' });
+});
+
+test('the window and the tax treatment are not filters', () => {
+  // A "clear all" resets what narrows the list, never how it is read: somebody
+  // who chose a 3-year after-tax view keeps it when they drop a fee cap.
+  assert.ok(!SCREEN_FILTER_PREFS.includes('horizon'));
+  assert.ok(!SCREEN_FILTER_PREFS.includes('tax'));
+  // Everything else in prefs is a filter and must be listed, or a "clear all"
+  // would leave it silently applied.
+  const managed = new Set([...SCREEN_FILTER_PREFS, 'horizon', 'tax']);
+  for (const key of Object.keys(defaultScreen().prefs)) {
+    assert.ok(managed.has(key), `${key} is in neither list`);
+  }
+});
+
+test('a leading ? or # on the query is tolerated', () => {
+  assert.equal(decodeScreen('?risk=4').prefs.maxRisk, 4);
+  assert.equal(decodeScreen('#risk=4').prefs.maxRisk, 4);
+  assert.equal(decodeScreen('').prefs.maxRisk, null);
+});
+
+test('a search with Turkish characters and an ampersand survives the trip', () => {
+  const screen = defaultScreen();
+  screen.filters.search = 'İŞ & GARANTİ';
+  assert.equal(decodeScreen(encodeScreen(screen)).filters.search, 'İŞ & GARANTİ');
+});
+
+
+// ---------------------------------------------------------------- real terms
+
+const CPI = { latest: 2025, years: { 2015: 146.07, 2019: 234.44, 2024: 1322.88, 2025: 1784.32 } };
+
+test('a lira figure is restated in the latest published year money', () => {
+  // A 2015 lira is 12.2 of today's, which is why fifteen bars of a twenty-year
+  // dividend chart are invisible.
+  assert.equal(Math.round(deflate(100, '2015-12-31', CPI).value), 1222);
+  assert.equal(deflate(100, '2015-12-31', CPI).real, true);
+  // The base year is itself, unchanged.
+  assert.equal(deflate(100, '2025-06-30', CPI).value, 100);
+});
+
+test('nothing is interpolated inside a year', () => {
+  // All four quarters of 2019 carry 2019's index. Sliding between two annual
+  // points to make the quarters look smooth would be a judgement no reader
+  // could see had been made, which is why this data took so long to land.
+  const q = ['2019-03-31', '2019-06-30', '2019-09-30', '2019-12-31']
+    .map((p) => deflate(100, p, CPI).value);
+  assert.equal(new Set(q.map((v) => Math.round(v))).size, 1);
+});
+
+test('a period the index does not reach is left nominal, and says so', () => {
+  // The series lags, so the newest periods cannot be deflated at all. Deflating
+  // them against the newest year that happens to exist would be worse.
+  const hit = deflate(100, '2026-06-30', CPI);
+  assert.equal(hit.value, 100);
+  assert.equal(hit.real, false);
+  // A year before the series starts is the same problem in the other direction.
+  assert.equal(deflate(100, '1990-01-01', CPI).real, false);
+  assert.equal(deflate(100, 'not a date', CPI).real, false);
+  assert.equal(deflate(null, '2015-01-01', CPI).value, null);
+});
+
+test('no deflator at all changes nothing rather than half the chart', () => {
+  assert.deepEqual(deflate(100, '2015-01-01', null), { value: 100, real: false });
+  assert.deepEqual(deflate(100, '2015-01-01', { years: {} }), { value: 100, real: false });
+  // A zero index would deflate to infinity; it is not a price level.
+  assert.equal(deflate(100, '2015-01-01', { latest: 2025, years: { 2015: 0, 2025: 100 } }).real,
+    false);
+});
+
+test('a series reports how much of it could be restated', () => {
+  const out = deflateSeries(
+    [100, 100, 100, null],
+    ['2015-12-31', '2025-12-31', '2026-06-30', '2026-09-30'],
+    CPI);
+  assert.equal(out.deflated, 2);
+  assert.equal(out.nominal, 1);
+  assert.deepEqual(out.real, [true, true, false, false]);
+  // A hole stays a hole and is counted as neither.
+  assert.equal(out.values[3], null);
+});
+
+test('the year is read off the front of whatever the period is called', () => {
+  assert.equal(yearOf('2026-03-31'), 2026);
+  assert.equal(yearOf(2019), 2019);
+  assert.equal(yearOf('nope'), null);
+  assert.equal(yearOf(null), null);
+  assert.equal(yearOf('0042-01-01'), null);
 });

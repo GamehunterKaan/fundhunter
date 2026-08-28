@@ -6,9 +6,10 @@ import {
   parseJsonl, filterFunds, sortFunds, compositionSegments, industryComposition,
   assetBreakdown, alignAndIndex, returnOver, HORIZONS, horizonOf, LEVERED_FROM,
   CRASH_PROOF_FROM, THEME_IDS, MIN_THEME,
-  aggregateHoldings, groupHoldings, queryMatcher, squarify,
+  aggregateHoldings, groupHoldings, HOLDING_GROUPS, queryMatcher, squarify,
   ringGeometry, ringPoint, ringPath, spreadLabels, svgN, TURN,
-  SPEC_NONE, SPEC_STEPS, SPEC_MIN_EQUITY,
+  SPEC_NONE, SPEC_STEPS, SPEC_MIN_EQUITY, bestIndexes, deflateSeries,
+  defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -16,10 +17,14 @@ import {
   crashSpared, rangePosition,
   trailingTwelve, yearOnYear, ratioSeries, netDebtToEbitda, altmanBand, piotroskiBand,
   consensus, shareOfTotal, beatRecord, surpriseOf, peersOf, peerMedians,
-  weightsOf, overlappingPairs, sharedPositions, themeMoves, moversIn, versusCash,
+  weightsOf, overlappingPairs, sharedPositions, sharedAcross, OVERLAP_FLOOR,
+  themeMoves, moversIn, versusCash,
   boardFlags, SPECULATIVE_HEAVY,
   priceOn, priceEntryOn, returnSince, positionOf, portfolioTotals,
   cashOver, cashAlternative, portfolioMix, portfolioSlices, portfolioDayMove,
+  lookThrough, LOOK_THROUGH_ROWS, portfolioXirr, feeDrag, taxIfSold, lotAges,
+  consistency, sinceVisit, newSince, VISIT_MIN_DAYS,
+  correlationMatrix, CORRELATION_HIGH,
 } from './analytics.js';
 import { LIVE_SOURCE, LIVE_REFRESH_MS, LIVE_TIMEOUT_MS, parseLiveQuotes, liveClock } from './live.js';
 import {
@@ -71,14 +76,10 @@ const state = {
   favs: new Set(),
   /** Per favourite: when it was starred, and how much of it is held. */
   positions: {},
-  filters: { search: '', kinds: [], categories: [], founders: [] },
-  prefs: {
-    tax: 'default', horizon: 'y1', maxRisk: null,
-    beatsCash: false, retailOnly: false, tradeableOnly: false,
-    onlyNew: false, stance: '', maxFee: null, levered: false, crashProof: false,
-  minDividend: null, speculative: '',
-  },
-  sort: { key: 'size', dir: 'desc' },
+  // The three of these together are the screen, and `defaultScreen()` is their
+  // one definition — they used to be written out here and again in the reset,
+  // and the two copies had already drifted apart.
+  ...defaultScreen(),
   /** Whether the filter panel is disclosed. Survives re-renders of the list. */
   filtersOpen: false,
   visible: PAGE_SIZE,
@@ -165,6 +166,8 @@ const T = (key, vars) => t(state.lang, key, vars);
 async function boot() {
   restorePreferences();
   restoreSaved();
+  restoreLastVisit();
+  registerWorker();
   wireChrome();
 
   try {
@@ -220,6 +223,46 @@ function restorePreferences() {
     // not worth migrating one preference.
   }
   syncLangButtons();
+}
+
+/**
+ * When this browser last opened the site, and stamping today over it.
+ *
+ * Read once into memory and immediately overwritten, so the dashboard is always
+ * answering about the PREVIOUS visit rather than about this one. Two loads on
+ * the same day leave nothing to report, which is correct — nothing happened
+ * between them.
+ *
+ * A date, not a timestamp: fund prices are published once a night, so an hour is
+ * not a unit anything here can answer in.
+ */
+const SEEN_KEY = 'fh-seen';
+
+function restoreLastVisit() {
+  const seen = localStorage.getItem(SEEN_KEY);
+  state.lastSeen = /^\d{4}-\d{2}-\d{2}$/.test(seen ?? '') ? seen : null;
+  try {
+    localStorage.setItem(SEEN_KEY, todayIso());
+  } catch {
+    // Blocked storage costs the panel, not the page.
+  }
+}
+
+/**
+ * Register the service worker, and never let it break the page.
+ *
+ * Everything here is best-effort. It is unavailable over plain http on anything
+ * but localhost, browsers can block it outright, and a registration that throws
+ * must cost a cache rather than a boot — so this is fire-and-forget with the
+ * failure swallowed. The site works identically without it; it is just slower.
+ */
+function registerWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  // After load: registration competes with the data fetches for connections,
+  // and the first visit is the one that can least afford the contention.
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
 }
 
 function syncLangButtons() {
@@ -278,20 +321,27 @@ function subNav(current) {
   return h('nav', { class: 'sub-nav', 'aria-label': T(parentRoute(current) === '/fonlar' ? 'navFunds' : 'navShares') },
     items.map((s) => h('a', {
       class: `sub-nav-link${s.route === current ? ' is-on' : ''}`,
-      href: `#${s.route}`,
+      // The screen travels with the link, so moving between the fund list and
+      // its siblings does not silently drop a filter set.
+      href: listHref(s.route),
       'aria-current': s.route === current ? 'page' : null,
     }, T(s.key))));
 }
 
 /** Label and highlight the section nav. */
 function syncNav() {
-  const hash = location.hash.slice(1) || '/';
+  const hash = hashPath();
   const current = parentRoute(hash);
   for (const a of document.querySelectorAll('#main-nav a[data-route]')) {
     const item = NAV.find((n) => n.route === a.dataset.route);
     // Into the span, not the link: the link also holds the icon the bottom tab
     // bar draws, and `textContent =` would delete it.
     if (item) a.querySelector('.nav-label').textContent = T(item.key);
+    // The two pages with a filter bar link to themselves carrying the screen, so
+    // stepping out to a fund and back through the nav keeps it.
+    if (a.dataset.route === '/fonlar' || a.dataset.route === '/favoriler') {
+      a.setAttribute('href', listHref(a.dataset.route));
+    }
     if (a.dataset.route === current) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   }
@@ -997,9 +1047,10 @@ function renderColophon() {
 // ---------------------------------------------------------------- routing
 
 function route() {
-  const hash = location.hash.slice(1) || '/';
+  const hash = hashPath();
   const fund = hash.match(/^\/fon\/([A-Za-z0-9]+)$/);
   const share = hash.match(/^\/hisse\/([A-Za-z0-9]+)$/);
+  const versus = hash.match(/^\/karsilastir\/([A-Za-z0-9,]+)$/);
   syncNav();
   syncSearchInput();
   // Leaving the dashboard has to drop its refresh loop, or the timer keeps
@@ -1007,15 +1058,16 @@ function route() {
   if (hash !== '/') dashView = null;
   if (!share) sharePage = null;
   if (hash !== '/portfoy') portfolioView = null;
-  if (fund) renderDetail(fund[1].toUpperCase());
+  if (versus) renderCompare(versus[1].toUpperCase().split(',').filter(Boolean));
+  else if (fund) renderDetail(fund[1].toUpperCase());
   else if (share) renderShare(share[1].toUpperCase());
   else if (hash === '/hisseler') renderShareList();
   else if (hash === '/piyasa') renderMarket();
   else if (hash === '/populer') renderPopular();
   else if (hash === '/dusus') renderCrashPage();
-  else if (hash === '/favoriler') renderList('favs');
+  else if (hash === '/favoriler') enterList('favs');
   else if (hash === '/portfoy') renderPortfolio();
-  else if (hash === '/fonlar') renderList('list');
+  else if (hash === '/fonlar') enterList('list');
   else renderDashboard();
   view.focus({ preventScroll: true });
 }
@@ -1272,9 +1324,10 @@ function renderDashboard() {
   // — the first three want width, for a sparkline, nineteen labelled chips and
   // a three-figure row respectively, and the last belongs under the day it is
   // the longer view of.
-  // Only your own funds are worth checking for duplication: the popular rail is
-  // a list of strangers and two of them overlapping is not your problem.
-  const overlap = renderOverlap(favourites.map((f) => f.c));
+  // What moved while you were away. Its own element, because the histories it
+  // needs are a second round of requests and the rest of the page must not wait.
+  const away = h('div', {});
+  renderSinceVisit(favourites, away);
 
   view.replaceChildren(...[
     h('div', { class: 'dash-grid' },
@@ -1286,12 +1339,12 @@ function renderDashboard() {
         // first quote arrives.
         renderTrending()),
       h('div', { class: 'dash-col dash-rail' },
+        away,
         flows.panel,
         favouritesPane)
     ),
     // Full width, below both: a row of it is two fund names at either end of a
     // shared-weight bar, and there is no width at which that wants a column.
-    overlap,
   ].filter(Boolean));
 
   // Prices arrive after the page is on screen, and again on every refresh while
@@ -1427,8 +1480,10 @@ function renderOverlap(codes) {
     body
   );
 
+  const page = state.page;
   Promise.all(codes.map(loadHoldings)).then((filings) => {
-    if (state.page !== 'dash') return;
+    // Whichever page asked for it must still be the page on screen.
+    if (state.page !== page) return;
     const weights = {};
     codes.forEach((code, i) => {
       const rows = filings[i]?.holdings;
@@ -1523,7 +1578,7 @@ function renderMarketPanels() {
     themesBody.replaceChildren(...(moves.length
       ? moves.map((t) => h('a', {
           class: 'theme-cell',
-          href: '#/fonlar',
+          href: listHref('/fonlar'),
           style: `background:${moveColor(t.move, THEME_TILE_CEILING)}`,
           title: `${themeName(t.id)} · ${t.priced}/${t.of}`,
           onClick: () => {
@@ -1582,7 +1637,7 @@ function renderTrending() {
       h('ul', { class: 'trend-list' }, sectors.map((s) => h('li', {},
         h('a', {
           class: 'trend-name',
-          href: '#/fonlar',
+          href: listHref('/fonlar'),
           // The same handoff the themes strip makes: set the filter, let the
           // router take the route.
           onClick: () => {
@@ -1878,6 +1933,9 @@ function renderList(page = state.page) {
 function applyAndRefresh() {
   applyFilters();
   refreshResults();
+  // Every control on the page ends up here, so this is where the screen becomes
+  // a link. Written before the chips are redrawn, since both read the same state.
+  syncScreenUrl();
   const chips = document.getElementById('active-chips');
   if (chips) chips.replaceWith(renderActiveChips());
   // Chips wrapping onto a second line changes the toolbar's height, and the
@@ -1890,6 +1948,196 @@ function applyAndRefresh() {
     badge.hidden = !n;
   }
 }
+
+
+// ------------------------------------------------------------- the screen URL
+//
+// The hash carries two things now: the route, and — on the two pages that have
+// a filter bar — the screen. `#/fonlar?risk=4&stance=defensive&on=cash`.
+//
+// Everything that changes the screen goes through `applyAndRefresh`, so that is
+// the one place the URL is written, and it is written with `replaceState`:
+// `location.hash = …` would fire `hashchange`, re-enter `route()` and redraw the
+// page under the control somebody is still using. It also keeps the back button
+// meaning "the page before this one" rather than "the last checkbox I ticked".
+
+/** The route, with any screen stripped off it. */
+const hashPath = () => {
+  const raw = location.hash.slice(1) || '/';
+  const cut = raw.indexOf('?');
+  return cut === -1 ? raw : raw.slice(0, cut);
+};
+
+/** The screen, as it appears in the hash. '' when there is none. */
+const hashQuery = () => {
+  const raw = location.hash.slice(1);
+  const cut = raw.indexOf('?');
+  return cut === -1 ? '' : raw.slice(cut + 1);
+};
+
+/**
+ * A link to one of the list pages carrying the screen currently in force.
+ *
+ * The nav, the sub-nav and every back link use it, so moving between the fund
+ * list, the favourites and a fund page does not silently drop a filter set —
+ * and the link somebody copies out of the address bar is the same link the page
+ * links to itself with.
+ */
+function listHref(route) {
+  const q = encodeScreen(state);
+  return `#${route}${q ? `?${q}` : ''}`;
+}
+
+/**
+ * Arrive at a list page, taking the screen from the hash.
+ *
+ * The URL is the truth on entry: whatever is in it wins, and a route with no
+ * screen on it is a request for an unfiltered list. That is what makes a link
+ * mean the same thing for the person who receives it as for the person who sent
+ * it, and it is only sound because every link the site draws to these pages
+ * carries the screen already.
+ */
+function enterList(page) {
+  const screen = decodeScreen(hashQuery());
+  state.filters = screen.filters;
+  state.prefs = screen.prefs;
+  state.sort = screen.sort;
+  syncSearchInput();
+  renderList(page);
+  // Write it straight back, so the address bar always describes the list that is
+  // actually on screen. A link carrying `risk=99` shows every fund, and leaving
+  // that parameter sitting in the URL would be the page claiming a filter it
+  // refused to apply.
+  syncScreenUrl();
+}
+
+/** Write the screen back into the hash, without re-routing the page. */
+function syncScreenUrl() {
+  if (state.page !== 'list' && state.page !== 'favs') return;
+  const q = encodeScreen(state);
+  const next = `#${state.page === 'favs' ? '/favoriler' : '/fonlar'}${q ? `?${q}` : ''}`;
+  if (next === location.hash) return;
+  history.replaceState(null, '', next);
+  syncSavedScreens();
+}
+
+// ---------------------------------------------------------- saved screens
+//
+// A screen that lives in the URL can be bookmarked, which is most of the value.
+// The rest is not having to: the four or five questions somebody actually asks
+// this site are asked over and over, and retyping six controls each time is what
+// stops anybody from asking the sixth.
+//
+// Stored as the encoded query rather than as a parsed object, so a saved screen
+// and a pasted link are the same thing and go through the same validation on the
+// way back in. Local to the browser, like the favourites.
+
+const SCREENS_KEY = 'fh-screens';
+
+/** How many a person can keep before the chip row stops being a row. */
+const MAX_SCREENS = 12;
+
+/** The saved screens, or an empty list — a corrupt value must not break the page. */
+function savedScreens() {
+  const raw = readStored(SCREENS_KEY);
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((s) => s && typeof s.n === 'string' && typeof s.q === 'string' && s.n.trim())
+    .slice(0, MAX_SCREENS);
+}
+
+const saveScreens = (list) => writeStored(SCREENS_KEY, list);
+
+/** The bar, while a list page is drawn. Null otherwise. */
+let screensBar = null;
+
+/**
+ * The saved screens, and the two things you can do with the one on screen.
+ *
+ * Built once per list render: the name field holds a caret, so the chips are the
+ * only part that gets replaced when a screen is added, applied or removed.
+ */
+function renderScreens() {
+  const chips = h('ul', { class: 'screen-chips' });
+
+  const name = h('input', {
+    type: 'text', class: 'port-input screen-name', maxlength: '40',
+    placeholder: T('screenName'), 'aria-label': T('screenName'),
+  });
+
+  const save = () => {
+    const label = name.value.trim();
+    if (!label) { name.focus(); return; }
+    const q = encodeScreen(state);
+    const list = savedScreens().filter((s) => s.n !== label);
+    // Newest first, and re-saving a name replaces it rather than making a second
+    // chip that reads the same and does something else.
+    list.unshift({ n: label, q });
+    saveScreens(list.slice(0, MAX_SCREENS));
+    name.value = '';
+    refresh();
+  };
+
+  const copy = h('button', {
+    type: 'button', class: 'control screen-copy',
+    onClick: async () => {
+      const url = `${location.origin}${location.pathname}${listHref(
+        state.page === 'favs' ? '/favoriler' : '/fonlar')}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        copy.textContent = T('screenCopied');
+        setTimeout(() => { copy.textContent = T('screenCopy'); }, 1600);
+      } catch {
+        // Denied clipboard permission, or an insecure origin. The address bar
+        // already holds the link, so there is nothing to fall back to and
+        // nothing worth interrupting anybody over.
+      }
+    },
+  }, T('screenCopy'));
+
+  const form = h('form', {
+    class: 'screen-form',
+    onSubmit: (e) => { e.preventDefault(); save(); },
+  }, name, h('button', { type: 'submit', class: 'control' }, T('screenSave')), copy);
+
+  function refresh() {
+    const here = encodeScreen(state);
+    chips.replaceChildren(...savedScreens().map((s) => h('li', {},
+      h('button', {
+        type: 'button',
+        class: `screen-chip${s.q === here ? ' is-on' : ''}`,
+        'aria-pressed': String(s.q === here),
+        onClick: () => {
+          const screen = decodeScreen(s.q);
+          state.filters = screen.filters;
+          state.prefs = screen.prefs;
+          state.sort = screen.sort;
+          // A whole screen changing means every control is now showing the wrong
+          // value, so this is the one case that redraws the page rather than
+          // refreshing the results under the controls.
+          syncSearchInput();
+          renderList();
+          syncScreenUrl();
+        },
+      }, s.n),
+      h('button', {
+        type: 'button', class: 'screen-x',
+        'aria-label': `${T('screenDelete')}: ${s.n}`,
+        onClick: () => {
+          saveScreens(savedScreens().filter((x) => x.n !== s.n));
+          refresh();
+        },
+      }, '×')
+    )));
+  }
+
+  refresh();
+  screensBar = { refresh };
+  return h('div', { class: 'screens' }, chips, form);
+}
+
+/** Re-mark which saved screen, if any, is the one on screen. */
+const syncSavedScreens = () => screensBar?.refresh();
 
 function renderFavHead() {
   // Count only favourites that still resolve to something: a code saved before
@@ -1966,7 +2214,7 @@ function renderFavShares(codes) {
 const emptyFavs = () =>
   h('div', { class: 'state-msg' },
     h('p', {}, T('favoritesEmpty')),
-    h('a', { class: 'back-link', href: '#/fonlar' }, `← ${T('navFunds')}`));
+    h('a', { class: 'back-link', href: listHref('/fonlar') }, `← ${T('navFunds')}`));
 
 function applyFilters() {
   // Scores depend on tax/horizon preferences, so they are recomputed here rather
@@ -2125,21 +2373,22 @@ function renderActiveChips() {
 }
 
 function resetFilters() {
-  state.filters = { search: '', kinds: [], categories: [], founders: [], exposure: undefined };
-  Object.assign(state.prefs, {
-    maxRisk: null, beatsCash: false, retailOnly: false,
-    tradeableOnly: false, onlyNew: false, stance: '', maxFee: null, levered: false,
-    crashProof: false, minDividend: null, speculative: '',
-  });
+  const base = defaultScreen();
+  state.filters = base.filters;
+  // Only the filtering preferences. The window and the tax treatment are how the
+  // list is READ rather than what it is narrowed to, and clearing a filter chip
+  // has no business resetting either — which is what SCREEN_FILTER_PREFS names.
+  for (const key of SCREEN_FILTER_PREFS) state.prefs[key] = base.prefs[key];
   syncSearchInput();
   renderList();
+  syncScreenUrl();
 }
 
 /** Result count, sort, and the filter disclosure. Sticky above the table. */
 function renderToolbar() {
   const n = activeFilters().length;
   const panel = h('div', { class: 'filter-panel', id: 'filter-panel', hidden: !state.filtersOpen },
-    renderFilters(), renderPrefs());
+    renderScreens(), renderFilters(), renderPrefs());
 
   const toggle = h('button', {
     type: 'button', class: 'filter-btn', 'aria-expanded': String(!!state.filtersOpen),
@@ -2176,6 +2425,7 @@ function renderToolbar() {
       toggle,
       search,
       renderActiveChips(),
+      h('div', { class: 'compare-slot', id: 'compare-slot' }, compareBar()),
       h('span', { class: 'result-count', id: 'result-count', 'aria-live': 'polite' },
         T('showing', { n: fmtInt(state.results.length, state.lang) })),
       h('label', { class: 'sort-field' },
@@ -2353,9 +2603,11 @@ function renderPrefs() {
         HORIZONS.map((hz) => [hz.key, T(hz.labelKey)]),
         p.horizon, (v) => { p.horizon = v; }),
 
+      // Two rates exist and nothing in between, so the override offers those and
+      // not a made-up ladder of percentages.
       pick('tax', T('taxPref'),
-        [['default', T('taxDefault')], ['0', T('taxNone')], ['0.1', '%10'], ['0.15', '%15']],
-        p.tax, (v) => { p.tax = v; }),
+        [['default', T('taxDefault')], ['0', T('taxNone')], ['0.175', '%17,5']],
+        p.tax, (v) => { p.tax = v; }, T('taxPrefNote')),
 
       pick('stance', T('stanceLabel'),
         [['', T('all')], ['aggressive', T('stanceAggressive')],
@@ -2534,7 +2786,9 @@ function appendRows(body) {
     const { segments } = compositionSegments(f.g, groupIds);
     body.append(
       h('tr', {},
-        h('td', { class: COL.fav }, favButton(f.c, onToggle)),
+        h('td', { class: COL.fav },
+          favButton(f.c, onToggle),
+          compareButton(f.c, syncCompareBar)),
         h('td', { class: COL.code }, h('a', { href: `#/fon/${f.c}` }, f.c)),
         h('td', { class: COL.name },
           h('a', { class: 'fund-name', href: `#/fon/${f.c}`, title: f.n }, f.n),
@@ -3011,7 +3265,7 @@ async function renderDetail(code) {
   if (!fund) {
     view.replaceChildren(h('div', { class: 'state-msg' },
       h('p', {}, T('notFound')),
-      h('a', { class: 'back-link', href: '#/fonlar' }, `← ${T('back')}`)));
+      h('a', { class: 'back-link', href: listHref('/fonlar') }, `← ${T('back')}`)));
     return;
   }
 
@@ -3042,10 +3296,18 @@ async function renderDetail(code) {
   // the literal text "null" on the page. ZIH showed one, SGK two.
   view.replaceChildren(...[
     h('div', { class: 'detail-head' },
-      h('a', { class: 'back-link', href: '#/fonlar' }, `← ${T('back')}`),
+      h('a', { class: 'back-link', href: listHref('/fonlar') }, `← ${T('back')}`),
       h('div', { class: 'detail-id' },
         h('div', { class: 'detail-code num' }, fund.c),
-        favButton(fund.c)
+        favButton(fund.c),
+        // Straight into a comparison carrying this fund. The page it lands on
+        // asks for the second one, which is a shorter path than going back to
+        // the list to tick two boxes.
+        h('a', {
+          class: 'control detail-compare',
+          href: `#/karsilastir/${fund.c}`,
+          title: T('compareAdd'),
+        }, T('compare'))
       ),
       h('h1', { class: 'detail-title' }, fund.n),
       h('ul', { class: 'chips' },
@@ -3088,9 +3350,46 @@ async function renderDetail(code) {
     renderThemes(fund),
     renderHoldings(holdings),
     allocRows.length > 2 ? renderAllocHistory(allocRows) : null,
+    renderConsistency(prices),
     prices.length > 5 ? renderFundChart(fund, prices) : h('p', { class: 'panel-note' }, T('noHistory'))
   ].filter(Boolean));
   window.scrollTo({ top: 0 });
+}
+
+/**
+ * How often this fund actually beat the money market, window after window.
+ *
+ * The trailing return above it is one window, picked by the calendar, and it is
+ * the number this page leads with because everybody expects it there. It is also
+ * the easiest number on the page to be fooled by: eleven months behind the
+ * hurdle and one enormous fortnight prints the same figure as a fund that was
+ * ahead the whole way.
+ *
+ * So this asks the same question at every start date instead. The rate is the
+ * headline and the median excess sits under it, because a fund can win 60% of
+ * its windows by a hair and lose the other 40% badly.
+ */
+function renderConsistency(prices) {
+  const mmf = state.benchmarks.filter((r) => r.mmf != null).map((r) => [r.d, r.mmf]);
+  const windows = consistency(prices, mmf);
+  if (!windows) return null;
+
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('consistency')),
+    h('dl', { class: 'stat-row stat-row-inset' }, windows.map((w) => h('div', { class: 'stat' },
+      h('dt', { title: T('consistencyHint') }, T(w.labelKey)),
+      // The rate leads, but never without its denominator: an overlapping
+      // window is not an independent trial and the count is what says so.
+      h('dd', { class: `delta ${w.rate >= 50 ? 'up' : 'down'}` },
+        fmtPct(w.rate, state.lang, { digits: 0 })),
+      h('span', { class: 'stat-sub num' },
+        T('consistencyOf', { n: w.wins, of: w.windows })),
+      h('span', { class: `stat-sub num delta ${signOf(w.median)}` },
+        T('consistencyMedian', {
+          v: fmtPoints(w.median, state.lang, { signed: true, digits: 1 }) })))
+    )),
+    h('p', { class: 'panel-note' }, T('consistencyNote'))
+  );
 }
 
 function renderStats(f) {
@@ -3865,6 +4164,445 @@ function drawMap() {
   box.replaceChildren(...tiles);
 }
 
+
+// ---------------------------------------------------------------- comparing
+//
+// Two or more funds on one indexed axis, with everything else that differs
+// between them underneath.
+//
+// The site is good at answering "is this fund any good" one fund at a time, and
+// that is not the question anybody actually has: they have three candidates and
+// want to know which. Doing it by opening three tabs loses the one thing that
+// matters most, which is that the three lines belong on the same axis rebased to
+// the same day — the chart already refuses to do anything else, so this page is
+// mostly a matter of handing it more than one fund.
+//
+// The codes are in the route, so a comparison is a link like any other screen.
+
+/**
+ * How many funds fit on one axis.
+ *
+ * Six lines is already a lot to hold apart, and the palette below runs out at
+ * eight. Past this the chart stops being a comparison and becomes a texture.
+ */
+const COMPARE_MAX = 6;
+
+/** Which funds are selected in the list, waiting to be compared. */
+const compareSet = new Set();
+
+/** A fund's line colour on the compare chart: its position, not its identity. */
+const compareColor = (i) => `var(--slice-${(i % 8) + 1}, var(--ink-muted))`;
+
+/**
+ * The rows of the table under the chart.
+ *
+ * `dir` marks which way is better, and is deliberately absent from most of them.
+ * A fee is unambiguous — you pay it, less is better. A return over a stated
+ * window is unambiguous. Volatility is NOT: somebody comparing two equity funds
+ * may well want the livelier one, and a green tick beside the calmer one would
+ * be a taste presented as a finding. The same goes for size, for investor count
+ * and for the official risk value, which is a constraint rather than a grade.
+ *
+ * A maximum drawdown is 'high' because it is negative: losing 4% at worst beats
+ * losing 22%.
+ */
+/** A value at the precision its cell shows, so a comparison sees what a reader does. */
+const roundTo = (v, digits) => {
+  if (v == null || !Number.isFinite(v)) return v;
+  const f = 10 ** (digits ?? 2);
+  return Math.round(v * f) / f;
+};
+
+const COMPARE_ROWS = [
+  { labelKey: 'price', digits: 4, get: (f) => f.p, fmt: (v) => `₺${fmtNum(v, state.lang, 4)}` },
+  { labelKey: 'size', digits: 0, get: (f) => f.sz, fmt: (v) => fmtMoney(v, state.lang) },
+  { labelKey: 'investors', digits: 0, get: (f) => f.iv, fmt: (v) => fmtInt(v, state.lang) },
+  ...HORIZONS.map((hz) => ({
+    labelKey: hz.labelKey, dir: 'high', delta: true, digits: 1,
+    get: (f) => f.r?.[hz.key],
+    fmt: (v) => fmtPct(v, state.lang, { signed: true, digits: 1 }),
+  })),
+  {
+    labelKey: 'vsCash', dir: 'high', delta: true, digits: 1,
+    get: (f) => f._score?.excess,
+    fmt: (v) => fmtPoints(v, state.lang, { signed: true, digits: 1 }),
+  },
+  {
+    labelKey: 'volatility', digits: 1,
+    get: (f) => f.vol,
+    fmt: (v) => fmtPct(v, state.lang, { digits: 1 }),
+  },
+  {
+    labelKey: 'maxDrawdown', dir: 'high', delta: true, digits: 1,
+    get: (f) => f.mdd,
+    fmt: (v) => fmtPct(v, state.lang, { digits: 1 }),
+  },
+  {
+    labelKey: 'expenseRatio', dir: 'low', digits: 2,
+    get: (f) => f.expenseRatio,
+    fmt: (v) => fmtPct(v, state.lang, { digits: 2 }),
+  },
+  {
+    labelKey: 'crashSpared', dir: 'high', digits: 0,
+    get: (f) => f.cr?.s,
+    fmt: (v) => fmtNum(v, state.lang, 0),
+  },
+];
+
+/** The rows that are a label rather than a number, printed under the figures. */
+const COMPARE_FACTS = [
+  { labelKey: 'category', get: (f) => label(catOf(f), state.lang) },
+  { labelKey: 'founder', get: (f) => f.f },
+  { labelKey: 'stanceLabel', get: (f) => (f.stance
+    ? T(`stance${f.stance[0].toUpperCase()}${f.stance.slice(1)}`) : null) },
+  { labelKey: 'riskLevel', get: (f) => (f.risk == null ? null : String(f.risk)) },
+];
+
+/**
+ * The compare page.
+ *
+ * Codes come from the route rather than from memory, so a comparison can be
+ * bookmarked and sent — which is most of what anybody wants to do with one.
+ */
+async function renderCompare(codes) {
+  state.page = 'compare';
+  const picked = codes
+    .map((c) => state.funds.find((f) => f.c === c))
+    .filter(Boolean)
+    .slice(0, COMPARE_MAX);
+
+  // The selection and the route are kept in step, so leaving the page and going
+  // back to the list finds the same funds ticked.
+  compareSet.clear();
+  for (const f of picked) compareSet.add(f.c);
+
+  if (picked.length < 2) {
+    view.replaceChildren(renderCompareHead(picked), compareAdd(picked),
+      h('div', { class: 'state-msg' }, h('p', {}, T('comparePickTwo'))));
+    return;
+  }
+
+  view.replaceChildren(renderCompareHead(picked), compareAdd(picked),
+    h('p', { class: 'state-msg' }, T('loading')));
+
+  const histories = await Promise.all(picked.map((f) => loadHistory(f.c)));
+  if (state.page !== 'compare') return;
+
+  // Scores depend on the tax and horizon preferences, exactly as on the list.
+  const ctx = scoringContext();
+  for (const f of picked) f._score = scoreFund(f, ctx);
+
+  const raw = {};
+  picked.forEach((f, i) => { if (histories[i]?.length > 1) raw[f.c] = histories[i]; });
+
+  const chart = Object.keys(raw).length > 1
+    ? renderChart({
+        raw,
+        titleKey: 'compareChart',
+        series: picked.filter((f) => raw[f.c]).map((f, i) => ({
+          key: f.c, color: compareColor(i), width: 2, prefix: '₺', tipDigits: 4,
+          axisDigits: null, name: () => f.c,
+        })),
+      })
+    : null;
+
+  const holdings = h('div', {});
+  view.replaceChildren(
+    renderCompareHead(picked),
+    compareAdd(picked),
+    ...(chart ? [chart] : []),
+    compareMix(picked),
+    compareTable(picked),
+    holdings
+  );
+  window.scrollTo({ top: 0 });
+
+  // The filings are a second round of requests, so the page is complete without
+  // them and gains a panel when they land — the same bargain the look-through
+  // makes on the portfolio page.
+  const filings = await loadPortfolioFilings(picked.map((f) => f.c));
+  if (state.page !== 'compare') return;
+  holdings.replaceChildren(...[compareHoldings(picked, filings)].filter(Boolean));
+}
+
+function renderCompareHead(picked) {
+  return h('section', { class: 'page-head' },
+    h('p', { class: 'eyebrow' }, T('compare')),
+    h('h1', { class: 'page-title' },
+      picked.length ? picked.map((f) => f.c).join(' · ') : T('compare')),
+    h('a', { class: 'back-link', href: listHref('/fonlar') }, `← ${T('navFunds')}`));
+}
+
+/** Add another fund, or drop one. The page's own picker. */
+function compareAdd(picked) {
+  const input = h('input', {
+    type: 'text', class: 'port-input', list: 'compare-list', spellcheck: 'false',
+    autocomplete: 'off', 'aria-label': T('compareAdd'), placeholder: T('compareAdd'),
+  });
+  const error = h('p', { class: 'port-add-error', role: 'alert' });
+
+  const go = (codes) => { location.hash = `#/karsilastir/${codes.join(',')}`; };
+
+  return h('section', { class: 'panel port-add-panel' },
+    h('ul', { class: 'compare-chips' }, picked.map((f, i) => h('li', {},
+      h('span', { class: 'compare-swatch', style: `background:${compareColor(i)}` }),
+      h('a', { class: 'code-link num', href: `#/fon/${f.c}` }, f.c),
+      h('span', { class: 'compare-chip-name', title: f.n }, f.n),
+      h('button', {
+        type: 'button', class: 'screen-x', 'aria-label': `${T('compareRemove')} — ${f.c}`,
+        onClick: () => go(picked.filter((x) => x.c !== f.c).map((x) => x.c)),
+      }, '×')
+    ))),
+    h('form', {
+      class: 'port-add',
+      onSubmit: (e) => {
+        e.preventDefault();
+        const code = input.value.trim().toUpperCase();
+        if (!code) return;
+        if (!state.funds.some((f) => f.c === code)) {
+          error.textContent = T('compareUnknown');
+          return;
+        }
+        if (picked.length >= COMPARE_MAX) {
+          error.textContent = T('compareFull', { n: COMPARE_MAX });
+          return;
+        }
+        error.textContent = '';
+        input.value = '';
+        go([...picked.map((f) => f.c), code]);
+      },
+    },
+      h('div', { class: 'port-add-fields' },
+        input,
+        h('button', { type: 'submit', class: 'control port-add-go' }, T('portAddButton'))),
+      // Funds only. A share and a fund do not share a price series anybody would
+      // put on one axis, and the share pages already compare against the index.
+      h('datalist', { id: 'compare-list' },
+        state.funds.slice(0, 400).map((f) =>
+          h('option', { value: f.c }, `${f.c} — ${f.n}`)))
+    ),
+    error
+  );
+}
+
+/** The recurring unit, once per fund, stacked so the shapes line up. */
+function compareMix(picked) {
+  const groupIds = state.meta.groups.map((g) => g.id);
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('compareMix')),
+    h('ul', { class: 'compare-mix' }, picked.map((f) => {
+      const { segments } = compositionSegments(f.g, groupIds);
+      return h('li', {},
+        h('span', { class: 'compare-mix-code num' }, f.c),
+        compBar(segments, 'comp-bar'));
+    })),
+    h('ul', { class: 'comp-legend' }, state.meta.groups
+      .filter((g) => picked.some((f) => (f.g?.[g.id] ?? 0) > 0))
+      .map((g) => h('li', {},
+        h('span', { class: 'swatch', style: `background:${groupColor(g.id)}` }),
+        h('span', {}, label(g, state.lang)))))
+  );
+}
+
+/** Every figure that differs, one row per measure, best marked. */
+function compareTable(picked) {
+  const row = (spec, isFact) => {
+    const values = picked.map((f) => spec.get(f));
+    // Compared at the precision the row PRINTS at. Two funds both showing
+    // "▲ %5,3" are the same number as far as this page is concerned, and marking
+    // one of them the winner over a third decimal nobody can see reads as a bug.
+    const best = isFact
+      ? new Set()
+      : bestIndexes(values.map((v) => roundTo(v, spec.digits)), spec.dir);
+    return h('tr', {},
+      h('th', { scope: 'row' }, T(spec.labelKey)),
+      ...values.map((v, i) => h('td', {
+        class: `num${best.has(i) ? ' is-best' : ''}`,
+      },
+        v == null || (typeof v === 'number' && !Number.isFinite(v))
+          ? '—'
+          : h('span', { class: spec.delta ? `delta ${signOf(v)}` : '' },
+              isFact ? v : spec.fmt(v)))));
+  };
+
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('compareFigures')),
+    h('div', { class: 'own-scroll' },
+      h('table', { class: 'own-table compare-table' },
+        h('thead', {}, h('tr', {},
+          h('th', {}, ''),
+          ...picked.map((f, i) => h('th', { class: 'num' },
+            h('span', { class: 'compare-swatch', style: `background:${compareColor(i)}` }),
+            h('a', { class: 'code-link num', href: `#/fon/${f.c}` }, f.c))))),
+        h('tbody', {},
+          COMPARE_ROWS.map((spec) => row(spec, false)),
+          COMPARE_FACTS.map((spec) => row(spec, true)))))
+  );
+}
+
+/**
+ * Whether these funds are actually different things.
+ *
+ * The figures above can differ in every row while the funds hold the same twelve
+ * companies, and that is the single most useful thing a comparison can say. The
+ * pairwise number says how much is duplicated; the list says what.
+ */
+function compareHoldings(picked, filings) {
+  const weights = {};
+  let filed = 0;
+  for (const f of picked) {
+    const rows = filings[f.c];
+    if (!rows?.length) continue;
+    weights[f.c] = weightsOf(rows);
+    filed++;
+  }
+  if (filed < 2) return null;
+
+  const pairs = overlappingPairs(weights, 0);
+  const shared = sharedAcross(weights, { min: 2, limit: 12 });
+  const codes = Object.keys(weights);
+
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('compareOverlap')),
+    h('ul', { class: 'compare-pairs' }, pairs.map((p) => h('li', {},
+      h('span', { class: 'num' }, `${p.a} · ${p.b}`),
+      h('span', { class: 'look-bar' },
+        h('span', { class: 'look-fill', style: `width:${svgN(p.shared)}%;`
+          + `background:${p.shared >= OVERLAP_FLOOR ? 'var(--down)' : 'var(--accent)'}` })),
+      h('span', { class: 'look-pct' }, fmtPct(p.shared, state.lang, { digits: 1 }))))),
+    shared.length
+      ? h('div', { class: 'own-scroll' },
+          h('table', { class: 'own-table compare-table' },
+            h('thead', {}, h('tr', {},
+              h('th', {}, T('portLookPosition')),
+              ...codes.map((c) => h('th', { class: 'num' }, c)))),
+            h('tbody', {}, shared.map((r) => h('tr', {},
+              h('th', { scope: 'row' }, h('span', { class: 'num' }, r.code)),
+              ...codes.map((c) => h('td', { class: 'num' },
+                r.weights[c] == null
+                  ? '—'
+                  : fmtPct(r.weights[c], state.lang, { digits: 2 }))))))))
+      : h('p', { class: 'panel-note' }, T('compareNoShared')),
+    // Which of them could be looked at at all. A pair figure over two funds when
+    // four were asked for is not an answer about the four.
+    filed < picked.length
+      ? h('p', { class: 'panel-note' },
+          T('compareUnfiled', { n: picked.length - filed }))
+      : null
+  );
+}
+
+/** The compare toggle that rides beside the star on every fund row. */
+function compareButton(code, onDone) {
+  const on = compareSet.has(code);
+  const btn = h('button', {
+    type: 'button',
+    class: `cmp-btn${on ? ' is-on' : ''}`,
+    'aria-pressed': String(on),
+    title: T(on ? 'compareRemove' : 'compareAdd'),
+    'aria-label': `${T(on ? 'compareRemove' : 'compareAdd')} — ${code}`,
+    onClick: (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (on) compareSet.delete(code);
+      else if (compareSet.size < COMPARE_MAX) compareSet.add(code);
+      btn.replaceWith(compareButton(code, onDone));
+      onDone?.();
+    },
+  }, on ? '◧' : '◫');
+  return btn;
+}
+
+/**
+ * What happened while you were away.
+ *
+ * The data here changes every night and the page looks identical, which is a
+ * strange property for something meant to be opened daily. This is the one panel
+ * that is different every time precisely because it is about the gap since last
+ * time — and it disappears entirely when there is nothing to say, which on a
+ * second load the same morning is the honest answer.
+ *
+ * Nothing about it leaves the browser: the date is a `localStorage` key beside
+ * the favourites, and it is read once and stamped over at boot so this is always
+ * answering about the PREVIOUS visit.
+ */
+async function renderSinceVisit(favourites, slot) {
+  const from = state.lastSeen;
+  if (!from || !favourites.length) return;
+  const codes = favourites.map((f) => f.c);
+  const histories = await Promise.all(codes.map(loadHistory));
+  if (state.page !== 'dash') return;
+
+  // Today, explicitly: the gap the heading names is calendar days between two
+  // dates, and the prices are read at the last print on or before each end.
+  const out = sinceVisit(
+    codes.map((code, i) => ({ code, series: histories[i] })), from, todayIso());
+  if (!out || out.days < VISIT_MIN_DAYS) return;
+
+  // Funds younger than the gap did not exist last time. A count only: the list
+  // of them is what `#/populer` is for, and this panel is a glance.
+  const fresh = newSince(state.funds, out.days).length;
+
+  slot.replaceChildren(h('section', { class: 'panel dash-pane away-pane' },
+    h('div', { class: 'dash-pane-head' },
+      h('h2', {}, T('sinceVisit')),
+      h('span', { class: 'dash-more' }, T('sinceVisitDays', { n: out.days }))),
+    h('dl', { class: 'stat-row stat-row-inset' },
+      h('div', { class: 'stat' },
+        // A median, because a handful of funds is a small sample and one of them
+        // doubling says nothing about the rest — the same reason the cash
+        // comparison on this page is a median and says so.
+        h('dt', { title: T('sinceVisitHint') }, T('sinceVisitMedian')),
+        h('dd', { class: `delta ${signOf(out.median)}` },
+          fmtPct(out.median, state.lang, { signed: true, digits: 1 })),
+        h('span', { class: 'stat-sub num' },
+          T('sinceVisitOf', { n: out.counted }))),
+      h('div', { class: 'stat' },
+        h('dt', {}, T('sinceVisitBest')),
+        h('dd', { class: `delta ${signOf(out.best.pct)}` },
+          fmtPct(out.best.pct, state.lang, { signed: true, digits: 1 })),
+        h('span', { class: 'stat-sub num' }, out.best.code)),
+      out.worst.code === out.best.code ? null : h('div', { class: 'stat' },
+        h('dt', {}, T('sinceVisitWorst')),
+        h('dd', { class: `delta ${signOf(out.worst.pct)}` },
+          fmtPct(out.worst.pct, state.lang, { signed: true, digits: 1 })),
+        h('span', { class: 'stat-sub num' }, out.worst.code)),
+      !fresh ? null : h('div', { class: 'stat' },
+        h('dt', {}, T('sinceVisitNew')),
+        h('dd', {}, fmtInt(fresh, state.lang)),
+        h('span', { class: 'stat-sub' },
+          h('a', { href: '#/populer' }, T('dashMore')))))
+  ));
+}
+
+/** Redraw only the compare strip, leaving the rest of the toolbar alone. */
+function syncCompareBar() {
+  const slot = document.getElementById('compare-slot');
+  if (slot) slot.replaceChildren(...[compareBar()].filter(Boolean));
+  measureChrome();
+}
+
+/**
+ * The selection, shown in the toolbar rather than in a tray of its own.
+ *
+ * The toolbar is already sticky and already carries the chips, so a second
+ * sticky layer would cost a row of the table and collide with the tab bar a
+ * phone draws along the bottom.
+ */
+function compareBar() {
+  if (compareSet.size < 1) return null;
+  const codes = [...compareSet];
+  return h('div', { class: 'compare-bar' },
+    h('a', {
+      class: `control compare-go${codes.length < 2 ? ' is-off' : ''}`,
+      href: codes.length < 2 ? null : `#/karsilastir/${codes.join(',')}`,
+    }, T('compareN', { n: codes.length })),
+    h('button', {
+      type: 'button', class: 'chip-clear',
+      onClick: () => { compareSet.clear(); renderList(); },
+    }, T('clearAll')));
+}
+
 // ---------------------------------------------------------------- shares
 //
 // Borsa İstanbul, the other way through the same data.
@@ -3878,6 +4616,31 @@ function drawMap() {
 // So the figures come from the same feeds as everything else — TradingView for
 // the fundamentals, Yahoo for the history, the 15-minute delayed scan for the
 // live price — and the ownership comes from us.
+
+/**
+ * The CPI deflator: 2KB, fetched the first time somebody asks for real terms.
+ *
+ * Not on boot and not with the share page, because most readers never press the
+ * button — and a page that is nominal until asked must not pay for a file it may
+ * never use.
+ */
+let cpi = null;
+let cpiJob = null;
+
+function loadCpi() {
+  if (cpi) return Promise.resolve(cpi);
+  cpiJob ??= fetch(`${DATA}/cpi.json`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data) => {
+      // A file with no `latest` cannot deflate anything, and half a deflator is
+      // worse than none: the toggle simply does nothing rather than restating
+      // some periods and not others without saying which.
+      cpi = data?.years && data?.latest ? data : null;
+      return cpi;
+    })
+    .catch(() => null);
+  return cpiJob;
+}
 
 /** The share index: 450KB, so it is loaded when a share page is opened, not on boot. */
 let shares = null;
@@ -4230,7 +4993,7 @@ async function renderShare(code) {
           // set here rather than passed in the hash: the router takes routes, and
           // giving it a query string would be a second way to say the same thing.
           h('a', {
-            href: '#/fonlar',
+            href: listHref('/fonlar'),
             onClick: () => {
               state.filters.theme = stock.th;
               state.filters.minTheme = MIN_THEME;
@@ -4518,6 +5281,11 @@ async function renderPortfolio() {
   const table = h('div', { class: 'table-wrap' });
   const summary = h('div', { id: 'port-summary' });
   const panels = h('div', { id: 'port-panels' });
+  // Correlation needs the price histories, which this page has already loaded
+  // for the rows. Computed once here rather than on every quote refresh: it is
+  // the one figure on the page that a live price cannot change.
+  const together = correlationMatrix(
+    codes.filter((c) => !isShareCode(c)).map((c) => ({ code: c, series: history.get(c) })));
   // The add control is built once and sits outside everything redraw() replaces,
   // for the same reason the rows do: a live quote arriving must not take the
   // caret out of a field somebody is typing a code into.
@@ -4542,18 +5310,29 @@ async function renderPortfolio() {
     h('tbody', {}, rows.map((r) => [r.tr, r.drawerRow]))
   ));
 
+  // The filings every fund on the page has, keyed by code. Empty until they
+  // arrive, and the look-through panel simply is not drawn until then — it is
+  // the one thing here that needs a second round of requests, and the rest of
+  // the page must not wait on it.
+  let filings = {};
+
   function redraw() {
     if (state.page !== 'portfolio') return;
     const valued = rows.map((r) => r.refresh()).filter(Boolean);
     summary.replaceChildren(
       ...[portfolioDonut(valued), portfolioSummary(valued, history)].filter(Boolean));
-    panels.replaceChildren(...portfolioPanels(valued).filter(Boolean));
+    panels.replaceChildren(...portfolioPanels(valued, filings, together).filter(Boolean));
   }
 
   redraw();
   // Share prices arrive after the page is drawn, and again on every refresh.
   portfolioView = redraw;
   ensureQuotes(null).then(redraw);
+  loadPortfolioFilings(codes).then((loaded) => {
+    if (state.page !== 'portfolio') return;
+    filings = loaded;
+    redraw();
+  });
   window.scrollTo({ top: 0 });
 }
 
@@ -4779,12 +5558,33 @@ function lotRow(code, lot, index, onChange) {
       title: T(sale ? 'posSellPriceHint' : 'posUnitPriceHint'),
       onInput: (e) => { setLot(code, index, 'price', decimal(e.target.value)); onChange(); },
     }),
+    // How long this purchase has been held. A fact, and only a fact: what a year
+    // means for anybody's withholding depends on rules that have been amended
+    // repeatedly, so the row states the age and claims nothing about it.
+    lotAge(lot),
     h('button', {
       type: 'button', class: 'port-remove lot-remove',
       title: T('posLotRemove'), 'aria-label': `${T('posLotRemove')} — ${code}`,
       onClick: () => { removeLot(code, index); onChange(); },
     }, '×')
   );
+}
+
+/**
+ * A buy's age. Nothing for a sale: its clock stopped when it was sold.
+ *
+ * A plain fact, and only a fact. It carried a tax countdown for a while, which
+ * was wrong: the exemption this site models has no holding period at all, so
+ * counting down to it invented a decision nobody has. The one exemption that
+ * does turn on a year needs each fund's izahname, which is not read here.
+ */
+function lotAge(lot) {
+  const [age] = lotAges([lot], todayIso());
+  if (!age) return null;
+  return h('span', {
+    class: 'lot-age',
+    title: age.on ? T('posTurnsOn', { date: fmtDate(age.on, state.lang) }) : T('posOverYear'),
+  }, T('posHeldDays', { n: fmtInt(age.days, state.lang) }));
 }
 
 /**
@@ -5046,6 +5846,12 @@ function portfolioSummary(valued, history) {
   const totals = portfolioTotals(valued);
   if (!totals) return null;
 
+  // The lots live in state rather than on the valued row, which only carries
+  // what a row prints. A rate needs every purchase and every sale.
+  const rate = portfolioXirr(
+    valued.map((p) => ({ code: p.code, lots: state.positions[p.code], value: p.value })),
+    todayIso());
+
   const mmf = state.benchmarks.filter((r) => r.mmf != null).map((r) => [r.d, r.mmf]);
   const alternative = cashAlternative(valued, mmf);
   const cash = alternative?.pct ?? null;
@@ -5072,7 +5878,17 @@ function portfolioSummary(valued, history) {
       gap == null ? null : h('div', { class: 'stat' },
         h('dt', {}, T('portVsCashGap')),
         h('dd', { class: `delta ${signOf(gap)}` },
-          fmtPoints(gap, state.lang, { signed: true, digits: 1 })))
+          fmtPoints(gap, state.lang, { signed: true, digits: 1 }))),
+      // Beside the profit, because it is the same money asked a better
+      // question: not how much, but at what rate.
+      rate == null ? null : h('div', { class: 'stat' },
+        h('dt', { title: T('portRateHint') }, T('portRate')),
+        h('dd', { class: `delta ${signOf(rate.pct)}` },
+          fmtPct(rate.pct, state.lang, { signed: true, digits: 1 })),
+        rate.counted < rate.of
+          ? h('span', { class: 'stat-sub num' },
+              T('portRatePartial', { n: rate.counted, of: rate.of }))
+          : null)
     ),
     // A total that quietly omitted a third of the holdings would be worse than
     // no total, so what was left out is stated rather than absorbed.
@@ -5219,7 +6035,7 @@ function ringTags(g, placed, nameOf, figureOf) {
 }
 
 /** The aggregate views that only exist once the sizes are known. */
-function portfolioPanels(valued) {
+function portfolioPanels(valued, filings, together) {
   const funds = valued.filter((p) => !p.share && p.value != null);
   const mixed = portfolioMix(funds.map((p) => ({ value: p.value, groups: p.groups })));
 
@@ -5235,6 +6051,19 @@ function portfolioPanels(valued) {
 
   return [
     mixed ? portfolioMixPanel(mixed) : null,
+    // Duplication belongs beside the look-through and the correlation panel:
+    // all three answer "is this portfolio as spread out as it looks", and only
+    // here are the sizes known. On the dashboard it was asking about a list of
+    // codes you follow, which is a weaker version of the same question.
+    // The three of them read top to bottom as one argument: which companies you
+    // actually own, which of your funds own the same ones, and whether they move
+    // as one regardless. The look-through leads because it is the concrete
+    // answer and the other two qualify it.
+    portfolioLookPanel(valued, filings),
+    renderOverlap(funds.map((p) => p.code)),
+    portfolioTogetherPanel(together),
+    portfolioTaxPanel(valued),
+    portfolioFeePanel(valued),
     specPct == null ? null : h('section', { class: 'panel' },
       h('h2', {}, T('portSpec')),
       h('dl', { class: 'stat-row stat-row-inset' },
@@ -5247,6 +6076,143 @@ function portfolioPanels(valued) {
           h('dd', {}, fmtMoney(specLira, state.lang)))),
       h('p', { class: 'panel-note' }, T('portSpecNote'))),
   ];
+}
+
+/**
+ * Whether the funds you hold are actually different bets.
+ *
+ * The look-through panel above answers "do I own the same company twice". This
+ * answers the other half, and they are genuinely different questions: two funds
+ * can share no position at all and still be one bet, because a Turkish equity
+ * fund and a Turkish equity fund are both a bet on Turkish equity whichever
+ * twelve companies they picked.
+ *
+ * The headline is not the average correlation, which nobody can act on. It is
+ * how many independent positions the portfolio behaves like — four funds that
+ * all move together are one bet, and that is a sentence.
+ */
+function portfolioTogetherPanel(together) {
+  if (!together) return null;
+  const peak = together.pairs[0]?.r ?? 0;
+
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('portTogether')),
+    h('dl', { class: 'stat-row stat-row-inset' },
+      h('div', { class: 'stat' },
+        h('dt', { title: T('portTogetherHint') }, T('portTogetherBets')),
+        h('dd', {}, fmtNum(together.effective, state.lang, 1)),
+        h('span', { class: 'stat-sub num' },
+          T('portTogetherOf', { n: together.counted }))),
+      h('div', { class: 'stat' },
+        h('dt', {}, T('portTogetherAvg')),
+        h('dd', { class: together.average >= CORRELATION_HIGH ? 'delta down' : '' },
+          fmtNum(together.average, state.lang, 2)))),
+    h('ul', { class: 'compare-pairs' }, together.pairs.map((p) => h('li', {},
+      h('span', { class: 'num' }, `${p.a} · ${p.b}`),
+      // A correlation runs from -1 to 1, so the bar is drawn from the middle
+      // outward: a pair that hedges is a bar to the left, not a short one.
+      h('span', { class: 'look-bar corr-bar' },
+        h('span', {
+          class: 'look-fill',
+          style: `margin-left:${svgN(p.r < 0 ? 50 + p.r * 50 : 50)}%;`
+            + `width:${svgN(Math.abs(p.r) * 50)}%;`
+            + `background:${p.r >= CORRELATION_HIGH ? 'var(--down)' : 'var(--accent)'}`,
+        })),
+      h('span', { class: 'look-pct' }, fmtNum(p.r, state.lang, 2))))),
+    together.counted < together.of
+      ? h('p', { class: 'panel-note' },
+          T('portTogetherPartial', { n: together.of - together.counted }))
+      : null
+  );
+}
+
+/**
+ * What selling today would cost in withholding.
+ *
+ * The tax model has always been here, and has only ever been used to rank funds
+ * — a gross return turned into a net one so two funds taxed differently can be
+ * compared. Pointed at the holding instead it answers a question the ranking
+ * never could: of the ₺10,600 you are up, how much is actually yours.
+ *
+ * Every figure on it is an assumption and the panel says so, because the rates
+ * are defaults the reader can change and Turkish withholding has been amended
+ * repeatedly. It is not tax advice and does not read as any.
+ */
+function portfolioTaxPanel(valued) {
+  const rates = taxRatesFor(state.prefs.tax);
+  const out = taxIfSold(valued.map((p) => ({
+    code: p.code,
+    // A share is not a fund and carries none of these rates.
+    fund: p.share ? null : state.funds.find((f) => f.c === p.code),
+    value: p.value,
+    basis: p.basis,
+  })), rates);
+  if (!out) return null;
+
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('portTax')),
+    h('dl', { class: 'stat-row stat-row-inset' },
+      h('div', { class: 'stat' },
+        h('dt', {}, T('portTaxGain')),
+        h('dd', { class: `delta ${signOf(out.gain)}` }, fmtMoney(out.gain, state.lang))),
+      h('div', { class: 'stat' },
+        h('dt', { title: T('portTaxHint') }, T('portTaxDue')),
+        h('dd', { class: out.tax > 0 ? 'delta down' : '' }, fmtMoney(out.tax, state.lang))),
+      h('div', { class: 'stat' },
+        h('dt', {}, T('portTaxNet')),
+        h('dd', { class: `delta ${signOf(out.net)}` }, fmtMoney(out.net, state.lang)))),
+    h('ul', { class: 'fee-list' }, out.rows.map((r) => h('li', {},
+      h('a', { class: 'code-link num', href: `#/fon/${r.code}` }, r.code),
+      h('span', { class: 'fee-rate num' }, fmtPct(r.rate * 100, state.lang, { digits: 1 })),
+      h('span', { class: 'fee-years' }, T(`taxBucket_${r.bucket}`)),
+      h('span', { class: 'fee-lira num' }, fmtMoney(r.tax, state.lang))))),
+    h('p', { class: 'panel-note' }, T('portTaxNote')),
+    out.counted < out.of
+      ? h('p', { class: 'panel-note' }, T('portTaxPartial', { n: out.of - out.counted }))
+      : null
+  );
+}
+
+/**
+ * What the management fees have already taken out of what you hold.
+ *
+ * A cost nobody sees. The expense ratio is a column on the fund list and a line
+ * on the fund page, and in both places it is a percentage — which is exactly the
+ * form in which a 2.5% fee reads as nothing at all. In lira, against a real
+ * holding, over the time it has actually been held, it does not.
+ *
+ * The panel says twice over that the money has already gone: the fee is taken
+ * inside the unit price, so this is not a bill and must never be read as one.
+ */
+function portfolioFeePanel(valued) {
+  const drag = feeDrag(valued.map((p) => {
+    const fund = p.share ? null : state.funds.find((f) => f.c === p.code);
+    return {
+      code: p.code, basis: p.basis, value: p.value, from: p.at,
+      // A share carries no expense ratio, which is not the same as carrying zero.
+      rate: fund?.expenseRatio ?? null,
+    };
+  }), todayIso());
+  if (!drag) return null;
+
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('portFees')),
+    h('dl', { class: 'stat-row stat-row-inset' },
+      h('div', { class: 'stat' },
+        h('dt', {}, T('portFeesTotal')),
+        h('dd', { class: 'delta down' }, fmtMoney(drag.total, state.lang)))),
+    h('ul', { class: 'fee-list' }, drag.rows.map((r) => h('li', {},
+      h('a', { class: 'code-link num', href: `#/fon/${r.code}` }, r.code),
+      h('span', { class: 'fee-rate num' }, fmtPct(r.rate, state.lang, { digits: 2 })),
+      h('span', { class: 'fee-years' }, T('portFeesYears', {
+        n: fmtNum(r.years, state.lang, 1) })),
+      h('span', { class: 'fee-lira num' }, fmtMoney(r.lira, state.lang))))),
+    h('p', { class: 'panel-note' }, T('portFeesNote')),
+    drag.counted < drag.of
+      ? h('p', { class: 'panel-note' },
+          T('portFeesPartial', { n: drag.of - drag.counted }))
+      : null
+  );
 }
 
 /** The mix, with the legend that makes a bar of five colours readable. */
@@ -5269,6 +6235,162 @@ function portfolioMixPanel(mixed) {
 }
 
 const round1 = (n) => (n == null ? null : Math.round(n * 10) / 10);
+
+/**
+ * Every filing the look-through needs, including one level of funds-in-funds.
+ *
+ * Two rounds, because the second round is not knowable until the first has been
+ * read: a fund of funds names the funds it holds inside its own filing. Both
+ * rounds go through `loadHoldings`, so a fund page opened earlier in the session
+ * has already paid for its file and a portfolio of six funds is at most six
+ * requests, not six every time the page is drawn.
+ *
+ * A missing filing is not an error here. It is the answer for 1,182 of the 2,063
+ * funds, and the panel reports the money it could not see into rather than
+ * pretending the rest is everything.
+ */
+async function loadPortfolioFilings(codes) {
+  const funds = codes.filter((c) => !isShareCode(c));
+  if (!funds.length) return {};
+
+  const filings = {};
+  const take = async (code) => {
+    if (filings[code] !== undefined) return;
+    const data = await loadHoldings(code);
+    filings[code] = data?.holdings ? aggregateHoldings(data.holdings) : null;
+  };
+
+  await Promise.all(funds.map(take));
+  // The funds those funds hold, on the build's own resolution.
+  const nested = new Set();
+  for (const rows of Object.values(filings)) {
+    for (const p of rows ?? []) {
+      if (p.group === 'funds' && p.ref && filings[p.ref] === undefined) nested.add(p.ref);
+    }
+  }
+  await Promise.all([...nested].map(take));
+  return filings;
+}
+
+/**
+ * What you own once the funds are opened up, one row per company.
+ *
+ * The panel this project exists to be able to draw. Every other page answers
+ * "what does this fund hold"; this is the only one that answers "what do I
+ * hold", and it can only be drawn because the filings and the position sizes
+ * are both on this page at once.
+ *
+ * Two figures lead it, and the second is the one that bites: how many equal
+ * positions your money is really spread over, and how many once the bonds and
+ * deposits are set aside. A saver holding four equity funds routinely finds the
+ * second number is eight.
+ */
+function portfolioLookPanel(valued, filings) {
+  const out = lookThrough(
+    valued.map((p) => ({
+      code: p.code,
+      value: p.value,
+      share: p.share,
+      name: p.share ? shareOf(p.code)?.n ?? p.code : null,
+    })),
+    filings
+  );
+  if (!out?.rows.length) return null;
+
+  const uncovered = round1(out.total - out.covered);
+  const shown = out.rows.slice(0, LOOK_THROUGH_ROWS);
+
+  return h('section', { class: 'panel' },
+    h('h2', {}, T('portLook')),
+    h('dl', { class: 'stat-row stat-row-inset' },
+      h('div', { class: 'stat' },
+        h('dt', { title: T('portLookConcHint') }, T('portLookConc')),
+        h('dd', {}, fmtNum(out.effective, state.lang, 1))),
+      out.equity == null ? null : h('div', { class: 'stat' },
+        h('dt', { title: T('portLookEquityHint') }, T('portLookEquity')),
+        h('dd', {}, fmtNum(out.equity.effective, state.lang, 1)),
+        h('span', { class: 'stat-sub num' }, fmtMoney(out.equity.value, state.lang))),
+      h('div', { class: 'stat' },
+        h('dt', {}, T('portLookNames')),
+        h('dd', {}, fmtInt(out.rows.length, state.lang)))
+    ),
+    h('div', { class: 'own-scroll' }, h('table', { class: 'own-table look-table' },
+      h('thead', {}, h('tr', {},
+        h('th', {}, T('portLookPosition')),
+        h('th', {}, T('portLookVia')),
+        h('th', { class: 'num' }, T('portLookValue')),
+        h('th', { class: 'num' }, T('portLookWeight')))),
+      h('tbody', {}, shown.map((row) => h('tr', {},
+        h('td', {},
+          lookLink(row),
+          row.name && row.name !== row.code
+            ? h('span', { class: 'row-sub', title: row.isin ?? '' }, row.name)
+            : null),
+        // Which of your funds brought it, heaviest first. This column is the
+        // reason the panel is a table and not a ring: "ASELS 7.2%" is a fact,
+        // and "ASELS 7.2%, and it came from three funds you thought were
+        // different" is the finding.
+        h('td', { class: 'look-via' }, row.holders.map((holder, i) => [
+          i ? h('span', { class: 'look-sep' }, '·') : null,
+          holder.code === row.code
+            ? h('span', { class: 'look-direct' }, T('portLookDirect'))
+            : h('a', { class: 'code-link num', href: `#/fon/${holder.code}` }, holder.code),
+        ])),
+        h('td', { class: 'num' }, fmtMoney(row.value, state.lang)),
+        h('td', { class: 'num' },
+          // The bar is the column, not an ornament beside it: twenty rows of
+          // percentages are read one at a time, and twenty bars are read at a
+          // glance. Scaled to the largest row rather than to 100, or every bar
+          // in a properly diversified portfolio would be an invisible sliver.
+          h('span', { class: 'look-bar' },
+            h('span', {
+              class: 'look-fill',
+              style: `width:${svgN((row.pct / shown[0].pct) * 100)}%;`
+                + `background:${groupColor(HOLDING_COLOR[row.group] ?? 'other')}`,
+            })),
+          h('span', { class: 'look-pct' }, fmtPct(row.pct, state.lang, { digits: 2 })))
+      )))
+    )),
+    out.rows.length > shown.length
+      ? h('p', { class: 'panel-note' },
+          T('portLookHidden', { n: fmtInt(shown.length, state.lang) }))
+      : null,
+    // What the figures above could not see. Stated for the same reason the
+    // profit total states the positions it left out: a percentage of an unknown
+    // fraction of somebody's money is not an answer.
+    uncovered > 0
+      ? h('p', { class: 'panel-note' },
+          T('portLookUncovered', { v: fmtMoney(uncovered, state.lang) }))
+      : null,
+    out.unidentified > 0
+      ? h('p', { class: 'panel-note' },
+          T('portLookUnnamed', { v: fmtMoney(out.unidentified, state.lang) }))
+      : null
+  );
+}
+
+/** A look-through row's code, linked to whichever page it is a code for. */
+function lookLink(row) {
+  const text = row.code ?? row.isin ?? '—';
+  // A share bought directly is already a company, and needs no resolving.
+  if (row.direct) return h('a', { class: 'code-link num', href: `#/hisse/${row.code}` }, text);
+  const target = row.ref ?? row.code;
+  if (target && state.funds.some((f) => f.c === target)) {
+    return h('a', { class: 'code-link num', href: `#/fon/${target}` }, text);
+  }
+  // Same resolution the holdings table links on, and the same refusal to link a
+  // code the exchange does not list.
+  const listing = listingOf(row);
+  if (listing?.market === 'bist') {
+    const listed = state.meta?.listedCodes;
+    const ticker = listing.tickers.find((t) => !listed || listed.includes(t));
+    if (ticker) return h('a', { class: 'code-link num', href: `#/hisse/${ticker}` }, text);
+  }
+  return h('span', { class: 'num' }, text);
+}
+
+/** Which of the eight palette colours a look-through row's group is drawn in. */
+const HOLDING_COLOR = Object.fromEntries(HOLDING_GROUPS.map((g) => [g.id, g.color]));
 
 // ------------------------------------------------------- speculative boards
 
@@ -5454,12 +6576,27 @@ function renderFinancials(stock, fin) {
       onClick: () => { line = l.key; draw(); },
     }, T(l.labelKey)));
 
+  // Nominal until asked otherwise. A reader opening a page should see the
+  // figures the company actually filed; restating them is a thing you choose.
+  let real = false;
+  const realButton = h('button', {
+    type: 'button', class: 'fin-real', 'aria-pressed': 'false',
+    title: T('realTermsHint'),
+    onClick: () => {
+      real = !real;
+      // The file is 2KB and only this panel wants it, so it is fetched on the
+      // first press rather than on every share page.
+      loadCpi().then(() => draw());
+    },
+  }, T('realTerms'));
+
   const panel = h('section', { class: 'panel fin-panel' },
     h('h2', {}, T('financials')),
     h('div', { class: 'panel-head fin-head' },
       h('div', { class: 'seg', role: 'group', 'aria-label': T('periodLabel') }, periodButtons),
       h('div', { class: 'seg seg-lines', role: 'group', 'aria-label': T('metricLabel') },
-        lineButtons)
+        lineButtons),
+      realButton
     ),
     chartSlot,
     statsSlot,
@@ -5468,17 +6605,27 @@ function renderFinancials(stock, fin) {
     tableSlot
   );
 
-  /** The labelled series for the current period setting, oldest-first. */
+  /**
+   * The labelled series for the current period setting, oldest-first.
+   *
+   * Deflated here rather than at the point of drawing, so the chart, the three
+   * figures under it and the margin ratios all read the same numbers. A ratio of
+   * two deflated series is the same as the ratio of the nominal ones, which is
+   * correct: restating both sides of a margin cannot change it.
+   */
   function viewOf(key) {
-    if (period === 'y') {
-      return { labels: fin.y.p.map(String), values: fin.y[key] ?? [], step: 1 };
-    }
-    const values = fin.q[key] ?? [];
-    return {
-      labels: fin.q.p.map(shortDate),
-      values: period === 'ttm' ? trailingTwelve(values) : values,
-      step: 4,
-    };
+    const yearly = period === 'y';
+    const periods = yearly ? fin.y.p.map(String) : fin.q.p;
+    const raw = yearly
+      ? (fin.y[key] ?? [])
+      : (period === 'ttm' ? trailingTwelve(fin.q[key] ?? []) : (fin.q[key] ?? []));
+    const labels = yearly ? periods : fin.q.p.map(shortDate);
+    const step = yearly ? 1 : 4;
+    // `real` can be on before the file has arrived; until it does there is
+    // nothing to deflate against and the nominal figures stand.
+    if (!real || !cpi) return { labels, values: raw, step, nominal: 0 };
+    const out = deflateSeries(raw, periods, cpi);
+    return { labels, values: out.values, step, nominal: out.nominal, marks: out.real };
   }
 
   function draw() {
@@ -5486,15 +6633,24 @@ function renderFinancials(stock, fin) {
       b.setAttribute('aria-pressed', String(periods[i].key === period)));
     lineButtons.forEach((b, i) =>
       b.setAttribute('aria-pressed', String(lines[i].key === line)));
+    // Only pressed once the file is actually here, so the control never claims a
+    // restatement that did not happen.
+    const on = real && Boolean(cpi);
+    realButton.setAttribute('aria-pressed', String(on));
 
     const spec = lines.find((l) => l.key === line);
-    const { labels, values, step } = viewOf(line);
+    const view = viewOf(line);
+    const { labels, values, step } = view;
     const from = Math.max(0, labels.length - STATEMENT_WINDOW);
-    const shown = values.slice(from);
+    const bars = values.slice(from);
     const shownLabels = labels.slice(from);
+    // How many of the bars ACTUALLY on screen are still nominal — not how many
+    // in the whole series, which would name periods the reader cannot see.
+    const shown = { nominal: (view.marks ?? []).slice(from)
+      .filter((r, i) => !r && bars[i] != null).length };
 
-    chartSlot.replaceChildren(shown.some((v) => v != null)
-      ? barChart(shownLabels, shown, {
+    chartSlot.replaceChildren(bars.some((v) => v != null)
+      ? barChart(shownLabels, bars, {
           format: (v) => formatLine(spec, v),
           ariaLabel: `${stock.c} · ${T(spec.labelKey)}`,
         })
@@ -5518,8 +6674,15 @@ function renderFinancials(stock, fin) {
 
     // Which caveat applies depends on the view: a rolling window needs saying,
     // and every lira figure needs the inflation note whichever window it is in.
+    // Which caveat applies depends on the view AND on whether the lira have been
+    // restated: `financialsNote` says the figures are nominal, and printing that
+    // under a deflated chart would be the page contradicting itself.
+    const money = on
+      ? [T('realTermsNote', { year: cpi.latest }),
+          shown.nominal ? T('realTermsPartial', { n: shown.nominal, year: cpi.latest }) : null]
+      : [T('financialsNote')];
     noteEl.replaceChildren(document.createTextNode(
-      period === 'ttm' ? `${T('ttmNote')} ${T('financialsNote')}` : T('financialsNote')));
+      [period === 'ttm' ? T('ttmNote') : null, ...money].filter(Boolean).join(' ')));
     tableSlot.replaceChildren(statementTable(fin, period, labels));
   }
 

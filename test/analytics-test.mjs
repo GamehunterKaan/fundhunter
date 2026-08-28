@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 
 import {
   TAX_DEFAULTS, PEER_GROUPS, FACTORS, LAGGED_FACTORS,
-  taxBucket, taxRateFor, afterTax, peerGroupOf, riskBand, stanceOf, leverageOf,
+  taxBucket, taxRateFor, taxRatesFor, afterTax,
+  isHsyf, HSYF_MARK, peerGroupOf, riskBand, stanceOf, leverageOf,
   netFlow, investorChange, allocationTurnover,
   ridgeFit, predictReturn, dailyReturns, factorReader, pendingFactorReturns,
   scoreFund, qualityFlags, median, cashReturnFor,
@@ -21,8 +22,13 @@ import {
   cashOver, cashAlternative, portfolioMix,
   portfolioSlices, portfolioDayMove, SLICE_MAX,
   trending, TREND_SIZE, MIN_TREND_MEMBERS,
+  lookThrough, concentrationOf, sharedAcross,
+  xirr, portfolioXirr, feeDrag, taxIfSold, lotAges, LOT_YEAR,
+  hitRate, consistency, HIT_STEP, MIN_HIT_WINDOWS,
+  sinceVisit, newSince, VISIT_MIN_DAYS,
+  correlationOf, correlationMatrix, MIN_CORRELATION_DAYS, CORRELATION_HIGH,
 } from '../analytics.js';
-import { HORIZONS, SPEC_STEPS } from '../core.js';
+import { HORIZONS, SPEC_STEPS, bestIndexes } from '../core.js';
 
 const fund = (over = {}) => ({
   c: 'AAA', n: 'TEST FONU', k: 'YAT', cat: null, f: 'TEST PORTFÖY',
@@ -32,10 +38,36 @@ const fund = (over = {}) => ({
 
 // ---------------------------------------------------------------- tax
 
-test('tax buckets follow fund type and composition', () => {
-  assert.equal(taxBucket(fund({ g: { equity: 85, cash: 15 } })), 'equityIntensive');
-  assert.equal(taxBucket(fund({ g: { cash: 90, govDebt: 10 } })), 'moneyMarket');
-  assert.equal(taxBucket(fund({ g: { govDebt: 60, cash: 40 } })), 'standard');
+test('the designation is read from the official title, never inferred', () => {
+  // TEFAS states it in the fund's own name, and that is the source.
+  assert.equal(isHsyf({ n: 'PUSULA PORTFÖY HİSSE SENEDİ FONU (HİSSE SENEDİ YOĞUN FON)' }), true);
+  assert.equal(isHsyf({ n: 'TERA PORTFÖY HİSSE SENEDİ (TL) FONU (HİSSE SENEDİ YOĞUN FON)' }), true);
+  // An equity fund by name is not a designated one. AFA is 96.9% equity — all
+  // of it American — and carries no designation.
+  assert.equal(isHsyf({ n: 'AK PORTFÖY AMERİKA YABANCI HİSSE SENEDİ FONU' }), false);
+  assert.equal(isHsyf({ n: 'TERA PORTFÖY BİRİNCİ SERBEST FON' }), false);
+  assert.equal(isHsyf({}), false);
+  assert.equal(isHsyf(null), false);
+});
+
+test('the marker survives the spacing and casing filings actually use', () => {
+  // The Turkish dotted İ does not fold onto i under /i, so it is matched
+  // explicitly — the same trap the holdings classifier documents.
+  assert.ok(HSYF_MARK.test('X (HİSSE SENEDİ YOĞUN FON)'));
+  assert.ok(HSYF_MARK.test('X (Hisse Senedi Yoğun Fon)'));
+  assert.ok(HSYF_MARK.test('X (HISSE SENEDI YOGUN FON)'));
+  assert.ok(HSYF_MARK.test('X  (HİSSE  SENEDİ  YOĞUN  FON)'));
+  assert.ok(!HSYF_MARK.test('HİSSE SENEDİ ŞEMSİYE FONU'));
+});
+
+test('a designated fund is exempt with no holding period at all', () => {
+  const hsyf = fund({ n: 'X (HİSSE SENEDİ YOĞUN FON)' });
+  // Bought this morning, sold this afternoon: still untaxed. Requiring a year
+  // here was the bug, and it billed funds that owe nothing.
+  assert.equal(taxBucket(hsyf), 'exempt');
+  assert.equal(taxRateFor(hsyf), 0);
+  assert.equal(taxBucket(fund({ n: 'X SERBEST FON' })), 'standard');
+  assert.equal(taxRateFor(fund({ n: 'X SERBEST FON' })), TAX_DEFAULTS.standard);
 });
 
 test('afterTax leaves losses alone', () => {
@@ -46,9 +78,18 @@ test('afterTax leaves losses alone', () => {
 });
 
 test('taxRateFor honours user overrides', () => {
-  const f = fund({ g: { govDebt: 100 } });
+  const f = fund({ n: 'X SERBEST FON' });
   assert.equal(taxRateFor(f), TAX_DEFAULTS.standard);
   assert.equal(taxRateFor(f, { ...TAX_DEFAULTS, standard: 0.25 }), 0.25);
+  // A flat override is flat: it applies to the exempt bucket too, because
+  // somebody who typed one knows their own situation better than we do.
+  assert.equal(taxRateFor(fund({ n: 'X (HİSSE SENEDİ YOĞUN FON)' }), taxRatesFor('0.1')), 0.1);
+});
+
+test('two rates exist and nothing in between', () => {
+  assert.deepEqual(Object.keys(TAX_DEFAULTS).sort(), ['exempt', 'standard']);
+  assert.equal(TAX_DEFAULTS.exempt, 0);
+  assert.equal(TAX_DEFAULTS.standard, 0.175);
 });
 
 // ---------------------------------------------------------------- classification
@@ -317,20 +358,20 @@ test('dailyReturns keys each return by its later date', () => {
 
 test('scoreFund compares net-of-tax return against net-of-tax cash', () => {
   const ctx = { cashReturn: 47.81, taxRates: TAX_DEFAULTS, horizon: 'y1' };
-  // An equity-intensive fund is untaxed; cash is taxed at 7.5%.
-  const winner = scoreFund(fund({ g: { equity: 90 }, r: { y1: 60 }, vol: 20 }), ctx);
+  // Over a year a qualifying fund is exempt; the money-market hurdle never is,
+  // because it holds no Borsa Istanbul equity.
+  const winner = scoreFund(fund({ n: 'X (HİSSE SENEDİ YOĞUN FON)', r: { y1: 60 }, vol: 20 }), ctx);
   assert.equal(winner.taxRate, 0);
   assert.equal(winner.net, 60);
-  assert.ok(winner.excess > 15 && winner.excess < 17, `excess ${winner.excess}`);
+  assert.ok(winner.excess > 20 && winner.excess < 22, `excess ${winner.excess}`);
 
-  // The median equity fund returned ~28% — well below cash, so negative excess.
-  const loser = scoreFund(fund({ g: { equity: 90 }, r: { y1: 28 }, vol: 20 }), ctx);
+  const loser = scoreFund(fund({ n: 'X (HİSSE SENEDİ YOĞUN FON)', r: { y1: 28 }, vol: 20 }), ctx);
   assert.ok(loser.excess < 0, 'underperforming cash must score negative');
   assert.equal(scoreFund(fund({ r: {} }), ctx), null);
 });
 
 test('scoreFund floors volatility so tiny risk cannot fake a huge ratio', () => {
-  const ctx = { cashReturn: 40, taxRates: { ...TAX_DEFAULTS, moneyMarket: 0 } };
+  const ctx = { cashReturn: 40, taxRates: { exempt: 0, standard: 0 } };
   const s = scoreFund(fund({ g: { cash: 100 }, r: { y1: 41 }, vol: 0.01 }), ctx);
   assert.ok(s.ratio <= 2.1, `ratio ${s.ratio} should be damped by the volatility floor`);
 });
@@ -351,14 +392,9 @@ test('qualityFlags surfaces cautions as well as strengths', () => {
 });
 
 test('the tax table has no bucket the fund universe cannot reach', () => {
-  // Pension funds were the only 'pension' bucket, and they are out of scope now.
   // A stale bucket would sit in meta.taxDefaults implying a rate nothing uses.
-  assert.deepEqual(
-    Object.keys(TAX_DEFAULTS).sort(),
-    ['equityIntensive', 'moneyMarket', 'standard']
-  );
-  for (const g of [{ equity: 90 }, { cash: 90 }, { govDebt: 90 }]) {
-    assert.ok(Object.keys(TAX_DEFAULTS).includes(taxBucket(fund({ g }))));
+  for (const f of [{ n: 'X (HİSSE SENEDİ YOĞUN FON)' }, { n: 'X SERBEST FON' }, {}]) {
+    assert.ok(Object.keys(TAX_DEFAULTS).includes(taxBucket(fund(f))));
   }
 });
 
@@ -388,7 +424,7 @@ test('scoreFund compares like with like across every horizon', () => {
   // a fund up 12% in three months beats cash even though it trails the 1y figure.
   const ctx = {
     cashReturns: { m3: 10.6, y1: 47.8 },
-    taxRates: { equityIntensive: 0, moneyMarket: 0, standard: 0 },
+    taxRates: { exempt: 0, standard: 0 },
   };
   const f = fund({ r: { m3: 12, y1: 40 }, vol: 4 });
 
@@ -1515,4 +1551,711 @@ test('the window is an argument, so the panel can name what it read', () => {
   ], 'm1');
   assert.equal(out.over, 'm1');
   assert.deepEqual(out.shares.map((s) => s.c), ['AAAA', 'CCCC', 'BBBB']);
+});
+
+// ---------------------------------------------------------------- look-through
+
+/** A filed position, aggregated as the holdings table leaves it. */
+const held = (code, weight, over = {}) => ({
+  code, isin: null, ref: null, name: code, weight, rows: 1, group: 'equityTr', ...over,
+});
+
+test('two funds holding the same company report it once, added up', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }, { code: 'BBB', value: 1000 }],
+    {
+      AAA: [held('ASELS', 50), held('THYAO', 50)],
+      BBB: [held('ASELS', 20), held('MGROS', 80)],
+    }
+  );
+  // 500 from one fund and 200 from the other. The whole point: neither
+  // statement says you own ₺700 of one company.
+  const aselsan = out.rows.find((r) => r.code === 'ASELS');
+  assert.equal(aselsan.value, 700);
+  assert.equal(aselsan.pct, 35);
+  assert.deepEqual(aselsan.holders, [{ code: 'AAA', value: 500 }, { code: 'BBB', value: 200 }]);
+  // Heaviest first, and nothing is double-counted.
+  assert.deepEqual(out.rows.map((r) => r.code), ['MGROS', 'ASELS', 'THYAO']);
+  assert.equal(out.rows.reduce((a, r) => a + r.value, 0), 2000);
+});
+
+test('a fund with no filing is counted but not looked into', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }, { code: 'ZZZ', value: 3000 }],
+    { AAA: [held('ASELS', 100)] }
+  );
+  // ₺3,000 is money you hold, so it is in the total — but the percentages are
+  // shares of what could actually be seen into, never of the total. Reporting
+  // ASELS as 25% here would be describing a portfolio nobody has.
+  assert.equal(out.total, 4000);
+  assert.equal(out.covered, 1000);
+  assert.equal(out.rows[0].pct, 100);
+});
+
+test('nothing to look into at all is null, not an empty answer', () => {
+  assert.equal(lookThrough([{ code: 'ZZZ', value: 100 }], {}), null);
+  assert.equal(lookThrough([], { AAA: [held('ASELS', 100)] }), null);
+  assert.equal(lookThrough(null, null), null);
+  // A position with no size is not a holding.
+  assert.equal(lookThrough([{ code: 'AAA', value: 0 }], { AAA: [held('ASELS', 100)] }), null);
+});
+
+test('a share bought directly pools with the same company held through a fund', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }, { code: 'ASELS', value: 500, share: true }],
+    { AAA: [held('ASELS', 40), held('THYAO', 60)] }
+  );
+  const aselsan = out.rows.find((r) => r.code === 'ASELS');
+  assert.equal(aselsan.value, 900);
+  assert.deepEqual(aselsan.holders.map((h) => h.code), ['ASELS', 'AAA']);
+  // The share needed no filing to be seen into: it is already the thing the
+  // funds are being reduced to.
+  assert.equal(out.covered, 1500);
+});
+
+test('a fund inside a fund is followed, not reported as a unit', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }],
+    {
+      AAA: [held('BBB', 50, { group: 'funds', ref: 'BBB' }), held('THYAO', 50)],
+      BBB: [held('ASELS', 100)],
+    }
+  );
+  // "You own 50% of a fund" answers nothing; ₺500 of ASELS does.
+  assert.deepEqual(out.rows.map((r) => r.code).sort(), ['ASELS', 'THYAO']);
+  assert.equal(out.rows.find((r) => r.code === 'ASELS').value, 500);
+  assert.equal(out.nested, 500);
+});
+
+test('a fund inside a fund that never filed stays the position it is', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }],
+    { AAA: [held('ZZZ', 50, { group: 'funds', ref: 'ZZZ' }), held('THYAO', 50)] }
+  );
+  // Honest rather than tidy: a fund nobody filed for really is what you own.
+  assert.equal(out.rows.find((r) => r.code === 'ZZZ').value, 500);
+  assert.equal(out.nested, 0);
+});
+
+test('funds holding each other terminate instead of spending forever', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }],
+    {
+      AAA: [held('BBB', 100, { group: 'funds', ref: 'BBB' })],
+      BBB: [held('AAA', 100, { group: 'funds', ref: 'AAA' })],
+    }
+  );
+  // The cycle guard stops it, and what is left is the unit it could not follow.
+  assert.equal(out.rows.length, 1);
+  assert.equal(out.rows[0].value, 1000);
+});
+
+test('a holding with neither ISIN nor code is a residual, never matched by name', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }, { code: 'BBB', value: 1000 }],
+    {
+      AAA: [held(null, 40, { name: 'HAZİNE VE MALİYE BAKANLIĞI' }), held('ASELS', 60)],
+      BBB: [held(null, 40, { name: 'HAZİNE VE MALİYE BAKANLIĞI' }), held('ASELS', 60)],
+    }
+  );
+  // Pooling these two by name is exactly what the overlap panel refuses to do,
+  // and for the same reason: two managers' spellings are not an identity.
+  assert.equal(out.unidentified, 800);
+  assert.equal(out.rows.length, 1);
+  assert.equal(out.rows[0].code, 'ASELS');
+  // The residual is why the rows do not add up to the covered total.
+  assert.equal(out.covered, 2000);
+});
+
+test('the same company under two spellings keeps the unsplit one', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }, { code: 'BBB', value: 1000 }],
+    {
+      // A position split over three lines is where the extractor mis-assigns a
+      // name — this one carries a neighbouring company's, and it is longer.
+      AAA: [held('ASELS', 100, { rows: 3, name: 'ATP TİCARİ BİLGİSAYAR AĞI VE ELEKTRİK' })],
+      BBB: [held('ASELS', 100, { rows: 1, name: 'ASELSAN A.Ş.' })],
+    }
+  );
+  assert.equal(out.rows[0].name, 'ASELSAN A.Ş.');
+});
+
+test('an ISIN and a ticker for the same holding are one position', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }, { code: 'BBB', value: 1000 }],
+    {
+      AAA: [held('ASELS', 100, { isin: 'TRAASELS91H2' })],
+      BBB: [held('ASELS', 100, { isin: 'TRAASELS91H2' })],
+    }
+  );
+  assert.equal(out.rows.length, 1);
+  assert.equal(out.rows[0].value, 2000);
+});
+
+test('concentration is published as a count of equal positions, not an index', () => {
+  // Four equal holdings are four; the Herfindahl 2,500 says the same thing and
+  // says it to nobody.
+  assert.equal(concentrationOf([
+    { value: 25 }, { value: 25 }, { value: 25 }, { value: 25 },
+  ]).effective, 4);
+  assert.equal(concentrationOf([
+    { value: 25 }, { value: 25 }, { value: 25 }, { value: 25 },
+  ]).hhi, 2500);
+  // Thirty holdings that are really one bet come back as roughly one.
+  const lopsided = [{ value: 970 }, ...Array.from({ length: 29 }, () => ({ value: 1 }))];
+  assert.ok(concentrationOf(lopsided).effective < 1.1);
+  assert.deepEqual(concentrationOf([]), { hhi: null, effective: null });
+});
+
+test('the equity concentration is counted apart from the bonds', () => {
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }],
+    {
+      AAA: [
+        held('ASELS', 10), held('THYAO', 10),
+        held('TRT010328T12', 80, { group: 'debt' }),
+      ],
+    }
+  );
+  // Forty government bonds are not a diversified portfolio in any sense worth
+  // printing, and averaging them in hides how many companies you are betting on.
+  assert.equal(out.equity.count, 2);
+  assert.equal(out.equity.value, 200);
+  assert.equal(out.equity.effective, 2);
+  // Against everything, the bond dominates.
+  assert.ok(out.effective < 1.6);
+  // A portfolio holding no shares at all reports no equity block rather than a
+  // zero, which would read as "no concentration".
+  assert.equal(lookThrough([{ code: 'AAA', value: 100 }],
+    { AAA: [held('TRT010328T12', 100, { group: 'debt' })] }).equity, null);
+});
+
+// ---------------------------------------------------------------- comparing
+
+test('positions held by more than one fund come out ordered by how many', () => {
+  const out = sharedAcross({
+    AAA: { ASELS: 10, THYAO: 5, MGROS: 30 },
+    BBB: { ASELS: 4, THYAO: 6 },
+    CCC: { ASELS: 1, SASA: 40 },
+  });
+  // Three funds can overlap little pair by pair and still be the same names —
+  // which is what the pairwise figure cannot say and this list can.
+  assert.deepEqual(out.map((r) => r.code), ['ASELS', 'THYAO']);
+  assert.equal(out[0].held, 3);
+  assert.equal(out[0].total, 15);
+  assert.deepEqual(out[0].weights, { AAA: 10, BBB: 4, CCC: 1 });
+  // MGROS is 30% of one fund and still not shared, so it is not on the list.
+  assert.ok(!out.some((r) => r.code === 'MGROS'));
+});
+
+test('a position in only one fund is not shared, and min is honoured', () => {
+  const weights = { AAA: { X: 5, Y: 5 }, BBB: { X: 5 }, CCC: { X: 5 } };
+  assert.deepEqual(sharedAcross(weights).map((r) => r.code), ['X']);
+  // "Held by all three" is a different question from "held by two of them".
+  assert.deepEqual(sharedAcross(weights, { min: 3 }).map((r) => r.code), ['X']);
+  assert.deepEqual(sharedAcross(weights, { min: 4 }), []);
+});
+
+test('comparing needs at least two funds to compare', () => {
+  assert.deepEqual(sharedAcross({ AAA: { X: 5 } }), []);
+  assert.deepEqual(sharedAcross({}), []);
+  assert.deepEqual(sharedAcross(null), []);
+  // A fund whose filing could not be read is not a fund for this purpose.
+  assert.deepEqual(sharedAcross({ AAA: { X: 5 }, BBB: null }), []);
+});
+
+test('ties are ordered by weight, and the list has a ceiling', () => {
+  const a = {};
+  const b = {};
+  for (let i = 0; i < 30; i++) { a[`S${i}`] = i + 1; b[`S${i}`] = i + 1; }
+  const out = sharedAcross({ A: a, B: b });
+  assert.equal(out.length, 12);
+  // Everything is held by both, so weight breaks the tie: the heaviest first.
+  assert.equal(out[0].code, 'S29');
+  assert.equal(out[0].total, 60);
+});
+
+test('the best figure in a row is a set, because a tie is a real answer', () => {
+  // Marking one of two equally cheap funds the winner invents a difference.
+  assert.deepEqual([...bestIndexes([1.2, 0.8, 0.8], 'low')], [1, 2]);
+  assert.deepEqual([...bestIndexes([10, 40, 25], 'high')], [1]);
+  // A drawdown is negative, so 'high' is the shallower loss.
+  assert.deepEqual([...bestIndexes([-22, -4, -13], 'high')], [1]);
+});
+
+test('a measure with no better direction marks nothing', () => {
+  // A unit price, a fund's size, an investor count, a volatility: defaulting
+  // these to "highest wins" would tick the biggest fund as though bigger were a
+  // result. It did exactly that until the compare page was drawn and read.
+  assert.deepEqual([...bestIndexes([1.27, 1.76, 1.64], null)], []);
+  assert.deepEqual([...bestIndexes([14, 24.8, 26], undefined)], []);
+  assert.deepEqual([...bestIndexes([1, 2, 3], 'biggest')], []);
+});
+
+test('nothing is marked best when there is nothing to compare', () => {
+  // Every fund tying is not a comparison.
+  assert.deepEqual([...bestIndexes([5, 5, 5])], []);
+  // One usable value among nulls: highlighting it says nothing.
+  assert.deepEqual([...bestIndexes([null, 3, undefined])], []);
+  assert.deepEqual([...bestIndexes([])], []);
+  assert.deepEqual([...bestIndexes(null)], []);
+  // A missing figure never wins, and never blocks the fund that has one.
+  assert.deepEqual([...bestIndexes([null, 3, 9], 'high')], [2]);
+  assert.deepEqual([...bestIndexes([NaN, 1, 2], 'low')], [1]);
+});
+
+
+// ---------------------------------------------------------------- xirr
+
+test('a rate of return is what it says on the tin', () => {
+  assert.equal(xirr([{ at: '2025-01-01', amount: -1000 }, { at: '2026-01-01', amount: 1100 }]), 10);
+  assert.equal(xirr([{ at: '2025-01-01', amount: -1000 }, { at: '2026-01-01', amount: 2000 }]), 100);
+  // Doubling in six months annualises to a little over 300%, not to 200%.
+  assert.equal(
+    xirr([{ at: '2025-01-01', amount: -1000 }, { at: '2025-07-02', amount: 2000 }]), 301.53);
+});
+
+test('the useful range runs far past where Newton stays stable', () => {
+  // This market really does print years like it, so the bisection fallback is
+  // load-bearing rather than decorative.
+  assert.equal(xirr([{ at: '2025-01-01', amount: -1000 }, { at: '2026-01-01', amount: 7840 }]), 684);
+  // And the other end: an almost total loss is a rate, not a failure.
+  assert.equal(xirr([{ at: '2025-01-01', amount: -1000 }, { at: '2026-01-01', amount: 1 }]), -99.9);
+});
+
+test('money that went in at two different times is weighted by how long it was in', () => {
+  // ₺1,000 in for a year and ₺1,000 in for a month, worth ₺2,200 at the end.
+  // Value over cost says 10%. That is not the rate the money earned, because
+  // half of it was only there for a month.
+  const rate = xirr([
+    { at: '2025-01-01', amount: -1000 },
+    { at: '2025-12-01', amount: -1000 },
+    { at: '2026-01-01', amount: 2200 },
+  ]);
+  assert.ok(rate > 18 && rate < 20, `got ${rate}`);
+});
+
+test('a question with no answer gets null, not a number', () => {
+  // Money in and never out: there is no return until the closing value is a flow.
+  assert.equal(xirr([{ at: '2025-01-01', amount: -1000 }]), null);
+  assert.equal(xirr([{ at: '2025-01-01', amount: -1000 }, { at: '2025-06-01', amount: -500 }]), null);
+  // In and back out the same afternoon — no period to annualise over.
+  assert.equal(xirr([{ at: '2025-01-01', amount: -1000 }, { at: '2025-01-01', amount: 1100 }]), null);
+  assert.equal(xirr([]), null);
+  assert.equal(xirr(null), null);
+  // Unparseable dates and zero amounts are not flows.
+  assert.equal(xirr([{ at: 'whenever', amount: -1000 }, { at: '2026-01-01', amount: 1100 }]), null);
+  assert.equal(xirr([{ at: '2025-01-01', amount: 0 }, { at: '2026-01-01', amount: 1100 }]), null);
+});
+
+test('a sale needs no special case', () => {
+  // `units` is negative on a sale and `price` is what it sold at, so one
+  // expression covers both directions.
+  const out = portfolioXirr([{
+    code: 'AAA',
+    lots: [
+      { at: '2025-01-01', units: 100, price: 10 },
+      { at: '2025-07-01', units: -50, price: 12 },
+    ],
+    value: 700,
+  }], '2026-01-01');
+  assert.equal(out.counted, 1);
+  assert.ok(out.pct > 0, `got ${out.pct}`);
+});
+
+test('a position is counted only when every lot carries a price', () => {
+  const out = portfolioXirr([
+    { code: 'AAA', lots: [{ at: '2025-01-01', units: 100, price: 10 }], value: 1200 },
+    // Half a position's cost is not a cost.
+    { code: 'BBB', lots: [
+      { at: '2025-01-01', units: 100, price: 10 },
+      { at: '2025-06-01', units: 50 },
+    ], value: 2000 },
+    { code: 'CCC', lots: [], value: 500 },
+  ], '2026-01-01');
+  assert.equal(out.counted, 1);
+  assert.equal(out.of, 3);
+  assert.equal(out.value, 1200);
+  assert.equal(out.pct, 20);
+  // Nothing priceable at all is null rather than a rate over an empty set.
+  assert.equal(portfolioXirr([{ code: 'X', lots: [], value: 1 }], '2026-01-01'), null);
+  assert.equal(portfolioXirr([], '2026-01-01'), null);
+});
+
+// ---------------------------------------------------------------- fee drag
+
+test('the fee is charged against the mean of what you paid and what you hold', () => {
+  // ₺1,000 grown to ₺2,000 over a year at 2%: the fee ran on a value that moved,
+  // so it is 2% of ₺1,500, not of either end.
+  const out = feeDrag([
+    { code: 'AAA', basis: 1000, value: 2000, from: '2025-01-01', rate: 2 },
+  ], '2026-01-01');
+  assert.equal(out.total, 30);
+  assert.equal(out.rows[0].years, 1);
+  // With no basis there is nothing to average, so today's value stands.
+  const bare = feeDrag([
+    { code: 'AAA', value: 2000, from: '2025-01-01', rate: 2 },
+  ], '2026-01-01');
+  assert.equal(bare.total, 40);
+});
+
+test('a fund with no published fee is skipped, never assumed cheap', () => {
+  const out = feeDrag([
+    { code: 'AAA', basis: 1000, value: 1000, from: '2025-01-01', rate: 1 },
+    { code: 'BBB', basis: 1000, value: 1000, from: '2025-01-01', rate: null },
+    { code: 'CCC', basis: 1000, value: 1000, from: '2025-01-01', rate: 0 },
+  ], '2026-01-01');
+  assert.equal(out.counted, 1);
+  assert.equal(out.of, 3);
+  assert.equal(out.total, 10);
+});
+
+test('the fee list is heaviest first, and a position bought today has paid none', () => {
+  const out = feeDrag([
+    { code: 'SMALL', basis: 100, value: 100, from: '2025-01-01', rate: 1 },
+    { code: 'BIG', basis: 10000, value: 10000, from: '2025-01-01', rate: 1 },
+    { code: 'TODAY', basis: 5000, value: 5000, from: '2026-01-01', rate: 3 },
+  ], '2026-01-01');
+  assert.deepEqual(out.rows.map((r) => r.code), ['BIG', 'SMALL']);
+  assert.equal(out.counted, 2);
+  assert.equal(feeDrag([], '2026-01-01'), null);
+  assert.equal(feeDrag([{ code: 'A', value: 1, from: '2025-01-01', rate: 1 }], 'whenever'), null);
+});
+
+
+// ---------------------------------------------------------------- tax if sold
+
+const taxable = (over = {}) => ({ n: 'X SERBEST FON', ...over });
+
+test('withholding follows the designation, and nothing else', () => {
+  const out = taxIfSold([
+    // Designated, bought yesterday: nothing due, because there is no period.
+    { code: 'NEW', fund: { n: 'A (HİSSE SENEDİ YOĞUN FON)' }, value: 12000, basis: 10000 },
+    { code: 'OLD', fund: { n: 'B (HİSSE SENEDİ YOĞUN FON)' }, value: 12000, basis: 10000 },
+    { code: 'ST', fund: taxable(), value: 13000, basis: 10000 },
+  ]);
+  assert.deepEqual(out.rows.map((r) => [r.code, r.tax]),
+    [['ST', 525], ['NEW', 0], ['OLD', 0]]);
+  assert.equal(out.gain, 7000);
+  assert.equal(out.tax, 525);
+  assert.equal(out.net, 6475);
+});
+
+test('a loss is not taxed and does not quietly cancel another position gain', () => {
+  const out = taxIfSold([
+    { code: 'UP', fund: taxable(), value: 13000, basis: 10000 },
+    { code: 'DOWN', fund: taxable(), value: 8000, basis: 10000 },
+  ]);
+  // Whether a loss can be set against a gain depends on the holder's whole year,
+  // which a page about four funds does not know. ₺300 is due on the position
+  // that is up, and netting them to ₺100 would understate it.
+  assert.equal(out.tax, 525);
+  assert.equal(out.gain, 1000);
+  assert.equal(out.rows.find((r) => r.code === 'DOWN').tax, 0);
+});
+
+test('a position with no basis has no known gain and is left out', () => {
+  const out = taxIfSold([
+    { code: 'AAA', fund: taxable(), value: 13000, basis: 10000 },
+    { code: 'BBB', fund: taxable(), value: 5000, basis: null },
+    // A share is not a fund and carries none of these rates. Assuming it exempt
+    // would be a claim; saying nothing about it is not.
+    { code: 'ASELS', fund: null, value: 4000, basis: 3000 },
+  ]);
+  assert.equal(out.counted, 1);
+  assert.equal(out.of, 3);
+  assert.equal(taxIfSold([]), null);
+  assert.equal(taxIfSold(null), null);
+});
+
+test('a flat override applies to every bucket, as the control promises', () => {
+  const out = taxIfSold([
+    { code: 'EQ', fund: { n: 'X (HİSSE SENEDİ YOĞUN FON)' }, value: 12000, basis: 10000 },
+  ], taxRatesFor('0.15'));
+  assert.equal(out.tax, 300);
+});
+
+// ---------------------------------------------------------------- lot ages
+
+test('a lot knows how long it has been held and when it turns a year', () => {
+  const out = lotAges([
+    { at: '2025-01-01', units: 10 },
+    { at: '2026-06-01', units: 5 },
+  ], '2026-08-28');
+  // Oldest first: the one nearest any threshold is the one worth seeing.
+  assert.deepEqual(out.map((r) => r.at), ['2025-01-01', '2026-06-01']);
+  assert.equal(out[0].days, 604);
+  assert.equal(out[0].past, true);
+  // Null once it has turned, so a date in the past can never be printed as
+  // something still to wait for.
+  assert.equal(out[0].on, null);
+  assert.equal(out[1].past, false);
+  assert.equal(out[1].on, '2027-06-01');
+});
+
+test('a sale is not a holding and has no age', () => {
+  const out = lotAges([
+    { at: '2025-01-01', units: 10 },
+    { at: '2026-02-01', units: -3 },
+  ], '2026-08-28');
+  assert.equal(out.length, 1);
+  assert.equal(lotAges([], '2026-08-28').length, 0);
+  assert.equal(lotAges([{ at: '2025-01-01', units: 10 }], 'whenever').length, 0);
+});
+
+test('the year the ages are measured against is an argument, not a rule', () => {
+  const lots = [{ at: '2026-01-01', units: 10 }];
+  assert.equal(lotAges(lots, '2026-08-28')[0].past, false);
+  assert.equal(lotAges(lots, '2026-08-28', { year: 180 })[0].past, true);
+  assert.equal(LOT_YEAR, 365);
+});
+
+
+// ---------------------------------------------------------------- consistency
+
+/** A daily series growing at a fixed rate per day, from a fixed start. */
+const ramp = (days, perDay, from = '2025-01-01') => {
+  const t0 = Date.parse(from);
+  const out = [];
+  for (let i = 0; i < days; i++) {
+    out.push([new Date(t0 + i * 86400000).toISOString().slice(0, 10), (1 + perDay) ** i]);
+  }
+  return out;
+};
+
+test('a fund ahead in every window reports every window', () => {
+  const out = hitRate(ramp(400, 0.001), ramp(400, 0.0002), { days: 91 });
+  assert.equal(out.wins, out.windows);
+  assert.equal(out.rate, 100);
+  assert.ok(out.windows > 20, `got ${out.windows}`);
+  assert.ok(out.median > 0);
+  assert.ok(out.worst > 0);
+});
+
+test('a fund behind in every window reports none of them', () => {
+  const out = hitRate(ramp(400, 0.0002), ramp(400, 0.001), { days: 91 });
+  assert.equal(out.wins, 0);
+  assert.equal(out.rate, 0);
+  assert.ok(out.best < 0);
+});
+
+test('window starts are spaced in calendar days, not in rows', () => {
+  const out = hitRate(ramp(400, 0.001), ramp(400, 0.0002), { days: 91, step: HIT_STEP });
+  // 400 days of history minus a 91-day window, stepped weekly.
+  assert.equal(out.windows, Math.floor((400 - 91 - 1) / HIT_STEP) + 1);
+  // A wider step is fewer windows over the same history.
+  assert.ok(hitRate(ramp(400, 0.001), ramp(400, 0.0002), { days: 91, step: 28 }).windows
+    < out.windows);
+});
+
+test('a window the benchmark cannot answer for is not a window the fund won', () => {
+  // The benchmark stops after 100 days; every window starting past it has no
+  // second reading, so `priceOn` carries the last value and the excess collapses
+  // — but a window starting before the fund's own history has nothing at all.
+  const out = hitRate(ramp(400, 0.001), [], { days: 91 });
+  assert.equal(out, null);
+  assert.equal(hitRate([], ramp(400, 0.001), { days: 91 }), null);
+  assert.equal(hitRate(null, null), null);
+});
+
+test('a window longer than the history is no answer at all', () => {
+  // Not "100% of one window", which is what a fund with one lucky quarter would
+  // otherwise print on its page.
+  assert.equal(hitRate(ramp(60, 0.001), ramp(60, 0.0002), { days: 182 }), null);
+  assert.equal(hitRate(ramp(400, 0.001), ramp(400, 0.0002), { days: 0 }), null);
+});
+
+test('too few windows is not published as a rate', () => {
+  const short = ramp(120, 0.001);
+  const bench = ramp(120, 0.0002);
+  // 120 days leaves a handful of six-month windows and none of them is a record.
+  const out = consistency(short, bench);
+  for (const window of out ?? []) assert.ok(window.windows >= MIN_HIT_WINDOWS);
+  // Nothing long enough at all reports nothing rather than an empty list.
+  assert.equal(consistency(ramp(20, 0.001), ramp(20, 0.0002)), null);
+  assert.equal(consistency([], []), null);
+});
+
+test('the median excess is the median, so one huge fortnight cannot carry it', () => {
+  // Eleven windows behind by 1 point and one ahead by 500: the mean says the
+  // fund is far ahead, and the median says what actually happened most weeks.
+  const out = hitRate(
+    [...ramp(300, 0.0001), ['2026-01-01', 1e6]],
+    ramp(301, 0.0002),
+    { days: 91 });
+  assert.ok(out.median < 0, `median was ${out.median}`);
+  assert.ok(out.best > 0, `best was ${out.best}`);
+});
+
+
+// ---------------------------------------------------------- since you last looked
+
+test('what your funds did while you were away, as a median', () => {
+  const out = sinceVisit([
+    { code: 'UP', series: [['2026-08-01', 100], ['2026-08-20', 110]] },
+    { code: 'DOWN', series: [['2026-08-01', 100], ['2026-08-20', 95]] },
+    { code: 'FLAT', series: [['2026-08-01', 100], ['2026-08-20', 100]] },
+  ], '2026-08-01', '2026-08-20');
+  assert.equal(out.days, 19);
+  assert.equal(out.counted, 3);
+  assert.equal(out.median, 0);
+  assert.deepEqual(out.best, { code: 'UP', pct: 10 });
+  assert.deepEqual(out.worst, { code: 'DOWN', pct: -5 });
+});
+
+test('a fund whose history does not reach back cannot answer, and is not flat', () => {
+  const out = sinceVisit([
+    { code: 'OLD', series: [['2026-08-01', 100], ['2026-08-20', 110]] },
+    // Launched after the visit: counting it as flat would drag the median.
+    { code: 'NEW', series: [['2026-08-15', 100], ['2026-08-20', 101]] },
+  ], '2026-08-01', '2026-08-20');
+  assert.equal(out.counted, 1);
+  assert.equal(out.median, 10);
+});
+
+test('the gap is measured date against date, never against the clock', () => {
+  const rows = [{ code: 'A', series: [['2026-08-01', 100], ['2026-08-21', 110]] }];
+  // Visiting again on the day you last visited is no gap at all. Comparing
+  // midnight on the stored date against the current time made an afternoon
+  // reload round to "1 day" and print a panel of zeroes.
+  assert.equal(sinceVisit(rows, '2026-08-28', '2026-08-28').days, 0);
+  assert.equal(sinceVisit(rows, '2026-08-01', '2026-08-20').days, 19);
+  // With no end given, the newest print anybody has is the end.
+  assert.equal(sinceVisit(rows, '2026-08-01').days, 20);
+});
+
+test('nothing to say is null, not a panel of dashes', () => {
+  assert.equal(sinceVisit([], '2026-08-01'), null);
+  assert.equal(sinceVisit(null, '2026-08-01'), null);
+  assert.equal(sinceVisit([{ code: 'A', series: [] }], '2026-08-01'), null);
+  // No previous visit stored, or a corrupt one.
+  assert.equal(sinceVisit([{ code: 'A', series: [['2026-08-01', 1]] }], 'whenever'), null);
+});
+
+test('a fund younger than the gap did not exist last time', () => {
+  const funds = [{ c: 'OLD', age: 400 }, { c: 'NEW', age: 5 }, { c: 'UNKNOWN' }];
+  assert.deepEqual(newSince(funds, 19).map((f) => f.c), ['NEW']);
+  // Same day: nothing is new, and nothing is claimed to be.
+  assert.deepEqual(newSince(funds, 0), []);
+  assert.deepEqual(newSince(null, 10), []);
+  assert.equal(VISIT_MIN_DAYS, 1);
+});
+
+
+// ---------------------------------------------------------- moving together
+
+/** A daily series from a list of daily returns. */
+const walk = (moves, from = '2025-01-01') => {
+  const t0 = Date.parse(from);
+  const out = [['2024-12-31', 100]];
+  let price = 100;
+  moves.forEach((m, i) => {
+    price *= 1 + m;
+    out.push([new Date(t0 + i * 86400000).toISOString().slice(0, 10), price]);
+  });
+  return out;
+};
+
+/**
+ * Deterministic pseudo-random daily returns.
+ *
+ * Not `Math.sin(i * k)`, which was the first attempt: two sine series at
+ * different phases are strongly correlated with each other, so the test for
+ * INDEPENDENT funds was quietly feeding in a pair at -0.95.
+ */
+const wobble = (n, seed = 1) => {
+  let x = seed * 48271 + 11;
+  return Array.from({ length: n }, () => {
+    x = (x * 1103515245 + 12345) % 2147483648;
+    return (x / 2147483648 - 0.5) * 0.02;
+  });
+};
+
+test('correlation is what it says, and is clamped to its range', () => {
+  const a = wobble(60);
+  assert.equal(correlationOf(a, a), 1);
+  assert.equal(correlationOf(a, a.map((x) => -x)), -1);
+  assert.equal(correlationOf(a, a.map((x) => x * 3 + 0.5)), 1);
+});
+
+test('a series that never moves has no correlation, not a zero', () => {
+  // A money-market fund with a flat week has no variance: the denominator is
+  // zero and "undefined" is the honest answer.
+  assert.equal(correlationOf([0, 0, 0, 0], [1, 2, 3, 4]), null);
+  assert.equal(correlationOf([1], [1]), null);
+  assert.equal(correlationOf(null, null), null);
+});
+
+test('funds that move together are fewer bets than they are funds', () => {
+  const moves = wobble(200);
+  const out = correlationMatrix([
+    { code: 'AAA', series: walk(moves) },
+    { code: 'BBB', series: walk(moves.map((m) => m * 1.5)) },
+    { code: 'CCC', series: walk(moves.map((m) => m * 0.8)) },
+  ]);
+  // Three funds that are the same bet report as one.
+  assert.equal(out.average, 1);
+  assert.equal(out.effective, 1);
+  assert.equal(out.counted, 3);
+  assert.equal(out.pairs.length, 3);
+});
+
+test('funds that move independently are close to as many bets as funds', () => {
+  const out = correlationMatrix([
+    { code: 'AAA', series: walk(wobble(200, 1)) },
+    { code: 'BBB', series: walk(wobble(200, 40)) },
+  ]);
+  assert.ok(Math.abs(out.average) < 0.3, `average was ${out.average}`);
+  assert.ok(out.effective > 1.5, `effective was ${out.effective}`);
+});
+
+test('funds that hedge each other are not MORE bets than there are funds', () => {
+  const moves = wobble(200);
+  const out = correlationMatrix([
+    { code: 'AAA', series: walk(moves) },
+    { code: 'BBB', series: walk(moves.map((m) => -m)) },
+  ]);
+  assert.equal(out.average, -1);
+  // The raw equicorrelation formula divides by 1 + (n-1)r, which at r = -1 with
+  // two funds is zero-ish and sends the answer to forty. Two funds are at most
+  // two bets.
+  assert.equal(out.effective, 2);
+});
+
+test('only the days both funds printed on are compared', () => {
+  const moves = wobble(200);
+  const full = walk(moves);
+  // Every other day missing. Carrying yesterday's price into the gap would
+  // invent a zero return and drag the correlation.
+  const sparse = full.filter((_, i) => i % 2 === 0);
+  const out = correlationMatrix([
+    { code: 'FULL', series: full },
+    { code: 'SPARSE', series: sparse },
+  ]);
+  assert.ok(out.pairs[0].days < full.length / 2 + 2, `compared ${out.pairs[0].days} days`);
+});
+
+test('too little shared history is left out rather than reported', () => {
+  const short = walk(wobble(10));
+  assert.equal(correlationMatrix([
+    { code: 'AAA', series: short },
+    { code: 'BBB', series: short },
+  ]), null);
+  // One fund is not a portfolio.
+  assert.equal(correlationMatrix([{ code: 'AAA', series: walk(wobble(200)) }]), null);
+  assert.equal(correlationMatrix([]), null);
+  assert.equal(correlationMatrix(null), null);
+  assert.equal(MIN_CORRELATION_DAYS, 30);
+  assert.equal(CORRELATION_HIGH, 0.9);
+});
+
+test('the count of funds compared is reported against how many were asked about', () => {
+  const out = correlationMatrix([
+    { code: 'AAA', series: walk(wobble(200, 1)) },
+    { code: 'BBB', series: walk(wobble(200, 40)) },
+    // No history: cannot be correlated, and is not silently forgotten.
+    { code: 'CCC', series: [] },
+  ]);
+  assert.equal(out.counted, 2);
+  assert.equal(out.of, 3);
 });
