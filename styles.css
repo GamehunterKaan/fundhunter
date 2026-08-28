@@ -2806,11 +2806,27 @@ a.dash-row:hover {
   align-items: flex-start;
   gap: 0.6rem;
 }
+/* A seg that WRAPS is not a pill any more.
+ *
+ * `border-radius: 999px` clamps to half the box's height, which is what makes a
+ * one-line seg a pill — and what makes a three-line one an ellipse the size of
+ * the whole box. With `overflow: hidden` on top, that ellipse bites corners off
+ * the buttons: on a phone the metric picker lost the left of "Revenue" and the
+ * top of "Total assets" to the curve.
+ *
+ * So the wrapping seg gets a plain rounded rectangle, a little padding so the
+ * rows are not welded to the border, and a pill per button instead — which is
+ * where the pill belonged once there was more than one row of them. */
 .seg-lines {
   flex-wrap: wrap;
+  border-radius: 14px;
+  padding: 0.25rem;
+  gap: 0.2rem;
+  overflow: visible;
 }
 .seg-lines button {
   font-size: 0.78rem;
+  border-radius: 999px;
 }
 .fin-chart {
   margin: 0.9rem 0 0.2rem;

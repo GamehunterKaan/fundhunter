@@ -2701,6 +2701,31 @@ const EQUITY_GROUPS = new Set(['equityTr', 'equityFx']);
  */
 export function lookThrough(positions, filings, { depth = LOOK_THROUGH_DEPTH } = {}) {
   const found = new Map();
+  // Which ISIN a ticker belongs to, learned from every row that carries both.
+  //
+  // Funds file TERA as `code: "TERA", isin: "TRETERA00013"`, so keying on the
+  // ISIN is right for them — but a share you bought yourself has only the
+  // ticker, and the two then landed in separate rows: the company appeared
+  // twice, once through your funds and once directly, which is the exact
+  // opposite of what this panel exists to show.
+  //
+  // The ISIN is the authority, so everything is pulled onto it: a messy code
+  // ("Tem.Ver. SASA") and a clean one resolve to the same holding as long as
+  // any single filing paired that code with an ISIN.
+  const isinOf = new Map();
+  for (const rows of Object.values(filings ?? {})) {
+    for (const row of rows ?? []) {
+      const code = String(row?.code ?? '').trim().toUpperCase();
+      const isin = String(row?.isin ?? '').trim().toUpperCase();
+      if (code && isin && !isinOf.has(code)) isinOf.set(code, isin);
+    }
+  }
+
+  /** The identity two holdings share when they are the same security. */
+  const keyOf = (code, isin) => {
+    const ticker = String(code ?? '').trim().toUpperCase();
+    return String(isin ?? '').trim().toUpperCase() || isinOf.get(ticker) || ticker;
+  };
   let total = 0;
   let covered = 0;
   let unidentified = 0;
@@ -2781,7 +2806,7 @@ export function lookThrough(positions, filings, { depth = LOOK_THROUGH_DEPTH } =
         continue;
       }
 
-      const key = String(position.isin || position.code || '').trim().toUpperCase();
+      const key = keyOf(position.code, position.isin);
       if (!key) { unidentified += own; continue; }
       credit(key, position, own, holder);
     }
@@ -2797,7 +2822,9 @@ export function lookThrough(positions, filings, { depth = LOOK_THROUGH_DEPTH } =
       // A share bought directly needs no opening up: it already IS the thing
       // every fund on this page is being reduced to, and it pools with the same
       // company reached through a fund.
-      credit(p.code,
+      // Through the same resolution, so a share held directly pools with the
+      // one your funds hold rather than sitting in a row of its own.
+      credit(keyOf(p.code, null),
         { code: p.code, name: p.name ?? p.code, group: 'equityTr', direct: true },
         lira, p.code);
       covered += lira;

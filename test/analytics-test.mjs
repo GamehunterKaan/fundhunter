@@ -1680,6 +1680,39 @@ test('the same company under two spellings keeps the unsplit one', () => {
   assert.equal(out.rows[0].name, 'ASELSAN A.Ş.');
 });
 
+test('a share you hold yourself pools with the same one inside your funds', () => {
+  // Funds file TERA with an ISIN; a share bought directly has only the ticker.
+  // Keyed separately they produced two rows for one company — the exact
+  // opposite of what this panel is for.
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }, { code: 'TERA', value: 5000, share: true }],
+    { AAA: [held('TERA', 100, { isin: 'TRETERA00013' })] }
+  );
+  assert.equal(out.rows.length, 1);
+  assert.equal(out.rows[0].value, 6000);
+  assert.deepEqual(out.rows[0].holders.map((h) => h.code), ['TERA', 'AAA']);
+});
+
+test('a messy code and a clean one meet on the ISIN', () => {
+  // Filers mark a pledged position in front of the ticker. One filing pairing
+  // that code with an ISIN is enough to pull every spelling onto it.
+  const out = lookThrough(
+    [{ code: 'AAA', value: 1000 }, { code: 'BBB', value: 1000 }],
+    {
+      AAA: [held('SASA', 100, { isin: 'TRASASAW91Q1' })],
+      BBB: [held('SASA', 100, { isin: 'TRASASAW91Q1' })],
+    }
+  );
+  assert.equal(out.rows.length, 1);
+  assert.equal(out.rows[0].value, 2000);
+  // A code nothing ever paired with an ISIN still stands on its own.
+  const lone = lookThrough(
+    [{ code: 'AAA', value: 1000 }],
+    { AAA: [held('MYSTERY', 100)] }
+  );
+  assert.equal(lone.rows[0].key, 'MYSTERY');
+});
+
 test('an ISIN and a ticker for the same holding are one position', () => {
   const out = lookThrough(
     [{ code: 'AAA', value: 1000 }, { code: 'BBB', value: 1000 }],
