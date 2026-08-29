@@ -2,7 +2,9 @@
 //
 // Builds the static dataset the site reads, from the public TEFAS API.
 //
-//   node scripts/fetch-tefas.mjs [--months=12] [--concurrency=3] [--quick] [--no-cache]
+//   node scripts/fetch-tefas.mjs [--months=12] [--alloc-months=12]
+//                                [--concurrency=3] [--quick] [--no-cache]
+//                                [--allow-shrink]
 //
 // Output (under public/data):
 //   meta.json          taxonomy, kinds, categories, founders, coverage stats
@@ -19,6 +21,7 @@ import {
   TefasClient, requestBody, mapPool, ymd, addDays, splitRange, weeklyAnchors,
 } from './lib/tefas.mjs';
 import { ASSETS, ASSET_CODES, GROUPS, KINDS, CATEGORY_EN } from './lib/taxonomy.mjs';
+import { collapseReason } from './lib/collapse.mjs';
 // Shared with the browser so a "1-year return" means the same thing in both.
 import { returnOver, volatility, maxDrawdown } from '../core.js';
 
@@ -40,6 +43,17 @@ const MAX_DAYS_PER_REQUEST = 28;
 /** Allocation is sampled weekly; this window absorbs public holidays. */
 const ALLOC_WINDOW_DAYS = 3;
 
+/**
+ * The window volatility and drawdown are measured over, in trading days.
+ *
+ * A year. Pinned rather than "the whole series", so the figures keep their
+ * meaning as the history deepens — see where they are computed for why.
+ */
+const RISK_WINDOW_DAYS = 252;
+
+/** The last `n` points of an ascending series, or all of it when it is shorter. */
+const windowOf = (series, n) => (series.length > n ? series.slice(-n) : series);
+
 // ---------------------------------------------------------------- args
 
 const args = Object.fromEntries(
@@ -49,7 +63,31 @@ const args = Object.fromEntries(
   })
 );
 
-const MONTHS = Number(args.months ?? (args.quick ? 1 : 12));
+/**
+ * TEFAS refuses a start date more than five years old:
+ *
+ *   Geçersiz veri: Baslangıc Tarihi 5 yıldan eski olamaz
+ *
+ * Exactly sixty months trips it, so the deepest usable pull is a little under.
+ * Asking for more fails the whole run rather than returning a short answer.
+ */
+const MAX_MONTHS = 59;
+
+const MONTHS = Math.min(Number(args.months ?? (args.quick ? 1 : 12)), MAX_MONTHS);
+/**
+ * How far back the WEEKLY ALLOCATION goes, when that should differ from prices.
+ *
+ * The two have very different costs. Prices come 28 days per request, so a
+ * five-year pull is 66 chunks per kind; the allocation is one request per weekly
+ * anchor, so the same five years is 261 per kind — four times the requests for
+ * the half of the data that changes slowest and is only ever read as "what does
+ * this fund hold now" plus a month-over-month diff.
+ *
+ * So a deep backfill can take the prices without dragging five years of weekly
+ * composition behind it: `--months=60 --alloc-months=12`. Defaults to MONTHS, so
+ * an ordinary run is unchanged.
+ */
+const ALLOC_MONTHS = Number(args['alloc-months'] ?? MONTHS);
 // TEFAS rate-limits hard; 2 in flight is the sweet spot between speed and 429s.
 const CONCURRENCY = Number(args.concurrency ?? 2);
 const OUT_DIR = path.join(ROOT, args.out ?? 'data');
@@ -114,6 +152,28 @@ function founderKey(s) {
  * @param {Set<string>} keep fund codes in the current index
  * @returns {Promise<number>} how many files were removed
  */
+/**
+ * Stop before writing if this run's result is not plausible.
+ *
+ * The decision lives in scripts/lib/collapse.mjs, pure and tested — it is the
+ * one check in this pipeline whose failure is unrecoverable without git, and it
+ * was added after a throttled backfill wrote an empty universe and pruned every
+ * history file behind it.
+ */
+async function assertNotCollapsed(found) {
+  let before = 0;
+  try {
+    before = JSON.parse(await fs.readFile(path.join(OUT_DIR, 'funds.json'), 'utf8')).length;
+  } catch {
+    before = 0;
+  }
+  const reason = collapseReason(found, before, { allowShrink: Boolean(args['allow-shrink']) });
+  if (reason) throw new Error(`${reason}. Refusing to write.`);
+  if (args['allow-shrink'] && before && found < before) {
+    log(`  WARN --allow-shrink: writing ${found} funds over the last run's ${before}`);
+  }
+}
+
 async function pruneHistory(keep) {
   const dir = path.join(OUT_DIR, 'history');
   let removed = 0;
@@ -123,8 +183,15 @@ async function pruneHistory(keep) {
   } catch {
     return 0;
   }
-  for (const name of files) {
-    if (!name.endsWith('.jsonl')) continue;
+  // Second line of the same defence. `assertNotCollapsed` should already have
+  // stopped the run, so reaching here with an empty keep-set means something
+  // else went wrong — and deleting the entire history directory is not a
+  // recovery from anything.
+  const owned = files.filter((n) => n.endsWith('.jsonl'));
+  if (!keep.size && owned.length) {
+    throw new Error(`refusing to prune all ${owned.length} history files over an empty universe`);
+  }
+  for (const name of owned) {
     if (keep.has(name.slice(0, -6))) continue;
     await fs.unlink(path.join(dir, name));
     removed++;
@@ -440,7 +507,11 @@ async function main() {
   const latestDate = await findLatestDate();
   const end = new Date(latestDate);
   const start = addDays(end, -Math.round(MONTHS * 30.44));
+  const allocStart = addDays(end, -Math.round(ALLOC_MONTHS * 30.44));
   log(`Latest trading date: ${latestDate}; range ${start.toISOString().slice(0, 10)} .. ${latestDate}`);
+  if (ALLOC_MONTHS !== MONTHS) {
+    log(`  allocation only from ${allocStart.toISOString().slice(0, 10)} (${ALLOC_MONTHS} months)`);
+  }
 
   latestTag = latestDate.replace(/-/g, '');
 
@@ -456,7 +527,7 @@ async function main() {
   const infoChunks = await fetchInfoHistory(start, end);
 
   log('Step 4/5 — allocation history');
-  const allocChunks = await fetchAllocHistory(start, end);
+  const allocChunks = await fetchAllocHistory(allocStart, end);
 
   log('Step 5/5 — building output');
 
@@ -493,6 +564,7 @@ async function main() {
   // A fund counts as "current" only if it reported on the latest trading date.
   const active = [...funds.entries()].filter(([, f]) => f.prices.has(latestDate));
   log(`  ${funds.size} funds seen, ${active.length} active on ${latestDate}`);
+  await assertNotCollapsed(active.length);
 
   const groupOf = Object.fromEntries(Object.entries(ASSETS).map(([k, v]) => [k, v.group]));
 
@@ -594,8 +666,23 @@ async function main() {
       },
       // Risk stats are computed here, not in the browser, so the list view can
       // sort and filter on them without loading 2,400 history files.
-      vol: volatility(priceSeries),
-      mdd: maxDrawdown(priceSeries),
+      //
+      // Over a STATED window rather than over whatever history happens to be on
+      // disk. They used to run over the whole series, which meant one year while
+      // the fetch window was one year — and deepening it to five would have
+      // silently turned every volatility on the site into a five-year figure,
+      // moved the risk bands under it and changed the ranking, without a line of
+      // UI admitting anything had changed. A risk number has to mean the same
+      // thing on Tuesday that it meant on Monday.
+      vol: volatility(windowOf(priceSeries, RISK_WINDOW_DAYS)),
+      mdd: maxDrawdown(windowOf(priceSeries, RISK_WINDOW_DAYS)),
+      // The deepest fall in everything we hold, which is the one risk figure
+      // the longer history genuinely unlocks: `mdd` says what a bad year looked
+      // like, this says what the worst of them did. Null when the series is not
+      // meaningfully longer than the window, so it never restates `mdd`.
+      mddAll: priceSeries.length > RISK_WINDOW_DAYS * 1.5
+        ? maxDrawdown(priceSeries)
+        : null,
     });
 
     appended += await writeHistory(code, prices, f.alloc);
