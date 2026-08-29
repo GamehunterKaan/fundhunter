@@ -1192,12 +1192,50 @@ export function overlapOf(a, b) {
 }
 
 /**
+ * Cash left at an exchange as margin, which filings state as if it were a
+ * position and which is not one.
+ *
+ * A fund that trades futures has to post collateral, so every fund that trades
+ * them carries a line for it. Counted as a holding, two funds sharing nothing
+ * but the requirement to have a margin account are reported as holding the same
+ * thing: THF and KHA came out 38.8% the same, 6.2 points of which was each
+ * fund's own collateral sitting in each fund's own account.
+ *
+ * Matched on the group rather than the code, because the code is not dependable
+ * and in one spelling is actively dangerous. Seven group labels say this —
+ * VIOP, foreign futures, OTC and options, in both Turkish spellings of NAKİT
+ * TEMİNAT — and they file it under codes as varied as "VIOP Nakit Teminatı",
+ * "Yurtdışı Futures USD", nothing at all, and "TRY". That last one would match
+ * every other fund filing its own margin the same way, under a position called
+ * TRY that neither of them holds.
+ *
+ * Only the collateral goes. A future itself is a real exposure — two funds long
+ * the same gold contract really are long the same thing — and those are filed
+ * under "VİOP İŞLEMLERİ", which says no such thing.
+ *
+ * `filedGroup` before `group`, because rows reach this in two shapes. The
+ * overlap panel passes the filing as it was published; the comparison page
+ * passes it through `aggregateHoldings`, which puts our own bucket id in `group`
+ * and keeps the filer's wording in `filedGroup`. Reading only `group` would see
+ * "derivatives" on that path and let the collateral straight back in — and
+ * matching "derivatives" instead would take the real futures with it.
+ */
+const isMarginCollateral = (holding) =>
+  /NAK[İI]T\s*TEM[İI]NAT/
+    .test(String(holding?.filedGroup ?? holding?.group ?? '').toUpperCase());
+
+/**
  * A filing as a weight per position, summed across split lines.
  *
  * The same holding is filed under an ISIN on one line and a ticker on the next,
  * so weights are added rather than replaced — the same rule the ownership pass
  * follows. Rows with no code cannot be matched against another fund's and are
  * left out, which makes the overlap a floor rather than an estimate.
+ *
+ * This feeds the overlap panel and the comparison page and nothing else, which
+ * is why it is the right place to drop margin collateral: the composition bar
+ * reads the filing itself and still shows the fund's collateral, because the
+ * fund's money really is there.
  */
 export function weightsOf(holdings) {
   const out = {};
@@ -1205,6 +1243,7 @@ export function weightsOf(holdings) {
     const code = h?.code;
     const weight = h?.weight;
     if (!code || weight == null || !Number.isFinite(weight) || weight <= 0) continue;
+    if (isMarginCollateral(h)) continue;
     out[code] = (out[code] ?? 0) + weight;
   }
   return out;

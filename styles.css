@@ -1050,6 +1050,42 @@ ul.comp-legend {
   font-size: 12.5px;
 }
 
+/* The overview's two answers, side by side: what the fund has done, and what it
+ * is. The chart takes what is left because it is the one that gains from width —
+ * a price line at 900 viewBox units reads at almost any size, while the ring is
+ * 320 units square and wants no more than that. Below the breakpoint the rail no
+ * longer leaves the chart enough to be a chart, so they stack. */
+.overview-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, 22rem);
+  gap: 1.25rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+.overview-row > .panel {
+  margin-bottom: 0;
+  min-width: 0;
+}
+@media (max-width: 1000px) {
+  .overview-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The ring carries its own name in the middle, so the legend under it is a key
+ * to the slices rather than a second reading of the same figure — one column,
+ * because a band and its weight belong on one line. */
+.mix-ring .donut-legend {
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.mix-ring .donut-legend li {
+  width: 100%;
+}
+.mix-ring .donut-legend li .val {
+  margin-left: auto;
+}
+
 /* The legend names what the labels around the ring cannot fit, so it appears
  * only in the layout that has no labels. */
 .donut-legend {

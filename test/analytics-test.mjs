@@ -28,7 +28,7 @@ import {
   sinceVisit, newSince, VISIT_MIN_DAYS,
   correlationOf, correlationMatrix, MIN_CORRELATION_DAYS, CORRELATION_HIGH,
 } from '../analytics.js';
-import { HORIZONS, SPEC_STEPS, bestIndexes } from '../core.js';
+import { HORIZONS, SPEC_STEPS, bestIndexes, aggregateHoldings } from '../core.js';
 
 const fund = (over = {}) => ({
   c: 'AAA', n: 'TEST FONU', k: 'YAT', cat: null, f: 'TEST PORTFÖY',
@@ -906,6 +906,56 @@ test('a filing becomes weights, with split lines added rather than replaced', ()
   // A closed position files at zero, and a correction can file negative.
   assert.deepEqual(weightsOf([{ code: 'A', weight: 0 }, { code: 'B', weight: -1 }]), {});
   assert.deepEqual(weightsOf(null), {});
+});
+
+test('margin collateral is not a position two funds can share', () => {
+  // Every fund that trades futures posts collateral, so counting it makes any
+  // two of them look alike for owning a margin account.
+  const seen = [
+    'VIOP NAKIT TEMINATI',
+    'VİOP NAKİT TEMİNAT İŞLEMLERİ',
+    'VİOP NAKİT TEMİNAT',
+    'VIOP USD NAKIT TEMINATI',
+    'YURTDIŞI FUTURES USD NAKIT TEMINATI',
+    'OPSP NAKIT TEMINATI',
+    'OTC USD NAKIT TEMINATI',
+  ];
+  for (const group of seen) {
+    assert.deepEqual(
+      weightsOf([{ code: 'X', weight: 5, group }, { code: 'ASELS', weight: 3 }]),
+      { ASELS: 3 },
+      group
+    );
+  }
+
+  // The code these are filed under is not dependable — one spelling files them
+  // as "TRY", which without this rule matches every other fund doing the same
+  // and reports a shared position in a currency neither of them holds.
+  assert.deepEqual(
+    overlapOf(
+      weightsOf([{ code: 'TRY', weight: 12, group: 'VİOP NAKİT TEMİNAT İŞLEMLERİ' }]),
+      weightsOf([{ code: 'TRY', weight: 9, group: 'VİOP NAKİT TEMİNAT İŞLEMLERİ' }])
+    ),
+    0
+  );
+
+  // A future is a real exposure and is filed under a group that does not claim
+  // to be collateral; two funds long the same contract do hold the same thing.
+  assert.deepEqual(
+    weightsOf([{ code: 'F_XAUTRYM0826', weight: 10.39, group: 'VİOP İŞLEMLERİ' }]),
+    { F_XAUTRYM0826: 10.39 }
+  );
+
+  // Rows arrive in two shapes. `aggregateHoldings` puts our own bucket id in
+  // `group` and keeps the filer's wording in `filedGroup`, so reading `group`
+  // alone sees "derivatives" and lets the collateral back in — while matching
+  // "derivatives" would take the real futures with it.
+  const aggregated = aggregateHoldings([
+    { code: 'VIOP Nakit Teminatı', weight: 8.31, group: 'VIOP NAKIT TEMINATI' },
+    { code: 'F_XAUTRYM0826', weight: 10.39, group: 'VİOP İŞLEMLERİ' },
+  ]);
+  assert.equal(aggregated.every((r) => r.group === 'derivatives'), true, 'same bucket');
+  assert.deepEqual(weightsOf(aggregated), { F_XAUTRYM0826: 10.39 });
 });
 
 test('only pairs that share more than the floor are worth warning about', () => {

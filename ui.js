@@ -3399,10 +3399,19 @@ async function renderDetail(code) {
       {
         id: 'ozet',
         labelKey: 'tabOverview',
+        // The price line and the mix, side by side. They answer the two halves
+        // of the first question anybody has about a fund — what it has done,
+        // and what it is — and neither reads as an answer to the other, so
+        // stacking them made you scroll to find out you were looking at the
+        // wrong one. The chart is drawn in viewBox units and stretches, so it
+        // gives up the width without giving up anything else.
         panels: [
-          prices.length > 5
-            ? renderFundChart(fund, prices)
-            : h('p', { class: 'panel-note' }, T('noHistory')),
+          withMixRing(
+            prices.length > 5
+              ? renderFundChart(fund, prices)
+              : h('p', { class: 'panel-note' }, T('noHistory')),
+            renderMixRing(segments)
+          ),
           renderVsCash(fund),
           renderPrediction(fund),
         ],
@@ -3890,6 +3899,88 @@ function renderComposition(fund, segments, latestAlloc, hasNegative) {
           h('tbody', {}, rows))
       : null
   );
+}
+
+/**
+ * The chart and the ring in one row, or the chart alone.
+ *
+ * A fund with no allocation filed has no ring, and a two-column grid holding one
+ * thing is a chart with a column of nothing beside it. The row only exists when
+ * there are two things to put in it.
+ */
+function withMixRing(chart, ring) {
+  return ring ? h('div', { class: 'overview-row' }, chart, ring) : chart;
+}
+
+/**
+ * The fund's composition as a ring, for the overview.
+ *
+ * The same weights and the same eight colours as the composition bar, because a
+ * reader who has met that bar on the list page should not have to learn a second
+ * palette to read this. A ring rather than another bar: what the overview is
+ * being asked, beside a price line, is "what kind of fund is this", and a circle
+ * answers it without the legend — a 6px bar has to be read left to right before
+ * it says anything.
+ *
+ * Always the tight geometry. It sits in a column next to the chart, which is
+ * never wide enough for labels around the ring, so the legend does the naming.
+ */
+function renderMixRing(segments) {
+  if (!segments.length) return null;
+
+  const g = ringGeometry(true);
+  const nameOf = (s) => label(state.meta.groups.find((x) => x.id === s.id), state.lang);
+  const pctOf = (s) => fmtPct(s.pct, state.lang, { digits: 1 });
+
+  // Drawn in the taxonomy's fixed order, not largest first, so a slice is in the
+  // same place and the same colour as its band in the bar.
+  //
+  // Angles come off `share`, which is already normalised to 100, and the last
+  // slice closes on the turn rather than on its own share: eight roundings of
+  // two decimals otherwise leave a visible wedge of unpainted ring at the end.
+  let turn = 0;
+  const placed = segments.map((s, i) => {
+    const from = turn;
+    turn = i === segments.length - 1 ? 1 : turn + s.share / 100;
+    return { s, from, to: turn };
+  });
+
+  // A fund that is 100% one thing is one slice, and an arc from nought to a
+  // whole turn starts and ends at the same point, which draws nothing at all.
+  // The same stroked-circle escape the portfolio ring makes, for the same
+  // reason — and money-market funds make this the common case here, not a
+  // corner one.
+  const ring = placed.length === 1
+    ? svg('circle', {
+        class: 'donut-whole', cx: g.cx, cy: g.cy, r: (g.outer + g.inner) / 2,
+        stroke: groupColor(segments[0].id), 'stroke-width': g.outer - g.inner,
+      }, svg('title', {}, text(`${nameOf(segments[0])} — ${pctOf(segments[0])}`)))
+    : placed.map(({ s, from, to }) =>
+        svg('path', { class: 'donut-slice', d: ringPath(g, from, to), fill: groupColor(s.id) },
+          svg('title', {}, text(`${nameOf(s)} — ${pctOf(s)}`))));
+
+  // The largest band, in the hole. It names the fund faster than the legend
+  // does: "Hisse Senedi 54,7%" is the answer to what kind of fund this is.
+  const top = segments.reduce((a, b) => (b.pct > a.pct ? b : a));
+
+  const centre = svg('g', { class: 'donut-centre', 'text-anchor': 'middle' },
+    svg('text', { class: 'donut-eyebrow', x: g.cx, y: g.cy - 14 }, text(nameOf(top))),
+    svg('text', { class: 'donut-total', x: g.cx, y: g.cy + 16 }, text(pctOf(top))));
+
+  return h('section', { class: 'panel mix-ring' },
+    h('h2', {}, T('mixRing')),
+    svg('svg', {
+      class: 'donut is-tight', viewBox: `0 0 ${g.w} ${g.h}`, role: 'img',
+      // What a screen reader gets instead of the picture: every band, in the
+      // order they are drawn.
+      'aria-label': segments.map((s) => `${nameOf(s)} ${pctOf(s)}`).join('. '),
+    }, ring, centre),
+    h('ul', { class: 'comp-legend donut-legend' },
+      segments.map((s) =>
+        h('li', {},
+          h('span', { class: 'swatch', style: `background:${groupColor(s.id)}` }),
+          h('span', {}, nameOf(s)),
+          h('span', { class: 'val num' }, pctOf(s))))));
 }
 
 /**
