@@ -12,7 +12,7 @@ import {
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   encodeShareView, decodeShareView, filterShares,
   OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS,
-  CONVICTION_STEPS, GOOD_STEPS, FRESH_WAYS,
+  CONVICTION_STEPS, GOOD_STEPS, FRESH_WAYS, MONEY_WAYS,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -5195,6 +5195,7 @@ const shareView = {
   conv: '',
   good: '',
   fresh: '',
+  money: '',
   clean: false,
   open: false,
   sort: { key: 'cap', dir: 'desc' },
@@ -5205,7 +5206,8 @@ const shareView = {
 function activeShareFilters() {
   return [
     shareView.theme, shareView.owners, shareView.crowd, shareView.flow,
-    shareView.conv, shareView.good, shareView.fresh, shareView.clean,
+    shareView.conv, shareView.good, shareView.fresh, shareView.money,
+    shareView.clean,
   ].filter(Boolean).length;
 }
 
@@ -5430,6 +5432,16 @@ function shareFilters() {
         FRESH_WAYS.map((way) =>
           h('option', { value: way, selected: shareView.fresh === way },
             T(way === 'opened' ? 'shareFreshOpened' : 'shareFreshLeft'))))),
+
+    field('sf-money', T('shareFilterMoney'), T('shareMoneyHint'),
+      h('select', {
+        id: 'sf-money', title: `${T('shareFilterMoney')} — ${T('shareMoneyHint')}`,
+        onChange: (e) => { shareView.money = e.target.value; refreshShares(); },
+      },
+        h('option', { value: '', selected: !shareView.money }, T('all')),
+        MONEY_WAYS.map((way) =>
+          h('option', { value: way, selected: shareView.money === way },
+            T(way === 'in' ? 'shareMoneyIn' : 'shareMoneyOut'))))),
 
     h('div', { class: 'field' },
       h('label', { class: 'check', title: T('shareCleanBoardsHint') },
@@ -5739,6 +5751,12 @@ function shareOwnership(stock) {
         h('dt', {}, T('heldByFunds')), h('dd', {}, fmtInt(own.funds, state.lang))),
       h('div', { class: 'stat' },
         h('dt', {}, T('heldValue')), h('dd', {}, fmtMoney(own.value, state.lang))),
+      // Plain, not coloured. Money leaving the funds that hold a company is not
+      // a loss on the company, and red would say it was.
+      own.flow30 == null ? null : h('div', { class: 'stat' },
+        h('dt', { title: T('ownFlowNote', { n: fmtInt(own.flowFrom, state.lang) }) },
+          T('ownFlow')),
+        h('dd', {}, fmtMoney(own.flow30, state.lang))),
       h('div', { class: 'stat' },
         h('dt', { title: T('fundOwnedNote') }, T('fundOwned')),
         h('dd', {}, pct(own.pctShares, 2))),

@@ -883,6 +883,19 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
   // held companies have no holder above 1%.
   const weights = rows.map((h) => h.weight).filter(Number.isFinite);
 
+  // Fund money moving toward the company, or away from it.
+  //
+  // Each holder's net flow over the past 30 days, apportioned by how much of
+  // that fund the share is. It is an attribution, not a receipt: money arriving
+  // at a fund is not necessarily spent on this position, and a manager can buy
+  // the share while the fund shrinks. What it does say is which companies are
+  // downstream of the money, which is a question the price cannot answer because
+  // the buying has not happened yet.
+  const flowing = rows.filter((h) => Number.isFinite(h.flow) && Number.isFinite(h.weight));
+  const flow30 = flowing.length
+    ? Math.round(flowing.reduce((sum, h) => sum + (h.flow * h.weight) / 100, 0))
+    : null;
+
   return {
     funds: rows.length,
     value: Math.round(value),
@@ -894,6 +907,11 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
     trimming,
     topWeight: weights.length ? round2(Math.max(...weights)) : null,
     left,
+    flow30,
+    // Of how many holders that flow figure could be read. A share whose money is
+    // known for two of forty holders has a figure that means very little, and the
+    // page can say so rather than printing it as though it were the whole.
+    flowFrom: flowing.length,
     // Of `compared`, how many were settled by counting shares in two snapshots
     // rather than by working back from weights. Zero until a second month of
     // filings has been archived; from then on it only grows.

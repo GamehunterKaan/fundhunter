@@ -11,7 +11,7 @@ import {
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   encodeShareView, decodeShareView, filterShares,
   OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS, MIN_FLOW_HOLDERS,
-  CONVICTION_STEPS, GOOD_STEPS, FRESH_WAYS,
+  CONVICTION_STEPS, GOOD_STEPS, FRESH_WAYS, MONEY_WAYS,
   deflate, deflateSeries, yearOf,
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
@@ -1278,7 +1278,7 @@ test('a theme survives the trip to the share list', () => {
 
 const EMPTY_SHARE_VIEW = {
   search: '', theme: '', owners: '', crowd: '', flow: '', conv: '', good: '',
-  fresh: '', clean: false,
+  fresh: '', money: '', clean: false,
 };
 
 test('an untouched share list encodes to nothing', () => {
@@ -1290,7 +1290,8 @@ test('an untouched share list encodes to nothing', () => {
 test('the share view round-trips', () => {
   const view = {
     search: 'ASELS', theme: THEME_IDS[1], owners: '20', crowd: '3',
-    flow: 'buying', conv: '5', good: '10', fresh: 'opened', clean: true,
+    flow: 'buying', conv: '5', good: '10', fresh: 'opened', money: 'in',
+    clean: true,
   };
   assert.deepEqual(decodeShareView(encodeShareView(view)), view);
 });
@@ -1336,9 +1337,9 @@ const share = (c, own, extra = {}) => ({ c, kind: 'stock', ...extra, ...(own ? {
 
 const EXCHANGE = [
   // BIGCO is the index name: everybody holds it, nobody holds much of it.
-  share('BIGCO', { funds: 90, pctShares: 12.5, compared: 60, adding: 40, trimming: 20, topWeight: 0.9, good: 25, opened: 4, left: 1 }, { th: 'finance' }),
-  share('MIDCO', { funds: 22, pctShares: 3.1, compared: 18, adding: 4, trimming: 14, topWeight: 7.5, good: 6 }, { th: 'finance' }),
-  share('SMALLCO', { funds: 6, pctShares: 0.4, compared: 6, adding: 3, trimming: 3, topWeight: 22, good: 0 }, { th: 'defence' }),
+  share('BIGCO', { funds: 90, pctShares: 12.5, compared: 60, adding: 40, trimming: 20, topWeight: 0.9, good: 25, opened: 4, left: 1, flow30: 3.1e9, flowFrom: 88 }, { th: 'finance' }),
+  share('MIDCO', { funds: 22, pctShares: 3.1, compared: 18, adding: 4, trimming: 14, topWeight: 7.5, good: 6, flow30: -4.2e9, flowFrom: 20 }, { th: 'finance' }),
+  share('SMALLCO', { funds: 6, pctShares: 0.4, compared: 6, adding: 3, trimming: 3, topWeight: 22, good: 0, flow30: 0, flowFrom: 6 }, { th: 'defence' }),
   share('THINCO', { funds: 1, pctShares: 0.02, compared: 1, adding: 1, trimming: 0, topWeight: 0.1, good: 1 }, { th: 'defence' }),
   share('UNREAD', { funds: 8, pctShares: null, compared: 0, adding: 0, trimming: 0, topWeight: null, good: 2 }, { th: 'defence' }),
   share('NOBODY', null, { th: 'defence' }),
@@ -1430,6 +1431,16 @@ test('a share every fund has left counts as one nobody holds', () => {
   // would have called it held.
   assert.ok(codes({ owners: OWNER_NONE }).includes('ABANDONED'));
   assert.ok(!codes({ owners: '1' }).includes('ABANDONED'));
+});
+
+test('money has a direction, and standing still is not one', () => {
+  assert.deepEqual(codes({ money: 'in' }), ['BIGCO']);
+  assert.deepEqual(codes({ money: 'out' }), ['MIDCO']);
+  // SMALLCO's holders took in exactly as much as they paid out. That is a
+  // finding, and it is not a direction.
+  for (const way of MONEY_WAYS) assert.ok(!codes({ money: way }).includes('SMALLCO'));
+  // And an unreadable flow is silence, which is not zero either.
+  for (const way of MONEY_WAYS) assert.ok(!codes({ money: way }).includes('THINCO'));
 });
 
 test('hiding flagged boards hides exactly the flagged ones', () => {

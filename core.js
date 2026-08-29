@@ -359,6 +359,13 @@ export const STRINGS = {
     shareFreshHint:
       'Bir önceki bildirimde hissesi olmayıp şimdi olan fonlar, ve bir önceki ' +
       'bildirimde olup şimdi tamamen satmış olanlar.',
+    shareFilterMoney: 'Fon parası',
+    shareMoneyIn: 'Şirkete doğru geliyor',
+    shareMoneyOut: 'Şirketten çıkıyor',
+    shareMoneyHint:
+      'Hisseyi tutan fonlara son 30 günde giren ya da çıkan net paranın, ' +
+      'hissenin o fonlardaki ağırlığına düşen kısmı. Fona gelen para mutlaka ' +
+      'bu hisseye harcanmaz; yine de alım henüz fiyata girmemiş olur.',
     shareCleanBoards: 'Şüpheli tahtaları gizle',
     shareCleanBoardsHint:
       'Sert yükseliş ve en az iki koşulu daha karşılayan tahtalar. ' +
@@ -746,6 +753,10 @@ export const STRINGS = {
     shareNoOwners: 'Hiçbir fonun portföyünde bu hisse görünmüyor.',
     heldByFunds: 'Fon sayısı',
     heldValue: 'Fonların tuttuğu',
+    ownFlow: 'Son 30 günde fon parası',
+    ownFlowNote:
+      'Hisseyi tutan fonlara son 30 günde giren ya da çıkan net paranın, ' +
+      'hissenin o fonlardaki ağırlığına düşen kısmı. {n} fondan okunabildi.',
     fundOwned: 'Şirketin yüzdesi',
     fundOwnedNote: 'Fonların elindeki pay adedinin toplam pay adedine oranı.',
     byValue: 'Değere göre',
@@ -1314,6 +1325,14 @@ export const STRINGS = {
     shareFreshHint:
       'Funds that had none of the share at the previous filing and hold it now, ' +
       'and funds that held it then and have sold out of it since.',
+    shareFilterMoney: 'Fund money',
+    shareMoneyIn: 'Flowing toward it',
+    shareMoneyOut: 'Flowing away',
+    shareMoneyHint:
+      'Net money into or out of the funds holding it over the past 30 days, ' +
+      'apportioned by how much of each fund the share is. Money arriving at a ' +
+      'fund is not necessarily spent here, but it is buying that has not ' +
+      'reached the price yet.',
     shareCleanBoards: 'Hide flagged boards',
     shareCleanBoardsHint:
       'Boards meeting a sharp run-up plus at least two more conditions. ' +
@@ -1700,6 +1719,10 @@ export const STRINGS = {
     shareNoOwners: 'No fund reports holding this share.',
     heldByFunds: 'Funds holding',
     heldValue: 'Held by funds',
+    ownFlow: 'Fund money, 30 days',
+    ownFlowNote:
+      'Net money into or out of the funds holding it over the past 30 days, ' +
+      'apportioned by the weight the share has in each. Read from {n} of them.',
     fundOwned: 'Of the company',
     fundOwnedNote: 'Shares held by funds against the company’s total shares outstanding.',
     byValue: 'By value',
@@ -2927,6 +2950,15 @@ export const GOOD_STEPS = [1, 5, 10];
 export const FRESH_WAYS = ['opened', 'left'];
 
 /**
+ * Which way fund money is moving toward the company.
+ *
+ * Each holder's net 30-day flow, apportioned by the weight the share has in it.
+ * It leads the price rather than following it: money that has arrived at a fund
+ * and not yet been spent is buying that has not happened.
+ */
+export const MONEY_WAYS = ['in', 'out'];
+
+/**
  * Narrow the share list to what the view asks for.
  *
  * Here rather than inside the page for the reason filterFunds is: a filter that
@@ -2975,6 +3007,12 @@ export function filterShares(rows, view = {}) {
 
     if (view.fresh && !(own?.[view.fresh] >= 1)) return false;
 
+    if (view.money) {
+      // Exactly zero is not a direction, and no readable flow is not zero.
+      if (!Number.isFinite(own?.flow30) || own.flow30 === 0) return false;
+      if (view.money === 'in' ? own.flow30 < 0 : own.flow30 > 0) return false;
+    }
+
     if (view.clean && s.spec) return false;
 
     return true;
@@ -2992,6 +3030,7 @@ export function encodeShareView(view) {
   if (view?.conv) q.set('conv', String(view.conv));
   if (view?.good) q.set('good', String(view.good));
   if (view?.fresh) q.set('fresh', String(view.fresh));
+  if (view?.money) q.set('money', String(view.money));
   if (view?.clean) q.set('clean', '1');
   return q.toString();
 }
@@ -3006,7 +3045,7 @@ export function encodeShareView(view) {
 export function decodeShareView(query) {
   const out = {
     search: '', theme: '', owners: '', crowd: '', flow: '', conv: '', good: '',
-    fresh: '', clean: false,
+    fresh: '', money: '', clean: false,
   };
   if (!query) return out;
   const q = new URLSearchParams(String(query).replace(/^[?#]/, ''));
@@ -3033,6 +3072,9 @@ export function decodeShareView(query) {
 
   const fresh = q.get('fresh') ?? '';
   if (FRESH_WAYS.includes(fresh)) out.fresh = fresh;
+
+  const money = q.get('money') ?? '';
+  if (MONEY_WAYS.includes(money)) out.money = money;
 
   out.clean = q.get('clean') === '1';
   return out;

@@ -813,6 +813,45 @@ test('a share nothing is known about answers nothing', () => {
   assert.equal(ownership([], {}), null);
 });
 
+test('fund money is apportioned by how much of the fund the share is', () => {
+  const own = ownership([
+    // A tenth of this fund, and ₺1bn came in: ₺100m of it is downstream of here.
+    { fund: 'BIG', value: 100e6, weight: 10, prev: 10, expected: 10, flow: 1e9 },
+    // Half of a smaller fund that lost ₺40m.
+    { fund: 'SMALL', value: 20e6, weight: 50, prev: 50, expected: 50, flow: -40e6 },
+  ], {});
+  assert.equal(own.flow30, 100e6 - 20e6);
+  assert.equal(own.flowFrom, 2);
+});
+
+test('a flow nobody can read is null, not zero', () => {
+  // Zero would say the money stood still, which is a finding. This is silence.
+  const own = ownership([{ fund: 'A', value: 10e6, weight: 5, flow: null }], {});
+  assert.equal(own.flow30, null);
+  assert.equal(own.flowFrom, 0);
+});
+
+test('the flow says how many holders it could be read from', () => {
+  // Two of forty is a figure that means very little, and the page can say so.
+  const own = ownership([
+    { fund: 'A', value: 10e6, weight: 5, flow: 1e9 },
+    { fund: 'B', value: 10e6, weight: 5, flow: null },
+    { fund: 'C', value: 10e6, weight: 5 },
+  ], {});
+  assert.equal(own.funds, 3);
+  assert.equal(own.flowFrom, 1);
+  assert.equal(own.flow30, 50e6);
+});
+
+test('a fund that has left carries none of its money with it', () => {
+  const own = ownership([
+    { fund: 'STAY', value: 10e6, weight: 5, flow: 1e9 },
+    { fund: 'GONE', value: 0, weight: 0, prev: 5, left: true, flow: -9e9 },
+  ], {});
+  assert.equal(own.flow30, 50e6, 'the departure is not a holder and not a flow');
+  assert.equal(own.left, 1);
+});
+
 test('a holder list is cut to the holders worth reading', () => {
   const many = Array.from({ length: 40 }, (_, i) => ({
     fund: `F${i}`, value: (40 - i) * 1e6, weight: 1, prev: 1, expected: 1,

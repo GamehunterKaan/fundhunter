@@ -499,6 +499,7 @@ async function main() {
         holders.get(ticker).push({
           fund: fund.c, value: row.value, shares: row.shares, weight: row.weight,
           prev, expected, opened, left, good: beatCash.has(fund.c),
+          flow: Number.isFinite(fund.fl30) ? fund.fl30 : null,
           // Only a positive count is a baseline to subtract from. A zero here
           // would read as "held none last month", which is the opened case, and
           // the snapshot cannot tell a genuine zero from an unfiled row.
@@ -515,7 +516,7 @@ async function main() {
           if (!holders.has(ticker)) holders.set(ticker, []);
           holders.get(ticker).push({
             fund: fund.c, value: 0, shares: 0, weight: 0, prev: null,
-            expected: null, opened: false, left: true,
+            expected: null, opened: false, left: true, flow: null,
             good: beatCash.has(fund.c), sharesBefore: was.shares,
           });
           leftCount++;
