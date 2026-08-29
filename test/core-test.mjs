@@ -9,7 +9,8 @@ import {
   alignAndIndex, signOf, HORIZONS, horizonOf, DEFAULT_HORIZON, SORTS, STRINGS, LANGS,
   SPEC_NONE, SPEC_MIN_EQUITY, SPEC_STEPS,
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
-  encodeShareView, decodeShareView,
+  encodeShareView, decodeShareView, filterShares,
+  OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS,
   deflate, deflateSeries, yearOf,
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
@@ -1274,14 +1275,18 @@ test('a theme survives the trip to the share list', () => {
   assert.equal(decodeShareView(`theme=${THEME_IDS[0]}`).theme, THEME_IDS[0]);
 });
 
+const EMPTY_SHARE_VIEW = { search: '', theme: '', owners: '', crowd: '', clean: false };
+
 test('an untouched share list encodes to nothing', () => {
-  assert.equal(encodeShareView({ search: '', theme: '', held: false }), '');
+  assert.equal(encodeShareView(EMPTY_SHARE_VIEW), '');
   assert.equal(encodeShareView({}), '');
   assert.equal(encodeShareView(null), '');
 });
 
 test('the share view round-trips', () => {
-  const view = { search: 'ASELS', theme: THEME_IDS[1], held: true };
+  const view = {
+    search: 'ASELS', theme: THEME_IDS[1], owners: '20', crowd: '3', clean: true,
+  };
   assert.deepEqual(decodeShareView(encodeShareView(view)), view);
 });
 
@@ -1291,15 +1296,88 @@ test('a theme nobody publishes is dropped rather than emptying the table', () =>
   assert.equal(decodeShareView('theme=unicorns').theme, '');
   assert.equal(decodeShareView('').theme, '');
   assert.equal(decodeShareView(null).theme, '');
-  assert.deepEqual(decodeShareView(null), { search: '', theme: '', held: false });
+  assert.deepEqual(decodeShareView(null), EMPTY_SHARE_VIEW);
 });
 
-test('held-only is a flag, and only "1" sets it', () => {
-  assert.equal(decodeShareView('held=1').held, true);
-  assert.equal(decodeShareView('held=0').held, false);
-  assert.equal(decodeShareView('held=yes').held, false);
-  assert.equal(encodeShareView({ held: true }), 'held=1');
-  assert.equal(encodeShareView({ held: false }), '');
+test('the old held=1 links still mean what they meant', () => {
+  // The checkbox this replaced said "only ones funds hold", which is the first
+  // step of the count that replaced it. Links carrying it are already out there.
+  assert.equal(decodeShareView('held=1').owners, '1');
+  assert.equal(decodeShareView('held=0').owners, '');
+  assert.equal(decodeShareView('held=yes').owners, '');
+  // An explicit count wins over the legacy flag rather than fighting it.
+  assert.equal(decodeShareView('held=1&owners=20').owners, '20');
+});
+
+test('an owner count off the list is no filter at all', () => {
+  for (const n of OWNER_STEPS) assert.equal(decodeShareView(`owners=${n}`).owners, String(n));
+  assert.equal(decodeShareView(`owners=${OWNER_NONE}`).owners, OWNER_NONE);
+  assert.equal(decodeShareView('owners=7').owners, '');
+  assert.equal(decodeShareView('owners=lots').owners, '');
+  // '' is not a number, and Number('') is 0 — which must not sneak past.
+  assert.equal(decodeShareView('owners=').owners, '');
+});
+
+test('a crowding step off the list is no filter at all', () => {
+  for (const n of CROWD_STEPS) assert.equal(decodeShareView(`crowd=${n}`).crowd, String(n));
+  assert.equal(decodeShareView(`crowd=${CROWD_THIN}`).crowd, CROWD_THIN);
+  assert.equal(decodeShareView('crowd=2').crowd, '');
+  assert.equal(decodeShareView('crowd=').crowd, '');
+});
+
+// -------------------------------------------------------------- filterShares
+
+const share = (c, own, extra = {}) => ({ c, kind: 'stock', ...extra, ...(own ? { own } : {}) });
+
+const EXCHANGE = [
+  share('BIGCO', { funds: 90, pctShares: 12.5 }, { th: 'finance' }),
+  share('MIDCO', { funds: 22, pctShares: 3.1 }, { th: 'finance' }),
+  share('SMALLCO', { funds: 6, pctShares: 0.4 }, { th: 'defence' }),
+  share('THINCO', { funds: 1, pctShares: 0.02 }, { th: 'defence' }),
+  share('UNREAD', { funds: 8, pctShares: null }, { th: 'defence' }),
+  share('NOBODY', null, { th: 'defence' }),
+  share('FLAGGED', { funds: 4, pctShares: 2 }, { th: 'finance', spec: { f: ['runUp'], of: 6 } }),
+];
+const codes = (view) => filterShares(EXCHANGE, view).map((s) => s.c);
+
+test('no view is no filter', () => {
+  assert.equal(filterShares(EXCHANGE, {}).length, EXCHANGE.length);
+  assert.equal(filterShares(EXCHANGE).length, EXCHANGE.length);
+  assert.deepEqual(filterShares(null, {}), []);
+});
+
+test('the owner count counts funds, and its other end means nobody', () => {
+  assert.deepEqual(codes({ owners: '1' }), ['BIGCO', 'MIDCO', 'SMALLCO', 'THINCO', 'UNREAD', 'FLAGGED']);
+  assert.deepEqual(codes({ owners: '20' }), ['BIGCO', 'MIDCO']);
+  assert.deepEqual(codes({ owners: '50' }), ['BIGCO']);
+  // The one question the checkbox could not ask.
+  assert.deepEqual(codes({ owners: OWNER_NONE }), ['NOBODY']);
+});
+
+test('crowding leaves out the companies whose share count could not be read', () => {
+  // UNREAD is held by 8 funds and has no pctShares. It is not thinly held — it
+  // is unknown, and null < 1 is true in JavaScript, which is how it would have
+  // got in.
+  assert.deepEqual(codes({ crowd: CROWD_THIN }), ['SMALLCO', 'THINCO']);
+  assert.deepEqual(codes({ crowd: '1' }), ['BIGCO', 'MIDCO', 'FLAGGED']);
+  assert.deepEqual(codes({ crowd: '10' }), ['BIGCO']);
+  assert.ok(!codes({ crowd: CROWD_THIN }).includes('UNREAD'));
+  assert.ok(!codes({ crowd: '1' }).includes('UNREAD'));
+  // And a company nobody holds is unheld, not thinly held.
+  assert.ok(!codes({ crowd: CROWD_THIN }).includes('NOBODY'));
+});
+
+test('hiding flagged boards hides exactly the flagged ones', () => {
+  assert.ok(!codes({ clean: true }).includes('FLAGGED'));
+  assert.equal(codes({ clean: true }).length, EXCHANGE.length - 1);
+});
+
+test('the filters stack', () => {
+  assert.deepEqual(codes({ theme: 'finance', owners: '20' }), ['BIGCO', 'MIDCO']);
+  assert.deepEqual(codes({ theme: 'finance', crowd: '1', clean: true }), ['BIGCO', 'MIDCO']);
+  assert.deepEqual(codes({ theme: 'defence', owners: OWNER_NONE }), ['NOBODY']);
+  // Contradictory is empty rather than wrong: nobody holds it AND twenty funds do.
+  assert.deepEqual(codes({ owners: OWNER_NONE, crowd: '1' }), []);
 });
 
 test('a leading ? or # is tolerated, as it is for the fund screen', () => {

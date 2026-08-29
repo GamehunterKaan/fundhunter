@@ -326,7 +326,19 @@ export const STRINGS = {
     showMore: 'Daha fazla göster',
     shareSearch: 'Hisse ara',
     shareCount: '{n} hisse',
-    heldOnly: 'Yalnızca fonların tuttukları',
+    shareFilterOwners: 'Kaç fon tutuyor',
+    shareOwnersNone: 'Hiçbir fon tutmuyor',
+    shareOwnersAtLeast: '{n}+ fon',
+    shareFilterCrowd: 'Şirketin ne kadarı fonlarda',
+    shareCrowdThin: '%1’in altında',
+    shareCrowdAtLeast: '%{n} ve üzeri',
+    shareCrowdHint:
+      'Fonların elindeki pay adedinin şirketin toplam pay adedine oranı. ' +
+      'Pay adedi okunamayan 12 şirket bu filtrenin dışında kalır.',
+    shareCleanBoards: 'Şüpheli tahtaları gizle',
+    shareCleanBoardsHint:
+      'Sert yükseliş ve en az iki koşulu daha karşılayan tahtalar. ' +
+      'Koşullar her hissenin kendi sayfasında yazıyor.',
     sharesUnavailable: 'Hisse verisi henüz yok.',
     sharesStamp: 'Fiyatlar {n} dakika gecikmeli. Diğer rakamlar son kapanışa ait.',
     sharesClose: '{date} kapanışı. Canlı fiyat alınamadı.',
@@ -1242,7 +1254,19 @@ export const STRINGS = {
     showMore: 'Show more',
     shareSearch: 'Search shares',
     shareCount: '{n} shares',
-    heldOnly: 'Only ones funds hold',
+    shareFilterOwners: 'How many funds hold it',
+    shareOwnersNone: 'No fund holds it',
+    shareOwnersAtLeast: '{n}+ funds',
+    shareFilterCrowd: 'How much of the company',
+    shareCrowdThin: 'Under 1%',
+    shareCrowdAtLeast: '{n}% or more',
+    shareCrowdHint:
+      'Shares held by funds against the company’s total shares outstanding. ' +
+      'The 12 companies whose share count could not be read are left out.',
+    shareCleanBoards: 'Hide flagged boards',
+    shareCleanBoardsHint:
+      'Boards meeting a sharp run-up plus at least two more conditions. ' +
+      'Each share’s own page says which.',
     sharesUnavailable: 'No share data yet.',
     sharesStamp: 'Prices are {n} minutes delayed. The other figures are from the last close.',
     sharesClose: 'Close of {date}. No live price this session.',
@@ -2782,12 +2806,71 @@ export function decodeScreen(query) {
 // that line of business, and a tile that set a variable and hoped the next page
 // would still be holding it is exactly the bug this replaced.
 
+/**
+ * How many funds have to hold a share, as the control offers it.
+ *
+ * `OWNER_NONE` is the same question from the other end, and it is the one the
+ * checkbox this replaced could not ask: 119 of the 623 listed companies sit in
+ * no fund's portfolio at all, and there was no way to see them.
+ */
+export const OWNER_NONE = 'none';
+export const OWNER_STEPS = [1, 5, 20, 50];
+
+/**
+ * The share of a company the funds own between them, in per cent.
+ *
+ * The steps are low on purpose. The median held company is 0.33% fund-owned and
+ * nineteen in twenty are under 3.6%, so a 25% step would be an empty filter.
+ * `CROWD_THIN` is again the other end: held, but barely.
+ */
+export const CROWD_THIN = 'thin';
+export const CROWD_STEPS = [1, 3, 10];
+
+/**
+ * Narrow the share list to what the view asks for.
+ *
+ * Here rather than inside the page for the reason filterFunds is: a filter that
+ * lives in a render function cannot be tested, and every one of these makes a
+ * claim about what the funds are doing that is worth holding to a test.
+ *
+ * The text search stays in the page. It needs the same matcher the masthead
+ * uses, and it is the one filter whose failure is obvious on sight.
+ */
+export function filterShares(rows, view = {}) {
+  return (rows ?? []).filter((s) => {
+    if (view.theme && s.th !== view.theme) return false;
+
+    const own = s.own ?? null;
+    if (view.owners === OWNER_NONE) {
+      if (own) return false;
+    } else if (view.owners) {
+      if (!(own?.funds >= Number(view.owners))) return false;
+    }
+
+    // Null pctShares is a company whose shares outstanding we could not read,
+    // not a company the funds have barely touched — 12 of the 504 held names.
+    // Letting it through the thin end would be the "unknown is a pass" mistake,
+    // and null < 1 is true in JavaScript, so this has to be explicit.
+    if (view.crowd === CROWD_THIN) {
+      if (!Number.isFinite(own?.pctShares) || own.pctShares >= CROWD_STEPS[0]) return false;
+    } else if (view.crowd) {
+      if (!Number.isFinite(own?.pctShares) || own.pctShares < Number(view.crowd)) return false;
+    }
+
+    if (view.clean && s.spec) return false;
+
+    return true;
+  });
+}
+
 /** A share list's state as a query string. '' when nothing is set. */
 export function encodeShareView(view) {
   const q = new URLSearchParams();
   if (view?.search) q.set('q', view.search);
   if (view?.theme) q.set('theme', view.theme);
-  if (view?.held) q.set('held', '1');
+  if (view?.owners) q.set('owners', String(view.owners));
+  if (view?.crowd) q.set('crowd', String(view.crowd));
+  if (view?.clean) q.set('clean', '1');
   return q.toString();
 }
 
@@ -2799,13 +2882,22 @@ export function encodeShareView(view) {
  * exchange went.
  */
 export function decodeShareView(query) {
-  const out = { search: '', theme: '', held: false };
+  const out = { search: '', theme: '', owners: '', crowd: '', clean: false };
   if (!query) return out;
   const q = new URLSearchParams(String(query).replace(/^[?#]/, ''));
   out.search = q.get('q') ?? '';
   const theme = q.get('theme');
   if (theme && THEME_IDS.includes(theme)) out.theme = theme;
-  out.held = q.get('held') === '1';
+
+  // `held=1` was the checkbox that came before the count, and links carrying it
+  // are already out there. It meant "at least one fund", which is the first step.
+  const owners = q.get('owners') ?? (q.get('held') === '1' ? '1' : '');
+  if (owners === OWNER_NONE || OWNER_STEPS.includes(Number(owners))) out.owners = owners;
+
+  const crowd = q.get('crowd') ?? '';
+  if (crowd === CROWD_THIN || CROWD_STEPS.includes(Number(crowd))) out.crowd = crowd;
+
+  out.clean = q.get('clean') === '1';
   return out;
 }
 

@@ -10,7 +10,8 @@ import {
   ringGeometry, ringPoint, ringPath, spreadLabels, svgN, TURN,
   SPEC_NONE, SPEC_STEPS, SPEC_MIN_EQUITY, bestIndexes, deflateSeries,
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
-  encodeShareView, decodeShareView,
+  encodeShareView, decodeShareView, filterShares,
+  OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -5183,10 +5184,23 @@ const SHARE_COLUMNS = [
 const shareView = {
   search: '',
   theme: '',
-  held: false,
+  // What the funds are doing with the company, as opposed to what the company
+  // is. The split is why these live behind a disclosure and the theme does not:
+  // a line of business is a fact about the listing, these are a fact about who
+  // bought it.
+  owners: '',
+  crowd: '',
+  clean: false,
+  open: false,
   sort: { key: 'cap', dir: 'desc' },
   visible: SHARE_PAGE_SIZE,
 };
+
+/** How many controls beyond the search are narrowing the list. */
+function activeShareFilters() {
+  return [shareView.theme, shareView.owners, shareView.crowd, shareView.clean]
+    .filter(Boolean).length;
+}
 
 /** Companies only. The index also carries ETFs and trusts, which have no P/E. */
 const listedCompanies = () => shares.list.filter((s) => s.kind === 'stock');
@@ -5198,8 +5212,7 @@ function shareResults() {
   const match = queryMatcher(shareView.search);
   let rows = listedCompanies();
   if (match) rows = rows.filter((s) => match(s.c, s.n) != null);
-  if (shareView.theme) rows = rows.filter((s) => s.th === shareView.theme);
-  if (shareView.held) rows = rows.filter((s) => s.own);
+  rows = filterShares(rows, shareView);
 
   const column = SHARE_COLUMNS.find((c) => c.key === shareView.sort.key);
   const dir = shareView.sort.dir === 'asc' ? 1 : -1;
@@ -5220,6 +5233,10 @@ async function renderShareList() {
   // Whatever the hash asks for wins on arrival, exactly as the fund list does,
   // which is what makes a theme link mean the same thing to whoever opens it.
   Object.assign(shareView, decodeShareView(hashQuery()), { visible: SHARE_PAGE_SIZE });
+  // A link that arrives already narrowed opens the panel that narrowed it. The
+  // badge alone would leave the reader looking at a short table wondering what
+  // happened to the rest of the exchange.
+  if (activeShareFilters()) shareView.open = true;
   view.replaceChildren(h('p', { class: 'state-msg' }, T('loading')));
   const loaded = await loadShares();
   if (state.page !== 'shares') return;
@@ -5240,7 +5257,7 @@ async function renderShareList() {
     h('div', { id: 'share-rows' }),
     h('p', { class: 'panel-note', id: 'share-stamp' })
   );
-  drawShares(true);
+  refreshShares();
   // The whole exchange comes back in one request, so every row on the page is
   // priced by a single call.
   ensureQuotes(null).then(() => { if (state.page === 'shares') drawShares(); });
@@ -5260,31 +5277,120 @@ function syncShareUrl() {
   if (next !== location.hash) history.replaceState(null, '', next);
 }
 
-/** Search, theme, held-only and the count. Rendered once per visit. */
+/**
+ * Search, theme, the filter disclosure and the count. Rendered once per visit.
+ *
+ * Built once and never rebuilt, like the fund toolbar and for the same reason:
+ * redrawing it on a keystroke replaces the input under the caret.
+ */
 function shareBar() {
-  return h('div', { class: 'share-bar' },
-    h('input', {
-      type: 'search', class: 'share-search', value: shareView.search,
-      placeholder: T('shareSearch'), 'aria-label': T('shareSearch'),
-      onInput: debounce((e) => {
-        shareView.search = e.target.value;
-        drawShares(true);
-        syncShareUrl();
-      }, 150),
-    }),
-    h('select', {
-      class: 'share-theme', 'aria-label': T('themeLabel'),
-      onChange: (e) => { shareView.theme = e.target.value; drawShares(true); syncShareUrl(); },
+  const panel = h('div', {
+    class: 'filter-panel', id: 'share-filter-panel', hidden: !shareView.open,
+  }, shareFilters());
+
+  // Counted here as well as in refreshShares, so the badge is right on the first
+  // paint of a link that arrives already narrowed.
+  const n = activeShareFilters();
+  const badge = h('span', {
+    class: 'filter-badge', id: 'share-filter-badge', hidden: !n,
+  }, n ? String(n) : '');
+  const toggle = h('button', {
+    type: 'button', class: 'filter-btn',
+    'aria-expanded': String(!!shareView.open), 'aria-controls': 'share-filter-panel',
+    onClick: () => {
+      shareView.open = !shareView.open;
+      panel.hidden = !shareView.open;
+      toggle.setAttribute('aria-expanded', String(!!shareView.open));
     },
-      h('option', { value: '', selected: !shareView.theme }, T('themeAny')),
-      THEME_IDS.map((id) => h('option', { value: id, selected: shareView.theme === id }, themeName(id)))),
-    h('label', { class: 'check' },
+  },
+    h('span', { class: 'filter-icon', 'aria-hidden': 'true' }),
+    T('filterButton'),
+    badge
+  );
+
+  return h('div', { class: 'share-controls' },
+    h('div', { class: 'share-bar' },
       h('input', {
-        type: 'checkbox', checked: shareView.held,
-        onChange: (e) => { shareView.held = e.target.checked; drawShares(true); syncShareUrl(); },
+        type: 'search', class: 'share-search', value: shareView.search,
+        placeholder: T('shareSearch'), 'aria-label': T('shareSearch'),
+        onInput: debounce((e) => {
+          shareView.search = e.target.value;
+          drawShares(true);
+          syncShareUrl();
+        }, 150),
       }),
-      h('span', {}, T('heldOnly'))),
-    h('span', { class: 'share-count', id: 'share-count' })
+      h('select', {
+        class: 'share-theme', 'aria-label': T('themeLabel'),
+        onChange: (e) => { shareView.theme = e.target.value; refreshShares(); },
+      },
+        h('option', { value: '', selected: !shareView.theme }, T('themeAny')),
+        THEME_IDS.map((id) => h('option', { value: id, selected: shareView.theme === id }, themeName(id)))),
+      toggle,
+      h('span', { class: 'share-count', id: 'share-count' })
+    ),
+    panel
+  );
+}
+
+/** Redraw, write the hash, and keep the badge honest. One call, three jobs. */
+function refreshShares() {
+  drawShares(true);
+  syncShareUrl();
+  const badge = document.getElementById('share-filter-badge');
+  if (badge) {
+    const n = activeShareFilters();
+    badge.hidden = !n;
+    badge.textContent = n ? String(n) : '';
+  }
+}
+
+/**
+ * What the funds are doing with each company, as controls.
+ *
+ * The panel is left alone when a filter changes — same rule as the fund side —
+ * so focus stays on the select under your hand rather than jumping to the top.
+ */
+function shareFilters() {
+  const field = (id, labelText, hint, control) =>
+    h('div', { class: 'field' },
+      h('label', { for: id, title: hint || null }, labelText),
+      control);
+
+  return h('div', { class: 'filters' },
+    field('sf-owners', T('shareFilterOwners'), null,
+      h('select', {
+        id: 'sf-owners',
+        onChange: (e) => { shareView.owners = e.target.value; refreshShares(); },
+      },
+        h('option', { value: '', selected: !shareView.owners }, T('all')),
+        // The two ends of one question, in one control. A separate "nobody holds
+        // it" checkbox beside a "held by n funds" select would let the reader ask
+        // for both at once and get an empty table with no explanation.
+        h('option', { value: OWNER_NONE, selected: shareView.owners === OWNER_NONE },
+          T('shareOwnersNone')),
+        OWNER_STEPS.map((n) =>
+          h('option', { value: String(n), selected: shareView.owners === String(n) },
+            T('shareOwnersAtLeast', { n: fmtInt(n, state.lang) }))))),
+
+    field('sf-crowd', T('shareFilterCrowd'), T('shareCrowdHint'),
+      h('select', {
+        id: 'sf-crowd', title: `${T('shareFilterCrowd')} — ${T('shareCrowdHint')}`,
+        onChange: (e) => { shareView.crowd = e.target.value; refreshShares(); },
+      },
+        h('option', { value: '', selected: !shareView.crowd }, T('all')),
+        h('option', { value: CROWD_THIN, selected: shareView.crowd === CROWD_THIN },
+          T('shareCrowdThin')),
+        CROWD_STEPS.map((n) =>
+          h('option', { value: String(n), selected: shareView.crowd === String(n) },
+            T('shareCrowdAtLeast', { n: fmtNum(n, state.lang, 0) }))))),
+
+    h('div', { class: 'field' },
+      h('label', { class: 'check', title: T('shareCleanBoardsHint') },
+        h('input', {
+          type: 'checkbox', checked: shareView.clean,
+          onChange: (e) => { shareView.clean = e.target.checked; refreshShares(); },
+        }),
+        h('span', {}, T('shareCleanBoards'))))
   );
 }
 
