@@ -4068,7 +4068,9 @@
     "m3": 10.93,
     "m6": 21.73,
     "ytd": 29.21,
-    "y1": 47.86
+    "y1": 47.86,
+    "y3": 254.42,
+    "y5": 420.6
   },
   "taxDefaults": {
     "exempt": 0,
@@ -4080,5 +4082,30 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-08-28T21:51:55.953Z"
+  "analyticsBuiltAt": "2026-08-29T10:10:40.235Z",
+  "cashBasis": {
+    "m1": {
+      "from": "index"
+    },
+    "m3": {
+      "from": "index"
+    },
+    "m6": {
+      "from": "index"
+    },
+    "ytd": {
+      "from": "index"
+    },
+    "y1": {
+      "from": "index"
+    },
+    "y3": {
+      "from": "published",
+      "funds": 47
+    },
+    "y5": {
+      "from": "published",
+      "funds": 33
+    }
+  }
 }

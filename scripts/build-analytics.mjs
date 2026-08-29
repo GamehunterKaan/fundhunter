@@ -39,6 +39,12 @@ const DATA = path.join(ROOT, 'data');
 /** A fund first seen this long after the window opens was newly launched/listed. */
 const NEW_FUND_GRACE_DAYS = 14;
 
+/** TEFAS's umbrella for the funds the hurdle is measured over. */
+const MONEY_MARKET_CATEGORY = 'Para Piyasası Şemsiye Fonu';
+
+/** Below this many money-market funds a median is not a hurdle worth quoting. */
+const MIN_CASH_FUNDS = 10;
+
 const log = (...m) => console.log(`[${new Date().toISOString().slice(11, 19)}]`, ...m);
 const round = (n, p = 4) => (n == null ? null : Math.round(n * 10 ** p) / 10 ** p);
 
@@ -66,10 +72,42 @@ async function main() {
   // compared against the benchmark's 3-month return.
   const mmfSeries = bench.filter((b) => b.mmf != null).map((b) => [b.d, b.mmf]);
   const cashReturn = returnOver(mmfSeries, 365);
+  // The hurdle, per horizon.
+  //
+  // The size-weighted money-market index is the measure everywhere it reaches,
+  // and it reaches about a year — it is chained from the fund history on disk,
+  // which is a year deep. The three- and five-year windows exist because TEFAS
+  // publishes those returns per fund, so the hurdle for them is the median
+  // published return of the money-market funds themselves.
+  //
+  // That is a different measurement of the same thing, not a substitution of one
+  // window's figure for another's, which is the line `cashReturnFor` holds. It
+  // is only reasonable because the two agree where they overlap: across the five
+  // shared windows the median runs 0.02 to 1.16 points under the index, the
+  // index being weighted toward the largest and cheapest funds. `cashBasis`
+  // records which was used and over how many funds, so the page can say so.
+  const moneyMarket = funds.filter((f) => f.cat === MONEY_MARKET_CATEGORY);
   const cashReturns = {};
-  for (const hz of HORIZONS) cashReturns[hz.key] = returnForHorizon(mmfSeries, hz.key);
+  const cashBasis = {};
+  for (const hz of HORIZONS) {
+    const derived = returnForHorizon(mmfSeries, hz.key);
+    if (derived != null) {
+      cashReturns[hz.key] = derived;
+      cashBasis[hz.key] = { from: 'index' };
+      continue;
+    }
+    const published = moneyMarket.map((f) => f.r?.[hz.key]).filter((v) => v != null);
+    // Too few money-market funds reach back this far to call it a median of
+    // anything, so the hurdle is absent and the column says so rather than
+    // quoting a figure off three funds.
+    if (published.length < MIN_CASH_FUNDS) continue;
+    cashReturns[hz.key] = round(median(published), 2);
+    cashBasis[hz.key] = { from: 'published', funds: published.length };
+  }
   log(`  cash (money-market) returns: ` +
-    HORIZONS.map((hz) => `${hz.key} ${cashReturns[hz.key] ?? '—'}%`).join(' · '));
+    HORIZONS.map((hz) => `${hz.key} ${cashReturns[hz.key] ?? '—'}%`
+      + (cashBasis[hz.key]?.from === 'published' ? `(${cashBasis[hz.key].funds} funds)` : ''))
+      .join(' · '));
 
   // This script enriches funds.json in place, and the three passes below skip a
   // fund rather than writing a null when they cannot answer for it — so last
@@ -491,6 +529,7 @@ async function main() {
   meta.peerStats = peerStats;
   meta.cashReturn = cashReturn;
   meta.cashReturns = cashReturns;
+  meta.cashBasis = cashBasis;
   meta.taxDefaults = TAX_DEFAULTS;
   meta.factors = FACTORS;
   meta.analyticsBuiltAt = new Date().toISOString();

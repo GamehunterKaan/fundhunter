@@ -147,6 +147,8 @@ export const STRINGS = {
     sortRet3m: '3 Aylık getiri',
     sortRet6m: '6 Aylık getiri',
     sortRet1y: '1 Yıllık getiri',
+    sortRet3y: '3 Yıllık getiri',
+    sortRet5y: '5 Yıllık getiri',
     sortInvestors: 'Yatırımcı sayısı',
     sortRisk: 'Oynaklık (düşükten)',
     sortExcess: 'Para piyasasına göre fazla getiri',
@@ -412,6 +414,13 @@ export const STRINGS = {
       'eşit ağırlıklı hâlinin aksine bu sizin gerçek dağılımınız.',
     portSpec: 'Spekülatif hisse maruziyeti',
     portSpecNote: 'Tuttuğunuz fonların spekülatif görünümlü hisselere ağırlığı, tutarınıza göre.',
+    // --- uzun vadeli getiriler ---
+    cashLongNote:
+      'Bu vadede karşılaştırma ölçütü, para piyasası fonlarının TEFAS’ta ' +
+      'yayımlanan getirilerinin ortancası ({n} fon). Kısa vadelerde kullanılan ' +
+      'büyüklüğe göre ağırlıklı endeks bu kadar geriye gitmiyor; iki yöntemin ' +
+      'çakıştığı pencerelerde fark 1,2 puanı geçmiyor.',
+    horizonThin: 'Bu vadede getirisi olan {n} fon var; kalanı bu kadar eski değil.',
     // --- içine bakış ---
     portLook: 'Gerçekte neye sahipsiniz',
     portLookConc: 'Etkin pozisyon',
@@ -1037,6 +1046,8 @@ export const STRINGS = {
     sortRet3m: '3-month return',
     sortRet6m: '6-month return',
     sortRet1y: '1-year return',
+    sortRet3y: '3-year return',
+    sortRet5y: '5-year return',
     sortInvestors: 'Investor count',
     sortRisk: 'Volatility (lowest first)',
     sortExcess: 'Excess return vs money market',
@@ -1303,6 +1314,13 @@ export const STRINGS = {
       'the equal-weighted version on the dashboard, this is your real mix.',
     portSpec: 'Exposure to speculative shares',
     portSpecNote: 'What your funds hold in shares with a speculative profile, weighted by your money.',
+    // --- long horizons ---
+    cashLongNote:
+      'Over this window the hurdle is the median published return of money-market ' +
+      'funds ({n} of them). The size-weighted index used for the shorter windows ' +
+      'does not reach back this far; where the two overlap they differ by at most ' +
+      '1.2 points.',
+    horizonThin: '{n} funds have a return over this window; the rest are not that old.',
     // --- look-through ---
     portLook: 'What you actually own',
     portLookConc: 'Effective positions',
@@ -1820,9 +1838,29 @@ export const HORIZONS = [
   { key: 'm6', days: 182, labelKey: 'return6m', sortKey: 'ret6m' },
   { key: 'ytd', days: null, labelKey: 'returnYtd', sortKey: 'retYtd' },
   { key: 'y1', days: 365, labelKey: 'return1y', sortKey: 'ret1y' },
+  // The long windows come from TEFAS's own published figures and not from our
+  // price series, which only goes back a year. That is why they can be offered
+  // at all — and why a fund without the record shows nothing rather than a
+  // number worked out over a shorter life. TEFAS reports these for 1,187 and
+  // 622 funds respectively, and null for the rest.
+  { key: 'y3', days: 1096, labelKey: 'return3y', sortKey: 'ret3y' },
+  { key: 'y5', days: 1827, labelKey: 'return5y', sortKey: 'ret5y' },
 ];
 
-export const horizonOf = (key) => HORIZONS.find((hz) => hz.key === key) ?? HORIZONS.at(-1);
+/**
+ * The window everything defaults to.
+ *
+ * Named rather than positional. `horizonOf` used to fall back to
+ * `HORIZONS.at(-1)`, which was y1 only because y1 happened to be last — adding
+ * the three- and five-year windows silently made an unrecognised horizon mean
+ * "five years", a window 622 funds of 2,068 can answer at all.
+ */
+export const DEFAULT_HORIZON = 'y1';
+
+export const horizonOf = (key) =>
+  HORIZONS.find((hz) => hz.key === key)
+  ?? HORIZONS.find((hz) => hz.key === DEFAULT_HORIZON)
+  ?? HORIZONS[0];
 
 // ---------------------------------------------------------------- text
 
@@ -2349,6 +2387,10 @@ export const SORTS = {
   ret3m: (f) => f.r?.m3 ?? -Infinity,
   ret6m: (f) => f.r?.m6 ?? -Infinity,
   ret1y: (f) => f.r?.y1 ?? -Infinity,
+  // A fund with no three-year record sorts last rather than at zero: it did not
+  // return nothing over three years, it was not there for them.
+  ret3y: (f) => f.r?.y3 ?? -Infinity,
+  ret5y: (f) => f.r?.y5 ?? -Infinity,
   risk: (f) => (f.vol == null ? Infinity : f.vol),
   excess: (f) => f._score?.excess ?? -Infinity,
   ratio: (f) => f._score?.ratio ?? -Infinity,
@@ -2541,7 +2583,7 @@ export function defaultScreen() {
       theme: undefined, minTheme: undefined,
     },
     prefs: {
-      tax: 'default', horizon: 'y1', maxRisk: null,
+      tax: 'default', horizon: DEFAULT_HORIZON, maxRisk: null,
       beatsCash: false, retailOnly: false, tradeableOnly: false,
       onlyNew: false, stance: '', maxFee: null, levered: false, crashProof: false,
       minDividend: null, speculative: '',

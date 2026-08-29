@@ -6,7 +6,7 @@ import {
   ringGeometry, ringPoint, ringPath, spreadLabels, TURN,
   compositionSegments, industryComposition, assetBreakdown,
   returnOver, returnYtd, returnForHorizon, volatility, maxDrawdown, indexSeries,
-  alignAndIndex, signOf, HORIZONS, horizonOf, SORTS, STRINGS, LANGS,
+  alignAndIndex, signOf, HORIZONS, horizonOf, DEFAULT_HORIZON, SORTS, STRINGS, LANGS,
   SPEC_NONE, SPEC_MIN_EQUITY, SPEC_STEPS,
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   deflate, deflateSeries, yearOf,
@@ -563,9 +563,26 @@ test('every horizon is wired end to end: label, sort key and sort accessor', () 
   }
 });
 
-test('horizonOf falls back to the longest window rather than crashing', () => {
+test('horizonOf falls back to the default window, not to whichever is last', () => {
   assert.equal(horizonOf('m3').key, 'm3');
+  assert.equal(horizonOf('y5').key, 'y5');
+  // Named, not positional. It used to return HORIZONS.at(-1), which was y1 only
+  // because y1 happened to be last; adding the long windows made an unrecognised
+  // horizon quietly mean "five years", which 622 funds of 2,068 can answer.
+  assert.equal(horizonOf('nonsense').key, DEFAULT_HORIZON);
   assert.equal(horizonOf('nonsense').key, 'y1');
+  assert.equal(horizonOf(undefined).key, 'y1');
+});
+
+test('every horizon the picker offers has a hurdle and a sort', () => {
+  // HORIZONS is the one list of return windows, so anything added to it has to
+  // arrive complete or the ranking silently reads a different field.
+  for (const hz of HORIZONS) {
+    assert.ok(SORTS[hz.sortKey], `${hz.key} has no sort`);
+    assert.ok(STRINGS.tr[hz.labelKey] && STRINGS.en[hz.labelKey], `${hz.key} has no label`);
+    const sortLabel = `sort${hz.sortKey[0].toUpperCase()}${hz.sortKey.slice(1)}`;
+    assert.ok(STRINGS.tr[sortLabel] && STRINGS.en[sortLabel], `${hz.key} has no sort label`);
+  }
 });
 
 test('year-to-date is measured from the previous year close, not the first print', () => {

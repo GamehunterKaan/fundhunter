@@ -2574,6 +2574,10 @@ function renderPrefs() {
   // The hurdle quoted must be the one actually used, over the chosen window.
   const hz = horizonOf(p.horizon);
   const cash = cashReturnFor(scoringContext(), hz.key);
+  const basis = state.meta?.cashBasis?.[hz.key];
+  // Counted off the universe rather than the filtered list: this is a fact about
+  // the window, not about whatever else is switched on.
+  const covered = state.funds.reduce((n, f) => n + (f.r?.[hz.key] != null ? 1 : 0), 0);
 
   const pick = (id, labelText, options, current, onPick, note = null) =>
     h('div', { class: 'field' },
@@ -2680,7 +2684,21 @@ function renderPrefs() {
     h('p', { class: 'prefs-note' },
       cash != null
         ? T('cashHurdle', { period: T(hz.labelKey), n: fmtNum(cash, state.lang, 1) })
-        : T('cashHurdleUnknown'))
+        : T('cashHurdleUnknown')),
+    // Over the long windows the hurdle is a different measurement — the median
+    // of what money-market funds themselves published, rather than the
+    // size-weighted index, which is only a year deep. Same quantity, measured
+    // another way, and the reader is told which they are looking at.
+    basis?.from === 'published'
+      ? h('p', { class: 'prefs-note' }, T('cashLongNote', { n: basis.funds }))
+      : null,
+    // And how many funds can answer over this window at all. A three-year
+    // ranking over 1,187 funds is a different list from a one-year ranking over
+    // 1,994, and saying so is the difference between a short list and a wrong one.
+    covered < state.funds.length
+      ? h('p', { class: 'prefs-note' },
+          T('horizonThin', { n: fmtInt(covered, state.lang) }))
+      : null
   );
 }
 

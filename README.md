@@ -485,6 +485,45 @@ The horizon control drives all of it at once: the return column, the hurdle, the
 ranking and the sort. `HORIZONS` in `core.js` is the only list of windows, and a
 test asserts each one has a label, a sort string and a matching sort accessor.
 
+### Three and five years, from a one-year price series
+
+Seven windows are offered, and the last two do not come from our own data. The
+history on disk is a year deep, so `returnForHorizon` refuses a three-year
+question asked of it — but TEFAS publishes 3y and 5y returns per fund, and those
+were already sitting in `funds.json` unused.
+
+They are reported for **1,187 and 622 funds** of 2,068; TEFAS returns null for
+the rest, and that null is the honest signal that a fund was not there for the
+window. Those funds show nothing, sort last rather than at zero, and are not
+ranked at all — `scoreFund` returns null rather than invent an excess.
+
+The hurdle needed a second source. The money-market index the shorter windows use
+is chained from the same year-deep history, so it cannot reach three years. For
+the long windows the hurdle is instead the **median published return of the
+money-market funds themselves** — 254.4% over three years across 47 of them,
+420.6% over five across 33.
+
+That is a different measurement of the same quantity, not one window's figure
+standing in for another's, which is the line `cashReturnFor` holds. It is only
+reasonable because the two agree where they overlap:
+
+| | m1 | m3 | m6 | ytd | y1 |
+|---|---|---|---|---|---|
+| size-weighted index | 3.40 | 10.93 | 21.73 | 29.21 | 47.86 |
+| median of published | 3.38 | 9.91 | 20.78 | 28.13 | 46.70 |
+
+At most 1.16 points apart, the median running consistently under because the
+index is weighted toward the largest and cheapest funds. `meta.cashBasis` records
+which source each window used and over how many funds, and the preferences panel
+says so on screen rather than leaving the reader to assume one method throughout.
+
+Below ten money-market funds a median is not a hurdle worth quoting, and the
+window simply has none.
+
+One thing the long windows do **not** buy: a longer chart. The price series is
+still a year deep, so a five-year *return* is available and a five-year *line* is
+not.
+
 Peers are derived from **what a fund actually holds**, not TEFAS's umbrella
 category, which files a gold fund and a leveraged equity fund under the same
 label. Eight peer groups, each with its own median.
