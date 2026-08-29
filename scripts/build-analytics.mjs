@@ -572,8 +572,8 @@ async function main() {
         delete fund.spec;
       }
     }
-    log(`  speculative boards: ${flagged.size} listings meet ${MIN_BOARD_FLAGS}+ conditions ` +
-      `including a run-up; of ${answered} funds whose shares could be read, ` +
+    log(`  speculative boards: ${flagged.size} listings meet ${MIN_BOARD_FLAGS}+ of the six ` +
+      `conditions; of ${answered} funds whose shares could be read, ` +
       `${exposed} hold at least one and ${heavy} hold ${SPECULATIVE_HEAVY}% or more ` +
       `of themselves in them`);
 

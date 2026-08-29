@@ -1610,16 +1610,26 @@ export function versusCash(funds, horizon, cashReturns) {
 // misconduct. What the flags say is that this price would be easy to move and
 // hard to argue with — which is exactly what a fund's investor deserves to know
 // before finding out that half of it is in shares like these.
+//
+// Note what that means now the run-up is one condition rather than the gate it
+// once was: a listing can be called out for being expensive and hard to trade
+// without its price having moved at all. That is the intended reading. Every
+// phrase the site puts around these flags describes conditions, and not one of
+// them alleges that anybody did anything.
 
-/** How far a price must have run before the rest of the tests are worth applying. */
+/** How far a price must have run for the run-up condition to count. */
 export const BOARD_RUN_3M = 75;
 export const BOARD_RUN_1Y = 200;
 
 /**
  * The conditions, each a published figure against a threshold.
  *
- * Thresholds sit at roughly the top decile of Borsa İstanbul on each measure,
+ * Thresholds sit at or beyond the top decile of Borsa İstanbul on each measure,
  * so a flag means "unusual for this exchange" rather than "unusual anywhere".
+ * The two run thresholds are stricter than that — 3% and 6% of the exchange
+ * clear them — and deliberately so: a return is the one measure here that
+ * inflation drags upward, and at a true decile a 112% year would qualify when
+ * cash alone pays 48%.
  * Every test returns null when the figure it needs is missing, and a test that
  * could not run is never counted as passed OR failed.
  */
@@ -1686,7 +1696,25 @@ export const BOARD_TESTS = [
   },
 ];
 
-/** How many conditions, the run-up included, before a listing is called out. */
+/**
+ * How many of the six conditions before a listing is called out.
+ *
+ * Any three. The run-up used to be required on top of two others, on the
+ * reasoning that a price which has not moved is an illiquid company rather than
+ * a board being worked. It turned out to exclude the clearest cases: DSTKF is a
+ * quarter-float company at 134× earnings and 44× book, up 251% since January,
+ * and the gate missed it because the run happened in January and February —
+ * outside the three-month window and 23 points short of the one-year bar.
+ *
+ * Requiring a run-up ALSO could not simply be dropped as a test. Nine listings
+ * were carrying it plus exactly two others, so removing it from the count would
+ * have quietly cleared KTLEV, ODINE, TRHOL and six more. Counting it as one
+ * condition among six, required by none, adds eight and loses nothing.
+ *
+ * Three is the floor for a reason. At two, 112 listings qualify, among them
+ * Arçelik, Türk Traktör and Eczacıbaşı — at which point the flag says nothing
+ * except that the exchange is expensive.
+ */
 export const MIN_BOARD_FLAGS = 3;
 
 /**
@@ -1712,11 +1740,10 @@ export function boardFlags(stock) {
     flags,
     tested,
     hit: flags.length,
+    // Still reported, because "it has also run hard" is worth knowing about a
+    // listing that meets the rest. It is no longer required to reach the verdict.
     moved,
-    // The run-up is required. A thin, loss-making, closely-held company whose
-    // price has not moved is an illiquid company, not a board being worked, and
-    // saying otherwise about a real business would be both wrong and unfair.
-    speculative: moved && flags.length >= MIN_BOARD_FLAGS,
+    speculative: flags.length >= MIN_BOARD_FLAGS,
   };
 }
 

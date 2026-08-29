@@ -1257,14 +1257,39 @@ test('an exchange-traded fund is not put through tests written for a company', (
   assert.equal(boardFlags(null), null);
 });
 
-test('the run-up is required, however many other conditions are met', () => {
-  // Thin, loss-making, closely held, dear against book, volatile — and the price
-  // has not moved. That is an illiquid company, not a board being worked, and
-  // calling it one about a real business would be wrong.
+test('a price that has not moved does not clear the others', () => {
+  // Thin, loss-making, closely held, dear against book, volatile, and the price
+  // standing still. The run-up used to be required on top of the rest, which
+  // meant this listing passed as ordinary; now it is five conditions out of six
+  // and the standstill is simply the one it does not meet.
   const still = boardFlags(board({ r: { m3: 4, y1: 11 } }));
   assert.equal(still.hit, 5);
-  assert.equal(still.moved, false);
-  assert.equal(still.speculative, false);
+  assert.equal(still.moved, false, 'still reported, because it is worth knowing');
+  assert.ok(still.speculative);
+});
+
+test('three of the six is the bar, and the run-up is one of the six', () => {
+  // The gate was dropped because it missed the clearest cases: DSTKF is a
+  // quarter-float company at 134x earnings and 44x book, up 251% since January,
+  // and its run fell outside the three-month window and 23 points short of the
+  // one-year bar.
+  const dstkf = board({
+    r: { m3: -5.3, y1: 176.8 }, float: 25, pe: 134.07, pb: 44.21, vola: 5.53,
+    ni: 4.9e9, cap: 655e9, own: { top: [{ v: 26.7e9 }] },
+  });
+  const r = boardFlags(dstkf);
+  assert.deepEqual(r.flags.map((f) => f.id), ['thinFloat', 'noEarnings', 'richBook']);
+  assert.equal(r.moved, false);
+  assert.ok(r.speculative, 'three conditions is three conditions');
+
+  // Two is not enough, and never was. At two the bar catches 112 listings,
+  // Arçelik and Türk Traktör among them.
+  const twoOnly = boardFlags(board({
+    r: { m3: 4, y1: 11 }, float: 60, pb: 1, vola: 2, pe: null, ni: -1,
+    cap: 100e9, own: { top: [{ v: 9e9 }] },
+  }));
+  assert.equal(twoOnly.hit, 2);
+  assert.equal(twoOnly.speculative, false);
 });
 
 test('either window can carry the run-up', () => {
@@ -1276,13 +1301,32 @@ test('either window can carry the run-up', () => {
   assert.ok(boardFlags(board({ r: { y1: 400 } })).moved);
 });
 
-test('three conditions including the run-up is the bar', () => {
+test('any three conditions is the bar', () => {
   const two = board({ float: 60, pb: 1, vola: 2, pe: 8, ni: 5e6, own: null, cap: 10e9 });
   assert.equal(boardFlags(two).hit, 1, 'the run-up alone');
   assert.equal(boardFlags(two).speculative, false);
   const three = board({ float: 60, pb: 1, vola: 9, pe: null, ni: -1, own: null });
   assert.equal(boardFlags(three).hit, 3);
   assert.ok(boardFlags(three).speculative);
+  assert.equal(MIN_BOARD_FLAGS, 3);
+});
+
+test('dropping the run-up as a TEST would have cleared nine listings', () => {
+  // The distinction that decided the shape of this change. Nine listings carry
+  // the run-up plus exactly two others; had the run-up been removed from the
+  // count rather than from the requirement, every one of them — KTLEV, ODINE,
+  // TRHOL among them — would have quietly fallen to two and been cleared.
+  const runUpPlusTwo = boardFlags(board({
+    float: 20, pb: 1, vola: 2, pe: 8, ni: 5e6, own: null, cap: 10e9, r: { m3: 90, y1: 10 },
+  }));
+  assert.deepEqual(runUpPlusTwo.flags.map((f) => f.id), ['runUp', 'thinFloat']);
+  assert.equal(runUpPlusTwo.hit, 2, 'two here, and this one stays clear');
+
+  const withThird = boardFlags(board({
+    float: 20, pb: 1, vola: 9, pe: 8, ni: 5e6, own: null, cap: 10e9, r: { m3: 90, y1: 10 },
+  }));
+  assert.equal(withThird.hit, 3);
+  assert.ok(withThird.speculative, 'the run-up still counts toward the three');
 });
 
 test('a single fund holding a twentieth of a company is the concentration test', () => {
@@ -1311,7 +1355,10 @@ test('the index summary carries the flags only for listings that meet the bar', 
   assert.deepEqual(boardSummary(board()).f,
     ['runUp', 'thinFloat', 'concentrated', 'noEarnings', 'richBook', 'violent']);
   assert.equal(boardSummary(board()).of, 6);
-  assert.equal(boardSummary(board({ r: { m3: 1, y1: 1 } })), null, 'nothing to publish');
+  // A listing that meets nothing but the run-up.
+  assert.equal(boardSummary(board({
+    r: { m3: 90, y1: 1 }, float: 60, pb: 1, vola: 2, pe: 8, ni: 5e6, own: null, cap: 10e9,
+  })), null, 'nothing to publish');
   assert.equal(boardSummary({ kind: 'etf' }), null);
 });
 

@@ -372,12 +372,12 @@ export const STRINGS = {
       'Fon portföyleri KAP bildirimlerinden okunur; bildirimi olmayan fonun ' +
       'içi görünmez.',
     shareMineEmpty: 'Önce portföyüne bir şey ekle.',
-    shareCleanBoards: 'Spekülatif görünümlüleri gizle',
+    shareCleanBoards: 'Spekülatif hisseleri gizle',
     shareCleanBoardsHint:
-      'Sert yükseliş, artı şu koşullardan en az ikisi: düşük halka açıklık, ' +
-      'tek bir fonun büyük pay tutması, arkasında kâr olmaması, defter ' +
-      'değerinin çok üstünde fiyat, sert günlük hareketler. Hangisinin ' +
-      'geçerli olduğu her hissenin kendi sayfasında yazıyor.',
+      'Şu altı koşuldan en az üçünü karşılayanlar: sert yükseliş, düşük halka ' +
+      'açıklık, tek bir fonun büyük pay tutması, arkasında kâr olmaması, defter ' +
+      'değerinin çok üstünde fiyat, sert günlük hareketler. Hangilerinin geçerli ' +
+      'olduğu her hissenin kendi sayfasında yazıyor.',
     sharesUnavailable: 'Hisse verisi henüz yok.',
     sharesStamp: 'Fiyatlar {n} dakika gecikmeli. Diğer rakamlar son kapanışa ait.',
     sharesClose: '{date} kapanışı. Canlı fiyat alınamadı.',
@@ -640,8 +640,8 @@ export const STRINGS = {
     // The conditions live on the share pages, not this one, so the note cannot
     // say "the ones above" — it has to name them.
     specFundNote:
-      'Fonun KAP bildirimindeki hisselerden kaçı şu ölçütleri karşılıyor: sert bir ' +
-      'fiyat yükselişi ve buna eşlik eden en az iki koşul daha — ince halka açıklık, ' +
+      'Fonun KAP bildirimindeki hisselerden kaçı şu altı koşuldan en az üçünü ' +
+      'karşılıyor: sert bir fiyat yükselişi, ince halka açıklık, ' +
       'tek bir fonun büyük payı, fiyatın arkasında kâr olmaması, defter değerinin çok ' +
       'üstü bir fiyat, sert günlük hareketler. Hangileri olduğu her hissenin kendi ' +
       'sayfasında yazıyor. Bir endeks fonu bunları seçmiş olmayabilir — endekste ' +
@@ -1347,12 +1347,12 @@ export const STRINGS = {
       'funds you hold. Fund portfolios come from their KAP filings; a fund ' +
       'without one cannot be seen into.',
     shareMineEmpty: 'Add something to your portfolio first.',
-    shareCleanBoards: 'Hide speculative profiles',
+    shareCleanBoards: 'Hide speculative shares',
     shareCleanBoardsHint:
-      'A sharp run-up, plus at least two more of: a thin free float, one fund ' +
-      'holding a large stake, no earnings behind the price, a price far above ' +
-      'book value, violent daily moves. Each share’s own page says which ones ' +
-      'it meets.',
+      'Shares meeting at least three of six conditions: a sharp run-up, a thin ' +
+      'free float, one fund holding a large stake, no earnings behind the price, ' +
+      'a price far above book value, violent daily moves. Each share’s own page ' +
+      'says which ones it meets.',
     sharesUnavailable: 'No share data yet.',
     sharesStamp: 'Prices are {n} minutes delayed. The other figures are from the last close.',
     sharesClose: 'Close of {date}. No live price this session.',
@@ -1615,8 +1615,8 @@ export const STRINGS = {
     // The conditions live on the share pages, not this one, so the fund-page note
     // cannot say "above" — it has to name them.
     specFundNote:
-      'How much of the fund’s filed equity meets these conditions: a sharp run-up, ' +
-      'plus at least two more of a thin free float, one fund holding a large stake, ' +
+      'How much of the fund’s filed equity meets at least three of six conditions: ' +
+      'a sharp run-up, a thin free float, one fund holding a large stake, ' +
       'no earnings behind the price, a price far above book value, and violent daily ' +
       'moves. Each share’s own page says which. An index fund may not have chosen ' +
       'them — it holds what the index holds — but its investor is exposed to those ' +
@@ -1632,9 +1632,9 @@ export const STRINGS = {
       'Covers funds whose KAP filing could be read and which hold shares. A fund ' +
       'whose filing could not be read is not counted as holding none: unknown is not clean.',
     specNoneFlagged:
-      'This fund holds shares, and none of them meets the conditions for a ' +
-      'speculative profile: a sharp run-up plus at least two more of the conditions ' +
-      'listed on each share’s own page.',
+      'This fund holds shares, and none of them meets three or more of the ' +
+      'conditions for a speculative profile, which are listed on each share’s ' +
+      'own page.',
     // --- the statements ---
     financials: 'Financial statements',
     financialsNote:
