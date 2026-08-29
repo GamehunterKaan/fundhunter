@@ -39,6 +39,18 @@ const DATA = path.join(ROOT, 'data');
 /** A fund first seen this long after the window opens was newly launched/listed. */
 const NEW_FUND_GRACE_DAYS = 14;
 
+/**
+ * The window the factor model is fitted over, in trading days.
+ *
+ * A year — 252 observations for four factors. Pinned rather than "every date
+ * the factors cover", so deepening the benchmark series cannot silently change
+ * what a beta or an alpha on this site means.
+ */
+const FACTOR_WINDOW_DAYS = 252;
+
+/** The last `n` points of an ascending series, or all of it when it is shorter. */
+const windowOf = (series, n) => (series.length > n ? series.slice(-n) : series);
+
 /** TEFAS's umbrella for the funds the hurdle is measured over. */
 const MONEY_MARKET_CATEGORY = 'Para Piyasası Şemsiye Fonu';
 
@@ -485,7 +497,12 @@ async function main() {
     fund.turn = allocationTurnover(allocs);
 
     // --- factor model ---
-    const fundReturns = dailyReturns(prices);
+    // Over a stated window, for the same reason volatility is: the fit used to
+    // run over every date carrying all four factors, which was about a year only
+    // because the money-market factor was. Once that series deepens the fit
+    // would have quietly become a five-year one, blending 2021's regime into
+    // today's betas and moving `alpha` under a panel that never mentioned it.
+    const fundReturns = dailyReturns(windowOf(prices, FACTOR_WINDOW_DAYS));
     const y = [];
     const X = [];
     for (const [date, r] of fundReturns) {

@@ -2286,6 +2286,11 @@ export const HIT_WINDOWS = [
   { key: 'm1', days: 30, labelKey: 'return1m' },
   { key: 'm3', days: 91, labelKey: 'return3m' },
   { key: 'm6', days: 182, labelKey: 'return6m' },
+  // A rolling YEAR, which only became askable once the history went past one.
+  // It needs no guard of its own: `consistency` drops any window with fewer
+  // than MIN_HIT_WINDOWS starts, so against a short series it simply is not
+  // offered, and against five years it is the most telling row of the four.
+  { key: 'y1', days: 365, labelKey: 'return1y' },
 ];
 
 /**
