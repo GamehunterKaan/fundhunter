@@ -24,6 +24,7 @@ import {
   THEME_IDS, MIN_THEME, aggregateHoldings,
 } from '../core.js';
 import { isPriceable, listingOf, WEIGHT_BAND } from '../quotes.js';
+import { periodMonth } from './lib/portfolio.mjs';
 import {
   PEER_GROUPS, TAX_DEFAULTS, FACTORS, LAGGED_FACTORS,
   peerGroupOf, riskBand, stanceOf, leverageOf, netFlow, investorChange,
@@ -50,6 +51,65 @@ const FACTOR_WINDOW_DAYS = 252;
 
 /** The last `n` points of an ascending series, or all of it when it is shorter. */
 const windowOf = (series, n) => (series.length > n ? series.slice(-n) : series);
+
+/** The last day of a "2026-07" month. Day 0 of the next month is the trick. */
+const monthEnd = (ym) => {
+  const [y, m] = String(ym).split('-').map(Number);
+  return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+};
+
+/**
+ * The two dates a filing's weight columns straddle, or null.
+ *
+ * `prevPeriod` is already an ISO month; `period` is a Turkish month name, which
+ * is why periodMonth exists. The dates are month ends and the series lookup
+ * takes the last close on or before each, so a weekend or a holiday closing the
+ * exchange on the 31st costs nothing.
+ */
+function filingWindow(filing) {
+  const to = periodMonth(filing?.period);
+  const from = /^\d{4}-\d{2}$/.test(String(filing?.prevPeriod ?? '')) ? filing.prevPeriod : null;
+  if (!to || !from || from >= to) return null;
+  return [monthEnd(from), monthEnd(to)];
+}
+
+// Growth ratios are asked for the same window thousands of times — once per
+// holder for the popular shares — so they are cached. Only the ratio is kept,
+// never the series: holding 58MB of parsed history in a Map to answer two
+// lookups per file would be a strange way to save a disk read.
+const ratioCache = new Map();
+
+/** How much a `{d, p}` series grew across a window, or null if it cannot say. */
+async function growthOver(file, [from, to]) {
+  const key = `${file}|${from}|${to}`;
+  if (ratioCache.has(key)) return ratioCache.get(key);
+  let out = null;
+  try {
+    let start = null;
+    let end = null;
+    for (const row of parseJsonl(await fs.readFile(file, 'utf8'))) {
+      if (!(row.p > 0)) continue;
+      if (row.d <= from) start = row.p;
+      if (row.d <= to) end = row.p;
+    }
+    out = start > 0 && end > 0 ? end / start : null;
+  } catch {
+    out = null;
+  }
+  ratioCache.set(key, out);
+  return out;
+}
+
+/**
+ * Where a weight would have ended up had the manager not traded.
+ *
+ * A weight is a position's value over the portfolio's, so with no trades it
+ * moves by the share's growth over the fund's. A previous weight of zero is a
+ * position opened during the window, and every point of it is a decision — which
+ * is exactly what `prev * 0 / nav === 0` says.
+ */
+const expectedWeight = (prev, share, nav) =>
+  Number.isFinite(prev) && prev >= 0 && share > 0 && nav > 0 ? (prev * share) / nav : null;
 
 /** TEFAS's umbrella for the funds the hurdle is measured over. */
 const MONEY_MARKET_CATEGORY = 'Para Piyasası Şemsiye Fonu';
@@ -275,6 +335,8 @@ async function main() {
     let readFilings = 0;
     let skipped = 0;
     let unusablePrev = 0;
+    let baselined = 0;
+    let noBaseline = 0;
 
     for (const fund of funds) {
       let filing;
@@ -319,11 +381,27 @@ async function main() {
       const prevUsable = prevTotal <= WEIGHT_BAND[1];
       if (!prevUsable) unusablePrev++;
 
+      // The fund's own growth across the same window the weight columns
+      // straddle. It is the denominator of the passive baseline, and it is per
+      // fund rather than per position, so it is fetched once out here.
+      const window = filingWindow(filing);
+      const navGrowth = window
+        ? await growthOver(path.join(DATA, 'history', `${fund.c}.jsonl`), window)
+        : null;
+
       for (const [ticker, row] of perTicker) {
+        const prev = prevUsable ? row.prev : null;
+        const shareGrowth = window
+          ? await growthOver(path.join(DATA, 'stocks', `${ticker}.jsonl`), window)
+          : null;
+        const expected = expectedWeight(prev, shareGrowth, navGrowth);
+        if (expected == null) noBaseline++;
+        else baselined++;
+
         if (!holders.has(ticker)) holders.set(ticker, []);
         holders.get(ticker).push({
           fund: fund.c, value: row.value, shares: row.shares, weight: row.weight,
-          prev: prevUsable ? row.prev : null,
+          prev, expected,
         });
       }
       // Kept for the speculative pass below, which cannot run until every share
@@ -381,7 +459,8 @@ async function main() {
       `of themselves in them`);
 
     stockFile.ownershipFrom = {
-      filings: readFilings, skipped, unusablePrev, builtAt: new Date().toISOString(),
+      filings: readFilings, skipped, unusablePrev, baselined, noBaseline,
+      builtAt: new Date().toISOString(),
     };
     // Every code the exchange actually lists, in meta.json — 5KB, loaded on boot.
     // A fund page holds tickers the scanner has never heard of (ZPX30, APLIB:
@@ -437,6 +516,8 @@ async function main() {
     log(`  membership: ${Object.keys(meta.themeWeights).length} themes carry ` +
       `${Object.values(meta.themeWeights).reduce((n, m) => n + m.length, 0)} companies, ` +
       `${meta.bist100.length} in a headline index`);
+    log(`  passive drift: ${baselined} of ${baselined + noBaseline} holdings could be ` +
+      `measured against what the market would have done on its own`);
     log(`  share ownership: ${held} of ${stockFile.stocks.length} shares are held by a fund, ` +
       `₺${(ownedValue / 1e9).toFixed(1)}bn in all, from ${readFilings} filings ` +
       `(${skipped} did not reconcile, ${unusablePrev} carry no usable previous weights)`);

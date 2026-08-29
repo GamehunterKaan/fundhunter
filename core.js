@@ -335,6 +335,13 @@ export const STRINGS = {
     shareCrowdHint:
       'Fonların elindeki pay adedinin şirketin toplam pay adedine oranı. ' +
       'Pay adedi okunamayan 12 şirket bu filtrenin dışında kalır.',
+    shareFilterFlow: 'Fonlar ne yapıyor',
+    shareFlowBuying: 'Alıyorlar',
+    shareFlowTrimming: 'Azaltıyorlar',
+    shareFlowHint:
+      'Fiyatın kendiliğinden getirdiği ağırlık değişimi düşüldükten sonra, ' +
+      'önceki bildirime göre ağırlığını artıran fonlar azaltanlardan çok mu. ' +
+      'En az 5 fonun karşılaştırılabildiği hisseler.',
     shareCleanBoards: 'Şüpheli tahtaları gizle',
     shareCleanBoardsHint:
       'Sert yükseliş ve en az iki koşulu daha karşılayan tahtalar. ' +
@@ -733,7 +740,10 @@ export const STRINGS = {
     ownWeight: 'Fondaki ağırlık',
     ownWeightNote: 'Hissenin o fonun portföyündeki payı.',
     ownMove: 'Değişim',
-    ownMoveNote: 'Bir önceki portföy bildirimine göre ağırlık değişimi, puan olarak.',
+    ownMoveNote:
+      'Fonun ağırlığı, fiyatın kendiliğinden getireceği değişim düşüldükten ' +
+      'sonra ne kadar arttı ya da azaldı. Puan olarak. Hisse fondan hızlı ' +
+      'yükseldiğinde ağırlık kendi kendine artar; buradaki rakam o kısmı saymaz.',
     navDash: 'Ana Sayfa',
     dashPopular: 'Bu hafta para girenler',
     dashFlowOut: 'Bu hafta para çıkanlar',
@@ -1263,6 +1273,13 @@ export const STRINGS = {
     shareCrowdHint:
       'Shares held by funds against the company’s total shares outstanding. ' +
       'The 12 companies whose share count could not be read are left out.',
+    shareFilterFlow: 'What the funds are doing',
+    shareFlowBuying: 'Buying',
+    shareFlowTrimming: 'Trimming',
+    shareFlowHint:
+      'Whether more funds raised the share’s weight than cut it since the last ' +
+      'filing, after taking out the drift the price caused on its own. Covers ' +
+      'shares where at least 5 funds could be compared.',
     shareCleanBoards: 'Hide flagged boards',
     shareCleanBoardsHint:
       'Boards meeting a sharp run-up plus at least two more conditions. ' +
@@ -1660,7 +1677,10 @@ export const STRINGS = {
     ownWeight: 'Weight in fund',
     ownWeightNote: 'How much of that fund’s portfolio the share is.',
     ownMove: 'Change',
-    ownMoveNote: 'Change in that weight since the previous filing, in percentage points.',
+    ownMoveNote:
+      'How far the fund moved the weight beyond where the price would have ' +
+      'carried it on its own, in points. A weight climbs by itself whenever the ' +
+      'share outruns the fund, and that part is not counted here.',
     navDash: 'Dashboard',
     dashPopular: 'Money in this week',
     dashFlowOut: 'Money out this week',
@@ -2827,6 +2847,24 @@ export const CROWD_THIN = 'thin';
 export const CROWD_STEPS = [1, 3, 10];
 
 /**
+ * Which way the funds moved, net of what the price did on its own.
+ *
+ * The counts behind it come from analytics.js, where a holder counts as adding
+ * only when it moved its weight past where the market would have carried it.
+ * Without that correction this control would rank shares by their own return.
+ */
+export const FLOW_WAYS = ['buying', 'trimming'];
+
+/**
+ * Below this many comparable holders, "the funds are buying" is one manager.
+ *
+ * Two funds out of three is a headline; two out of three funds where the third
+ * is the only other holder is not. The bar is deliberately low — it throws away
+ * the shares nobody covers, not the small ones.
+ */
+export const MIN_FLOW_HOLDERS = 5;
+
+/**
  * Narrow the share list to what the view asks for.
  *
  * Here rather than inside the page for the reason filterFunds is: a filter that
@@ -2857,6 +2895,14 @@ export function filterShares(rows, view = {}) {
       if (!Number.isFinite(own?.pctShares) || own.pctShares < Number(view.crowd)) return false;
     }
 
+    if (view.flow) {
+      // A share whose holders' drift could not be worked out has no direction,
+      // and "no direction" is not "flat" — it stays out of both answers.
+      if (!(own?.compared >= MIN_FLOW_HOLDERS)) return false;
+      const net = own.adding - own.trimming;
+      if (view.flow === 'buying' ? !(net > 0) : !(net < 0)) return false;
+    }
+
     if (view.clean && s.spec) return false;
 
     return true;
@@ -2870,6 +2916,7 @@ export function encodeShareView(view) {
   if (view?.theme) q.set('theme', view.theme);
   if (view?.owners) q.set('owners', String(view.owners));
   if (view?.crowd) q.set('crowd', String(view.crowd));
+  if (view?.flow) q.set('flow', String(view.flow));
   if (view?.clean) q.set('clean', '1');
   return q.toString();
 }
@@ -2882,7 +2929,7 @@ export function encodeShareView(view) {
  * exchange went.
  */
 export function decodeShareView(query) {
-  const out = { search: '', theme: '', owners: '', crowd: '', clean: false };
+  const out = { search: '', theme: '', owners: '', crowd: '', flow: '', clean: false };
   if (!query) return out;
   const q = new URLSearchParams(String(query).replace(/^[?#]/, ''));
   out.search = q.get('q') ?? '';
@@ -2896,6 +2943,9 @@ export function decodeShareView(query) {
 
   const crowd = q.get('crowd') ?? '';
   if (crowd === CROWD_THIN || CROWD_STEPS.includes(Number(crowd))) out.crowd = crowd;
+
+  const flow = q.get('flow') ?? '';
+  if (FLOW_WAYS.includes(flow)) out.flow = flow;
 
   out.clean = q.get('clean') === '1';
   return out;

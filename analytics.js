@@ -768,10 +768,18 @@ export const MAX_WEIGHT_MOVE = 100;
  * rather than picking a winner silently.
  *
  * The movement half is measured over `compared` holders only — the ones whose
- * filing carried a usable previous weight, about three quarters of them. A blank
- * previous weight is a filer leaving a column empty, not a position opened this
- * month, and counting it as the latter would have every share on the exchange
- * being bought by everybody.
+ * filing carried a usable previous weight AND whose passive drift could be
+ * worked out. A blank previous weight is a filer leaving a column empty, not a
+ * position opened this month, and counting it as the latter would have every
+ * share on the exchange being bought by everybody.
+ *
+ * A holder counts as adding when it moved its weight BEYOND where the market
+ * would have carried it on its own. That distinction is the whole measure: a
+ * weight rises by itself whenever the share outruns the fund, and counting raw
+ * weight changes made "the funds are buying" correlate 0.78 with the share's
+ * own return over the same window — a price screen wearing a hat. Against the
+ * corrected count that correlation is −0.18. The baseline is `expected`, which
+ * the build supplies because it is the half that needs the price series.
  *
  * The movement is reported as a COUNT and never as a sum of lira. Pricing each
  * weight change at the fund's current size is arithmetic anyone can do and it
@@ -788,9 +796,20 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
   const rows = (holders ?? []).filter((h) => Number.isFinite(h?.value));
   if (!rows.length) return null;
 
-  const moveOf = (h) => {
-    if (!Number.isFinite(h.weight) || !Number.isFinite(h.prev)) return null;
-    const move = h.weight - h.prev;
+  // What the fund actually did, with the market's own contribution taken out.
+  //
+  // `expected` is where the weight would have ended up had the manager not
+  // traded: the previous weight grown by the share's return and shrunk by the
+  // fund's, since a weight is the ratio of the two. Anything beyond it is a
+  // decision.
+  //
+  // The denominator is NAV per unit, which excludes subscriptions. That makes
+  // this a statement about EXPOSURE — whether the fund gave this company more of
+  // the portfolio than the market handed it — rather than about share counts,
+  // which no TEFAS filing discloses on both sides of the window.
+  const activeOf = (h) => {
+    if (!Number.isFinite(h.weight) || !Number.isFinite(h.expected)) return null;
+    const move = h.weight - h.expected;
     return Math.abs(move) > MAX_WEIGHT_MOVE ? null : move;
   };
 
@@ -803,7 +822,7 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
   for (const h of rows) {
     value += h.value;
     if (Number.isFinite(h.shares)) held += h.shares;
-    const move = moveOf(h);
+    const move = activeOf(h);
     if (move == null) continue;
     compared++;
     if (move > 0) adding++;
@@ -818,7 +837,10 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
       c: h.fund,
       v: Math.round(h.value),
       w: Number.isFinite(h.weight) ? round2(h.weight) : null,
-      m: moveOf(h) == null ? null : round2(moveOf(h)),
+      // The same measure the counts above use, so the table and the sentence
+      // over it cannot disagree. Null rather than the raw weight change when the
+      // drift is unknown: a number meaning something else is worse than none.
+      m: activeOf(h) == null ? null : round2(activeOf(h)),
     }));
 
   return {

@@ -646,9 +646,9 @@ test('themeExposure withholds rather than dividing by nothing', () => {
 
 test('ownership adds up who holds a share and how much of the company that is', () => {
   const own = ownership([
-    { fund: 'AAA', value: 100e6, shares: 1e6, weight: 5, prev: 4 },
-    { fund: 'BBB', value: 300e6, shares: 3e6, weight: 2, prev: 3 },
-    { fund: 'CCC', value: 50e6, shares: 0.5e6, weight: 1, prev: 1 },
+    { fund: 'AAA', value: 100e6, shares: 1e6, weight: 5, prev: 4, expected: 4.4 },
+    { fund: 'BBB', value: 300e6, shares: 3e6, weight: 2, prev: 3, expected: 3.3 },
+    { fund: 'CCC', value: 50e6, shares: 0.5e6, weight: 1, prev: 1, expected: 1 },
   ], { shares: 100e6, cap: 10e9 });
 
   assert.equal(own.funds, 3);
@@ -656,20 +656,36 @@ test('ownership adds up who holds a share and how much of the company that is', 
   assert.equal(own.shares, 4.5e6);
   assert.equal(own.pctShares, 4.5, 'share counts against the exchange listing');
   assert.equal(own.pctCap, 4.5, 'and lira against market value, which should agree');
-  assert.equal(own.adding, 1);
-  assert.equal(own.trimming, 1);
+  assert.equal(own.adding, 1, 'AAA is above where the market would have left it');
+  assert.equal(own.trimming, 1, 'BBB is below it');
   assert.equal(own.compared, 3, 'a position that did not move is still compared');
   assert.equal(own.top[0].c, 'BBB', 'largest holder first, by lira not by weight');
-  assert.equal(own.top[0].m, -1, 'and its move in percentage points');
+  assert.equal(own.top[0].m, -1.3, 'and its move against the baseline, in points');
 });
 
-test('a blank previous weight is not a new position', () => {
-  // Three quarters of filings carry a previous weight; the rest leave the column
-  // empty. Reading the empty ones as "opened this month" would have every share
-  // on the exchange being bought by everybody.
+test('a weight the price carried up on its own is not a purchase', () => {
+  // The whole reason the baseline exists. Both funds ended the month at 6% from
+  // 5%, but the share outran one fund and lagged the other. Counting the raw
+  // weight change would call both of them buyers, and did: it made "the funds
+  // are buying" correlate 0.78 with the share's own return over the window.
   const own = ownership([
-    { fund: 'AAA', value: 100e6, weight: 5, prev: null },
-    { fund: 'BBB', value: 100e6, weight: 5, prev: 4 },
+    { fund: 'RODE', value: 10e6, weight: 6, prev: 5, expected: 6.5 },
+    { fund: 'BOUGHT', value: 10e6, weight: 6, prev: 5, expected: 5.2 },
+  ], {});
+  assert.equal(own.compared, 2);
+  assert.equal(own.adding, 1, 'only the one that beat the drift');
+  assert.equal(own.trimming, 1, 'the other let its exposure fall behind');
+  const rode = own.top.find((t) => t.c === 'RODE');
+  assert.ok(rode.m < 0, 'a rising weight can still be a retreat');
+});
+
+test('a holder with no baseline casts no vote', () => {
+  // A blank previous weight is a filer leaving a column empty, and a missing
+  // price series is a share we cannot follow. Neither is a position opened this
+  // month, and reading them that way would have everything bought by everybody.
+  const own = ownership([
+    { fund: 'AAA', value: 100e6, weight: 5, prev: null, expected: null },
+    { fund: 'BBB', value: 100e6, weight: 5, prev: 4, expected: 4 },
   ], {});
   assert.equal(own.funds, 2, 'both still count as holders');
   assert.equal(own.compared, 1, 'only one can be compared');
@@ -678,13 +694,23 @@ test('a blank previous weight is not a new position', () => {
   assert.equal(own.top[0].m, null, 'and the uncomparable one shows no move');
 });
 
+test('a position opened during the window is bought outright', () => {
+  // Nothing grown by anything is still nothing, so the baseline is zero and
+  // every point of the new weight is a decision.
+  const own = ownership([{ fund: 'AAA', value: 10e6, weight: 3, prev: 0, expected: 0 }], {});
+  assert.equal(own.compared, 1);
+  assert.equal(own.adding, 1);
+  assert.equal(own.top[0].m, 3);
+});
+
 test('an impossible weight move is a filing error, not a trade', () => {
-  // A real filing gave last month's ASELS weight as 2,070,000%. A position
-  // cannot move further than the whole portfolio, so the move is dropped — the
-  // fund is still a holder, it just casts no vote on direction.
+  // A real filing gave last month's ASELS weight as 2,070,000%, which carries
+  // straight through into the baseline. A position cannot move further than the
+  // whole portfolio, so the move is dropped — the fund is still a holder, it
+  // just casts no vote on direction.
   const own = ownership([
-    { fund: 'AED', value: 10e6, weight: 6.72, prev: 2070000 },
-    { fund: 'BBB', value: 10e6, weight: 5, prev: 4 },
+    { fund: 'AED', value: 10e6, weight: 6.72, prev: 2070000, expected: 2070000 },
+    { fund: 'BBB', value: 10e6, weight: 5, prev: 4, expected: 4 },
   ], {});
   assert.equal(own.funds, 2);
   assert.equal(own.compared, 1);
@@ -694,7 +720,7 @@ test('an impossible weight move is a filing error, not a trade', () => {
 
 test('a holder list is cut to the holders worth reading', () => {
   const many = Array.from({ length: 40 }, (_, i) => ({
-    fund: `F${i}`, value: (40 - i) * 1e6, weight: 1, prev: 1,
+    fund: `F${i}`, value: (40 - i) * 1e6, weight: 1, prev: 1, expected: 1,
   }));
   const own = ownership(many, {});
   assert.equal(own.funds, 40, 'all of them are counted');
@@ -703,9 +729,13 @@ test('a holder list is cut to the holders worth reading', () => {
 });
 
 test('the move guard is the size of the whole portfolio', () => {
-  const at = ownership([{ fund: 'A', value: 1e6, weight: MAX_WEIGHT_MOVE, prev: 0 }], {});
+  const at = ownership([
+    { fund: 'A', value: 1e6, weight: MAX_WEIGHT_MOVE, prev: 0, expected: 0 },
+  ], {});
   assert.equal(at.compared, 1, 'a position that went from nothing to everything is possible');
-  const past = ownership([{ fund: 'A', value: 1e6, weight: MAX_WEIGHT_MOVE + 1, prev: 0 }], {});
+  const past = ownership([
+    { fund: 'A', value: 1e6, weight: MAX_WEIGHT_MOVE + 1, prev: 0, expected: 0 },
+  ], {});
   assert.equal(past.compared, 0, 'anything past it is a filing error');
 });
 

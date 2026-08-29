@@ -10,7 +10,7 @@ import {
   SPEC_NONE, SPEC_MIN_EQUITY, SPEC_STEPS,
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   encodeShareView, decodeShareView, filterShares,
-  OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS,
+  OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS, MIN_FLOW_HOLDERS,
   deflate, deflateSeries, yearOf,
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
@@ -1275,7 +1275,9 @@ test('a theme survives the trip to the share list', () => {
   assert.equal(decodeShareView(`theme=${THEME_IDS[0]}`).theme, THEME_IDS[0]);
 });
 
-const EMPTY_SHARE_VIEW = { search: '', theme: '', owners: '', crowd: '', clean: false };
+const EMPTY_SHARE_VIEW = {
+  search: '', theme: '', owners: '', crowd: '', flow: '', clean: false,
+};
 
 test('an untouched share list encodes to nothing', () => {
   assert.equal(encodeShareView(EMPTY_SHARE_VIEW), '');
@@ -1285,7 +1287,8 @@ test('an untouched share list encodes to nothing', () => {
 
 test('the share view round-trips', () => {
   const view = {
-    search: 'ASELS', theme: THEME_IDS[1], owners: '20', crowd: '3', clean: true,
+    search: 'ASELS', theme: THEME_IDS[1], owners: '20', crowd: '3',
+    flow: 'buying', clean: true,
   };
   assert.deepEqual(decodeShareView(encodeShareView(view)), view);
 });
@@ -1330,13 +1333,13 @@ test('a crowding step off the list is no filter at all', () => {
 const share = (c, own, extra = {}) => ({ c, kind: 'stock', ...extra, ...(own ? { own } : {}) });
 
 const EXCHANGE = [
-  share('BIGCO', { funds: 90, pctShares: 12.5 }, { th: 'finance' }),
-  share('MIDCO', { funds: 22, pctShares: 3.1 }, { th: 'finance' }),
-  share('SMALLCO', { funds: 6, pctShares: 0.4 }, { th: 'defence' }),
-  share('THINCO', { funds: 1, pctShares: 0.02 }, { th: 'defence' }),
-  share('UNREAD', { funds: 8, pctShares: null }, { th: 'defence' }),
+  share('BIGCO', { funds: 90, pctShares: 12.5, compared: 60, adding: 40, trimming: 20 }, { th: 'finance' }),
+  share('MIDCO', { funds: 22, pctShares: 3.1, compared: 18, adding: 4, trimming: 14 }, { th: 'finance' }),
+  share('SMALLCO', { funds: 6, pctShares: 0.4, compared: 6, adding: 3, trimming: 3 }, { th: 'defence' }),
+  share('THINCO', { funds: 1, pctShares: 0.02, compared: 1, adding: 1, trimming: 0 }, { th: 'defence' }),
+  share('UNREAD', { funds: 8, pctShares: null, compared: 0, adding: 0, trimming: 0 }, { th: 'defence' }),
   share('NOBODY', null, { th: 'defence' }),
-  share('FLAGGED', { funds: 4, pctShares: 2 }, { th: 'finance', spec: { f: ['runUp'], of: 6 } }),
+  share('FLAGGED', { funds: 4, pctShares: 2, compared: 4, adding: 4, trimming: 0 }, { th: 'finance', spec: { f: ['runUp'], of: 6 } }),
 ];
 const codes = (view) => filterShares(EXCHANGE, view).map((s) => s.c);
 
@@ -1365,6 +1368,23 @@ test('crowding leaves out the companies whose share count could not be read', ()
   assert.ok(!codes({ crowd: '1' }).includes('UNREAD'));
   // And a company nobody holds is unheld, not thinly held.
   assert.ok(!codes({ crowd: CROWD_THIN }).includes('NOBODY'));
+});
+
+test('direction needs enough holders to be a direction', () => {
+  // THINCO's one holder added, and one manager is not "the funds". FLAGGED has
+  // four, still under the bar. Both are opinions, neither is a finding.
+  assert.deepEqual(codes({ flow: 'buying' }), ['BIGCO']);
+  assert.deepEqual(codes({ flow: 'trimming' }), ['MIDCO']);
+  assert.equal(MIN_FLOW_HOLDERS, 5);
+});
+
+test('a share with no comparable holders has no direction either way', () => {
+  // UNREAD is held by 8 funds and compared against none of them. That is not
+  // "flat" — it is unanswered, and it belongs in neither answer.
+  for (const way of FLOW_WAYS) assert.ok(!codes({ flow: way }).includes('UNREAD'));
+  for (const way of FLOW_WAYS) assert.ok(!codes({ flow: way }).includes('NOBODY'));
+  // Evenly split is genuinely flat, and that is not a direction either.
+  for (const way of FLOW_WAYS) assert.ok(!codes({ flow: way }).includes('SMALLCO'));
 });
 
 test('hiding flagged boards hides exactly the flagged ones', () => {

@@ -11,7 +11,7 @@ import {
   SPEC_NONE, SPEC_STEPS, SPEC_MIN_EQUITY, bestIndexes, deflateSeries,
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   encodeShareView, decodeShareView, filterShares,
-  OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS,
+  OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -5190,6 +5190,7 @@ const shareView = {
   // bought it.
   owners: '',
   crowd: '',
+  flow: '',
   clean: false,
   open: false,
   sort: { key: 'cap', dir: 'desc' },
@@ -5198,7 +5199,7 @@ const shareView = {
 
 /** How many controls beyond the search are narrowing the list. */
 function activeShareFilters() {
-  return [shareView.theme, shareView.owners, shareView.crowd, shareView.clean]
+  return [shareView.theme, shareView.owners, shareView.crowd, shareView.flow, shareView.clean]
     .filter(Boolean).length;
 }
 
@@ -5383,6 +5384,16 @@ function shareFilters() {
         CROWD_STEPS.map((n) =>
           h('option', { value: String(n), selected: shareView.crowd === String(n) },
             T('shareCrowdAtLeast', { n: fmtNum(n, state.lang, 0) }))))),
+
+    field('sf-flow', T('shareFilterFlow'), T('shareFlowHint'),
+      h('select', {
+        id: 'sf-flow', title: `${T('shareFilterFlow')} — ${T('shareFlowHint')}`,
+        onChange: (e) => { shareView.flow = e.target.value; refreshShares(); },
+      },
+        h('option', { value: '', selected: !shareView.flow }, T('all')),
+        FLOW_WAYS.map((way) =>
+          h('option', { value: way, selected: shareView.flow === way },
+            T(way === 'buying' ? 'shareFlowBuying' : 'shareFlowTrimming'))))),
 
     h('div', { class: 'field' },
       h('label', { class: 'check', title: T('shareCleanBoardsHint') },

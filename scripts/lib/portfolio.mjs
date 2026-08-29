@@ -615,6 +615,14 @@ export function readPeriod(lines) {
   return null;
 }
 
+/** "Temmuz-2026" -> "2026-07". The inverse, for lining a filing up with prices. */
+export function periodMonth(name) {
+  const m = /^(.+)-(\d{4})$/.exec(String(name ?? ''));
+  if (!m) return null;
+  const i = MONTHS.indexOf(m[1]);
+  return i < 0 ? null : `${m[2]}-${String(i + 1).padStart(2, '0')}`;
+}
+
 /** "2026-07" -> "Temmuz-2026", so a fallback reads like a parsed period. */
 export function periodName(month) {
   const m = /^(\d{4})-(\d{2})$/.exec(String(month ?? ''));
