@@ -15,6 +15,7 @@
     "fetch:benchmarks": "node scripts/fetch-benchmarks.mjs",
     "analytics": "node scripts/build-analytics.mjs",
     "fetch:holdings": "node scripts/fetch-holdings.mjs",
+    "archive:weights": "node scripts/archive-weights.mjs",
     "fetch:crashes": "node scripts/fetch-crashes.mjs",
     "fetch:sectors": "node scripts/fetch-sectors.mjs",
     "fetch:stocks": "node scripts/fetch-stocks.mjs",

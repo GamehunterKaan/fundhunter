@@ -56,6 +56,14 @@ jobs:
             ${{ github.event.inputs.month && format('--month {0}', github.event.inputs.month) || '' }} \
             ${{ github.event.inputs.force == 'true' && '--force' || '' }}
 
+      # One compact copy of the period, kept for good. It is what next month's
+      # build compares against, and it is the only way to see a fund that sold
+      # out: four filers in five drop the row rather than leaving a zero behind.
+      # Runs BEFORE the analytics, so a period is archived even if the build
+      # below fails for an unrelated reason.
+      - name: Archive this period's holdings
+        run: node scripts/archive-weights.mjs
+
       # The holdings feed the speculative-exposure figures, the themes and the
       # share-ownership tables, all of which live in funds.json and stocks.json.
       - name: Build analytics

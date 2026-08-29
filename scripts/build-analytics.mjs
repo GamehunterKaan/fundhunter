@@ -100,6 +100,61 @@ async function growthOver(file, [from, to]) {
   return out;
 }
 
+/** The month before an ISO one. "2026-01" -> "2025-12". */
+const monthBefore = (ym) => {
+  const [y, m] = String(ym).split('-').map(Number);
+  return m > 1 ? `${y}-${String(m - 1).padStart(2, '0')}` : `${y - 1}-12`;
+};
+
+// Snapshots are loaded once per month asked for, not once per fund. Most of the
+// 883 filings cover the same period, and a few are late.
+const snapshotCache = new Map();
+
+/**
+ * The filings from the month before `month`, as fund -> ticker -> what it held.
+ *
+ * This is what turns "did the fund buy" from an inference into a measurement: a
+ * share count in two consecutive snapshots cannot be moved by the price, so it
+ * needs no correction and gets none. Null until archive-weights.mjs has run for
+ * two months, and everything downstream falls back to the weight baseline.
+ *
+ * The snapshot's own per-fund period is checked, so a filing that was late and
+ * still carried the older numbers is not compared against itself.
+ */
+async function snapshotBefore(month, listed) {
+  if (!month) return null;
+  const want = monthBefore(month);
+  if (snapshotCache.has(want)) return snapshotCache.get(want);
+
+  let out = null;
+  try {
+    const snapshot = JSON.parse(
+      await fs.readFile(path.join(DATA, 'weights', `${want}.json`), 'utf8'));
+    const funds = new Map();
+    for (const [code, fund] of Object.entries(snapshot.funds ?? {})) {
+      if (fund?.p !== want) continue;
+      const held = new Map();
+      for (const [ticker, isin, shares, value] of fund.h ?? []) {
+        const code2 = String(ticker ?? '').trim().toUpperCase();
+        const key = listed.has(code2) ? code2 : String(isin ?? '').trim().toUpperCase();
+        if (!listed.has(key)) continue;
+        // Positions split across an ISIN row and a ticker row are added up here
+        // exactly as the current month's are, or the two sides would not compare.
+        const row = held.get(key) ?? { shares: 0, value: 0 };
+        row.shares += Number.isFinite(shares) ? shares : 0;
+        row.value += Number.isFinite(value) ? value : 0;
+        held.set(key, row);
+      }
+      if (held.size) funds.set(code, held);
+    }
+    out = funds.size ? funds : null;
+  } catch {
+    out = null;
+  }
+  snapshotCache.set(want, out);
+  return out;
+}
+
 /**
  * Where a weight would have ended up had the manager not traded.
  *
@@ -403,6 +458,11 @@ async function main() {
       // position carries a previous weight, the ones that do not are new.
       const reportsPrev = [...perTicker.values()].some((r) => Number.isFinite(r.prev));
 
+      // What this fund held a month before this filing, if that month was
+      // archived. Keyed off the filing's own period so a late one lines up.
+      const month = periodMonth(filing.period);
+      const before = (await snapshotBefore(month, listed))?.get(fund.c) ?? null;
+
       const window = filingWindow(filing);
       const navGrowth = window
         ? await growthOver(path.join(DATA, 'history', `${fund.c}.jsonl`), window)
@@ -415,7 +475,14 @@ async function main() {
         // Sold out during the window: the row survives at zero because the filer
         // chose to leave it there. Most do not — they simply stop listing the
         // position — so this counts the departures that were written down.
-        const left = !(row.value > 0) && !(row.weight > 0) && row.prev > 0;
+        const was = before?.get(ticker) ?? null;
+        // Nothing in it now, and either witness saying there was something in it
+        // before. The snapshot is the better witness — it settles the question
+        // outright — but a filer who left a zero behind is telling us the same
+        // thing, and dropping that because a snapshot exists would lose exits the
+        // archive has not reached back far enough to cover.
+        const empty = !(row.value > 0) && !(row.weight > 0);
+        const left = empty && (was?.value > 0 || row.prev > 0);
         const opened = prevUsable && reportsPrev
           && !Number.isFinite(row.prev) && row.weight > 0;
         const prev = prevUsable ? (opened ? 0 : row.prev) : null;
@@ -432,8 +499,29 @@ async function main() {
         holders.get(ticker).push({
           fund: fund.c, value: row.value, shares: row.shares, weight: row.weight,
           prev, expected, opened, left, good: beatCash.has(fund.c),
+          // Only a positive count is a baseline to subtract from. A zero here
+          // would read as "held none last month", which is the opened case, and
+          // the snapshot cannot tell a genuine zero from an unfiled row.
+          sharesBefore: was?.shares > 0 ? was.shares : null,
         });
       }
+      // A share in last month's snapshot that this month's filing does not list
+      // at all. This is the exit the filings themselves cannot report: four in
+      // five filers simply drop the row, and until now those funds vanished from
+      // the arithmetic as though they had never held it.
+      if (before) {
+        for (const [ticker, was] of before) {
+          if (perTicker.has(ticker) || !(was.value > 0)) continue;
+          if (!holders.has(ticker)) holders.set(ticker, []);
+          holders.get(ticker).push({
+            fund: fund.c, value: 0, shares: 0, weight: 0, prev: null,
+            expected: null, opened: false, left: true,
+            good: beatCash.has(fund.c), sharesBefore: was.shares,
+          });
+          leftCount++;
+        }
+      }
+
       // Kept for the speculative pass below, which cannot run until every share
       // has its flags and every share needs this loop's ownership figures first.
       // Re-reading 880 filings to get back to the same numbers would be silly.
@@ -550,6 +638,7 @@ async function main() {
       `measured against what the market would have done on its own`);
     log(`  quality of holders: ${beatCash.size} of ${funds.length} funds beat cash over a year`);
     log(`  positions opened since the previous filing: ${openedCount}, sold out: ${leftCount}`);
+    log(`  previous snapshots: ${[...snapshotCache].filter(([, v]) => v).map(([m]) => m).join(', ') || 'none yet — run archive-weights.mjs monthly'}`);
     log(`  share ownership: ${held} of ${stockFile.stocks.length} shares are held by a fund, ` +
       `₺${(ownedValue / 1e9).toFixed(1)}bn in all, from ${readFilings} filings ` +
       `(${skipped} did not reconcile, ${unusablePrev} carry no usable previous weights)`);

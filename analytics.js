@@ -796,12 +796,15 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
   const all = (holders ?? []).filter((h) => Number.isFinite(h?.value));
   if (!all.length) return null;
 
-  // A fund that sold out still files the row, at zero, and it was being counted
-  // as a holder — ASELS read 196 when two of them had gone. It is not a holder
-  // and it does not own any of the company; it is a departure, and it is counted
-  // as one below.
-  const rows = all.filter((h) => !h.left);
-  const left = all.length - rows.length;
+  // A holder is a fund with something in it. A fund that sold out still files
+  // the row, at zero, and it was being counted — ASELS read 196 when one of them
+  // had gone. Testing the lira rather than the departure flag also catches the
+  // phantom rows: a position at zero that we have no evidence was ever held is
+  // not a holder and not a departure either, and it should affect no figure on
+  // the page.
+  const rows = all.filter((h) => h.value > 0);
+  const left = all.filter((h) => h.left === true).length;
+  if (!rows.length && !left) return null;
 
   // What the fund actually did, with the market's own contribution taken out.
   //
@@ -820,20 +823,43 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
     return Math.abs(move) > MAX_WEIGHT_MOVE ? null : move;
   };
 
+  /**
+   * Which way the fund went, by the best instrument available for that holder.
+   *
+   * A share count in two consecutive monthly snapshots is a MEASUREMENT: it
+   * cannot be moved by the price, so no correction is needed and none is
+   * applied. The weight baseline above is an INFERENCE, and a good one, but it
+   * answers a slightly different question — exposure rather than shares — and it
+   * inherits every error in the filer's previous-weight column.
+   *
+   * So the measurement wins wherever a previous snapshot covers the holding, and
+   * the inference covers the rest. `measured` says how much of the count came
+   * from which, because a reader is entitled to know.
+   */
+  const directionOf = (h) => {
+    if (Number.isFinite(h.sharesBefore) && Number.isFinite(h.shares)) {
+      return Math.sign(h.shares - h.sharesBefore);
+    }
+    const move = activeOf(h);
+    return move == null ? null : Math.sign(move);
+  };
+
   let value = 0;
   let held = 0;
   let compared = 0;
+  let measured = 0;
   let adding = 0;
   let trimming = 0;
 
   for (const h of rows) {
     value += h.value;
     if (Number.isFinite(h.shares)) held += h.shares;
-    const move = activeOf(h);
-    if (move == null) continue;
+    const way = directionOf(h);
+    if (way == null) continue;
     compared++;
-    if (move > 0) adding++;
-    else if (move < 0) trimming++;
+    if (Number.isFinite(h.sharesBefore) && Number.isFinite(h.shares)) measured++;
+    if (way > 0) adding++;
+    else if (way < 0) trimming++;
   }
 
   const top = rows
@@ -868,6 +894,10 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
     trimming,
     topWeight: weights.length ? round2(Math.max(...weights)) : null,
     left,
+    // Of `compared`, how many were settled by counting shares in two snapshots
+    // rather than by working back from weights. Zero until a second month of
+    // filings has been archived; from then on it only grows.
+    measured,
     // Holders that did not have the share at the previous filing at all. A
     // position opened outright says more than one nudged up a tenth of a point,
     // and it is the half of "what changed" the filings can actually be held to:

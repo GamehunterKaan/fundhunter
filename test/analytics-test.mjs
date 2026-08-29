@@ -752,6 +752,67 @@ test('positions opened during the window are counted apart', () => {
   assert.equal(own.adding, 2, 'and both added to it');
 });
 
+test('a share count in two snapshots beats working back from weights', () => {
+  // The weight baseline says this fund retreated: it ended at 6% where drift
+  // alone would have carried it to 6.5%. The share count says it bought. The
+  // share count is a measurement and the baseline is an inference, so the
+  // measurement wins — and the reader is told how much of the count came from
+  // where.
+  const own = ownership([
+    {
+      fund: 'AAA', value: 100e6, shares: 1.4e6, sharesBefore: 1e6,
+      weight: 6, prev: 5, expected: 6.5,
+    },
+  ], {});
+  assert.equal(own.compared, 1);
+  assert.equal(own.measured, 1, 'settled by counting shares');
+  assert.equal(own.adding, 1, 'it bought 400,000 shares, whatever the weight did');
+  assert.equal(own.trimming, 0);
+  // The per-fund column stays in weight points, because that is what it is.
+  assert.equal(own.top[0].m, -0.5);
+});
+
+test('without a snapshot the inference still answers', () => {
+  const own = ownership([
+    { fund: 'AAA', value: 100e6, shares: 1.4e6, weight: 6, prev: 5, expected: 6.5 },
+  ], {});
+  assert.equal(own.compared, 1);
+  assert.equal(own.measured, 0, 'nothing was measured');
+  assert.equal(own.trimming, 1, 'and the baseline gets the casting vote');
+});
+
+test('a share count that did not move is not a purchase', () => {
+  const own = ownership([
+    {
+      fund: 'AAA', value: 100e6, shares: 1e6, sharesBefore: 1e6,
+      weight: 9, prev: 5, expected: 5.2,
+    },
+  ], {});
+  assert.equal(own.measured, 1);
+  assert.equal(own.adding, 0, 'the weight nearly doubled and not one share moved');
+  assert.equal(own.trimming, 0);
+  assert.equal(own.compared, 1, 'standing still is still an answer');
+});
+
+test('a position at zero that nothing says was ever held is not a holder', () => {
+  // Filings carry rows like this. It is not a holder, and it is not a departure
+  // either — there is no evidence it ever held anything, so it should move no
+  // number on the page.
+  const own = ownership([
+    { fund: 'REAL', value: 50e6, shares: 1e6, weight: 4, prev: 4, expected: 4 },
+    { fund: 'PHANTOM', value: 0, shares: 0, weight: 0, prev: null, expected: null },
+  ], { shares: 10e6 });
+  assert.equal(own.funds, 1);
+  assert.equal(own.left, 0, 'no evidence of a departure is not a departure');
+  assert.equal(own.value, 50e6);
+  assert.equal(own.pctShares, 10);
+});
+
+test('a share nothing is known about answers nothing', () => {
+  assert.equal(ownership([{ fund: 'PHANTOM', value: 0, weight: 0 }], {}), null);
+  assert.equal(ownership([], {}), null);
+});
+
 test('a holder list is cut to the holders worth reading', () => {
   const many = Array.from({ length: 40 }, (_, i) => ({
     fund: `F${i}`, value: (40 - i) * 1e6, weight: 1, prev: 1, expected: 1,
