@@ -366,6 +366,12 @@ export const STRINGS = {
       'Hisseyi tutan fonlara son 30 günde giren ya da çıkan net paranın, ' +
       'hissenin o fonlardaki ağırlığına düşen kısmı. Fona gelen para mutlaka ' +
       'bu hisseye harcanmaz; yine de alım henüz fiyata girmemiş olur.',
+    shareMine: 'Portföyünde olanlar',
+    shareMineHint:
+      'Doğrudan aldığın hisseler ve fonlarının içinden ulaştığın şirketler. ' +
+      'Fon portföyleri KAP bildirimlerinden okunur; bildirimi olmayan fonun ' +
+      'içi görünmez.',
+    shareMineEmpty: 'Önce portföyüne bir şey ekle.',
     shareCleanBoards: 'Şüpheli tahtaları gizle',
     shareCleanBoardsHint:
       'Sert yükseliş ve en az iki koşulu daha karşılayan tahtalar. ' +
@@ -1333,6 +1339,12 @@ export const STRINGS = {
       'apportioned by how much of each fund the share is. Money arriving at a ' +
       'fund is not necessarily spent here, but it is buying that has not ' +
       'reached the price yet.',
+    shareMine: 'In your portfolio',
+    shareMineHint:
+      'Shares you bought yourself, and the companies you reach through the ' +
+      'funds you hold. Fund portfolios come from their KAP filings; a fund ' +
+      'without one cannot be seen into.',
+    shareMineEmpty: 'Add something to your portfolio first.',
     shareCleanBoards: 'Hide flagged boards',
     shareCleanBoardsHint:
       'Boards meeting a sharp run-up plus at least two more conditions. ' +
@@ -3013,6 +3025,13 @@ export function filterShares(rows, view = {}) {
       if (view.money === 'in' ? own.flow30 < 0 : own.flow30 > 0) return false;
     }
 
+    // The companies the reader's own funds reach, resolved on the page because
+    // it takes their filings and their positions, neither of which belongs in a
+    // data file. A Set or nothing: `mine` alone is a request, and answering a
+    // request for a list we have not loaded by quietly returning the whole
+    // exchange would be the worst of the three options.
+    if (view.mineSet instanceof Set && !view.mineSet.has(s.c)) return false;
+
     if (view.clean && s.spec) return false;
 
     return true;
@@ -3031,6 +3050,7 @@ export function encodeShareView(view) {
   if (view?.good) q.set('good', String(view.good));
   if (view?.fresh) q.set('fresh', String(view.fresh));
   if (view?.money) q.set('money', String(view.money));
+  if (view?.mine) q.set('mine', '1');
   if (view?.clean) q.set('clean', '1');
   return q.toString();
 }
@@ -3045,7 +3065,7 @@ export function encodeShareView(view) {
 export function decodeShareView(query) {
   const out = {
     search: '', theme: '', owners: '', crowd: '', flow: '', conv: '', good: '',
-    fresh: '', money: '', clean: false,
+    fresh: '', money: '', mine: false, clean: false,
   };
   if (!query) return out;
   const q = new URLSearchParams(String(query).replace(/^[?#]/, ''));
@@ -3076,6 +3096,7 @@ export function decodeShareView(query) {
   const money = q.get('money') ?? '';
   if (MONEY_WAYS.includes(money)) out.money = money;
 
+  out.mine = q.get('mine') === '1';
   out.clean = q.get('clean') === '1';
   return out;
 }

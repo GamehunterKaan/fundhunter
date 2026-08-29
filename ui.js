@@ -5181,6 +5181,47 @@ const SHARE_COLUMNS = [
     cell: (s) => fmtPct(s.own?.pctShares, state.lang, { digits: 2 }) },
 ];
 
+/**
+ * Every company the reader reaches, directly or through a fund they hold.
+ *
+ * Kept beside the view rather than in it: the view is what the URL carries, and
+ * this is a few hundred tickers derived from files that have to be fetched. The
+ * key is the portfolio itself, so adding a fund invalidates it and nothing else
+ * has to remember to.
+ */
+let myShares = null;
+let mySharesKey = null;
+
+const portfolioKey = () => Object.keys(state.positions).sort().join(',');
+
+async function loadMyShares() {
+  const key = portfolioKey();
+  if (myShares && mySharesKey === key) return myShares;
+
+  const codes = Object.keys(state.positions);
+  const filings = await loadPortfolioFilings(codes);
+  const set = new Set();
+
+  // A share bought directly is already the thing every fund is being reduced
+  // to. Leaving it out would say you do not own the company you own outright.
+  for (const code of codes) if (shares?.byCode.has(code)) set.add(code);
+
+  // Through the same resolver the build uses, so "Tem.Ver. SASA" reaches SASA
+  // and the answer here matches the ownership figures on the share's own page.
+  for (const rows of Object.values(filings)) {
+    for (const row of rows ?? []) {
+      const listing = listingOf(row);
+      if (listing?.market !== 'bist') continue;
+      const ticker = listing.tickers.find((t) => shares?.byCode.has(t));
+      if (ticker) set.add(ticker);
+    }
+  }
+
+  mySharesKey = key;
+  myShares = set;
+  return set;
+}
+
 /** Filter and sort state for the share list. Survives navigation, like the funds'. */
 const shareView = {
   search: '',
@@ -5196,6 +5237,7 @@ const shareView = {
   good: '',
   fresh: '',
   money: '',
+  mine: false,
   clean: false,
   open: false,
   sort: { key: 'cap', dir: 'desc' },
@@ -5207,7 +5249,7 @@ function activeShareFilters() {
   return [
     shareView.theme, shareView.owners, shareView.crowd, shareView.flow,
     shareView.conv, shareView.good, shareView.fresh, shareView.money,
-    shareView.clean,
+    shareView.mine, shareView.clean,
   ].filter(Boolean).length;
 }
 
@@ -5221,7 +5263,12 @@ function shareResults() {
   const match = queryMatcher(shareView.search);
   let rows = listedCompanies();
   if (match) rows = rows.filter((s) => match(s.c, s.n) != null);
-  rows = filterShares(rows, shareView);
+  // The resolved set, never the flag: filterShares is given a list or nothing,
+  // so a filter whose answer has not arrived yet cannot quietly pass everything.
+  rows = filterShares(rows, {
+    ...shareView,
+    mineSet: shareView.mine ? myShares : null,
+  });
 
   const column = SHARE_COLUMNS.find((c) => c.key === shareView.sort.key);
   const dir = shareView.sort.dir === 'asc' ? 1 : -1;
@@ -5246,6 +5293,13 @@ async function renderShareList() {
   // badge alone would leave the reader looking at a short table wondering what
   // happened to the rest of the exchange.
   if (activeShareFilters()) shareView.open = true;
+  // A link can arrive asking for this, and it needs the filings before it can
+  // mean anything. An empty portfolio simply drops it — somebody else's link
+  // cannot tell this reader what they own.
+  if (shareView.mine) {
+    if (Object.keys(state.positions).length) await loadMyShares();
+    else shareView.mine = false;
+  }
   view.replaceChildren(h('p', { class: 'state-msg' }, T('loading')));
   const loaded = await loadShares();
   if (state.page !== 'shares') return;
@@ -5442,6 +5496,28 @@ function shareFilters() {
         MONEY_WAYS.map((way) =>
           h('option', { value: way, selected: shareView.money === way },
             T(way === 'in' ? 'shareMoneyIn' : 'shareMoneyOut'))))),
+
+    h('div', { class: 'field' },
+      h('label', {
+        class: 'check',
+        title: Object.keys(state.positions).length
+          ? T('shareMineHint')
+          : T('shareMineEmpty'),
+      },
+        h('input', {
+          type: 'checkbox', checked: shareView.mine,
+          disabled: !Object.keys(state.positions).length,
+          onChange: async (e) => {
+            const on = e.target.checked;
+            // Loaded BEFORE the filter turns on, so the table never draws itself
+            // against a list that has not arrived. Six funds is six requests and
+            // they are cached, so this is usually instant and always brief.
+            if (on) await loadMyShares();
+            shareView.mine = on;
+            refreshShares();
+          },
+        }),
+        h('span', {}, T('shareMine')))),
 
     h('div', { class: 'field' },
       h('label', { class: 'check', title: T('shareCleanBoardsHint') },

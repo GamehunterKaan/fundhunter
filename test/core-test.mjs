@@ -1278,7 +1278,7 @@ test('a theme survives the trip to the share list', () => {
 
 const EMPTY_SHARE_VIEW = {
   search: '', theme: '', owners: '', crowd: '', flow: '', conv: '', good: '',
-  fresh: '', money: '', clean: false,
+  fresh: '', money: '', mine: false, clean: false,
 };
 
 test('an untouched share list encodes to nothing', () => {
@@ -1291,7 +1291,7 @@ test('the share view round-trips', () => {
   const view = {
     search: 'ASELS', theme: THEME_IDS[1], owners: '20', crowd: '3',
     flow: 'buying', conv: '5', good: '10', fresh: 'opened', money: 'in',
-    clean: true,
+    mine: true, clean: true,
   };
   assert.deepEqual(decodeShareView(encodeShareView(view)), view);
 });
@@ -1441,6 +1441,26 @@ test('money has a direction, and standing still is not one', () => {
   for (const way of MONEY_WAYS) assert.ok(!codes({ money: way }).includes('SMALLCO'));
   // And an unreadable flow is silence, which is not zero either.
   for (const way of MONEY_WAYS) assert.ok(!codes({ money: way }).includes('THINCO'));
+});
+
+test('the portfolio filter takes a list, never a request for one', () => {
+  // `mine` is what the URL carries; the list of companies it means has to be
+  // resolved on the page, from the reader's own filings. Answering the flag on
+  // its own by returning the whole exchange would be the worst of the options,
+  // so the flag alone does nothing here.
+  assert.equal(codes({ mine: true }).length, EXCHANGE.length);
+  assert.deepEqual(codes({ mineSet: new Set(['MIDCO', 'NOBODY']) }), ['MIDCO', 'NOBODY']);
+  // An empty set means you own nothing on the exchange, which is an answer.
+  assert.deepEqual(codes({ mineSet: new Set() }), []);
+  // Anything that is not a Set is not a list, whatever it looks like.
+  assert.equal(codes({ mineSet: ['MIDCO'] }).length, EXCHANGE.length);
+  assert.equal(codes({ mineSet: null }).length, EXCHANGE.length);
+});
+
+test('the portfolio filter stacks with the rest', () => {
+  const mine = new Set(['BIGCO', 'MIDCO', 'SMALLCO']);
+  assert.deepEqual(codes({ mineSet: mine, conv: '1' }), ['MIDCO', 'SMALLCO']);
+  assert.deepEqual(codes({ mineSet: mine, good: '10' }), ['BIGCO']);
 });
 
 test('hiding flagged boards hides exactly the flagged ones', () => {
