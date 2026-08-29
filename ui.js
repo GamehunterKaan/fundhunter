@@ -12,6 +12,7 @@ import {
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   encodeShareView, decodeShareView, filterShares,
   OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS,
+  CONVICTION_STEPS, GOOD_STEPS,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -5191,6 +5192,8 @@ const shareView = {
   owners: '',
   crowd: '',
   flow: '',
+  conv: '',
+  good: '',
   clean: false,
   open: false,
   sort: { key: 'cap', dir: 'desc' },
@@ -5199,8 +5202,10 @@ const shareView = {
 
 /** How many controls beyond the search are narrowing the list. */
 function activeShareFilters() {
-  return [shareView.theme, shareView.owners, shareView.crowd, shareView.flow, shareView.clean]
-    .filter(Boolean).length;
+  return [
+    shareView.theme, shareView.owners, shareView.crowd, shareView.flow,
+    shareView.conv, shareView.good, shareView.clean,
+  ].filter(Boolean).length;
 }
 
 /** Companies only. The index also carries ETFs and trusts, which have no P/E. */
@@ -5394,6 +5399,26 @@ function shareFilters() {
         FLOW_WAYS.map((way) =>
           h('option', { value: way, selected: shareView.flow === way },
             T(way === 'buying' ? 'shareFlowBuying' : 'shareFlowTrimming'))))),
+
+    field('sf-conv', T('shareFilterConviction'), T('shareConvictionHint'),
+      h('select', {
+        id: 'sf-conv', title: `${T('shareFilterConviction')} — ${T('shareConvictionHint')}`,
+        onChange: (e) => { shareView.conv = e.target.value; refreshShares(); },
+      },
+        h('option', { value: '', selected: !shareView.conv }, T('all')),
+        CONVICTION_STEPS.map((n) =>
+          h('option', { value: String(n), selected: shareView.conv === String(n) },
+            T('shareConvictionAtLeast', { n: fmtNum(n, state.lang, 0) }))))),
+
+    field('sf-good', T('shareFilterGood'), T('shareGoodHint'),
+      h('select', {
+        id: 'sf-good', title: `${T('shareFilterGood')} — ${T('shareGoodHint')}`,
+        onChange: (e) => { shareView.good = e.target.value; refreshShares(); },
+      },
+        h('option', { value: '', selected: !shareView.good }, T('all')),
+        GOOD_STEPS.map((n) =>
+          h('option', { value: String(n), selected: shareView.good === String(n) },
+            T('shareGoodAtLeast', { n: fmtInt(n, state.lang) }))))),
 
     h('div', { class: 'field' },
       h('label', { class: 'check', title: T('shareCleanBoardsHint') },

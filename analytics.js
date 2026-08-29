@@ -843,6 +843,13 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
       m: activeOf(h) == null ? null : round2(activeOf(h)),
     }));
 
+  // The largest weight ANY holder gives the share, not the largest among the
+  // twelve in `top` — those are ranked by lira, and the fund that has made this
+  // company a fifth of itself is usually a small one that would never appear.
+  // It separates a position somebody chose from index filler: 103 of the 504
+  // held companies have no holder above 1%.
+  const weights = rows.map((h) => h.weight).filter(Number.isFinite);
+
   return {
     funds: rows.length,
     value: Math.round(value),
@@ -852,6 +859,11 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
     compared,
     adding,
     trimming,
+    topWeight: weights.length ? round2(Math.max(...weights)) : null,
+    // How many of the holders cleared the money-market hurdle over a year.
+    // "Twelve funds hold it" and "twelve funds that beat cash hold it" are
+    // different statements, and only the second one is an argument.
+    good: rows.filter((h) => h.good === true).length,
     top,
   };
 }

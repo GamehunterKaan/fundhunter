@@ -11,6 +11,7 @@ import {
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   encodeShareView, decodeShareView, filterShares,
   OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS, MIN_FLOW_HOLDERS,
+  CONVICTION_STEPS, GOOD_STEPS,
   deflate, deflateSeries, yearOf,
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
@@ -1276,7 +1277,8 @@ test('a theme survives the trip to the share list', () => {
 });
 
 const EMPTY_SHARE_VIEW = {
-  search: '', theme: '', owners: '', crowd: '', flow: '', clean: false,
+  search: '', theme: '', owners: '', crowd: '', flow: '', conv: '', good: '',
+  clean: false,
 };
 
 test('an untouched share list encodes to nothing', () => {
@@ -1288,7 +1290,7 @@ test('an untouched share list encodes to nothing', () => {
 test('the share view round-trips', () => {
   const view = {
     search: 'ASELS', theme: THEME_IDS[1], owners: '20', crowd: '3',
-    flow: 'buying', clean: true,
+    flow: 'buying', conv: '5', good: '10', clean: true,
   };
   assert.deepEqual(decodeShareView(encodeShareView(view)), view);
 });
@@ -1333,13 +1335,14 @@ test('a crowding step off the list is no filter at all', () => {
 const share = (c, own, extra = {}) => ({ c, kind: 'stock', ...extra, ...(own ? { own } : {}) });
 
 const EXCHANGE = [
-  share('BIGCO', { funds: 90, pctShares: 12.5, compared: 60, adding: 40, trimming: 20 }, { th: 'finance' }),
-  share('MIDCO', { funds: 22, pctShares: 3.1, compared: 18, adding: 4, trimming: 14 }, { th: 'finance' }),
-  share('SMALLCO', { funds: 6, pctShares: 0.4, compared: 6, adding: 3, trimming: 3 }, { th: 'defence' }),
-  share('THINCO', { funds: 1, pctShares: 0.02, compared: 1, adding: 1, trimming: 0 }, { th: 'defence' }),
-  share('UNREAD', { funds: 8, pctShares: null, compared: 0, adding: 0, trimming: 0 }, { th: 'defence' }),
+  // BIGCO is the index name: everybody holds it, nobody holds much of it.
+  share('BIGCO', { funds: 90, pctShares: 12.5, compared: 60, adding: 40, trimming: 20, topWeight: 0.9, good: 25 }, { th: 'finance' }),
+  share('MIDCO', { funds: 22, pctShares: 3.1, compared: 18, adding: 4, trimming: 14, topWeight: 7.5, good: 6 }, { th: 'finance' }),
+  share('SMALLCO', { funds: 6, pctShares: 0.4, compared: 6, adding: 3, trimming: 3, topWeight: 22, good: 0 }, { th: 'defence' }),
+  share('THINCO', { funds: 1, pctShares: 0.02, compared: 1, adding: 1, trimming: 0, topWeight: 0.1, good: 1 }, { th: 'defence' }),
+  share('UNREAD', { funds: 8, pctShares: null, compared: 0, adding: 0, trimming: 0, topWeight: null, good: 2 }, { th: 'defence' }),
   share('NOBODY', null, { th: 'defence' }),
-  share('FLAGGED', { funds: 4, pctShares: 2, compared: 4, adding: 4, trimming: 0 }, { th: 'finance', spec: { f: ['runUp'], of: 6 } }),
+  share('FLAGGED', { funds: 4, pctShares: 2, compared: 4, adding: 4, trimming: 0, topWeight: 12, good: 0 }, { th: 'finance', spec: { f: ['runUp'], of: 6 } }),
 ];
 const codes = (view) => filterShares(EXCHANGE, view).map((s) => s.c);
 
@@ -1385,6 +1388,31 @@ test('a share with no comparable holders has no direction either way', () => {
   for (const way of FLOW_WAYS) assert.ok(!codes({ flow: way }).includes('NOBODY'));
   // Evenly split is genuinely flat, and that is not a direction either.
   for (const way of FLOW_WAYS) assert.ok(!codes({ flow: way }).includes('SMALLCO'));
+});
+
+test('conviction reads the biggest holder, not the number of them', () => {
+  // BIGCO is held by 90 funds and is a rounding error in every one of them.
+  // SMALLCO is held by six and is a fifth of somebody. Only one of those is
+  // a decision, and headcount cannot tell them apart.
+  assert.deepEqual(codes({ conv: '1' }), ['MIDCO', 'SMALLCO', 'FLAGGED']);
+  assert.deepEqual(codes({ conv: '10' }), ['SMALLCO', 'FLAGGED']);
+  assert.ok(!codes({ conv: '1' }).includes('BIGCO'), '90 holders at 0.9% is index filler');
+  // No weight on file is no reading, not a reading of nothing.
+  for (const n of CONVICTION_STEPS) assert.ok(!codes({ conv: String(n) }).includes('UNREAD'));
+});
+
+test('the quality of the holders is a separate question from their number', () => {
+  assert.deepEqual(codes({ good: '10' }), ['BIGCO']);
+  assert.deepEqual(codes({ good: '5' }), ['BIGCO', 'MIDCO']);
+  // SMALLCO has six holders and none of them beat cash.
+  assert.ok(!codes({ good: '1' }).includes('SMALLCO'));
+  assert.ok(GOOD_STEPS.includes(10));
+});
+
+test('conviction and quality pull in different directions, which is the point', () => {
+  // Nothing is both somebody's big bet and widely held by funds that beat cash.
+  assert.deepEqual(codes({ conv: '10', good: '5' }), []);
+  assert.deepEqual(codes({ conv: '1', good: '5' }), ['MIDCO']);
 });
 
 test('hiding flagged boards hides exactly the flagged ones', () => {

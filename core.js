@@ -342,6 +342,17 @@ export const STRINGS = {
       'Fiyatın kendiliğinden getirdiği ağırlık değişimi düşüldükten sonra, ' +
       'önceki bildirime göre ağırlığını artıran fonlar azaltanlardan çok mu. ' +
       'En az 5 fonun karşılaştırılabildiği hisseler.',
+    shareFilterConviction: 'Birinin portföyünde ağırlığı',
+    shareConvictionAtLeast: '%{n} ve üzeri',
+    shareConvictionHint:
+      'Hisseyi tutan fonlar içinde en yüksek ağırlık. Kırk fonun %0,2 ile ' +
+      'tuttuğu şirket kimsenin tercihi değildir; birinin portföyünün %10’u ' +
+      'olan şirket tercihtir.',
+    shareFilterGood: 'Parayı kazanan fonlardan kaçı',
+    shareGoodAtLeast: '{n}+ fon',
+    shareGoodHint:
+      'Son bir yılda para piyasası fonlarının medyanını geçen fonlardan kaçı ' +
+      'bu hisseyi tutuyor. 2.068 fonun 375’i bu eşiği geçiyor. Stopaj öncesi.',
     shareCleanBoards: 'Şüpheli tahtaları gizle',
     shareCleanBoardsHint:
       'Sert yükseliş ve en az iki koşulu daha karşılayan tahtalar. ' +
@@ -1280,6 +1291,17 @@ export const STRINGS = {
       'Whether more funds raised the share’s weight than cut it since the last ' +
       'filing, after taking out the drift the price caused on its own. Covers ' +
       'shares where at least 5 funds could be compared.',
+    shareFilterConviction: 'Weight in someone’s portfolio',
+    shareConvictionAtLeast: '{n}% or more',
+    shareConvictionHint:
+      'The largest weight any holder gives it. A company forty funds hold at ' +
+      '0.2% each is nobody’s idea; one that is a tenth of somebody’s portfolio ' +
+      'is a decision.',
+    shareFilterGood: 'Holders that beat cash',
+    shareGoodAtLeast: '{n}+ funds',
+    shareGoodHint:
+      'How many of its holders beat the median money-market fund over the past ' +
+      'year. 375 of 2,068 funds clear that bar. Before withholding.',
     shareCleanBoards: 'Hide flagged boards',
     shareCleanBoardsHint:
       'Boards meeting a sharp run-up plus at least two more conditions. ' +
@@ -2865,6 +2887,25 @@ export const FLOW_WAYS = ['buying', 'trimming'];
 export const MIN_FLOW_HOLDERS = 5;
 
 /**
+ * How much of its own portfolio somebody has put into the share, in per cent.
+ *
+ * The measure is the LARGEST weight any holder gives it, which is what separates
+ * a position a manager chose from index filler — a company forty funds hold at
+ * 0.2% each is nobody's idea. 103 of the 504 held companies have no holder above
+ * one per cent.
+ */
+export const CONVICTION_STEPS = [1, 5, 10];
+
+/**
+ * How many of the holders beat the money market over the past year.
+ *
+ * "Twelve funds hold it" and "twelve funds that beat cash hold it" are different
+ * statements, and only 375 of 2,068 funds clear that bar, so the steps stay
+ * small: 51 companies have ten such holders and 9 have twenty.
+ */
+export const GOOD_STEPS = [1, 5, 10];
+
+/**
  * Narrow the share list to what the view asks for.
  *
  * Here rather than inside the page for the reason filterFunds is: a filter that
@@ -2903,6 +2944,12 @@ export function filterShares(rows, view = {}) {
       if (view.flow === 'buying' ? !(net > 0) : !(net < 0)) return false;
     }
 
+    // A share with no holder weight on file has no conviction reading, which is
+    // not the same as nobody being convinced.
+    if (view.conv && !(own?.topWeight >= Number(view.conv))) return false;
+
+    if (view.good && !(own?.good >= Number(view.good))) return false;
+
     if (view.clean && s.spec) return false;
 
     return true;
@@ -2917,6 +2964,8 @@ export function encodeShareView(view) {
   if (view?.owners) q.set('owners', String(view.owners));
   if (view?.crowd) q.set('crowd', String(view.crowd));
   if (view?.flow) q.set('flow', String(view.flow));
+  if (view?.conv) q.set('conv', String(view.conv));
+  if (view?.good) q.set('good', String(view.good));
   if (view?.clean) q.set('clean', '1');
   return q.toString();
 }
@@ -2929,7 +2978,10 @@ export function encodeShareView(view) {
  * exchange went.
  */
 export function decodeShareView(query) {
-  const out = { search: '', theme: '', owners: '', crowd: '', flow: '', clean: false };
+  const out = {
+    search: '', theme: '', owners: '', crowd: '', flow: '', conv: '', good: '',
+    clean: false,
+  };
   if (!query) return out;
   const q = new URLSearchParams(String(query).replace(/^[?#]/, ''));
   out.search = q.get('q') ?? '';
@@ -2946,6 +2998,12 @@ export function decodeShareView(query) {
 
   const flow = q.get('flow') ?? '';
   if (FLOW_WAYS.includes(flow)) out.flow = flow;
+
+  const conv = q.get('conv') ?? '';
+  if (CONVICTION_STEPS.includes(Number(conv))) out.conv = conv;
+
+  const good = q.get('good') ?? '';
+  if (GOOD_STEPS.includes(Number(good))) out.good = good;
 
   out.clean = q.get('clean') === '1';
   return out;

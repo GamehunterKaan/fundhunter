@@ -332,6 +332,16 @@ async function main() {
     const listed = new Map(stockFile.stocks.map((s) => [s.c, s]));
     const holders = new Map();
     const perFund = new Map();
+    // Funds that beat the money market over the past year, by the same figure
+    // the hurdle everywhere else on the site uses. Gross of withholding: the tax
+    // a holder pays depends on the fund and on how long they held it, and
+    // neither belongs in a yes-or-no gate on a share list.
+    const beatCash = new Set(
+      Number.isFinite(cashReturns.y1)
+        ? funds.filter((f) => f.r?.y1 > cashReturns.y1).map((f) => f.c)
+        : []
+    );
+
     let readFilings = 0;
     let skipped = 0;
     let unusablePrev = 0;
@@ -401,7 +411,7 @@ async function main() {
         if (!holders.has(ticker)) holders.set(ticker, []);
         holders.get(ticker).push({
           fund: fund.c, value: row.value, shares: row.shares, weight: row.weight,
-          prev, expected,
+          prev, expected, good: beatCash.has(fund.c),
         });
       }
       // Kept for the speculative pass below, which cannot run until every share
@@ -518,6 +528,7 @@ async function main() {
       `${meta.bist100.length} in a headline index`);
     log(`  passive drift: ${baselined} of ${baselined + noBaseline} holdings could be ` +
       `measured against what the market would have done on its own`);
+    log(`  quality of holders: ${beatCash.size} of ${funds.length} funds beat cash over a year`);
     log(`  share ownership: ${held} of ${stockFile.stocks.length} shares are held by a fund, ` +
       `₺${(ownedValue / 1e9).toFixed(1)}bn in all, from ${readFilings} filings ` +
       `(${skipped} did not reconcile, ${unusablePrev} carry no usable previous weights)`);
