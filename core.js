@@ -372,10 +372,12 @@ export const STRINGS = {
       'Fon portföyleri KAP bildirimlerinden okunur; bildirimi olmayan fonun ' +
       'içi görünmez.',
     shareMineEmpty: 'Önce portföyüne bir şey ekle.',
-    shareCleanBoards: 'Şüpheli tahtaları gizle',
+    shareCleanBoards: 'Spekülatif görünümlüleri gizle',
     shareCleanBoardsHint:
-      'Sert yükseliş ve en az iki koşulu daha karşılayan tahtalar. ' +
-      'Koşullar her hissenin kendi sayfasında yazıyor.',
+      'Sert yükseliş, artı şu koşullardan en az ikisi: düşük halka açıklık, ' +
+      'tek bir fonun büyük pay tutması, arkasında kâr olmaması, defter ' +
+      'değerinin çok üstünde fiyat, sert günlük hareketler. Hangisinin ' +
+      'geçerli olduğu her hissenin kendi sayfasında yazıyor.',
     sharesUnavailable: 'Hisse verisi henüz yok.',
     sharesStamp: 'Fiyatlar {n} dakika gecikmeli. Diğer rakamlar son kapanışa ait.',
     sharesClose: '{date} kapanışı. Canlı fiyat alınamadı.',
@@ -1345,10 +1347,12 @@ export const STRINGS = {
       'funds you hold. Fund portfolios come from their KAP filings; a fund ' +
       'without one cannot be seen into.',
     shareMineEmpty: 'Add something to your portfolio first.',
-    shareCleanBoards: 'Hide flagged boards',
+    shareCleanBoards: 'Hide speculative profiles',
     shareCleanBoardsHint:
-      'Boards meeting a sharp run-up plus at least two more conditions. ' +
-      'Each share’s own page says which.',
+      'A sharp run-up, plus at least two more of: a thin free float, one fund ' +
+      'holding a large stake, no earnings behind the price, a price far above ' +
+      'book value, violent daily moves. Each share’s own page says which ones ' +
+      'it meets.',
     sharesUnavailable: 'No share data yet.',
     sharesStamp: 'Prices are {n} minutes delayed. The other figures are from the last close.',
     sharesClose: 'Close of {date}. No live price this session.',

@@ -1461,6 +1461,9 @@ ul.comp-legend {
 .filters {
   display: flex;
   flex-wrap: wrap;
+  /* Bottom-aligned so a bare checkbox sits on the same line as the selects
+   * rather than floating halfway up the label above them. */
+  align-items: flex-end;
   gap: 0.6rem;
   padding: 0.9rem 0 0;
 }
@@ -1478,9 +1481,12 @@ ul.comp-legend {
   color: var(--ink-muted);
 }
 
+/* A checkbox is excluded on purpose. `appearance: none` on one strips the tick
+ * and leaves a blank box that never appears to respond — which is exactly what
+ * it did the day a checkbox was first put in this row. */
 .control,
 .filters select,
-.filters input {
+.filters input:not([type='checkbox']) {
   appearance: none;
   border: 1px solid var(--rule);
   background: var(--surface);

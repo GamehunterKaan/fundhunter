@@ -5497,35 +5497,36 @@ function shareFilters() {
           h('option', { value: way, selected: shareView.money === way },
             T(way === 'in' ? 'shareMoneyIn' : 'shareMoneyOut'))))),
 
-    h('div', { class: 'field' },
-      h('label', {
-        class: 'check',
-        title: Object.keys(state.positions).length
-          ? T('shareMineHint')
-          : T('shareMineEmpty'),
-      },
-        h('input', {
-          type: 'checkbox', checked: shareView.mine,
-          disabled: !Object.keys(state.positions).length,
-          onChange: async (e) => {
-            const on = e.target.checked;
-            // Loaded BEFORE the filter turns on, so the table never draws itself
-            // against a list that has not arrived. Six funds is six requests and
-            // they are cached, so this is usually instant and always brief.
-            if (on) await loadMyShares();
-            shareView.mine = on;
-            refreshShares();
-          },
-        }),
-        h('span', {}, T('shareMine')))),
+    // Bare `.check` labels, exactly as the fund page writes them. Wrapped in a
+    // `.field` they inherited that class's label styling and came out as tiny
+    // uppercase captions, which is not what a checkbox label is.
+    h('label', {
+      class: 'check',
+      title: Object.keys(state.positions).length
+        ? T('shareMineHint')
+        : T('shareMineEmpty'),
+    },
+      h('input', {
+        type: 'checkbox', checked: shareView.mine,
+        disabled: !Object.keys(state.positions).length,
+        onChange: async (e) => {
+          const on = e.target.checked;
+          // Loaded BEFORE the filter turns on, so the table never draws itself
+          // against a list that has not arrived. Six funds is six requests and
+          // they are cached, so this is usually instant and always brief.
+          if (on) await loadMyShares();
+          shareView.mine = on;
+          refreshShares();
+        },
+      }),
+      h('span', {}, T('shareMine'))),
 
-    h('div', { class: 'field' },
-      h('label', { class: 'check', title: T('shareCleanBoardsHint') },
-        h('input', {
-          type: 'checkbox', checked: shareView.clean,
-          onChange: (e) => { shareView.clean = e.target.checked; refreshShares(); },
-        }),
-        h('span', {}, T('shareCleanBoards'))))
+    h('label', { class: 'check', title: T('shareCleanBoardsHint') },
+      h('input', {
+        type: 'checkbox', checked: shareView.clean,
+        onChange: (e) => { shareView.clean = e.target.checked; refreshShares(); },
+      }),
+      h('span', {}, T('shareCleanBoards')))
   );
 }
 
