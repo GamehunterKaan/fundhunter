@@ -83,7 +83,10 @@ const TIMEOUT_MS = 20_000;
  * so both halves of the contract sit on one screen.
  */
 const COLUMNS = [
-  'name', 'description', 'type', 'typespecs', 'sector', 'industry', 'currency',
+  // `logoid` is the slug of the company's mark on TradingView's own asset host,
+  // and it rides along in a request that was being made anyway — 629 of the 647
+  // listings carry one. fetch-logos.mjs turns it into a file in data/logos.
+  'name', 'description', 'logoid', 'type', 'typespecs', 'sector', 'industry', 'currency',
   'close', 'change', 'volume', 'average_volume_10d_calc', 'relative_volume_10d_calc',
   'market_cap_basic', 'total_shares_outstanding_fundamental', 'float_shares_percent_current',
   'price_earnings_ttm', 'price_book_fq', 'price_sales_current', 'enterprise_value_ebitda_ttm',
@@ -203,6 +206,9 @@ function shape(r) {
   return {
     c: r.name,
     n: r.description,
+    // Empty for the eighteen listings TradingView holds no mark for; they show
+    // a monogram instead, so the key is dropped rather than stored blank.
+    lg: r.logoid || undefined,
     // What the listing IS, because the exchange lists three kinds of thing and
     // only one of them has earnings. The share list shows companies; the index
     // carries all of them, so that a fund holding an exchange-traded fund has

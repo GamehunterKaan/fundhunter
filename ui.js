@@ -67,6 +67,12 @@ const state = {
   meta: null,
   funds: [],
   benchmarks: [],
+  /**
+   * What data/logos holds, keyed by share code and by founder string. Empty
+   * until the manifest lands, and empty forever if it does not — every caller
+   * falls back to a monogram, so this is never a thing to wait for.
+   */
+  logos: { stock: {}, manager: {} },
   /** 'list' | 'favs' — both use the same filter bar and table. */
   page: 'list',
   /** Latest live quotes, or null when the feed has not answered this session. */
@@ -171,12 +177,19 @@ async function boot() {
   wireChrome();
 
   try {
-    const [meta, funds] = await Promise.all([
+    const [meta, funds, logos] = await Promise.all([
       fetch(`${DATA}/meta.json`).then(okJson),
       fetch(`${DATA}/funds.json`).then(okJson),
+      // Alongside the other two rather than after them: it is 21KB against
+      // funds.json's 475 and costs nothing in parallel, and a row that draws
+      // before the manifest lands keeps its monogram for the life of the page.
+      // Never fatal — a checkout where the logo build has not run is a site with
+      // monograms, not a site with an error on it.
+      fetch(`${DATA}/logos/index.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
     state.meta = meta;
     state.funds = funds;
+    if (logos) state.logos = { stock: logos.stock ?? {}, manager: logos.manager ?? {} };
     // Benchmarks are optional: the fund pages still work without them.
     state.benchmarks = await fetch(`${DATA}/benchmarks.jsonl`)
       .then((r) => (r.ok ? r.text() : ''))
@@ -1219,6 +1232,7 @@ function dashRow(fund, extra) {
   const est = estimateFor(fund.c);
   return h('a', { class: 'dash-row', href: `#/fon/${fund.c}` },
     h('span', { class: 'dash-top' },
+      mark('manager', fund.f),
       h('span', { class: 'dash-code num' }, fund.c),
       h('span', { class: `dash-last delta ${signOf(fund.ch)}`, title: T('dashLastNote') },
         fmtPct(fund.ch, state.lang, { signed: true, digits: 2 })),
@@ -1849,6 +1863,9 @@ function tileFor(item, series, range, share, quote, redraw, fellBack) {
   return h('div', { class: `watch-tile ${signOf(change)}` },
     h('a', { class: 'watch-head', href: `#/${share ? 'hisse' : 'fon'}/${item.c}`, title: item.n },
       h('span', { class: 'watch-top' },
+        // A watchlist mixes the two: a share wears its own company's mark, a
+        // fund its manager's.
+        share ? mark('stock', item.c) : mark('manager', item.f),
         h('span', { class: 'dash-code num' }, item.c),
         h('span', { class: `delta ${signOf(change)}` },
           fmtPct(change, state.lang, { signed: true, digits: shown === 'd1' ? 2 : 1 }))),
@@ -2818,8 +2835,15 @@ function appendRows(body) {
           compareButton(f.c, syncCompareBar)),
         h('td', { class: COL.code }, h('a', { href: `#/fon/${f.c}` }, f.c)),
         h('td', { class: COL.name },
-          h('a', { class: 'fund-name', href: `#/fon/${f.c}`, title: f.n }, f.n),
-          h('span', { class: 'fund-meta' }, `${f.f} · ${label(catOf(f), state.lang)}`)
+          h('div', { class: 'name-cell' },
+            // A fund has no logo of its own; the mark is its manager's, which is
+            // also the only thing on the row a reader could recognise at a
+            // glance — thirty of these names begin "İŞ PORTFÖY BİRİNCİ".
+            mark('manager', f.f),
+            h('div', { class: 'name-lines' },
+              h('a', { class: 'fund-name', href: `#/fon/${f.c}`, title: f.n }, f.n),
+              h('span', { class: 'fund-meta' }, `${f.f} · ${label(catOf(f), state.lang)}`))
+          )
         ),
         // `data-label` is what the card layout on narrow screens prints above each
         // value, once there is no header row left to read them against.
@@ -3329,6 +3353,7 @@ async function renderDetail(code) {
     h('div', { class: 'detail-head' },
       h('a', { class: 'back-link', href: listHref('/fonlar') }, `← ${T('back')}`),
       h('div', { class: 'detail-id' },
+        mark('manager', fund.f),
         h('div', { class: 'detail-code num' }, fund.c),
         favButton(fund.c),
         // Straight into a comparison carrying this fund. The page it lands on
@@ -3870,10 +3895,6 @@ function renderComposition(fund, segments, latestAlloc, hasNegative) {
 /**
  * A deterministic hue for a security, so the same ticker is always the same
  * colour and the table gains a scannable left edge.
- *
- * Company logos are what a commercial site would use here. Fetching a few
- * hundred of them from a third party on every fund page would be a second
- * runtime dependency for decoration, so a monogram stands in.
  */
 function monogramHue(code) {
   let hash = 0;
@@ -3881,17 +3902,78 @@ function monogramHue(code) {
   return hash;
 }
 
-/** The two-letter mark that leads a holding row. */
-function monogram(position) {
-  const label = String(position.code ?? position.name ?? '?')
+/** The two-letter mark for anything we hold no logo for. */
+function monogramFor(key, text = key) {
+  const label = String(text ?? key ?? '?')
     .replace(/[^A-Za-z0-9ÇĞİÖŞÜçğıöşü]/g, '')
     .slice(0, 2)
     .toUpperCase();
   return h('span', {
-    class: 'holding-mark',
-    style: `--mark-hue:${monogramHue(position.code ?? position.name)}`,
+    class: 'mark mark-monogram',
+    style: `--mark-hue:${monogramHue(key)}`,
     'aria-hidden': 'true',
   }, label || '—');
+}
+
+/**
+ * The mark that leads a row: the real logo where we hold one, a monogram where
+ * we do not.
+ *
+ * `kind` is 'stock' or 'manager' and `key` is the string that side of the
+ * manifest is keyed by — a share code, or a fund's founder exactly as TEFAS
+ * prints it. Both come straight off the row, so no caller has to know that six
+ * of the founder strings are Azimut wearing different hats.
+ *
+ * The key is also what the monogram falls back to, which is why a fund passes
+ * its manager rather than its own code: the mark means the manager either way,
+ * so Astra's nine funds should read as nine Astras and not as nine unrelated
+ * pairs of letters in nine colours.
+ *
+ * Decoration, and marked as such: `alt=""` and aria-hidden, because the code and
+ * the name it sits beside already say what this is, and a screen reader that
+ * announced "Aselsan logo, ASELS, Aselsan" would be reading the same fact three
+ * times. Lazy, because a fund's holdings table is two hundred of these.
+ *
+ * A missing file falls back to the monogram rather than to a broken image: the
+ * manifest and the directory can disagree, most obviously on a checkout where
+ * the logo build has not run.
+ */
+function mark(kind, key, text = key) {
+  const file = state.logos?.[kind]?.[key];
+  if (!file) return monogramFor(key, text);
+
+  const img = h('img', {
+    class: 'mark mark-logo',
+    // The manifest value carries its own directory: a manager whose group is
+    // listed points at the share's file rather than at one of its own, so that
+    // İş Portföy and İş Yatırım are one mark and not two crops of one.
+    src: `${DATA}/logos/${file}`,
+    alt: '',
+    'aria-hidden': 'true',
+    loading: 'lazy',
+    decoding: 'async',
+    onError: () => img.replaceWith(monogramFor(key, text)),
+  });
+  return img;
+}
+
+/**
+ * The mark for a line in a portfolio filing.
+ *
+ * A filing names a position however the manager felt like naming it — a ticker,
+ * an ISIN, a ticker with a pledge mark after it — so the logo is looked up
+ * against the listing that line resolves to rather than against the raw string.
+ */
+function holdingMark(position) {
+  const key = position.code ?? position.name;
+  const listing = listingOf(position);
+  const listed = state.meta?.listedCodes;
+  const ticker = listing?.market === 'bist'
+    ? listing.tickers.find((t) => !listed || listed.includes(t))
+    : null;
+  return ticker && state.logos.stock[ticker]
+    ? mark('stock', ticker, key)
+    : monogramFor(key, key);
 }
 
 /** Movement filters, which read the live quotes rather than the filing. */
@@ -4016,7 +4098,7 @@ function renderHoldings(data) {
 
         cells.push(h('tr', {},
           h('td', { class: 'holding-asset' },
-            monogram(position),
+            holdingMark(position),
             h('span', { class: 'holding-id' },
               h('span', { class: 'holding-code num' },
                 // A Borsa İstanbul line is a company with a page of its own, so
@@ -5162,8 +5244,11 @@ function shareRow(stock, onFav = () => drawShares()) {
     h('td', { class: 'col-code cell-code' },
       h('a', { class: 'num', href: `#/hisse/${stock.c}` }, stock.c)),
     h('td', { class: 'col-name cell-name' },
-      h('a', { href: `#/hisse/${stock.c}` }, stock.n),
-      stock.th ? h('span', { class: 'row-sub' }, themeName(stock.th)) : null),
+      h('div', { class: 'name-cell' },
+        mark('stock', stock.c),
+        h('div', { class: 'name-lines' },
+          h('a', { href: `#/hisse/${stock.c}` }, stock.n),
+          stock.th ? h('span', { class: 'row-sub' }, themeName(stock.th)) : null))),
     SHARE_COLUMNS.map((col) =>
       h('td', { class: `col-figure num-cell${col.delta ? ` delta ${signOf(col.get(stock))}` : ''}` },
         // The dot marks the two cells the exchange is feeding live; the rest of
@@ -5210,6 +5295,7 @@ async function renderShare(code) {
     h('div', { class: 'detail-head' },
       h('a', { class: 'back-link', href: '#/hisseler' }, `← ${T('navShares')}`),
       h('div', { class: 'detail-id' },
+        mark('stock', stock.c),
         h('div', { class: 'detail-code num' }, stock.c),
         favButton(stock.c)
       ),
@@ -5635,9 +5721,12 @@ function portfolioRow(code, series, onChange) {
   const tr = h('tr', { class: 'port-row' },
     h('td', { class: 'col-fav' }, toggle),
     h('td', {},
-      h('a', { class: 'code-link num', href: `#/${share ? 'hisse' : 'fon'}/${code}` }, code),
-      h('span', { class: 'row-sub' }, meta?.n ?? ''),
-      lotsLabel),
+      h('div', { class: 'name-cell' },
+        share ? mark('stock', code) : mark('manager', meta?.f ?? code),
+        h('div', { class: 'name-lines' },
+          h('a', { class: 'code-link num', href: `#/${share ? 'hisse' : 'fon'}/${code}` }, code),
+          h('span', { class: 'row-sub' }, meta?.n ?? ''),
+          lotsLabel))),
     sinceCell,
     unitsCell,
     avgCell,

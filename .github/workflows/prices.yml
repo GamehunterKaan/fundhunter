@@ -83,6 +83,15 @@ jobs:
         continue-on-error: true
         run: node scripts/fetch-stocks.mjs
 
+      # After the shares, because it reads the logoid they bring back, and before
+      # the commit so new marks travel with the data they belong to. Nothing on
+      # the site needs it — every row falls back to a monogram — so a bad minute
+      # on sixty small manager websites must not fail the run that has the
+      # prices in it.
+      - name: Fetch company and manager logos
+        continue-on-error: true
+        run: node scripts/fetch-logos.mjs
+
       - name: Build analytics
         run: node scripts/build-analytics.mjs
 

@@ -19,7 +19,8 @@
     "fetch:sectors": "node scripts/fetch-sectors.mjs",
     "fetch:stocks": "node scripts/fetch-stocks.mjs",
     "fetch:cpi": "node scripts/fetch-cpi.mjs",
-    "build:data": "npm run fetch && npm run fetch:benchmarks && npm run fetch:crashes && npm run fetch:sectors && npm run fetch:stocks && npm run fetch:cpi && npm run analytics",
+    "fetch:logos": "node scripts/fetch-logos.mjs",
+    "build:data": "npm run fetch && npm run fetch:benchmarks && npm run fetch:crashes && npm run fetch:sectors && npm run fetch:stocks && npm run fetch:cpi && npm run fetch:logos && npm run analytics",
     "serve": "node scripts/serve.mjs"
   }
 }

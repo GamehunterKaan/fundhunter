@@ -1876,6 +1876,9 @@ td.col-rank {
 .detail-id .fav-btn {
   font-size: 1.35rem;
 }
+.detail-id .mark {
+  --mark-size: 2rem;
+}
 
 .detail-code {
   font-family: var(--font-mono);
@@ -2109,9 +2112,14 @@ td.col-rank {
 }
 .dash-top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 4.4rem 4.4rem;
+  grid-template-columns: auto minmax(0, 1fr) 4.4rem 4.4rem;
   align-items: baseline;
   gap: 0.4rem;
+}
+.dash-top .mark,
+.watch-top .mark {
+  --mark-size: 1.1rem;
+  align-self: center;
 }
 .dash-rows > .dash-row:first-child {
   border-top: 0;
@@ -2201,9 +2209,11 @@ a.dash-row:hover {
 .watch-top {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: 0.5rem;
   font-size: 0.82rem;
+}
+.watch-top > .delta {
+  margin-left: auto;
 }
 /* The tile takes its colour from the month it is drawing, and the line and wash
  * inherit it — so a red month is red end to end without a second class. */
@@ -2551,27 +2561,77 @@ a.dash-row:hover {
   gap: 0.6rem;
   min-width: 0;
 }
-.holding-mark {
+/* ------------------------------------------------------------------- marks
+ *
+ * The square that leads a row: a company's logo, or the two-letter monogram for
+ * the ninety-odd rows across the site we hold no logo for. One box either way,
+ * so a table whose marks are half logos does not have a ragged left edge.
+ *
+ * Sized by a variable rather than by a class per place, because the only thing
+ * that differs between a list row, a holdings row and a page heading is how big
+ * it is. */
+.mark {
   flex: none;
-  width: 1.85rem;
-  height: 1.85rem;
-  border-radius: 7px;
+  width: var(--mark-size, 1.35rem);
+  height: var(--mark-size, 1.35rem);
+  border-radius: calc(var(--mark-size, 1.35rem) / 4);
   display: grid;
   place-items: center;
+  overflow: hidden;
+}
+.mark-monogram {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: calc(var(--mark-size, 1.35rem) * 0.34);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: hsl(var(--mark-hue) 65% 32%);
   background: hsl(var(--mark-hue) 62% 88%);
   border: 1px solid hsl(var(--mark-hue) 45% 78%);
 }
+/* A constant light ground, in both themes, and deliberately not a themed one.
+ * A good half of these are a dark wordmark on a transparent background — drawn
+ * for the company's own white page — and on this site's dark surface they would
+ * be a black square. The artwork cannot be recoloured, so it is given the page
+ * it was drawn for, one twenty-second of an inch across. */
+.mark-logo {
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--hairline);
+  padding: 1px;
+}
 @media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme='light'])) .holding-mark {
+  :root:where(:not([data-theme='light'])) .mark-monogram {
     color: hsl(var(--mark-hue) 70% 78%);
     background: hsl(var(--mark-hue) 40% 20%);
     border-color: hsl(var(--mark-hue) 35% 32%);
   }
+}
+:root[data-theme='dark'] .mark-monogram {
+  color: hsl(var(--mark-hue) 70% 78%);
+  background: hsl(var(--mark-hue) 40% 20%);
+  border-color: hsl(var(--mark-hue) 35% 32%);
+}
+
+/* The mark and the two lines of text beside it, in a list row. `min-width` on
+ * both is what keeps the ellipsis working: without it the flex item refuses to
+ * shrink below its content and a sixty-character fund name pushes the figures
+ * off the row instead of clipping. */
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.name-lines {
+  min-width: 0;
+}
+
+/* The holdings table's marks are larger — the rows are taller and each carries a
+ * code and a company name — and it is the one place the size was set before
+ * there was anything else to be consistent with. */
+.holding-mark,
+.holding-asset .mark {
+  --mark-size: 1.85rem;
 }
 :root[data-theme='dark'] .holding-mark {
   color: hsl(var(--mark-hue) 70% 78%);
