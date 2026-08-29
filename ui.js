@@ -1082,6 +1082,12 @@ const CHART_RANGES = [
   { key: 'm3', days: 91, labelKey: 'return3m' },
   { key: 'm6', days: 182, labelKey: 'return6m' },
   { key: 'y1', days: 365, labelKey: 'return1y' },
+  // The history reaches five years now, so the windows that were pointless
+  // against a year of prices are worth offering. `all` still floors itself on
+  // the ticked series, so a fund younger than the button simply draws its whole
+  // life rather than an empty axis.
+  { key: 'y3', days: 1096, labelKey: 'return3y', long: true },
+  { key: 'y5', days: 1827, labelKey: 'return5y', long: true },
   { key: 'all', days: null, labelKey: 'rangeAll' },
 ];
 
@@ -1115,7 +1121,10 @@ const WATCH_RANGES = [
   { key: 'd1', days: null, labelKey: 'win1d' },
   // Short labels, because this picker is 60px wide inside a tile rather than a
   // row of buttons across a panel — "3 Months" does not fit and does not need to.
-  ...CHART_RANGES.filter((r) => r.days != null)
+  // The long windows are deliberately not offered here. A five-year line inside
+  // a 60px tile is a smudge, and the tile exists to answer "what has this done
+  // lately" — the fund's own page is where a five-year view belongs.
+  ...CHART_RANGES.filter((r) => r.days != null && !r.long)
     .map((r) => ({ ...r, labelKey: `win${r.key.replace(/^([my])(\d)$/, '$2$1')}` })),
 ];
 
@@ -3060,8 +3069,10 @@ function renderThemes(fund) {
 
   const market = state.meta?.marketYield;
   const peak = entries[0]?.[1] ?? 1;
-  const stat = (dt, dd, cls) =>
-    h('div', { class: 'stat' }, h('dt', {}, dt), h('dd', { class: cls }, dd));
+  const stat = (dt, dd, cls, note = null) =>
+    h('div', { class: 'stat' },
+      h('dt', note ? { title: note } : {}, dt),
+      h('dd', { class: cls }, dd));
 
   return h('section', { class: 'panel' },
     h('h2', {}, T('themeSection')),
@@ -3301,7 +3312,9 @@ async function renderDetail(code) {
       .catch(() => null),
   ]);
   // A late-arriving fetch must not overwrite a page the user already left.
-  if (!location.hash.endsWith(`/${code}`)) return;
+  // Against the route, not the whole hash: the section sits on the hash as a
+  // query and `#/fon/AFA?b=risk` is still the page this fetch was started for.
+  if (hashPath() !== `/fon/${code}`) return;
 
   const prices = history.filter((r) => r.p != null).map((r) => [r.d, r.p]);
   const allocRows = history.filter((r) => r.a).map((r) => [r.d, r.a]);
@@ -3357,21 +3370,150 @@ async function renderDetail(code) {
       )
     ),
     renderStats(fund),
-    renderVsCash(fund),
-    renderPrediction(fund),
-    renderQuality(fund),
-    // Beside the other risk panels rather than beside the holdings table: what
-    // the fund is holding is the table's job, and this is a warning about it.
-    renderSpeculative(fund),
-    renderCrash(fund),
-    renderComposition(fund, segments, latestAlloc, hasNegative),
-    renderThemes(fund),
-    renderHoldings(holdings),
-    allocRows.length > 2 ? renderAllocHistory(allocRows) : null,
-    renderConsistency(prices),
-    prices.length > 5 ? renderFundChart(fund, prices) : h('p', { class: 'panel-note' }, T('noHistory'))
+    ...renderDetailSections([
+      {
+        id: 'ozet',
+        labelKey: 'tabOverview',
+        panels: [
+          prices.length > 5
+            ? renderFundChart(fund, prices)
+            : h('p', { class: 'panel-note' }, T('noHistory')),
+          renderVsCash(fund),
+          renderPrediction(fund),
+        ],
+      },
+      {
+        id: 'getiri',
+        labelKey: 'tabReturns',
+        panels: [renderConsistency(prices), renderDailyTable(prices)],
+      },
+      {
+        id: 'risk',
+        labelKey: 'tabRisk',
+        // Speculative sits with the other risk panels rather than beside the
+        // holdings table: what the fund is holding is the table's job, and
+        // this is a warning about it.
+        panels: [renderQuality(fund), renderSpeculative(fund), renderCrash(fund)],
+      },
+      {
+        id: 'portfoy',
+        labelKey: 'tabHoldings',
+        panels: [
+          renderComposition(fund, segments, latestAlloc, hasNegative),
+          renderThemes(fund),
+          renderHoldings(holdings),
+          allocRows.length > 2 ? renderAllocHistory(allocRows) : null,
+        ],
+      },
+    ])
   ].filter(Boolean));
   window.scrollTo({ top: 0 });
+}
+
+/**
+ * The fund page, cut into sections you switch between.
+ *
+ * Everything under the headline figures used to be one column — chart, cash
+ * comparison, factor model, quality flags, crash record, composition, themes,
+ * the KAP holdings table, the allocation history, the consistency windows and
+ * five years of daily prices, in that order. Fourteen panels is not a page you
+ * read, it is a page you scroll past, and the panel somebody actually came for
+ * was never the one on screen.
+ *
+ * The sections are built in full and swapped in and out of one slot rather than
+ * rebuilt on each press. That is what lets a section keep what you did to it:
+ * the chart holds the range you picked, the daily table holds the days you
+ * unfolded, the holdings table holds its filter — press away and back, and it
+ * is as you left it.
+ *
+ * A section with nothing in it is dropped rather than drawn empty. A fund with
+ * no KAP filing and no crash record has fewer buttons, not two dead ones.
+ */
+function renderDetailSections(sections) {
+  const live = sections
+    .map((s) => ({ ...s, panels: s.panels.filter(Boolean) }))
+    .filter((s) => s.panels.length);
+  if (!live.length) return [];
+
+  const wanted = new URLSearchParams(hashQuery()).get(DETAIL_SECTION_PARAM);
+  let current = live.some((s) => s.id === wanted) ? wanted : live[0].id;
+
+  const slot = h('div', { class: 'detail-pane', id: 'detail-pane', role: 'tabpanel' });
+
+  const buttons = live.map((s) =>
+    h('button', {
+      type: 'button',
+      role: 'tab',
+      class: 'detail-tab',
+      id: `detail-tab-${s.id}`,
+      'aria-controls': 'detail-pane',
+      onClick: () => show(s.id),
+    }, T(s.labelKey)));
+
+  function show(id) {
+    current = id;
+    const section = live.find((s) => s.id === id);
+    slot.replaceChildren(...section.panels);
+    slot.setAttribute('aria-labelledby', `detail-tab-${id}`);
+    buttons.forEach((b, i) => {
+      const on = live[i].id === id;
+      b.setAttribute('aria-selected', String(on));
+      // Only the selected tab is in the tab order; the arrow keys move between
+      // them, which is what a tab strip is supposed to do.
+      b.tabIndex = on ? 0 : -1;
+    });
+    syncDetailSectionUrl(id, live[0].id);
+  }
+
+  // Left and right walk the strip and take the pane with them, wrapping at
+  // either end. Home and End jump to the ends.
+  const step = (from, delta) => {
+    const next = (from + delta + live.length) % live.length;
+    show(live[next].id);
+    buttons[next].focus();
+  };
+
+  const bar = h('div', {
+    class: 'detail-tabs',
+    role: 'tablist',
+    'aria-label': T('tabsLabel'),
+    onKeydown: (e) => {
+      const i = buttons.indexOf(document.activeElement);
+      if (i === -1) return;
+      if (e.key === 'ArrowRight') step(i, 1);
+      else if (e.key === 'ArrowLeft') step(i, -1);
+      else if (e.key === 'Home') step(i, -i);
+      else if (e.key === 'End') step(i, live.length - 1 - i);
+      else return;
+      e.preventDefault();
+    },
+  }, buttons);
+
+  show(current);
+  return [bar, slot];
+}
+
+/** The hash key naming the open section of a fund page. */
+const DETAIL_SECTION_PARAM = 'b';
+
+/**
+ * Write the open section into the hash, without re-routing the page.
+ *
+ * Same reasoning as the screen on the list pages: `location.hash = …` would
+ * fire `hashchange`, re-enter `route()` and refetch the history under a page
+ * that is already drawn. `replaceState` also keeps the back button meaning
+ * "the fund I was looking at before" rather than "the last button I pressed".
+ *
+ * The first section is the default, so it is left off the URL entirely — a link
+ * to a fund page stays `#/fon/AFA`.
+ */
+function syncDetailSectionUrl(id, fallback) {
+  const params = new URLSearchParams(hashQuery());
+  if (id === fallback) params.delete(DETAIL_SECTION_PARAM);
+  else params.set(DETAIL_SECTION_PARAM, id);
+  const q = params.toString();
+  const next = `#${hashPath()}${q ? `?${q}` : ''}`;
+  if (next !== location.hash) history.replaceState(null, '', next);
 }
 
 /**
@@ -3417,6 +3559,75 @@ function renderConsistency(prices) {
   );
 }
 
+/** How many days the table shows before you ask for more. */
+const DAILY_PAGE = 60;
+
+/**
+ * Every day the fund has a price for, and what it did that day.
+ *
+ * The chart answers "what has this been doing" and a crosshair will read one day
+ * off it, but neither answers "what did it do on the 14th" without hunting, and
+ * neither lets you scan a run of days at once. This is the plain record: one row
+ * per published price, newest first, with the move from the day before.
+ *
+ * The daily change is computed here rather than stored, from the two prices
+ * either side of it — the same arithmetic the rest of the site uses, so a day's
+ * figure here can never disagree with the chart above it.
+ */
+function renderDailyTable(prices) {
+  if (!prices || prices.length < 2) return null;
+
+  // Newest first: somebody opening this wants the last few days, not 2021.
+  const rows = [];
+  for (let i = prices.length - 1; i >= 0; i--) {
+    const [date, price] = prices[i];
+    const before = i > 0 ? prices[i - 1][1] : null;
+    rows.push({
+      date,
+      price,
+      // The first print has no day before it, so it has no daily move — not a
+      // zero, which would read as a flat day.
+      change: before != null && before > 0 ? (price / before - 1) * 100 : null,
+    });
+  }
+
+  let shown = DAILY_PAGE;
+  const body = h('tbody', {});
+  const more = h('button', { type: 'button', class: 'control fold-more' });
+
+  const draw = () => {
+    body.replaceChildren(...rows.slice(0, shown).map((r) => h('tr', {},
+      h('td', { class: 'daily-date' }, fmtDate(r.date, state.lang)),
+      h('td', { class: 'num daily-price' }, `₺${fmtNum(r.price, state.lang, 6)}`),
+      h('td', { class: `num delta ${signOf(r.change)}` },
+        r.change == null ? '—' : fmtPct(r.change, state.lang, { signed: true, digits: 2 }))
+    )));
+    more.textContent = T('dailyMore', { n: fmtInt(Math.min(DAILY_PAGE, rows.length - shown), state.lang) });
+    more.hidden = shown >= rows.length;
+  };
+
+  more.addEventListener('click', () => { shown += DAILY_PAGE; draw(); });
+  draw();
+
+  return h('section', { class: 'panel' },
+    h('div', { class: 'holdings-head' },
+      h('h2', {}, T('dailyTitle')),
+      h('p', { class: 'holdings-stamp' },
+        T('dailyCount', {
+          n: fmtInt(rows.length, state.lang),
+          from: fmtDate(prices[0][0], state.lang),
+        }))),
+    h('div', { class: 'table-wrap daily-wrap' },
+      h('table', { class: 'funds daily-table' },
+        h('thead', {}, h('tr', {},
+          h('th', {}, T('date')),
+          h('th', { class: 'num' }, T('price')),
+          h('th', { class: 'num' }, T('dayChange')))),
+        body)),
+    more
+  );
+}
+
 function renderStats(f) {
   const stat = (dt, dd, cls) =>
     h('div', { class: 'stat' }, h('dt', {}, dt), h('dd', { class: cls }, dd));
@@ -3435,11 +3646,14 @@ function renderStats(f) {
     ret('m1', 'return1m'),
     ret('ytd', 'returnYtd'),
     ret('y1', 'return1y'),
-    ret('y3', 'return3y'),
-    ret('y5', 'return5y'),
     stat(T('riskLabel'), f.vol == null ? '—' : fmtPct(f.vol, state.lang, { digits: 1 })),
     stat(T('maxDrawdown'), f.mdd == null ? '—' : fmtPct(f.mdd, state.lang, { digits: 1 }),
-      `delta ${signOf(f.mdd)}`),
+      `delta ${signOf(f.mdd)}`, T('maxDrawdownHint')),
+    // Only where the history is meaningfully longer than the one-year window,
+    // so this never restates the figure beside it under a second name.
+    f.mddAll == null ? null : stat(T('maxDrawdownAll'),
+      fmtPct(f.mddAll, state.lang, { digits: 1 }),
+      `delta ${signOf(f.mddAll)}`, T('maxDrawdownAllHint')),
     f.expenseRatio != null
       ? stat(T('expenseRatio'), fmtPct(f.expenseRatio, state.lang, { digits: 2 }))
       : null,

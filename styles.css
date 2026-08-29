@@ -1951,6 +1951,60 @@ td.col-rank {
   font-variant-numeric: tabular-nums;
 }
 
+/* ------------------------------------------------- the fund page's sections
+ *
+ * Underlines, not the `.seg` pill used inside panels. These switch the page,
+ * and a control that changes everything below it should not be dressed as the
+ * one that changes a chart's range.
+ *
+ * Sticky under the masthead at the same offset the list page's toolbar takes,
+ * so five screens into a holdings table the section you are in is still named,
+ * and still switchable, without scrolling back up. */
+.detail-tabs {
+  position: sticky;
+  top: var(--stick-toolbar, 59px);
+  z-index: 30;
+  display: flex;
+  gap: 0.15rem;
+  margin-bottom: 1.5rem;
+  background: color-mix(in srgb, var(--plane) 94%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+  /* A narrow screen scrolls the strip sideways rather than wrapping it: a
+   * wrapped strip doubles the height of the thing pinned to the top of the
+   * page, which is the height it was pinned there to avoid spending. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.detail-tabs::-webkit-scrollbar {
+  display: none;
+}
+.detail-tab {
+  flex: 0 0 auto;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  padding: 0.6rem 0.85rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.detail-tab:hover {
+  color: var(--ink);
+}
+.detail-tab[aria-selected='true'] {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+/* The panels carry their own bottom margin; the last one in a section should
+ * not add a second gap above the footer. */
+.detail-pane > :last-child {
+  margin-bottom: 0;
+}
+
 .panel {
   background: var(--surface);
   border: 1px solid var(--hairline);
@@ -3723,6 +3777,43 @@ a.dash-row:hover {
   bottom: -2px;
   width: 1px;
   background: var(--rule);
+}
+
+/* ---------------------------------------------- day by day
+ *
+ * The plain record under the chart. Capped in height so a five-year fund does
+ * not push everything below it off the page — the list scrolls inside the panel
+ * and the button underneath extends it. */
+.daily-wrap {
+  max-height: 26rem;
+  overflow-y: auto;
+}
+.daily-table {
+  width: 100%;
+}
+/* `table.funds th` is the more specific selector, and it parks the header
+ * 115px down — the offset the list page needs to clear its sticky toolbar.
+ * There is no toolbar here, only a 26rem scroll box, so that offset dropped the
+ * header into the middle of the rows it was meant to label. Matched
+ * specificity, pinned to the top of its own scroller. */
+table.funds.daily-table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.daily-table td {
+  padding: 0.35rem 0.6rem;
+  font-size: 0.85rem;
+}
+.daily-date {
+  white-space: nowrap;
+}
+.daily-price {
+  font-variant-numeric: tabular-nums;
+}
+.fold-more {
+  margin-top: 0.75rem;
 }
 
 /* ---------------------------------------------- what the fees took
