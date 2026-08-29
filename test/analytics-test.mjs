@@ -718,6 +718,40 @@ test('an impossible weight move is a filing error, not a trade', () => {
   assert.equal(own.top.find((t) => t.c === 'AED').m, null);
 });
 
+test('a fund that sold out is a departure, not a holder', () => {
+  // The row survives the sale, at zero, because some filers leave it there. It
+  // was being counted as a holder: ASELS read 196 when one of them had gone.
+  const own = ownership([
+    { fund: 'STAY', value: 100e6, shares: 1e6, weight: 5, prev: 4, expected: 4 },
+    { fund: 'GONE', value: 0, shares: 0, weight: 0, prev: 6, expected: 6, left: true },
+  ], { shares: 10e6, cap: 1e9 });
+  assert.equal(own.funds, 1, 'one fund holds it');
+  assert.equal(own.left, 1, 'and one has walked away');
+  assert.equal(own.value, 100e6, 'the departure brings no lira with it');
+  assert.equal(own.shares, 1e6);
+  assert.equal(own.compared, 1, 'nor does it cast a vote on direction');
+  assert.deepEqual(own.top.map((t) => t.c), ['STAY'], 'and it is not in the table');
+});
+
+test('a share everybody has left still answers, and says so', () => {
+  const own = ownership([
+    { fund: 'GONE', value: 0, weight: 0, prev: 6, expected: 6, left: true },
+  ], {});
+  assert.equal(own.funds, 0, 'nobody holds it');
+  assert.equal(own.left, 1);
+  assert.equal(own.value, 0);
+});
+
+test('positions opened during the window are counted apart', () => {
+  const own = ownership([
+    { fund: 'NEW', value: 10e6, weight: 3, prev: 0, expected: 0, opened: true },
+    { fund: 'OLD', value: 10e6, weight: 3, prev: 2, expected: 2.5 },
+  ], {});
+  assert.equal(own.opened, 1);
+  assert.equal(own.funds, 2, 'both hold it now');
+  assert.equal(own.adding, 2, 'and both added to it');
+});
+
 test('a holder list is cut to the holders worth reading', () => {
   const many = Array.from({ length: 40 }, (_, i) => ({
     fund: `F${i}`, value: (40 - i) * 1e6, weight: 1, prev: 1, expected: 1,

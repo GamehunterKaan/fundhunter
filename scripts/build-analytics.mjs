@@ -347,6 +347,8 @@ async function main() {
     let unusablePrev = 0;
     let baselined = 0;
     let noBaseline = 0;
+    let openedCount = 0;
+    let leftCount = 0;
 
     for (const fund of funds) {
       let filing;
@@ -394,24 +396,42 @@ async function main() {
       // The fund's own growth across the same window the weight columns
       // straddle. It is the denominator of the passive baseline, and it is per
       // fund rather than per position, so it is fetched once out here.
+      // Does this filing report previous weights at all? 42 of them name a
+      // previous period and then leave every cell blank, which is a filer
+      // omission and not a fund that rebuilt its entire book in a month. Asking
+      // the rows rather than the header is what tells the two apart: where SOME
+      // position carries a previous weight, the ones that do not are new.
+      const reportsPrev = [...perTicker.values()].some((r) => Number.isFinite(r.prev));
+
       const window = filingWindow(filing);
       const navGrowth = window
         ? await growthOver(path.join(DATA, 'history', `${fund.c}.jsonl`), window)
         : null;
 
       for (const [ticker, row] of perTicker) {
-        const prev = prevUsable ? row.prev : null;
+        // A position held now, in a filing that reports previous weights, with
+        // no previous weight of its own. Its baseline is zero rather than
+        // unknown, so it also counts as bought outright — which it was.
+        // Sold out during the window: the row survives at zero because the filer
+        // chose to leave it there. Most do not — they simply stop listing the
+        // position — so this counts the departures that were written down.
+        const left = !(row.value > 0) && !(row.weight > 0) && row.prev > 0;
+        const opened = prevUsable && reportsPrev
+          && !Number.isFinite(row.prev) && row.weight > 0;
+        const prev = prevUsable ? (opened ? 0 : row.prev) : null;
         const shareGrowth = window
           ? await growthOver(path.join(DATA, 'stocks', `${ticker}.jsonl`), window)
           : null;
         const expected = expectedWeight(prev, shareGrowth, navGrowth);
         if (expected == null) noBaseline++;
         else baselined++;
+        if (opened) openedCount++;
+        if (left) leftCount++;
 
         if (!holders.has(ticker)) holders.set(ticker, []);
         holders.get(ticker).push({
           fund: fund.c, value: row.value, shares: row.shares, weight: row.weight,
-          prev, expected, good: beatCash.has(fund.c),
+          prev, expected, opened, left, good: beatCash.has(fund.c),
         });
       }
       // Kept for the speculative pass below, which cannot run until every share
@@ -529,6 +549,7 @@ async function main() {
     log(`  passive drift: ${baselined} of ${baselined + noBaseline} holdings could be ` +
       `measured against what the market would have done on its own`);
     log(`  quality of holders: ${beatCash.size} of ${funds.length} funds beat cash over a year`);
+    log(`  positions opened since the previous filing: ${openedCount}, sold out: ${leftCount}`);
     log(`  share ownership: ${held} of ${stockFile.stocks.length} shares are held by a fund, ` +
       `₺${(ownedValue / 1e9).toFixed(1)}bn in all, from ${readFilings} filings ` +
       `(${skipped} did not reconcile, ${unusablePrev} carry no usable previous weights)`);

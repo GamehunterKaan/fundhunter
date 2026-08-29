@@ -793,8 +793,15 @@ export const MAX_WEIGHT_MOVE = 100;
  * @param {{shares?: number|null, cap?: number|null}} listing exchange figures
  */
 export function ownership(holders, { shares = null, cap = null } = {}) {
-  const rows = (holders ?? []).filter((h) => Number.isFinite(h?.value));
-  if (!rows.length) return null;
+  const all = (holders ?? []).filter((h) => Number.isFinite(h?.value));
+  if (!all.length) return null;
+
+  // A fund that sold out still files the row, at zero, and it was being counted
+  // as a holder — ASELS read 196 when two of them had gone. It is not a holder
+  // and it does not own any of the company; it is a departure, and it is counted
+  // as one below.
+  const rows = all.filter((h) => !h.left);
+  const left = all.length - rows.length;
 
   // What the fund actually did, with the market's own contribution taken out.
   //
@@ -860,6 +867,13 @@ export function ownership(holders, { shares = null, cap = null } = {}) {
     adding,
     trimming,
     topWeight: weights.length ? round2(Math.max(...weights)) : null,
+    left,
+    // Holders that did not have the share at the previous filing at all. A
+    // position opened outright says more than one nudged up a tenth of a point,
+    // and it is the half of "what changed" the filings can actually be held to:
+    // a fund that sold out simply stops listing the row, and only a fifth of the
+    // filers leave a zero behind to say so.
+    opened: rows.filter((h) => h.opened === true).length,
     // How many of the holders cleared the money-market hurdle over a year.
     // "Twelve funds hold it" and "twelve funds that beat cash hold it" are
     // different statements, and only the second one is an argument.

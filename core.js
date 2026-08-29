@@ -353,6 +353,12 @@ export const STRINGS = {
     shareGoodHint:
       'Son bir yılda para piyasası fonlarının medyanını geçen fonlardan kaçı ' +
       'bu hisseyi tutuyor. 2.068 fonun 375’i bu eşiği geçiyor. Stopaj öncesi.',
+    shareFilterFresh: 'Yeni giren / çıkan',
+    shareFreshOpened: 'Yeni girenler var',
+    shareFreshLeft: 'Çıkanlar var',
+    shareFreshHint:
+      'Bir önceki bildirimde hissesi olmayıp şimdi olan fonlar, ve bir önceki ' +
+      'bildirimde olup şimdi tamamen satmış olanlar.',
     shareCleanBoards: 'Şüpheli tahtaları gizle',
     shareCleanBoardsHint:
       'Sert yükseliş ve en az iki koşulu daha karşılayan tahtalar. ' +
@@ -1302,6 +1308,12 @@ export const STRINGS = {
     shareGoodHint:
       'How many of its holders beat the median money-market fund over the past ' +
       'year. 375 of 2,068 funds clear that bar. Before withholding.',
+    shareFilterFresh: 'Opened and closed',
+    shareFreshOpened: 'Someone opened it',
+    shareFreshLeft: 'Someone sold out',
+    shareFreshHint:
+      'Funds that had none of the share at the previous filing and hold it now, ' +
+      'and funds that held it then and have sold out of it since.',
     shareCleanBoards: 'Hide flagged boards',
     shareCleanBoardsHint:
       'Boards meeting a sharp run-up plus at least two more conditions. ' +
@@ -2906,6 +2918,15 @@ export const CONVICTION_STEPS = [1, 5, 10];
 export const GOOD_STEPS = [1, 5, 10];
 
 /**
+ * Positions started and positions closed since the previous filing.
+ *
+ * A position opened outright says more than one nudged up a tenth of a point,
+ * and the same the other way. Both are counted per share across every fund whose
+ * filing could be read.
+ */
+export const FRESH_WAYS = ['opened', 'left'];
+
+/**
  * Narrow the share list to what the view asks for.
  *
  * Here rather than inside the page for the reason filterFunds is: a filter that
@@ -2921,7 +2942,9 @@ export function filterShares(rows, view = {}) {
 
     const own = s.own ?? null;
     if (view.owners === OWNER_NONE) {
-      if (own) return false;
+      // Live holders, not the record: a share every fund has sold out of has an
+      // ownership record saying so, and nobody holds it.
+      if (own?.funds > 0) return false;
     } else if (view.owners) {
       if (!(own?.funds >= Number(view.owners))) return false;
     }
@@ -2950,6 +2973,8 @@ export function filterShares(rows, view = {}) {
 
     if (view.good && !(own?.good >= Number(view.good))) return false;
 
+    if (view.fresh && !(own?.[view.fresh] >= 1)) return false;
+
     if (view.clean && s.spec) return false;
 
     return true;
@@ -2966,6 +2991,7 @@ export function encodeShareView(view) {
   if (view?.flow) q.set('flow', String(view.flow));
   if (view?.conv) q.set('conv', String(view.conv));
   if (view?.good) q.set('good', String(view.good));
+  if (view?.fresh) q.set('fresh', String(view.fresh));
   if (view?.clean) q.set('clean', '1');
   return q.toString();
 }
@@ -2980,7 +3006,7 @@ export function encodeShareView(view) {
 export function decodeShareView(query) {
   const out = {
     search: '', theme: '', owners: '', crowd: '', flow: '', conv: '', good: '',
-    clean: false,
+    fresh: '', clean: false,
   };
   if (!query) return out;
   const q = new URLSearchParams(String(query).replace(/^[?#]/, ''));
@@ -3004,6 +3030,9 @@ export function decodeShareView(query) {
 
   const good = q.get('good') ?? '';
   if (GOOD_STEPS.includes(Number(good))) out.good = good;
+
+  const fresh = q.get('fresh') ?? '';
+  if (FRESH_WAYS.includes(fresh)) out.fresh = fresh;
 
   out.clean = q.get('clean') === '1';
   return out;

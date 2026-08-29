@@ -12,7 +12,7 @@ import {
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   encodeShareView, decodeShareView, filterShares,
   OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS,
-  CONVICTION_STEPS, GOOD_STEPS,
+  CONVICTION_STEPS, GOOD_STEPS, FRESH_WAYS,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -5194,6 +5194,7 @@ const shareView = {
   flow: '',
   conv: '',
   good: '',
+  fresh: '',
   clean: false,
   open: false,
   sort: { key: 'cap', dir: 'desc' },
@@ -5204,7 +5205,7 @@ const shareView = {
 function activeShareFilters() {
   return [
     shareView.theme, shareView.owners, shareView.crowd, shareView.flow,
-    shareView.conv, shareView.good, shareView.clean,
+    shareView.conv, shareView.good, shareView.fresh, shareView.clean,
   ].filter(Boolean).length;
 }
 
@@ -5419,6 +5420,16 @@ function shareFilters() {
         GOOD_STEPS.map((n) =>
           h('option', { value: String(n), selected: shareView.good === String(n) },
             T('shareGoodAtLeast', { n: fmtInt(n, state.lang) }))))),
+
+    field('sf-fresh', T('shareFilterFresh'), T('shareFreshHint'),
+      h('select', {
+        id: 'sf-fresh', title: `${T('shareFilterFresh')} — ${T('shareFreshHint')}`,
+        onChange: (e) => { shareView.fresh = e.target.value; refreshShares(); },
+      },
+        h('option', { value: '', selected: !shareView.fresh }, T('all')),
+        FRESH_WAYS.map((way) =>
+          h('option', { value: way, selected: shareView.fresh === way },
+            T(way === 'opened' ? 'shareFreshOpened' : 'shareFreshLeft'))))),
 
     h('div', { class: 'field' },
       h('label', { class: 'check', title: T('shareCleanBoardsHint') },

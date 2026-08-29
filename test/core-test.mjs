@@ -11,7 +11,7 @@ import {
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
   encodeShareView, decodeShareView, filterShares,
   OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS, MIN_FLOW_HOLDERS,
-  CONVICTION_STEPS, GOOD_STEPS,
+  CONVICTION_STEPS, GOOD_STEPS, FRESH_WAYS,
   deflate, deflateSeries, yearOf,
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
@@ -1278,7 +1278,7 @@ test('a theme survives the trip to the share list', () => {
 
 const EMPTY_SHARE_VIEW = {
   search: '', theme: '', owners: '', crowd: '', flow: '', conv: '', good: '',
-  clean: false,
+  fresh: '', clean: false,
 };
 
 test('an untouched share list encodes to nothing', () => {
@@ -1290,7 +1290,7 @@ test('an untouched share list encodes to nothing', () => {
 test('the share view round-trips', () => {
   const view = {
     search: 'ASELS', theme: THEME_IDS[1], owners: '20', crowd: '3',
-    flow: 'buying', conv: '5', good: '10', clean: true,
+    flow: 'buying', conv: '5', good: '10', fresh: 'opened', clean: true,
   };
   assert.deepEqual(decodeShareView(encodeShareView(view)), view);
 });
@@ -1336,12 +1336,15 @@ const share = (c, own, extra = {}) => ({ c, kind: 'stock', ...extra, ...(own ? {
 
 const EXCHANGE = [
   // BIGCO is the index name: everybody holds it, nobody holds much of it.
-  share('BIGCO', { funds: 90, pctShares: 12.5, compared: 60, adding: 40, trimming: 20, topWeight: 0.9, good: 25 }, { th: 'finance' }),
+  share('BIGCO', { funds: 90, pctShares: 12.5, compared: 60, adding: 40, trimming: 20, topWeight: 0.9, good: 25, opened: 4, left: 1 }, { th: 'finance' }),
   share('MIDCO', { funds: 22, pctShares: 3.1, compared: 18, adding: 4, trimming: 14, topWeight: 7.5, good: 6 }, { th: 'finance' }),
   share('SMALLCO', { funds: 6, pctShares: 0.4, compared: 6, adding: 3, trimming: 3, topWeight: 22, good: 0 }, { th: 'defence' }),
   share('THINCO', { funds: 1, pctShares: 0.02, compared: 1, adding: 1, trimming: 0, topWeight: 0.1, good: 1 }, { th: 'defence' }),
   share('UNREAD', { funds: 8, pctShares: null, compared: 0, adding: 0, trimming: 0, topWeight: null, good: 2 }, { th: 'defence' }),
   share('NOBODY', null, { th: 'defence' }),
+  // Every fund that held it has sold out: there is a record, and it says nobody
+  // holds it. "No fund holds it" has to agree with that.
+  share('ABANDONED', { funds: 0, left: 3, pctShares: null, compared: 0, adding: 0, trimming: 0, topWeight: null, good: 0, opened: 0 }, { th: 'finance' }),
   share('FLAGGED', { funds: 4, pctShares: 2, compared: 4, adding: 4, trimming: 0, topWeight: 12, good: 0 }, { th: 'finance', spec: { f: ['runUp'], of: 6 } }),
 ];
 const codes = (view) => filterShares(EXCHANGE, view).map((s) => s.c);
@@ -1356,8 +1359,9 @@ test('the owner count counts funds, and its other end means nobody', () => {
   assert.deepEqual(codes({ owners: '1' }), ['BIGCO', 'MIDCO', 'SMALLCO', 'THINCO', 'UNREAD', 'FLAGGED']);
   assert.deepEqual(codes({ owners: '20' }), ['BIGCO', 'MIDCO']);
   assert.deepEqual(codes({ owners: '50' }), ['BIGCO']);
-  // The one question the checkbox could not ask.
-  assert.deepEqual(codes({ owners: OWNER_NONE }), ['NOBODY']);
+  // The one question the checkbox could not ask. ABANDONED belongs in it too:
+  // it has an ownership record, and not one live holder left inside it.
+  assert.deepEqual(codes({ owners: OWNER_NONE }), ['NOBODY', 'ABANDONED']);
 });
 
 test('crowding leaves out the companies whose share count could not be read', () => {
@@ -1413,6 +1417,19 @@ test('conviction and quality pull in different directions, which is the point', 
   // Nothing is both somebody's big bet and widely held by funds that beat cash.
   assert.deepEqual(codes({ conv: '10', good: '5' }), []);
   assert.deepEqual(codes({ conv: '1', good: '5' }), ['MIDCO']);
+});
+
+test('opened and closed are counted per share', () => {
+  assert.deepEqual(codes({ fresh: 'opened' }), ['BIGCO']);
+  assert.deepEqual(codes({ fresh: 'left' }), ['BIGCO', 'ABANDONED']);
+  assert.deepEqual(FRESH_WAYS, ['opened', 'left']);
+});
+
+test('a share every fund has left counts as one nobody holds', () => {
+  // It has an ownership record, so the truthiness test that used to answer this
+  // would have called it held.
+  assert.ok(codes({ owners: OWNER_NONE }).includes('ABANDONED'));
+  assert.ok(!codes({ owners: '1' }).includes('ABANDONED'));
 });
 
 test('hiding flagged boards hides exactly the flagged ones', () => {
