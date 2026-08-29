@@ -9,6 +9,7 @@ import {
   alignAndIndex, signOf, HORIZONS, horizonOf, DEFAULT_HORIZON, SORTS, STRINGS, LANGS,
   SPEC_NONE, SPEC_MIN_EQUITY, SPEC_STEPS,
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
+  encodeShareView, decodeShareView,
   deflate, deflateSeries, yearOf,
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
@@ -1260,4 +1261,48 @@ test('the year is read off the front of whatever the period is called', () => {
   assert.equal(yearOf('nope'), null);
   assert.equal(yearOf(null), null);
   assert.equal(yearOf('0042-01-01'), null);
+});
+
+
+// ---------------------------------------------------------- the share list view
+
+test('a theme survives the trip to the share list', () => {
+  // The dashboard's theme tiles are links into this. They used to assign a
+  // variable on the way out and hope the next page still held it, which stopped
+  // working the day the list started reading its own state from the URL.
+  assert.equal(encodeShareView({ theme: THEME_IDS[0] }), `theme=${THEME_IDS[0]}`);
+  assert.equal(decodeShareView(`theme=${THEME_IDS[0]}`).theme, THEME_IDS[0]);
+});
+
+test('an untouched share list encodes to nothing', () => {
+  assert.equal(encodeShareView({ search: '', theme: '', held: false }), '');
+  assert.equal(encodeShareView({}), '');
+  assert.equal(encodeShareView(null), '');
+});
+
+test('the share view round-trips', () => {
+  const view = { search: 'ASELS', theme: THEME_IDS[1], held: true };
+  assert.deepEqual(decodeShareView(encodeShareView(view)), view);
+});
+
+test('a theme nobody publishes is dropped rather than emptying the table', () => {
+  // Filtering the exchange down to nothing over a typo would look exactly like
+  // an outage, so an unknown theme is no filter at all.
+  assert.equal(decodeShareView('theme=unicorns').theme, '');
+  assert.equal(decodeShareView('').theme, '');
+  assert.equal(decodeShareView(null).theme, '');
+  assert.deepEqual(decodeShareView(null), { search: '', theme: '', held: false });
+});
+
+test('held-only is a flag, and only "1" sets it', () => {
+  assert.equal(decodeShareView('held=1').held, true);
+  assert.equal(decodeShareView('held=0').held, false);
+  assert.equal(decodeShareView('held=yes').held, false);
+  assert.equal(encodeShareView({ held: true }), 'held=1');
+  assert.equal(encodeShareView({ held: false }), '');
+});
+
+test('a leading ? or # is tolerated, as it is for the fund screen', () => {
+  assert.equal(decodeShareView(`?theme=${THEME_IDS[0]}`).theme, THEME_IDS[0]);
+  assert.equal(decodeShareView(`#theme=${THEME_IDS[0]}`).theme, THEME_IDS[0]);
 });

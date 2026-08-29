@@ -2775,6 +2775,40 @@ export function decodeScreen(query) {
   return out;
 }
 
+// ------------------------------------------------------- the share list view
+//
+// The same idea as the screen above, for the other list. It exists because a
+// theme has to be linkable: the dashboard's theme tiles point at the shares in
+// that line of business, and a tile that set a variable and hoped the next page
+// would still be holding it is exactly the bug this replaced.
+
+/** A share list's state as a query string. '' when nothing is set. */
+export function encodeShareView(view) {
+  const q = new URLSearchParams();
+  if (view?.search) q.set('q', view.search);
+  if (view?.theme) q.set('theme', view.theme);
+  if (view?.held) q.set('held', '1');
+  return q.toString();
+}
+
+/**
+ * A query string back into a share list's state.
+ *
+ * The theme is checked against the published list, so a hand-edited hash cannot
+ * filter the table down to nothing and leave the reader wondering where the
+ * exchange went.
+ */
+export function decodeShareView(query) {
+  const out = { search: '', theme: '', held: false };
+  if (!query) return out;
+  const q = new URLSearchParams(String(query).replace(/^[?#]/, ''));
+  out.search = q.get('q') ?? '';
+  const theme = q.get('theme');
+  if (theme && THEME_IDS.includes(theme)) out.theme = theme;
+  out.held = q.get('held') === '1';
+  return out;
+}
+
 // ---------------------------------------------------------------- holdings
 
 /**

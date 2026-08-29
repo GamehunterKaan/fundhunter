@@ -10,6 +10,7 @@ import {
   ringGeometry, ringPoint, ringPath, spreadLabels, svgN, TURN,
   SPEC_NONE, SPEC_STEPS, SPEC_MIN_EQUITY, bestIndexes, deflateSeries,
   defaultScreen, encodeScreen, decodeScreen, SCREEN_FILTER_PREFS,
+  encodeShareView, decodeShareView,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -1601,15 +1602,12 @@ function renderMarketPanels() {
     themesBody.replaceChildren(...(moves.length
       ? moves.map((t) => h('a', {
           class: 'theme-cell',
-          href: listHref('/fonlar'),
+          // The companies, not the funds. A tile here is a line of business
+          // that moved today, and the question it raises is which shares did
+          // the moving — the funds holding them are a step further out.
+          href: sharesInThemeHref(t.id),
           style: `background:${moveColor(t.move, THEME_TILE_CEILING)}`,
           title: `${themeName(t.id)} · ${t.priced}/${t.of}`,
-          onClick: () => {
-            // The same handoff a share page makes: set the filter, let the
-            // router take the route. Two ways of saying it would be one too many.
-            state.filters.theme = t.id;
-            state.filters.minTheme = MIN_THEME;
-          },
         },
           h('span', { class: 'theme-cell-name' }, themeName(t.id)),
           h('span', { class: 'theme-cell-move num' },
@@ -1660,13 +1658,8 @@ function renderTrending() {
       h('ul', { class: 'trend-list' }, sectors.map((s) => h('li', {},
         h('a', {
           class: 'trend-name',
-          href: listHref('/fonlar'),
-          // The same handoff the themes strip makes: set the filter, let the
-          // router take the route.
-          onClick: () => {
-            state.filters.theme = s.id;
-            state.filters.minTheme = MIN_THEME;
-          },
+          // The shares, for the same reason the themes strip points at them.
+          href: sharesInThemeHref(s.id),
         }, themeName(s.id)),
         h('span', { class: `num delta ${signOf(s.move)}` },
           fmtPct(s.move, state.lang, { signed: true, digits: 1 })))))
@@ -2013,6 +2006,24 @@ function listHref(route) {
   const q = encodeScreen(state);
   return `#${route}${q ? `?${q}` : ''}`;
 }
+
+/**
+ * A link to the shares in one line of business.
+ *
+ * The theme goes in the hash rather than into a variable the next page is
+ * expected to still be holding. That is how these links used to work, and once
+ * the list started reading its state from the URL the variable was overwritten
+ * on arrival — every theme link led to an unfiltered page.
+ */
+const sharesInThemeHref = (id) => `#/hisseler?theme=${encodeURIComponent(id)}`;
+
+/** A link to the funds with a real position in one line of business. */
+const fundsInThemeHref = (id) => {
+  const screen = defaultScreen();
+  screen.filters.theme = id;
+  screen.filters.minTheme = MIN_THEME;
+  return `#/fonlar?${encodeScreen(screen)}`;
+};
 
 /**
  * Arrive at a list page, taking the screen from the hash.
@@ -5206,6 +5217,9 @@ function shareResults() {
 
 async function renderShareList() {
   state.page = 'shares';
+  // Whatever the hash asks for wins on arrival, exactly as the fund list does,
+  // which is what makes a theme link mean the same thing to whoever opens it.
+  Object.assign(shareView, decodeShareView(hashQuery()), { visible: SHARE_PAGE_SIZE });
   view.replaceChildren(h('p', { class: 'state-msg' }, T('loading')));
   const loaded = await loadShares();
   if (state.page !== 'shares') return;
@@ -5232,24 +5246,42 @@ async function renderShareList() {
   ensureQuotes(null).then(() => { if (state.page === 'shares') drawShares(); });
 }
 
+/**
+ * Write the share list's state back into the hash.
+ *
+ * `replaceState`, for the same reason the fund screen uses it: assigning to
+ * `location.hash` would re-enter the router and redraw the table under the
+ * control being used.
+ */
+function syncShareUrl() {
+  if (state.page !== 'shares') return;
+  const q = encodeShareView(shareView);
+  const next = `#/hisseler${q ? `?${q}` : ''}`;
+  if (next !== location.hash) history.replaceState(null, '', next);
+}
+
 /** Search, theme, held-only and the count. Rendered once per visit. */
 function shareBar() {
   return h('div', { class: 'share-bar' },
     h('input', {
       type: 'search', class: 'share-search', value: shareView.search,
       placeholder: T('shareSearch'), 'aria-label': T('shareSearch'),
-      onInput: debounce((e) => { shareView.search = e.target.value; drawShares(true); }, 150),
+      onInput: debounce((e) => {
+        shareView.search = e.target.value;
+        drawShares(true);
+        syncShareUrl();
+      }, 150),
     }),
     h('select', {
       class: 'share-theme', 'aria-label': T('themeLabel'),
-      onChange: (e) => { shareView.theme = e.target.value; drawShares(true); },
+      onChange: (e) => { shareView.theme = e.target.value; drawShares(true); syncShareUrl(); },
     },
       h('option', { value: '', selected: !shareView.theme }, T('themeAny')),
       THEME_IDS.map((id) => h('option', { value: id, selected: shareView.theme === id }, themeName(id)))),
     h('label', { class: 'check' },
       h('input', {
         type: 'checkbox', checked: shareView.held,
-        onChange: (e) => { shareView.held = e.target.checked; drawShares(true); },
+        onChange: (e) => { shareView.held = e.target.checked; drawShares(true); syncShareUrl(); },
       }),
       h('span', {}, T('heldOnly'))),
     h('span', { class: 'share-count', id: 'share-count' })
@@ -5405,15 +5437,12 @@ async function renderShare(code) {
         stock.spec ? h('li', { class: 'chip chip-warn' }, T('specChip')) : null,
         stock.th ? h('li', { class: 'chip' },
           // A link back into the funds, because "who buys this kind of company"
-          // is the question a share page cannot answer on its own. The filter is
-          // set here rather than passed in the hash: the router takes routes, and
-          // giving it a query string would be a second way to say the same thing.
+          // is the question a share page cannot answer on its own. The theme
+          // travels in the hash: it used to be assigned to a variable on the way
+          // out, which stopped working the day the list started reading its own
+          // state from the URL and overwrote it on arrival.
           h('a', {
-            href: listHref('/fonlar'),
-            onClick: () => {
-              state.filters.theme = stock.th;
-              state.filters.minTheme = MIN_THEME;
-            },
+            href: fundsInThemeHref(stock.th),
           }, T('fundsInTheme', { name: themeName(stock.th) }))) : null,
         // Sector and industry stay in the exchange's own English. Translating a
         // hundred and thirty industry names would be inventing a taxonomy.
