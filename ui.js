@@ -2868,10 +2868,14 @@ function appendRows(body) {
         crashRanked()
           ? h('td', { class: COL.excess, dataset: { label: T('crashSpared') } },
               sparedCell(f.cr?.s))
-          // A gap between two returns is measured in points, not per cent.
+          // A gap between two returns is measured in points, not per cent —
+          // which the heading's own tooltip says, so the cells do not repeat it.
+          // Turkish funds run to four figures here (35.222,7 at the top of the
+          // table), and " puan" on every row was five characters of column that
+          // the digits then lost to `overflow: hidden`.
           : h('td', { class: COL.excess, dataset: { label: T('vsCash') } },
               h('span', { class: `delta ${signOf(f._score?.excess)}` },
-                fmtPoints(f._score?.excess, state.lang, { signed: true, digits: 1 }))),
+                fmtPoints(f._score?.excess, state.lang, { signed: true, digits: 1, unit: false }))),
         h('td', { class: `${COL.fee} num` },
           f.expenseRatio == null ? '—' : fmtPct(f.expenseRatio, state.lang, { digits: 2 })),
         h('td', { class: COL.risk }, riskChip(f)),
@@ -2902,7 +2906,13 @@ const deltaCell = (v, cls = 'num-cell', dataLabel = null) =>
   h('td', {
     class: cls,
     dataset: dataLabel ? { label: dataLabel } : undefined,
-  }, h('span', { class: `delta ${signOf(v)}` }, fmtPct(v, state.lang, { signed: true, digits: 1 })));
+  }, h('span', { class: `delta ${signOf(v)}` },
+    // A tenth of a point on a four-figure return is noise, and it is the exact
+    // character that pushes the column past its width: %11.493,9 does not fit
+    // where %11.494 does. Turkish one-year returns reach four figures often
+    // enough — 67 funds over 100%, eight over 1000% — that this is worth a
+    // branch rather than a wider column taken off the fund name.
+    fmtPct(v, state.lang, { signed: true, digits: Math.abs(v) >= 1000 ? 0 : 1 })));
 
 /**
  * TEFAS's official risk value, 1–7. The number carries the meaning; the colour
@@ -4658,7 +4668,8 @@ const COMPARE_ROWS = [
   {
     labelKey: 'vsCash', dir: 'high', delta: true, digits: 1,
     get: (f) => f._score?.excess,
-    fmt: (v) => fmtPoints(v, state.lang, { signed: true, digits: 1 }),
+    // Same column, same reason, in the ranking tables.
+    fmt: (v) => fmtPoints(v, state.lang, { signed: true, digits: 1, unit: false }),
   },
   {
     labelKey: 'volatility', digits: 1,

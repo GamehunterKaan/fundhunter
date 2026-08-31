@@ -1714,8 +1714,12 @@ table.funds {
 .col-submetric { width: 104px; }
 .col-size { width: 96px; }
 .col-inv { width: 94px; }
-.col-ret { width: 86px; }
-.col-excess { width: 104px; }
+/* Sized to the widest figure the data actually holds, not to a plausible one.
+ * A Turkish one-year return reaches %11.493,9 and the money-market gap 35.222,7,
+ * and `overflow: hidden` above turns anything narrower into a number missing its
+ * last digits rather than a number that looks cramped. */
+.col-ret { width: 100px; }
+.col-excess { width: 108px; }
 .col-fee { width: 92px; }
 .col-risk { width: 74px; }
 .col-comp { width: 144px; }
