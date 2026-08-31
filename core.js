@@ -933,8 +933,13 @@ export const STRINGS = {
     tefasNotTraded: 'TEFAS’ta işlem görmüyor',
     platformUnknown: 'Platform durumu bilinmiyor',
     mgmtFee: 'Yönetim ücreti',
+    mgmtFeeHint: 'Yöneticinin şu anda uyguladığı oran. Pay fiyatının içinden günlük kesilir.',
     maxMgmtFee: 'İçtüzük üst sınırı',
     expenseRatio: 'Toplam gider oranı',
+    expenseRatioHint:
+      'Yönetim ücreti artı saklama, denetim ve diğer giderler; geçmiş bir ' +
+      'dönemde fiilen gerçekleşen oran. Bu yüzden güncel yönetim ücretinin ' +
+      'altında kalabilir.',
     feeNote: 'Yıllık, yüzde olarak',
     returnYtd: 'Yıl başından',
     return3y: '3 Yıl',
@@ -1908,8 +1913,13 @@ export const STRINGS = {
     tefasNotTraded: 'Not traded on TEFAS',
     platformUnknown: 'Platform status unknown',
     mgmtFee: 'Management fee',
+    mgmtFeeHint: 'The rate the manager applies now, taken daily inside the unit price.',
     maxMgmtFee: 'Prospectus cap',
     expenseRatio: 'Total expense ratio',
+    expenseRatioHint:
+      'The management fee plus custody, audit and the rest, as actually ' +
+      'incurred over a past period — which is why it can sit below the fee ' +
+      'being charged today.',
     feeNote: 'Annual, per cent',
     returnYtd: 'Year to date',
     return3y: '3 Years',

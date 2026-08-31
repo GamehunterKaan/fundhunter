@@ -3676,8 +3676,10 @@ function renderDailyTable(prices) {
 }
 
 function renderStats(f) {
-  const stat = (dt, dd, cls) =>
-    h('div', { class: 'stat' }, h('dt', {}, dt), h('dd', { class: cls }, dd));
+  const stat = (dt, dd, cls, note = null) =>
+    h('div', { class: 'stat' },
+      h('dt', note ? { title: note } : {}, dt),
+      h('dd', { class: cls }, dd));
 
   const ret = (key, labelKey) =>
     f.r?.[key] == null
@@ -3701,11 +3703,17 @@ function renderStats(f) {
     f.mddAll == null ? null : stat(T('maxDrawdownAll'),
       fmtPct(f.mddAll, state.lang, { digits: 1 }),
       `delta ${signOf(f.mddAll)}`, T('maxDrawdownAllHint')),
+    // The pair invites a comparison it does not support: one is the rate being
+    // charged today, the other what a past period actually cost. PHE applies
+    // 2.5% and reports 2.19%, which is a fee that moved mid-window, not an
+    // error. The tooltips are where that belongs.
     f.expenseRatio != null
-      ? stat(T('expenseRatio'), fmtPct(f.expenseRatio, state.lang, { digits: 2 }))
+      ? stat(T('expenseRatio'), fmtPct(f.expenseRatio, state.lang, { digits: 2 }),
+          null, T('expenseRatioHint'))
       : null,
     f.mgmtFee != null
-      ? stat(T('mgmtFee'), fmtPct(f.mgmtFee, state.lang, { digits: 2 }))
+      ? stat(T('mgmtFee'), fmtPct(f.mgmtFee, state.lang, { digits: 2 }),
+          null, T('mgmtFeeHint'))
       : null
   );
 }

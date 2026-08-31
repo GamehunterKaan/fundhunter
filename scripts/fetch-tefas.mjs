@@ -437,11 +437,19 @@ async function fetchFundProfiles() {
       exportBody('management', kind),
       { cacheKey: USE_CACHE ? `export-mgmt-v2-${kind}-${latestTag}` : null }
     );
+    // TEFAS writes an unpublished fee as "0" rather than leaving the field
+    // empty, and a zero here is the absence of a number, not a fund that
+    // charges nothing. TLY reports no management fee against a 2% prospectus
+    // cap and a 2% realised expense ratio — it charges 2%, and the site said
+    // it was free. 438 of the 443 funds reporting a zero expense ratio also
+    // report a management fee, which is the same story at scale: left as zero
+    // they sort to the top of "cheapest" and pass a "fees under 1%" filter.
+    const published = (v) => trNumber(v) || null;
     for (const row of fees) {
       upsert(row.fonKodu, {
-        mgmtFee: trNumber(row.uygulananYu1Y),
-        maxMgmtFee: trNumber(row.fonIcTuzukYu1G),
-        expenseRatio: trNumber(row.fonTopGiderKesoran),
+        mgmtFee: published(row.uygulananYu1Y),
+        maxMgmtFee: published(row.fonIcTuzukYu1G),
+        expenseRatio: published(row.fonTopGiderKesoran),
       });
     }
 
