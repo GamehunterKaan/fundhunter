@@ -455,9 +455,18 @@ async function fetchFundProfiles() {
 /** Daily price/size/investor history for every kind. */
 async function fetchInfoHistory(start, end) {
   const jobs = [];
+  const endTag = ymd(end);
   for (const kind of KINDS.map((k) => k.id)) {
     for (const [s, e] of splitRange(start, end, MAX_DAYS_PER_REQUEST)) {
-      jobs.push({ kind, s: ymd(s), e: ymd(e) });
+      // The grid runs the newest chunk past the latest trading date, so that
+      // one is still filling up while its key stays put — and a cache keyed by
+      // the range alone would serve whichever day it was first written for
+      // until the block ends, weeks later. Tagging the open chunk with the
+      // trading date is what weeklyAnchors() does for the allocation
+      // snapshots. Same-day re-runs still hit; a rollover fetches one chunk.
+      const s0 = ymd(s);
+      const e0 = ymd(e);
+      jobs.push({ kind, s: s0, e: e0, open: e0 >= endTag });
     }
   }
   log(`  info history: ${jobs.length} requests`);
@@ -466,7 +475,10 @@ async function fetchInfoHistory(start, end) {
     const rows = await client.post(
       INFO_METHOD,
       requestBody({ fonTipi: j.kind, basTarih: j.s, bitTarih: j.e }),
-      { cacheKey: USE_CACHE ? `info-${j.kind}-${j.s}-${j.e}` : null, reduce: reduceInfo }
+      {
+        cacheKey: USE_CACHE ? `info-${j.kind}-${j.s}-${j.e}${j.open ? `-${latestTag}` : ''}` : null,
+        reduce: reduceInfo,
+      }
     );
     if (++done % 10 === 0 || done === jobs.length) log(`    info ${done}/${jobs.length}`);
     return { kind: j.kind, rows };
