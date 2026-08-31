@@ -11,9 +11,17 @@ name: Prices and contents
 
 on:
   schedule:
-    # 06:15 UTC ≈ 09:15 Europe/Istanbul — TEFAS publishes the previous trading
-    # day's valuations overnight, so this picks them up once they are settled.
+    # Twice, because a schedule is best-effort. GitHub has been creating these
+    # runs four to twelve hours after the minute they name, and a fire it drops
+    # outright would leave the site a day behind with nothing to say so.
+    # Whichever lands first commits; the other finds nothing new and is gone in
+    # about two minutes against a warm cache.
+    #
+    # 06:15 and 11:15 UTC ≈ 09:15 and 14:15 Europe/Istanbul. A fund's price for
+    # the day is on TEFAS by mid-morning Istanbul rather than after the close,
+    # so both of these ask for a day that already exists.
     - cron: '15 6 * * 1-6'
+    - cron: '15 11 * * 1-6'
   workflow_dispatch:
     inputs:
       months:
