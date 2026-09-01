@@ -13,24 +13,68 @@ runs:
   steps:
     # A fetch takes the better part of an hour, so anything pushed to main while
     # it runs leaves this checkout behind and the push is rejected as a
-    # non-fast-forward — a whole day's data lost to a one-line commit landing at
-    # the wrong moment. Rebasing first is safe here because these jobs only ever
-    # touch data/ and only ever add to it.
+    # non-fast-forward — a whole day's data lost to a commit landing at the
+    # wrong moment.
+    #
+    # What is NOT used to recover from that is a rebase, which is what this did
+    # until 2026-08-31, when the holdings job pushed while the prices job sat in
+    # the concurrency queue and the day's prices died in a conflict on
+    # data/meta.json. These files are generated whole. Two runs' output are not
+    # two edits to reconcile, and asking git to merge them line by line is a
+    # question with no correct answer that reliably fails to have one.
+    #
+    # So: take the new tip, then put back exactly the paths this run wrote. A
+    # sibling job's files survive because they are never touched, ours win where
+    # both wrote the same file because ours were generated later, and no textual
+    # merge happens at all.
     #
     # Shared by three workflows rather than pasted into each: a retry loop that
-    # has to get "rebase, then push again" right is exactly the kind of thing
-    # that drifts between copies until only one of them still works.
+    # has to get this right is exactly the kind of thing that drifts between
+    # copies until only one of them still works.
     - shell: bash
       run: |
+        set -uo pipefail
         git config user.name  "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
+
+        subject="chore: ${{ inputs.message }} $(date -u '+%Y-%m-%d')"
+
         git add data
-        git diff --staged --quiet && echo "nothing changed" && exit 0
-        git commit -m "chore: ${{ inputs.message }} $(date -u '+%Y-%m-%d')"
+        if git diff --staged --quiet; then
+          echo "nothing changed"
+          exit 0
+        fi
+        git commit -m "$subject"
+
         for attempt in 1 2 3; do
-          git push && exit 0
-          echo "push rejected, rebasing onto main (attempt $attempt)"
-          git pull --rebase origin main
+          if git push; then exit 0; fi
+          echo "push rejected; replaying this run's files onto the new tip (attempt $attempt)"
+
+          ours=$(git rev-parse HEAD)
+          # Split by what this run did to each path, because a pruned history
+          # file has to be re-deleted rather than re-checked-out.
+          git diff --name-only --diff-filter=d "$ours^" "$ours" > /tmp/kept.txt
+          git diff --name-only --diff-filter=D "$ours^" "$ours" > /tmp/gone.txt
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          # xargs, not "$(cat)": a full run rewrites every one of 2000-odd
+          # history files and the argument list would not fit.
+          if [ -s /tmp/kept.txt ]; then
+            xargs -r -a /tmp/kept.txt git checkout "$ours" --
+          fi
+          if [ -s /tmp/gone.txt ]; then
+            xargs -r -a /tmp/gone.txt git rm -q --ignore-unmatch --
+          fi
+
+          git add data
+          if git diff --staged --quiet; then
+            echo "the new tip already carries this run's data"
+            exit 0
+          fi
+          git commit -m "$subject"
         done
+
         echo "::error::could not push after three attempts"
         exit 1

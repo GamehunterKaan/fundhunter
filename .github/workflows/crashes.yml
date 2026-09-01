@@ -31,6 +31,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          # The tip as it is when this job STARTS, not the SHA from when the run
+          # was queued, which is what checkout takes by default. The concurrency
+          # group below can hold a job for the better part of an hour behind a
+          # sibling data job — and that sibling spends the wait pushing to
+          # data/. Regenerating on top of the stale pin leaves a push that can
+          # only be rebased by merging two whole-file rewrites of the same
+          # generated JSON, which is not a merge that can succeed: it cost a
+          # day's prices on 2026-08-31.
+          ref: main
 
       - uses: actions/setup-node@v5
         with:
