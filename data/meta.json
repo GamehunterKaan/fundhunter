@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-01T11:41:15.066Z",
+  "lastUpdated": "2026-09-01T15:27:50.943Z",
   "latestDate": "2026-09-01",
   "rangeStart": "2025-09-01",
   "months": 12,
@@ -1558,11 +1558,11 @@
         0.0665
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0618
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0618
       ],
       [
@@ -2174,15 +2174,15 @@
         0.0768
       ],
       [
+        "KRDMD",
+        0.0488
+      ],
+      [
         "KRDMA",
         0.0488
       ],
       [
         "KRDMB",
-        0.0488
-      ],
-      [
-        "KRDMD",
         0.0488
       ],
       [
@@ -3834,97 +3834,97 @@
     "sectors": [
       {
         "id": "health",
-        "move": 4.66,
+        "move": 5.4,
         "of": 16
       },
       {
         "id": "metals",
-        "move": 1.69,
+        "move": 2.22,
         "of": 37
       },
       {
-        "id": "energy",
-        "move": 1.21,
-        "of": 43
-      },
-      {
-        "id": "banks",
-        "move": 1.09,
-        "of": 12
-      },
-      {
         "id": "construction",
-        "move": 0.8,
+        "move": 0.81,
         "of": 36
       },
       {
-        "id": "tech",
-        "move": 0.73,
-        "of": 28
-      },
-      {
         "id": "transport",
-        "move": 0.68,
+        "move": 0.7,
         "of": 13
       },
       {
+        "id": "banks",
+        "move": 0.56,
+        "of": 12
+      },
+      {
+        "id": "energy",
+        "move": 0.44,
+        "of": 43
+      },
+      {
         "id": "retail",
-        "move": -0.84,
+        "move": -0.52,
+        "of": 28
+      },
+      {
+        "id": "tech",
+        "move": -0.8,
         "of": 28
       },
       {
         "id": "industrial",
-        "move": -0.93,
+        "move": -0.9,
         "of": 103
       },
       {
         "id": "realEstate",
-        "move": -1.01,
+        "move": -1.96,
         "of": 62
       },
       {
         "id": "textile",
-        "move": -2,
+        "move": -2.27,
         "of": 33
       },
       {
-        "id": "semis",
-        "move": -2.2,
-        "of": 3
-      },
-      {
-        "id": "defence",
-        "move": -2.98,
-        "of": 5
-      },
-      {
-        "id": "autos",
-        "move": -3.38,
-        "of": 14
-      },
-      {
-        "id": "chemicals",
-        "move": -4.08,
-        "of": 12
-      },
-      {
         "id": "finance",
-        "move": -4.8,
+        "move": -3.28,
         "of": 61
       },
       {
+        "id": "semis",
+        "move": -3.55,
+        "of": 3
+      },
+      {
+        "id": "autos",
+        "move": -3.9,
+        "of": 14
+      },
+      {
+        "id": "defence",
+        "move": -3.93,
+        "of": 5
+      },
+      {
+        "id": "chemicals",
+        "move": -4.11,
+        "of": 12
+      },
+      {
         "id": "food",
-        "move": -4.85,
+        "move": -4.77,
         "of": 67
       },
       {
         "id": "tourism",
-        "move": -4.95,
+        "move": -4.93,
         "of": 28
       },
       {
         "id": "telecom",
-        "move": -6.05,
+        "move": -5.2,
         "of": 9
       }
     ],
@@ -3932,57 +3932,57 @@
       {
         "c": "KARCL",
         "n": "Kardemir Celik Sanayi AS",
-        "move": 42.8,
+        "move": 56.6,
         "th": "metals",
-        "spec": 1
-      },
-      {
-        "c": "ANELE",
-        "n": "Anel Elektrik Proje Taahhut ve Ticaret A.S.",
-        "move": 32.4,
-        "th": "construction",
         "spec": 1
       },
       {
         "c": "MARTI",
         "n": "Marti Otel Isletmeleri A.S.",
-        "move": 29.3,
+        "move": 33.6,
         "th": "tourism"
+      },
+      {
+        "c": "ANELE",
+        "n": "Anel Elektrik Proje Taahhut ve Ticaret A.S.",
+        "move": 32.8,
+        "th": "construction",
+        "spec": 1
       },
       {
         "c": "TRHOL",
         "n": "Tera Financial Investments Holding A.S.",
-        "move": 23.3,
+        "move": 31.5,
         "th": "finance",
         "spec": 1
       },
       {
-        "c": "BIGEN",
-        "n": "Birlesim Grup Enerji Yatirimlari AS",
-        "move": 22.3,
-        "th": "energy",
-        "spec": 1
+        "c": "RYSAS",
+        "n": "Reysas Tasimacilik ve Lojistik Ticaret Anonim Sirketi",
+        "move": 25,
+        "th": "transport"
       },
       {
         "c": "BAHKM",
         "n": "Bahadir Kimya Sanayi Ve Ticaret Anonim Sirketi",
-        "move": 21.2,
+        "move": 24.9,
         "th": "industrial"
       },
       {
-        "c": "RYSAS",
-        "n": "Reysas Tasimacilik ve Lojistik Ticaret Anonim Sirketi",
-        "move": 20.8,
-        "th": "transport"
+        "c": "BIGEN",
+        "n": "Birlesim Grup Enerji Yatirimlari AS",
+        "move": 23.2,
+        "th": "energy",
+        "spec": 1
       },
       {
-        "c": "ISVEA",
-        "n": "Isvea Seramik ve Banyo Urunleri Sanayi A.S.",
-        "move": 19.3,
-        "th": "retail"
+        "c": "TGSAS",
+        "n": "TGS Dis Ticaret AS",
+        "move": 22.3,
+        "th": "industrial"
       }
     ],
-    "floor": 61875060,
+    "floor": 64380310,
     "of": 307
   },
   "peerGroups": [
@@ -4114,5 +4114,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-01T14:21:04.329Z"
+  "analyticsBuiltAt": "2026-09-01T15:28:14.586Z"
 }
