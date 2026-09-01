@@ -1,0 +1,134 @@
+name: Freshness
+
+# The watchdog. Every hour it asks the live site what date it is showing and
+# TEFAS what date there is, and if those disagree it does something about it.
+#
+# It watches the OUTCOME, not the pipeline, and that is the whole point. The
+# data has gone stale four different ways now — a fetch that refused to write
+# over a poisoned cache, a commit that died in a rebase, a service worker
+# answering from yesterday's copy, a scheduled run that simply never fired — and
+# a check per failure mode would have caught the first and missed the other
+# three. From out here they are one symptom: the site is behind TEFAS. So is
+# the fifth one, whatever it turns out to be.
+#
+# Three levels, from scripts/lib/freshness.mjs:
+#   grace  the site is behind but it is still morning and the daily job has not
+#          had its turn yet. Do nothing; this is normal.
+#   heal   behind, and late enough that something has gone wrong. Re-run the
+#          prices job. Most failures here are transient and this ends them.
+#   alert  behind into the afternoon, or by more than a weekend, or unreadable.
+#          Healing has already been tried and has not worked, so open an issue,
+#          which is the part that reaches a human.
+#
+# Hourly is cheap — three HTTP requests and no fetch — and it is deliberately
+# not tied to the data jobs' own schedule, so a run that never fires is exactly
+# the case this still catches.
+
+on:
+  schedule:
+    - cron: '20 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+  issues: write
+
+# Not in the fundhunter-data group. This job never writes to data/, and putting
+# it in that queue would mean the watchdog spends the fetch it is watching stuck
+# behind it — unable to report on the very run it is waiting for.
+concurrency:
+  group: fundhunter-freshness
+  cancel-in-progress: true
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Compare the live site against TEFAS
+        id: check
+        run: node scripts/check-freshness.mjs --github-output
+
+      # Nothing below runs when the site is current, which is almost always.
+
+      - name: Is a prices run already dealing with it?
+        if: steps.check.outputs.level == 'heal' || steps.check.outputs.level == 'alert'
+        id: busy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          n=$(gh run list --workflow=prices.yml --status in_progress --json databaseId --jq 'length')
+          q=$(gh run list --workflow=prices.yml --status queued --json databaseId --jq 'length')
+          echo "running=$(( n + q ))" >> "$GITHUB_OUTPUT"
+          echo "prices runs in flight: $(( n + q ))"
+
+      # One re-run, only when nothing is already in flight. The hourly cadence
+      # is the rate limit: a job that cannot succeed gets retried once an hour,
+      # not once a minute, and the alert below is what escalates it past that.
+      - name: Re-run the prices job
+        if: >-
+          (steps.check.outputs.level == 'heal' || steps.check.outputs.level == 'alert')
+          && steps.busy.outputs.running == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "site is behind — ${{ steps.check.outputs.reason }}"
+          gh workflow run prices.yml
+
+      # The part that reaches a person. One issue, reopened and updated rather
+      # than a new one every hour, so a week of staleness is one thread and not
+      # 168 notifications anybody would learn to ignore.
+      - name: Open or update the staleness issue
+        if: steps.check.outputs.level == 'alert'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Data is stale: the site is behind TEFAS"
+          body=$(cat <<EOF
+          ${{ steps.check.outputs.reason }}
+
+          | | |
+          |---|---|
+          | site is serving | \`${{ steps.check.outputs.site_date }}\` |
+          | TEFAS has | \`${{ steps.check.outputs.tefas_date }}\` |
+          | days behind | ${{ steps.check.outputs.behind_days }} |
+          | noticed by | [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+
+          A re-run of \`prices.yml\` has already been attempted. This issue is open
+          because the site was still behind by the afternoon, so that attempt did not
+          work and the cause is not transient. Check the most recent \`prices.yml\` run.
+
+          Closes itself when the site catches up.
+          EOF
+          )
+          existing=$(gh issue list --state open --search "$title in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+            echo "commented on #$existing"
+          else
+            gh issue create --title "$title" --body "$body" --label data 2>/dev/null \
+              || gh issue create --title "$title" --body "$body"
+          fi
+
+      # Shutting up on its own matters as much as speaking up: an issue nobody
+      # closed is an alert everybody stops reading.
+      - name: Close the staleness issue once the site catches up
+        if: steps.check.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title="Data is stale: the site is behind TEFAS"
+          for n in $(gh issue list --state open --search "$title in:title" --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "The site is current again — ${{ steps.check.outputs.reason }}."
+            echo "closed #$n"
+          done
