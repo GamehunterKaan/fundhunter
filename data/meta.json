@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-02T11:28:08.024Z",
+  "lastUpdated": "2026-09-02T15:04:51.364Z",
   "latestDate": "2026-09-02",
   "rangeStart": "2025-09-02",
   "months": 12,
@@ -2175,7 +2175,7 @@
         0.0768
       ],
       [
-        "KRDMB",
+        "KRDMA",
         0.0488
       ],
       [
@@ -2183,7 +2183,7 @@
         0.0488
       ],
       [
-        "KRDMA",
+        "KRDMB",
         0.0488
       ],
       [
@@ -2641,11 +2641,11 @@
         0.0012
       ],
       [
-        "USHOL",
+        "MARKA",
         0.0011
       ],
       [
-        "MARKA",
+        "USHOL",
         0.0011
       ],
       [
@@ -3835,97 +3835,97 @@
     "sectors": [
       {
         "id": "health",
-        "move": 5.65,
+        "move": 6.28,
         "of": 16
       },
       {
-        "id": "energy",
-        "move": 1.64,
-        "of": 43
-      },
-      {
         "id": "metals",
-        "move": 1.19,
+        "move": 3.49,
         "of": 37
       },
       {
-        "id": "retail",
-        "move": -2.15,
-        "of": 28
-      },
-      {
-        "id": "construction",
-        "move": -2.26,
-        "of": 36
+        "id": "energy",
+        "move": 2.32,
+        "of": 43
       },
       {
         "id": "banks",
-        "move": -2.31,
+        "move": -0.08,
         "of": 12
       },
       {
         "id": "realEstate",
-        "move": -2.31,
+        "move": -1.18,
         "of": 62
       },
       {
+        "id": "retail",
+        "move": -1.38,
+        "of": 28
+      },
+      {
+        "id": "construction",
+        "move": -1.47,
+        "of": 36
+      },
+      {
         "id": "industrial",
-        "move": -2.37,
+        "move": -1.81,
         "of": 104
       },
       {
-        "id": "textile",
-        "move": -3.68,
-        "of": 33
-      },
-      {
         "id": "chemicals",
-        "move": -4.16,
+        "move": -2.38,
         "of": 12
       },
       {
+        "id": "textile",
+        "move": -3.32,
+        "of": 33
+      },
+      {
         "id": "transport",
-        "move": -4.26,
+        "move": -3.58,
         "of": 13
       },
       {
+        "id": "autos",
+        "move": -4.06,
+        "of": 14
+      },
+      {
         "id": "food",
-        "move": -4.48,
+        "move": -4.12,
         "of": 67
       },
       {
         "id": "defence",
-        "move": -4.73,
+        "move": -4.66,
         "of": 5
       },
       {
-        "id": "autos",
-        "move": -4.87,
-        "of": 14
-      },
-      {
         "id": "tourism",
-        "move": -6.03,
+        "move": -5.01,
         "of": 28
       },
       {
-        "id": "semis",
-        "move": -6.8,
-        "of": 3
-      },
-      {
         "id": "telecom",
-        "move": -7.54,
+        "move": -5.35,
         "of": 9
       },
       {
+        "id": "semis",
+        "move": -5.83,
+        "of": 3
+      },
+      {
         "id": "finance",
-        "move": -9.23,
+        "move": -8.32,
         "of": 61
       },
       {
         "id": "tech",
-        "move": -14.02,
+        "move": -13.83,
         "of": 28
       }
     ],
@@ -3933,7 +3933,7 @@
       {
         "c": "KARCL",
         "n": "Kardemir Celik Sanayi AS",
-        "move": 63,
+        "move": 65.3,
         "th": "metals",
         "spec": 1
       },
@@ -3952,38 +3952,38 @@
       {
         "c": "TRHOL",
         "n": "Tera Financial Investments Holding A.S.",
-        "move": 32.5,
+        "move": 32.6,
         "th": "finance",
-        "spec": 1
-      },
-      {
-        "c": "ANELE",
-        "n": "Anel Elektrik Proje Taahhut ve Ticaret A.S.",
-        "move": 27.1,
-        "th": "construction",
         "spec": 1
       },
       {
         "c": "RYSAS",
         "n": "Reysas Tasimacilik ve Lojistik Ticaret Anonim Sirketi",
-        "move": 25,
+        "move": 27.2,
         "th": "transport"
       },
       {
-        "c": "MRGYO",
-        "n": "Marti Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 23.7,
-        "th": "realEstate"
+        "c": "ANELE",
+        "n": "Anel Elektrik Proje Taahhut ve Ticaret A.S.",
+        "move": 26.8,
+        "th": "construction",
+        "spec": 1
+      },
+      {
+        "c": "KARSN",
+        "n": "Karsan Otomotiv Sanayii ve Ticaret A.S.",
+        "move": 22,
+        "th": "industrial"
       },
       {
         "c": "CRFSA",
         "n": "CarrefourSA Carrefour Sabanci Ticaret Merkezi A.S.",
-        "move": 23.2,
+        "move": 20.5,
         "th": "retail",
         "spec": 1
       }
     ],
-    "floor": 61313547,
+    "floor": 64580509,
     "of": 308
   },
   "peerGroups": [
@@ -4077,8 +4077,8 @@
     "m6": 21.77,
     "ytd": 29.89,
     "y1": 47.77,
-    "y3": 252.96,
-    "y5": 434.55
+    "y3": 254.29,
+    "y5": 422.76
   },
   "cashBasis": {
     "m1": {
@@ -4098,11 +4098,11 @@
     },
     "y3": {
       "from": "published",
-      "funds": 63
+      "funds": 47
     },
     "y5": {
       "from": "published",
-      "funds": 48
+      "funds": 33
     }
   },
   "taxDefaults": {
@@ -4115,5 +4115,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-02T14:03:33.670Z"
+  "analyticsBuiltAt": "2026-09-02T15:05:06.746Z"
 }
