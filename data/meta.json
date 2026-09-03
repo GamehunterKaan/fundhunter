@@ -1,11 +1,14 @@
 {
-  "lastUpdated": "2026-09-03T08:10:56.807Z",
+  "lastUpdated": "2026-09-03T08:29:05.416Z",
   "latestDate": "2026-09-03",
+  "lastWideRead": "2026-09-03T08:29:05.416Z",
   "rangeStart": "2025-09-03",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2071,
+    "priced": 2071,
+    "lagging": 0,
     "byKind": {
       "YAT": 2041,
       "BYF": 30
@@ -1559,11 +1562,11 @@
         0.0629
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0624
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0624
       ],
       [
@@ -2183,11 +2186,11 @@
         0.047
       ],
       [
-        "KRDMB",
+        "KRDMA",
         0.047
       ],
       [
-        "KRDMA",
+        "KRDMB",
         0.047
       ],
       [
@@ -3839,73 +3842,78 @@
     "sectors": [
       {
         "id": "health",
-        "move": 4.69,
+        "move": 4.87,
         "of": 16
       },
       {
         "id": "energy",
-        "move": 0.46,
+        "move": 0.42,
         "of": 43
       },
       {
         "id": "banks",
-        "move": -0.11,
+        "move": -0.09,
         "of": 12
       },
       {
         "id": "metals",
-        "move": -0.17,
+        "move": -0.56,
         "of": 37
       },
       {
         "id": "realEstate",
-        "move": -1.72,
+        "move": -1.62,
         "of": 62
       },
       {
         "id": "retail",
-        "move": -2.01,
+        "move": -1.95,
         "of": 28
       },
       {
         "id": "chemicals",
-        "move": -3.81,
+        "move": -3.73,
         "of": 12
       },
       {
-        "id": "autos",
-        "move": -4.38,
-        "of": 14
-      },
-      {
         "id": "construction",
-        "move": -4.49,
+        "move": -4.17,
         "of": 36
       },
       {
+        "id": "autos",
+        "move": -4.35,
+        "of": 14
+      },
+      {
         "id": "food",
-        "move": -4.56,
+        "move": -4.46,
         "of": 67
       },
       {
-        "id": "defence",
-        "move": -4.7,
-        "of": 5
-      },
-      {
         "id": "textile",
-        "move": -4.74,
+        "move": -4.64,
         "of": 33
       },
       {
+        "id": "defence",
+        "move": -4.8,
+        "of": 5
+      },
+      {
         "id": "industrial",
-        "move": -4.82,
+        "move": -4.98,
         "of": 104
       },
       {
         "id": "tourism",
-        "move": -5.99,
+        "move": -6.13,
         "of": 28
+      },
+      {
+        "id": "transport",
+        "move": -6.3,
+        "of": 13
       },
       {
         "id": "telecom",
@@ -3913,23 +3921,18 @@
         "of": 9
       },
       {
-        "id": "transport",
-        "move": -6.38,
-        "of": 13
-      },
-      {
         "id": "semis",
-        "move": -7.28,
+        "move": -7.38,
         "of": 3
       },
       {
         "id": "finance",
-        "move": -10.38,
+        "move": -10.54,
         "of": 61
       },
       {
         "id": "tech",
-        "move": -13.74,
+        "move": -13.81,
         "of": 29
       }
     ],
@@ -3937,28 +3940,34 @@
       {
         "c": "MARTI",
         "n": "Marti Otel Isletmeleri A.S.",
-        "move": 50.7,
+        "move": 47.1,
         "th": "tourism"
       },
       {
         "c": "KARCL",
         "n": "Kardemir Celik Sanayi AS",
-        "move": 44.7,
+        "move": 40.5,
         "th": "metals",
+        "spec": 1
+      },
+      {
+        "c": "TRHOL",
+        "n": "Tera Financial Investments Holding A.S.",
+        "move": 27.9,
+        "th": "finance",
         "spec": 1
       },
       {
         "c": "KARSN",
         "n": "Karsan Otomotiv Sanayii ve Ticaret A.S.",
-        "move": 28.1,
+        "move": 27.1,
         "th": "industrial"
       },
       {
-        "c": "TRHOL",
-        "n": "Tera Financial Investments Holding A.S.",
-        "move": 26.9,
-        "th": "finance",
-        "spec": 1
+        "c": "TEHOL",
+        "n": "Tera Yatirim Teknoloji Holding A.S.",
+        "move": 23.9,
+        "th": "realEstate"
       },
       {
         "c": "RYSAS",
@@ -3967,25 +3976,20 @@
         "th": "transport"
       },
       {
-        "c": "TKNKA",
-        "n": "Teknika Plast Teknik Kalip Plastik Sanayi Ve Ticaret Anonim Sirketi",
-        "move": 22.8,
-        "th": "industrial"
-      },
-      {
-        "c": "TEHOL",
-        "n": "Tera Yatirim Teknoloji Holding A.S.",
-        "move": 22.7,
-        "th": "realEstate"
-      },
-      {
         "c": "HALKB",
         "n": "Turkiye Halk Bankasi Anonim Sirketi",
         "move": 17.9,
         "th": "banks"
+      },
+      {
+        "c": "SELEC",
+        "n": "Selcuk Ecza Deposu Ticaret ve Sanayi A.S.",
+        "move": 16.8,
+        "th": "health",
+        "spec": 1
       }
     ],
-    "floor": 58063781,
+    "floor": 58511691,
     "of": 309
   },
   "peerGroups": [
@@ -4079,8 +4083,8 @@
     "m6": 21.83,
     "ytd": 30.04,
     "y1": 47.76,
-    "y3": 253.34,
-    "y5": 433.97
+    "y3": 254.64,
+    "y5": 424.13
   },
   "cashBasis": {
     "m1": {
@@ -4100,11 +4104,11 @@
     },
     "y3": {
       "from": "published",
-      "funds": 63
+      "funds": 47
     },
     "y5": {
       "from": "published",
-      "funds": 49
+      "funds": 34
     }
   },
   "taxDefaults": {
@@ -4117,5 +4121,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-03T08:12:07.740Z"
+  "analyticsBuiltAt": "2026-09-03T08:29:18.048Z"
 }
