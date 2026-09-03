@@ -73,6 +73,8 @@ try {
   verdict.siteDate = meta.latestDate ?? null;
   verdict.tefasDate = tefasDate;
   verdict.lastUpdated = meta.lastUpdated ?? null;
+  verdict.lagging = meta.counts?.lagging ?? null;
+  verdict.funds = meta.counts?.funds ?? null;
 } catch (e) {
   // Unreachable is not the same as stale, but it is not fine either, and the
   // one thing it must not do is pass quietly.
@@ -86,6 +88,14 @@ try {
 
 console.log(verdict.ok ? `fresh — ${verdict.reason}` : `STALE — ${verdict.reason}`);
 if (verdict.lastUpdated) console.log(`  site last updated ${verdict.lastUpdated}`);
+// Reported, not yet alerted on. A fund inside its grace window that has not
+// printed today is normal and self-correcting, and the build drops it after
+// five silent trading days on its own. What the right number is on an ordinary
+// day is not something to guess at — so it is instrumented first and given a
+// threshold once there is a baseline to set one from.
+if (verdict.lagging != null) {
+  console.log(`  funds published at an older date: ${verdict.lagging} of ${verdict.funds}`);
+}
 console.log(`  level: ${verdict.level}`);
 
 if (args['github-output'] && process.env.GITHUB_OUTPUT) {
@@ -97,6 +107,7 @@ if (args['github-output'] && process.env.GITHUB_OUTPUT) {
       `behind_days=${verdict.behindDays}`,
       `reason=${verdict.reason}`,
       `site_date=${verdict.siteDate ?? ''}`,
+      `lagging=${verdict.lagging ?? ''}`,
       `tefas_date=${verdict.tefasDate ?? ''}`,
       '',
     ].join('\n')

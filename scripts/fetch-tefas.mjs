@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import {
   TefasClient, requestBody, mapPool, ymd, addDays, splitRange, weeklyAnchors,
 } from './lib/tefas.mjs';
+import { staleCutoff, partitionUniverse, lastDate, PRUNE_GRACE_DAYS } from './lib/universe.mjs';
 import { ASSETS, ASSET_CODES, GROUPS, KINDS, CATEGORY_EN } from './lib/taxonomy.mjs';
 import { collapseReason } from './lib/collapse.mjs';
 // Shared with the browser so a "1-year return" means the same thing in both.
@@ -40,6 +41,9 @@ const EXPORT_URL = 'https://www.tefas.gov.tr/api/fund-returns/export';
 
 /** TEFAS caps a single request at roughly one month of data. */
 const MAX_DAYS_PER_REQUEST = 28;
+/** Chunks re-read on a wide run, and how often one is due. */
+const WIDE_CHUNKS = 3;
+const WIDE_EVERY_MS = 7 * 24 * 3600 * 1000;
 /** Allocation is sampled weekly; this window absorbs public holidays. */
 const ALLOC_WINDOW_DAYS = 3;
 
@@ -461,23 +465,26 @@ async function fetchFundProfiles() {
 }
 
 /** Daily price/size/investor history for every kind. */
-async function fetchInfoHistory(start, end) {
+async function fetchInfoHistory(start, end, liveChunks = 1) {
+  const grid = splitRange(start, end, MAX_DAYS_PER_REQUEST);
+  // The grid runs the newest chunk past the latest trading date, so that one is
+  // still filling up while its key stays put — and a cache keyed by the range
+  // alone would serve whichever day it was first written for until the block
+  // ends, weeks later. Tagging it with the trading date is what weeklyAnchors()
+  // does for the allocation snapshots. Same-day re-runs still hit.
+  //
+  // `liveChunks` widens that to the newest few. TEFAS restates a NAV
+  // occasionally, and a restatement inside a chunk that is already closed is
+  // never re-read at any run frequency — the request is simply never made
+  // again. Once a week the window is opened wide enough to see them.
+  const liveFrom = Math.max(0, grid.length - liveChunks);
   const jobs = [];
-  const endTag = ymd(end);
   for (const kind of KINDS.map((k) => k.id)) {
-    for (const [s, e] of splitRange(start, end, MAX_DAYS_PER_REQUEST)) {
-      // The grid runs the newest chunk past the latest trading date, so that
-      // one is still filling up while its key stays put — and a cache keyed by
-      // the range alone would serve whichever day it was first written for
-      // until the block ends, weeks later. Tagging the open chunk with the
-      // trading date is what weeklyAnchors() does for the allocation
-      // snapshots. Same-day re-runs still hit; a rollover fetches one chunk.
-      const s0 = ymd(s);
-      const e0 = ymd(e);
-      jobs.push({ kind, s: s0, e: e0, open: e0 >= endTag });
-    }
+    grid.forEach(([s, e], i) => {
+      jobs.push({ kind, s: ymd(s), e: ymd(e), open: i >= liveFrom });
+    });
   }
-  log(`  info history: ${jobs.length} requests`);
+  log(`  info history: ${jobs.length} requests (${liveChunks} live chunk(s) per kind)`);
   let done = 0;
   const chunks = await mapPool(jobs, CONCURRENCY, async (j) => {
     const rows = await client.post(
@@ -544,7 +551,25 @@ async function main() {
   log(`  ${profiles.size} fund profiles`);
 
   log('Step 3/5 — price history');
-  const infoChunks = await fetchInfoHistory(start, end);
+  // Whether this run re-reads the closed chunks as well. Driven by what the
+  // last run wrote rather than by the weekday: a Saturday that GitHub never
+  // fires would otherwise skip the wide read for the whole week and nothing
+  // would say so.
+  let lastWideRead = null;
+  try {
+    lastWideRead = JSON.parse(
+      await fs.readFile(path.join(OUT_DIR, 'meta.json'), 'utf8')
+    ).lastWideRead ?? null;
+  } catch {
+    lastWideRead = null;
+  }
+  const wide =
+    Boolean(args.wide) ||
+    !lastWideRead ||
+    Date.now() - Date.parse(lastWideRead) >= WIDE_EVERY_MS;
+  if (wide) log(`  wide read: re-reading the newest ${WIDE_CHUNKS} chunks for restatements`);
+
+  const infoChunks = await fetchInfoHistory(start, end, wide ? WIDE_CHUNKS : 1);
 
   log('Step 4/5 — allocation history');
   const allocChunks = await fetchAllocHistory(allocStart, end);
@@ -581,10 +606,36 @@ async function main() {
     }
   }
 
-  // A fund counts as "current" only if it reported on the latest trading date.
-  const active = [...funds.entries()].filter(([, f]) => f.prices.has(latestDate));
-  log(`  ${funds.size} funds seen, ${active.length} active on ${latestDate}`);
-  await assertNotCollapsed(active.length);
+  // A fund that did not print today has not necessarily gone. Everything below
+  // is built from `active`, including the prune that deletes history files, so
+  // reading "silent today" as "delisted" is how a fund publishing an hour late
+  // loses its past. Grace is counted in trading days actually seen, so a
+  // weekend or a holiday spends none of it.
+  //
+  // `priced` stays strict and is what the collapse guard reads: the question it
+  // answers is whether this fetch worked at all, and grace must not soften that.
+  const tradingDays = new Set();
+  for (const [, f] of funds) for (const d of f.prices.keys()) tradingDays.add(d);
+  const cutoff = staleCutoff(tradingDays);
+  const { priced, keep: active, dropped } = partitionUniverse(
+    funds.entries(), latestDate, cutoff
+  );
+  log(
+    `  ${funds.size} funds seen, ${priced.length} priced on ${latestDate}, ` +
+    `${active.length} kept (silent since ${cutoff} is dropped)`
+  );
+  if (active.length > priced.length) {
+    const late = active.filter(([, f]) => !f.prices.has(latestDate));
+    log(
+      `  ${late.length} kept without a print today: ` +
+      late.slice(0, 8).map(([c, f]) => `${c}@${lastDate(f.prices)}`).join(' ') +
+      (late.length > 8 ? ' …' : '')
+    );
+  }
+  if (dropped.length) {
+    log(`  ${dropped.length} dropped after ${PRUNE_GRACE_DAYS} silent trading days`);
+  }
+  await assertNotCollapsed(priced.length);
 
   const groupOf = Object.fromEntries(Object.entries(ASSETS).map(([k, v]) => [k, v.group]));
 
@@ -716,11 +767,20 @@ async function main() {
   const meta = {
     lastUpdated: new Date().toISOString(),
     latestDate,
+    // Carried forward untouched on a narrow run, so the weekly clock is the
+    // last wide read and not the last run of any kind.
+    lastWideRead: wide ? new Date().toISOString() : lastWideRead,
     rangeStart: start.toISOString().slice(0, 10),
     months: MONTHS,
     source: 'https://www.tefas.gov.tr',
     counts: {
       funds: index.length,
+      // How many of those are published at a date older than latestDate —
+      // funds inside their grace window that have not printed yet. Written here
+      // rather than counted by the watchdog so the check stays three small
+      // requests: meta.json already crosses the wire, funds.json does not.
+      priced: priced.length,
+      lagging: index.length - priced.length,
       byKind: Object.fromEntries(
         KINDS.map((k) => [k.id, index.filter((r) => r.k === k.id).length])
       ),

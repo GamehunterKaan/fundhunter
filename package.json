@@ -10,7 +10,7 @@
     "url": "https://github.com/GamehunterKaan/fundhunter.git"
   },
   "scripts": {
-    "test": "node --test test/core-test.mjs test/analytics-test.mjs test/pdf-test.mjs test/portfolio-test.mjs test/quotes-test.mjs test/sw-test.mjs test/collapse-test.mjs test/freshness-test.mjs",
+    "test": "node --test test/core-test.mjs test/analytics-test.mjs test/pdf-test.mjs test/portfolio-test.mjs test/quotes-test.mjs test/sw-test.mjs test/collapse-test.mjs test/freshness-test.mjs test/universe-test.mjs",
     "fetch": "node scripts/fetch-tefas.mjs",
     "fetch:benchmarks": "node scripts/fetch-benchmarks.mjs",
     "analytics": "node scripts/build-analytics.mjs",
