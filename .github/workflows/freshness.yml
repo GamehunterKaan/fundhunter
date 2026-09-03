@@ -11,22 +11,29 @@ name: Freshness
 # three. From out here they are one symptom: the site is behind TEFAS. So is
 # the fifth one, whatever it turns out to be.
 #
-# Three levels, from scripts/lib/freshness.mjs:
-#   grace  the site is behind but it is still morning and the daily job has not
-#          had its turn yet. Do nothing; this is normal.
-#   heal   behind, and late enough that something has gone wrong. Re-run the
-#          prices job. Most failures here are transient and this ends them.
-#   alert  behind into the afternoon, or by more than a weekend, or unreadable.
-#          Healing has already been tried and has not worked, so open an issue,
-#          which is the part that reaches a human.
+# Two levels, from scripts/lib/freshness.mjs, and no third one that waits:
+#   heal   the site is behind TEFAS. Re-run the prices job, whatever the hour.
+#          Most gaps are a run that did not fire and this ends them.
+#   alert  behind by more than a weekend, or behind with the site not having
+#          moved for hours, or unreadable. Re-running has already been tried and
+#          has not worked, so open an issue, which is the part that reaches a
+#          human.
 #
-# Hourly is cheap — three HTTP requests and no fetch — and it is deliberately
-# not tied to the data jobs' own schedule, so a run that never fires is exactly
-# the case this still catches.
+# There used to be a "grace" level that forgave a gap before 09:00 UTC. It cost
+# a day: on 2026-09-03 this ran at 04:37, saw the site a day behind, called it
+# grace and did nothing, and the reader found it first. A watchdog that has been
+# taught when not to bark is not a watchdog.
+#
+# Every fifteen minutes rather than hourly, because GitHub drops most scheduled
+# fires: an hourly cron here was landing roughly every three to four hours, and
+# the gap between 04:37 and 08:00 on 09-03 is exactly the gap a reader fell into.
+# Four attempts an hour is what it takes to land about one. It is cheap — three
+# HTTP requests and no fetch — and deliberately not tied to the data jobs' own
+# schedule, so a run that never fires is exactly the case this still catches.
 
 on:
   schedule:
-    - cron: '20 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -62,7 +69,7 @@ jobs:
       # Nothing below runs when the site is current, which is almost always.
 
       - name: Is a prices run already dealing with it?
-        if: steps.check.outputs.level == 'heal' || steps.check.outputs.level == 'alert'
+        if: steps.check.outputs.ok == 'false'
         id: busy
         env:
           GH_TOKEN: ${{ github.token }}
@@ -76,9 +83,7 @@ jobs:
       # is the rate limit: a job that cannot succeed gets retried once an hour,
       # not once a minute, and the alert below is what escalates it past that.
       - name: Re-run the prices job
-        if: >-
-          (steps.check.outputs.level == 'heal' || steps.check.outputs.level == 'alert')
-          && steps.busy.outputs.running == '0'
+        if: steps.check.outputs.ok == 'false' && steps.busy.outputs.running == '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

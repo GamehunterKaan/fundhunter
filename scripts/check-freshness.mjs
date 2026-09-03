@@ -64,7 +64,12 @@ const site = (args.site === true ? null : args.site) ?? (await defaultSite());
 let verdict;
 try {
   const [meta, tefasDate] = await Promise.all([siteMeta(site), tefasLatestDate()]);
-  verdict = freshnessVerdict({ siteDate: meta.latestDate ?? null, tefasDate, now: new Date() });
+  verdict = freshnessVerdict({
+    siteDate: meta.latestDate ?? null,
+    tefasDate,
+    lastUpdated: meta.lastUpdated ?? null,
+    now: new Date(),
+  });
   verdict.siteDate = meta.latestDate ?? null;
   verdict.tefasDate = tefasDate;
   verdict.lastUpdated = meta.lastUpdated ?? null;
