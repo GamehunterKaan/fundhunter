@@ -2,30 +2,17 @@
  "code": "TCF",
  "kapCode": null,
  "name": "TCF - TEB PORTFÖY ÜÇÜNCÜ FON SEPETİ FONU",
- "period": "Temmuz-2026",
- "prevPeriod": "2026-06",
- "publishedAt": "07.08.2026 16:11:32",
- "disclosure": 1645274,
+ "period": "Ağustos-2026",
+ "prevPeriod": "2026-07",
+ "publishedAt": "04.09.2026 10:14:35",
+ "disclosure": 1658756,
  "form": "A",
- "portfolioValue": 3454984275.74,
- "netAssetValue": 3450061558.12,
+ "portfolioValue": 3245343325.16,
+ "netAssetValue": 3247721942.22,
  "warnings": [],
  "holdings": [
   {
-   "code": "TRT061228T16",
-   "isin": "TRT061228T16",
-   "ref": null,
-   "name": "HAZİNE",
-   "currency": "TL",
-   "group": "BORÇLANMA SENETLERİ",
-   "subgroup": "Devlet Tahvili",
-   "nominal": 50000000,
-   "value": 53188536.08,
-   "weight": 1.54,
-   "prevWeight": 1.17
-  },
-  {
-   "code": "TRT040729T14",
+   "code": "TRT040729T14 _VIOP",
    "isin": "TRT040729T14",
    "ref": null,
    "name": "HAZİNE",
@@ -33,12 +20,12 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 50007968,
-   "value": 51273663.82,
-   "weight": 1.48,
-   "prevWeight": 1.38
+   "value": 53198587.23,
+   "weight": 1.64,
+   "prevWeight": 1.48
   },
   {
-   "code": "TRT090130T12",
+   "code": "TRT090130T12 _VIOP",
    "isin": "TRT090130T12",
    "ref": null,
    "name": "HAZİNE",
@@ -46,9 +33,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 300000000,
-   "value": 302366504.65,
-   "weight": 8.75,
-   "prevWeight": 9.25
+   "value": 312333772.97,
+   "weight": 9.62,
+   "prevWeight": 8.75
   },
   {
    "code": "TEB A.Ş.",
@@ -58,23 +45,23 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 32250000,
-   "value": 32355629.79,
-   "weight": 0.94,
-   "prevWeight": 0.51
+   "nominal": 68150000,
+   "value": 68218803.49,
+   "weight": 2.1,
+   "prevWeight": 0.94
   },
   {
-   "code": "F_USDTRY0826",
-   "isin": "TRVXIST04YL7",
+   "code": "F_EURUSD0926",
+   "isin": "TRVXIST05PH0",
    "ref": null,
    "name": null,
-   "currency": "TL",
-   "group": "Kısa",
+   "currency": "USD",
+   "group": "Uzun",
    "subgroup": null,
-   "nominal": 2500,
-   "value": 121545000,
+   "nominal": 900,
+   "value": 50437256.27,
    "weight": 0,
-   "prevWeight": 0
+   "prevWeight": null
   },
   {
    "code": "F_USDTRY0926",
@@ -85,7 +72,20 @@
    "group": "Kısa",
    "subgroup": null,
    "nominal": 10000,
-   "value": 498550000,
+   "value": 493720000,
+   "weight": 0,
+   "prevWeight": 0
+  },
+  {
+   "code": "F_USDTRY1026",
+   "isin": "TRVXIST052Y5",
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "Kısa",
+   "subgroup": null,
+   "nominal": 2500,
+   "value": 126477500,
    "weight": 0,
    "prevWeight": null
   },
@@ -97,10 +97,10 @@
    "currency": null,
    "group": "VIOP Nakit Teminatı",
    "subgroup": null,
-   "nominal": 129884272.43,
-   "value": 129884272.43,
-   "weight": 3.76,
-   "prevWeight": 2.82
+   "nominal": 83671890.28,
+   "value": 83671890.28,
+   "weight": 2.58,
+   "prevWeight": 3.76
   },
   {
    "code": "DRAM US",
@@ -111,9 +111,9 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
    "nominal": 6500,
-   "value": 16289741.02,
-   "weight": 0.47,
-   "prevWeight": null
+   "value": 17665875.79,
+   "weight": 0.54,
+   "prevWeight": 0.47
   },
   {
    "code": "BGP-AK PORTFÖY",
@@ -123,9 +123,22 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 62742608,
-   "value": 402166690.36,
-   "weight": 11.64,
+   "nominal": 50000000,
+   "value": 330632200,
+   "weight": 10.19,
+   "prevWeight": 11.64
+  },
+  {
+   "code": "BHL-İŞ PORTFÖY",
+   "isin": "TRYISPO01520",
+   "ref": null,
+   "name": "İŞ PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Y.Fonu Türk",
+   "nominal": 15865586,
+   "value": 20061398.87,
+   "weight": 0.62,
    "prevWeight": null
   },
   {
@@ -136,23 +149,10 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 200000000,
-   "value": 486103800,
-   "weight": 14.07,
-   "prevWeight": 18.21
-  },
-  {
-   "code": "GO6-FONERİA",
-   "isin": "TRYGRIP00066",
-   "ref": null,
-   "name": "FONERİA PORTFÖY YÖNETİMİA.Ş.",
-   "currency": "TL",
-   "group": "DİĞER",
-   "subgroup": "Y.Fonu Türk",
-   "nominal": 19049541,
-   "value": 79411821.57,
-   "weight": 2.3,
-   "prevWeight": 1.75
+   "nominal": 190000000,
+   "value": 476394030,
+   "weight": 14.68,
+   "prevWeight": 14.07
   },
   {
    "code": "GUB-GARANTİ",
@@ -163,9 +163,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 42680624,
-   "value": 107489230.92,
-   "weight": 3.11,
-   "prevWeight": 2.37
+   "value": 110807948.2,
+   "weight": 3.41,
+   "prevWeight": 3.11
   },
   {
    "code": "NZT-NEO PORTFÖY",
@@ -176,9 +176,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 50000000,
-   "value": 297651100,
-   "weight": 8.62,
-   "prevWeight": 9.19
+   "value": 306788900,
+   "weight": 9.45,
+   "prevWeight": 8.62
   },
   {
    "code": "TE4-TEB PORTFÖY",
@@ -189,9 +189,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 36173757,
-   "value": 231279447.54,
-   "weight": 6.69,
-   "prevWeight": 5.12
+   "value": 239913833.95,
+   "weight": 7.39,
+   "prevWeight": 6.69
   },
   {
    "code": "TKM TEB PORTFÖY",
@@ -201,10 +201,23 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 1301821922,
-   "value": 274979939.12,
-   "weight": 7.96,
-   "prevWeight": 3.49
+   "nominal": 815894376,
+   "value": 177659368.59,
+   "weight": 5.47,
+   "prevWeight": 7.96
+  },
+  {
+   "code": "TUA TEB PORTFÖY",
+   "isin": "TRYTEBK00030",
+   "ref": null,
+   "name": "TEB PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Y.Fonu Türk",
+   "nominal": 31500000,
+   "value": 46929141,
+   "weight": 1.45,
+   "prevWeight": null
   },
   {
    "code": "TYH - TEB PORTFÖY",
@@ -214,10 +227,10 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 31549369,
-   "value": 62201410.85,
-   "weight": 1.8,
-   "prevWeight": 1.1
+   "nominal": 21000000,
+   "value": 43582245,
+   "weight": 1.34,
+   "prevWeight": 1.8
   },
   {
    "code": "UPP-ÜNLÜ PORTFÖY",
@@ -228,9 +241,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 75970328,
-   "value": 524073482.76,
-   "weight": 15.17,
-   "prevWeight": 11.56
+   "value": 540398594.61,
+   "weight": 16.67,
+   "prevWeight": 15.17
   },
   {
    "code": "ZBJ-ZİRAAT",
@@ -241,9 +254,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 79616199,
-   "value": 404269004.83,
-   "weight": 11.7,
-   "prevWeight": null
+   "value": 417086735.18,
+   "weight": 12.85,
+   "prevWeight": 11.7
   },
   {
    "code": "EUR",
@@ -254,7 +267,7 @@
    "group": "DİĞER",
    "subgroup": "Döviz",
    "nominal": 86.22,
-   "value": 4697.62,
+   "value": 4816.7,
    "weight": 0,
    "prevWeight": 0
   },
@@ -267,7 +280,7 @@
    "group": "DİĞER",
    "subgroup": "Döviz",
    "nominal": 285728.7,
-   "value": 13527882.45,
+   "value": 13764837.26,
    "weight": 0,
    "prevWeight": 0
   }

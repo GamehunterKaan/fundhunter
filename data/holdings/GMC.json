@@ -2,14 +2,16 @@
  "code": "GMC",
  "kapCode": null,
  "name": "GMC - TEB PORTFÖY GÜMÜŞ FON SEPETİ FONU",
- "period": "Temmuz-2026",
- "prevPeriod": "2026-06",
- "publishedAt": "07.08.2026 16:15:24",
- "disclosure": 1645295,
+ "period": "Ağustos-2026",
+ "prevPeriod": "2026-07",
+ "publishedAt": "04.09.2026 10:13:38",
+ "disclosure": 1658745,
  "form": "A",
- "portfolioValue": 3698536372.4,
- "netAssetValue": 3699192794.95,
- "warnings": [],
+ "portfolioValue": 4239662040.75,
+ "netAssetValue": 4279000389.63,
+ "warnings": [
+  "Portfolio weights sum to 99.44%, not 100%"
+ ],
  "holdings": [
   {
    "code": "TEB A.Ş.",
@@ -19,23 +21,49 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 100750000,
-   "value": 101079990.8,
-   "weight": 2.73,
-   "prevWeight": 2.32
+   "nominal": 54460000,
+   "value": 54514982.22,
+   "weight": 1.29,
+   "prevWeight": 2.73
   },
   {
-   "code": "F_XAGUSD0826",
-   "isin": "TRVXIST05HF1",
+   "code": "F_XAGUSD1026",
+   "isin": "TRVXIST05KX8",
    "ref": null,
    "name": null,
    "currency": "USD",
    "group": "Uzun",
    "subgroup": null,
-   "nominal": 17000,
-   "value": 464811501,
+   "nominal": 17500,
+   "value": 564255874.88,
    "weight": 0,
-   "prevWeight": 0
+   "prevWeight": null
+  },
+  {
+   "code": "ISHARES SILVER",
+   "isin": "BBG020GH22T4",
+   "ref": null,
+   "name": null,
+   "currency": "USD",
+   "group": "Call Alım",
+   "subgroup": null,
+   "nominal": 200,
+   "value": 0,
+   "weight": 0,
+   "prevWeight": null
+  },
+  {
+   "code": "ISHARES SILVER",
+   "isin": "BBG020GH5L00",
+   "ref": null,
+   "name": null,
+   "currency": "USD",
+   "group": "Call Alım",
+   "subgroup": null,
+   "nominal": 200,
+   "value": 0,
+   "weight": 0,
+   "prevWeight": null
   },
   {
    "code": "VIOP Nakit Teminatı",
@@ -45,10 +73,23 @@
    "currency": null,
    "group": "VIOP Nakit Teminatı",
    "subgroup": null,
-   "nominal": 201126970.88,
-   "value": 201126970.88,
-   "weight": 5.44,
-   "prevWeight": 3.51
+   "nominal": 226466398.71,
+   "value": 226466398.71,
+   "weight": 5.34,
+   "prevWeight": 5.44
+  },
+  {
+   "code": "Yurtdışı Futures USD",
+   "isin": null,
+   "ref": null,
+   "name": null,
+   "currency": null,
+   "group": "Yurtdışı Futures USD Nakit Teminatı",
+   "subgroup": null,
+   "nominal": 503398.76,
+   "value": 24250983.56,
+   "weight": 0.01,
+   "prevWeight": null
   },
   {
    "code": "GMSTR",
@@ -59,9 +100,22 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Türk",
    "nominal": 1350000,
-   "value": 719550000,
-   "weight": 19.46,
-   "prevWeight": 19.35
+   "value": 836662500,
+   "weight": 19.73,
+   "prevWeight": 19.46
+  },
+  {
+   "code": "GMSTR",
+   "isin": "TRYFNBK00030",
+   "ref": null,
+   "name": "QNB FİNANS PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Borsa Y.Fonu Türk",
+   "nominal": -50000,
+   "value": -30987500,
+   "weight": -0.73,
+   "prevWeight": 19.46
   },
   {
    "code": "PSLV",
@@ -72,9 +126,9 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
    "nominal": 800000,
-   "value": 703924645.98,
-   "weight": 19.03,
-   "prevWeight": 19.02
+   "value": 841192287.32,
+   "weight": 19.84,
+   "prevWeight": 19.03
   },
   {
    "code": "SIVR",
@@ -85,9 +139,9 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
    "nominal": 230000,
-   "value": 593658290.67,
-   "weight": 16.05,
-   "prevWeight": 16.41
+   "value": 701146510.75,
+   "weight": 16.54,
+   "prevWeight": 16.05
   },
   {
    "code": "SLV",
@@ -98,9 +152,22 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
    "nominal": 290000,
-   "value": 711965139.26,
-   "weight": 19.25,
-   "prevWeight": 19.47
+   "value": 839957478.54,
+   "weight": 19.81,
+   "prevWeight": 19.25
+  },
+  {
+   "code": "SLV",
+   "isin": "US46428Q1094",
+   "ref": null,
+   "name": "ISHARES,INC",
+   "currency": "USD",
+   "group": "DİĞER",
+   "subgroup": "Borsa Y.Fonu Yabancı",
+   "nominal": -10000,
+   "value": -28964050.98,
+   "weight": -0.68,
+   "prevWeight": 19.25
   },
   {
    "code": "SVUSA",
@@ -111,9 +178,9 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
    "nominal": 13000,
-   "value": 331902611.53,
-   "weight": 8.97,
-   "prevWeight": 10.32
+   "value": 386160163.19,
+   "weight": 9.11,
+   "prevWeight": 8.97
   },
   {
    "code": "IOG - İŞ POTFÖY",
@@ -124,9 +191,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 27472020,
-   "value": 335328723.28,
-   "weight": 9.07,
-   "prevWeight": 9.6
+   "value": 389262287.44,
+   "weight": 9.18,
+   "prevWeight": 9.07
   },
   {
    "code": "EUR",
@@ -137,7 +204,7 @@
    "group": "DİĞER",
    "subgroup": "Döviz",
    "nominal": 1473.44,
-   "value": 80279.05,
+   "value": 82314.02,
    "weight": 0,
    "prevWeight": 0
   },
@@ -149,8 +216,8 @@
    "currency": "USD",
    "group": "DİĞER",
    "subgroup": "Döviz",
-   "nominal": 566135.26,
-   "value": 26803787.11,
+   "nominal": 569534.02,
+   "value": 27437016.65,
    "weight": 0,
    "prevWeight": 0
   }
