@@ -501,7 +501,12 @@ async function fetchInfoHistory(start, end, liveChunks = 1) {
       INFO_METHOD,
       requestBody({ fonTipi: j.kind, basTarih: j.s, bitTarih: j.e }),
       {
-        cacheKey: USE_CACHE ? `info-${j.kind}-${j.s}-${j.e}${j.open ? `-${latestTag}` : ''}` : null,
+        // v2 retires every entry written before the open chunk was tagged. Those
+        // were cached while the chunk was still filling, and a chunk only loses
+        // its tag once it closes — so on the day the grid rolled over, 822 funds
+        // read their newest price out of a snapshot taken three weeks earlier.
+        // A closed chunk fetched fresh is final, so this is a one-time cost.
+        cacheKey: USE_CACHE ? `info-v2-${j.kind}-${j.s}-${j.e}${j.open ? `-${latestTag}` : ''}` : null,
         reduce: reduceInfo,
       }
     );
@@ -527,7 +532,8 @@ async function fetchAllocHistory(start, end) {
     const rows = await client.post(
       DIST_METHOD,
       requestBody({ fonTipi: j.kind, basTarih: j.s, bitTarih: j.e }),
-      { cacheKey: USE_CACHE ? `dist-${j.kind}-${j.s}-${j.e}` : null, reduce: reduceDist }
+      // v2 for the same reason as the info chunks above.
+      { cacheKey: USE_CACHE ? `dist-v2-${j.kind}-${j.s}-${j.e}` : null, reduce: reduceDist }
     );
     if (++done % 10 === 0 || done === jobs.length) log(`    alloc ${done}/${jobs.length}`);
     return { kind: j.kind, rows };
@@ -648,7 +654,19 @@ async function main() {
   if (dropped.length) {
     log(`  ${dropped.length} dropped after ${PRUNE_GRACE_DAYS} silent trading days`);
   }
-  await assertNotCollapsed(priced.length);
+  // Two different questions, and running them together made the guard refuse a
+  // perfectly good run: it compared 1240 funds priced today against 2073 in the
+  // last funds.json, which counts every fund inside its grace window. The shrink
+  // check has to read what actually gets written; only the zero check wants the
+  // strict count, because nothing priced at all is a failed fetch however many
+  // funds are still carried.
+  if (!priced.length) {
+    throw new Error(
+      'no funds priced on the latest trading date — this is a failed fetch, '
+      + 'not an empty universe; check for throttling. Refusing to write.'
+    );
+  }
+  await assertNotCollapsed(active.length);
 
   const groupOf = Object.fromEntries(Object.entries(ASSETS).map(([k, v]) => [k, v.group]));
 
