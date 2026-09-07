@@ -441,7 +441,11 @@ button {
   align-items: stretch;
   gap: 0.9rem;
 }
-.tape-stamp {
+/* Two "as of" claims share the rail — the funds' date and the market's — so they
+ * are cut from one pattern and read as a pair rather than as a stamp and a
+ * notice. */
+.tape-stamp,
+.data-stamp {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -554,6 +558,20 @@ button {
 }
 .tape-stamp.is-live b {
   color: var(--accent);
+}
+
+/* The data stamp keeps the rail's own border on its right and sits first, so the
+ * market stamp stays adjacent to the tiles it labels. */
+.data-stamp {
+  padding-left: 0;
+}
+/* Only when there is something to say. A stamp that colours itself on every
+ * weekend is a stamp that gets ignored on the morning it matters, so this is
+ * driven by dataFreshness and never by the calendar. The words change too —
+ * "Gün tamamlanmadı", "Güncellenmiyor" — so colour is never the only carrier. */
+.data-stamp.is-flagged,
+.data-stamp.is-flagged b {
+  color: var(--down);
 }
 
 /* ---------------------------------------------------------------- layout */
@@ -1675,7 +1693,8 @@ ul.comp-legend {
 }
 /* Qualified-investor marker. A legal restriction, so it is spelled out rather
  * than encoded in the risk colour. */
-.nq-mark {
+.nq-mark,
+.lag-mark {
   font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 600;
@@ -1684,6 +1703,21 @@ ul.comp-legend {
   border-radius: 4px;
   border: 1px solid color-mix(in srgb, var(--down) 40%, transparent);
   color: var(--down);
+}
+
+/* A fund whose own date is behind the index's. Never allowed to shrink: it is
+ * the reason the row's returns are not comparable with the rows around it, and
+ * the name column beside it is the one with room to give. */
+.lag-mark {
+  flex: none;
+  white-space: nowrap;
+  align-self: center;
+}
+/* On the fund page it follows the price itself, which is 1.15rem mono in a
+   block, so it needs the space and the lift the flex row gave it for free. */
+.stat dd .lag-mark {
+  margin-left: 0.4rem;
+  vertical-align: 0.18em;
 }
 
 /* ---------------------------------------------------------------- table */
@@ -4178,7 +4212,8 @@ table.funds.daily-table th {
     order: 3;
     flex: 1 1 100%;
   }
-  .tape-stamp {
+  .tape-stamp,
+  .data-stamp {
     max-width: 6.5rem;
     font-size: 0.6rem;
   }

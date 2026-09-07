@@ -153,6 +153,23 @@ export const STRINGS = {
     benchmarkFund: 'Fon',
     dataSource: 'Kaynak: TEFAS',
     updated: 'Güncelleme: {date}',
+    // Veri güncelliği: piyasa şeridindeki damga ve fon başına gecikme işareti.
+    dataStampDate: 'Fon verisi {date}',
+    dataToday: 'Bugün',
+    dataYesterday: 'Dün',
+    dataAge: '{n} gün önce',
+    dataPartial: 'Gün tamamlanmadı',
+    dataStale: 'Güncellenmiyor',
+    dataUnknown: 'Tarih okunamadı',
+    dataNoteCurrent: 'TEFAS’ın {date} yayınından; {n} fon o gün fiyatlandı.',
+    dataNotePartial:
+      'TEFAS {date} için hâlâ yayın yapıyor: {n} fon ({pct}) önceki günün fiyatını taşıyor. Bu fonlar listede işaretli.',
+    dataNoteStale: 'Sayfadaki her rakam {date} tarihli — {n} gün önce.',
+    dataNoteSilent: 'Veri hattı {h} saattir yeni bir güncelleme yazmadı.',
+    dataNoteUnknown: 'Bu sayfa rakamlarının hangi tarihe ait olduğunu okuyamadı.',
+    fundLate: 'GEÇ',
+    fundLateNote:
+      'Bu fon {latest} için henüz fiyat yayınlamadı. Fiyatı ve tüm getirileri {own} tarihli.',
     indexedNote: '{date} = 100 olacak şekilde ölçeklenmiştir',
     noHistory: 'Bu fon için yeterli geçmiş veri yok.',
     tableView: 'Tablo görünümü',
@@ -1131,6 +1148,23 @@ export const STRINGS = {
     benchmarkFund: 'Fund',
     dataSource: 'Source: TEFAS',
     updated: 'Updated {date}',
+    // Data freshness: the stamp in the market rail and the per-fund lag mark.
+    dataStampDate: 'Fund data {date}',
+    dataToday: 'Today',
+    dataYesterday: 'Yesterday',
+    dataAge: '{n} days ago',
+    dataPartial: 'Day incomplete',
+    dataStale: 'Not updating',
+    dataUnknown: 'Date unreadable',
+    dataNoteCurrent: 'From TEFAS’s {date} publication; {n} funds priced that day.',
+    dataNotePartial:
+      'TEFAS is still publishing {date}: {n} funds ({pct}) still carry the previous day’s price. Those funds are marked in the list.',
+    dataNoteStale: 'Every figure on this page is from {date} — {n} days ago.',
+    dataNoteSilent: 'The data pipeline has not written an update for {h} hours.',
+    dataNoteUnknown: 'This page could not read which date its figures are from.',
+    fundLate: 'LATE',
+    fundLateNote:
+      'This fund has not published a price for {latest}. Its price and every return on it are from {own}.',
     indexedNote: 'Indexed so that {date} = 100',
     noHistory: 'Not enough history for this fund.',
     tableView: 'Table view',
@@ -2355,6 +2389,194 @@ export function parseJsonl(text) {
   }
   return out;
 }
+
+// --------------------------------------------------- how current the data is
+
+/**
+ * The page's own answer to "is the figure in front of me current?".
+ *
+ * `scripts/lib/freshness.mjs` already asks that question properly, by comparing
+ * the live site against TEFAS. It runs outside the app, every fifteen minutes,
+ * and it cannot help the reader who is looking at the number right now: on four
+ * separate days a reader found the staleness before any watchdog did, because
+ * nothing on the page ever said which day it was showing or whether that day was
+ * finished.
+ *
+ * The client has no TEFAS to compare against, so the honest design splits the
+ * claim in two:
+ *
+ *   the date is always stated as a fact   never wrong, needs no judgement
+ *   the alarm fires only on evidence      a bound taken from data, never from an
+ *                                         assumption about when TEFAS publishes
+ *                                         or which days the exchange is shut
+ *
+ * That split is what keeps this out of the trap the watchdog fell into. Its
+ * first version forgave any gap before 09:00 UTC on a guess about publication
+ * time, and spent an incident watching the site sit a day behind; a page-side
+ * check written as "latestDate is not today, therefore stale" is the same guess
+ * in a different place, and would cry on every weekend and every bayram. So
+ * nothing here counts weekdays or knows a holiday table. Two bounds, both
+ * measured:
+ *
+ *   closureDays       the longest run of days the exchange has actually taken
+ *                     off, read out of `benchmarks.jsonl` at runtime by
+ *                     `marketClosureBound`. Five years of BIST closes put it at
+ *                     7 (2023-02-08 to 2023-02-15), with bayram runs at 6. A
+ *                     market shut longer than it has ever been shut is not a
+ *                     market that is shut.
+ *
+ *   HEARTBEAT_HOURS   how long the pipeline itself has been silent.
+ *                     `meta.lastUpdated` is a fresh timestamp on every
+ *                     successful prices run, so it advances on days the market
+ *                     never opened, which makes it the one signal here that owes
+ *                     the trading calendar nothing at all.
+ *
+ * And one exact signal that needs no clock: the share of funds still carrying an
+ * older date. That is incident 10's signature, TEFAS stamping a row with today's
+ * date before it fills the price in. Since a row without a real price is now
+ * refused at ingest, a run caught mid-publication shows up here as a large
+ * `counts.lagging` rather than as 832 funds quoted at zero.
+ *
+ * Deliberately not used: comparing `meta.latestDate` against the last date in
+ * `benchmarks.jsonl`. Two sources inside one page looks like the cross-check the
+ * watchdog gets from TEFAS, and is not one. Yahoo publishes a BIST close after
+ * the Istanbul session while TEFAS publishes a fund price that morning, so the
+ * benchmark file is routinely a day behind the funds by design; today it holds
+ * 2026-09-04 against a fund date of 2026-09-07. And both are written by the same
+ * job, so the failures worth catching stop them together.
+ */
+
+/**
+ * Share of funds behind the index's own latest date that means the day was
+ * caught mid-publication, rather than simply having a few funds that never print.
+ *
+ * Measured on 2026-09-07: 832/2073 (40.1%) inside the publication window,
+ * 8/2041 (0.4%) an hour later, 0/2065 once the day was complete. 5% sits an
+ * order of magnitude above the noise and an order below the signal.
+ *
+ * `scripts/lib/freshness.mjs` imports this rather than restating it, so the
+ * watchdog and the page cannot reach different conclusions about one number.
+ */
+export const LAGGING_SHARE = 0.05;
+
+/**
+ * Hours of pipeline silence that mean it has stopped, not that it is between
+ * runs.
+ *
+ * `prices.yml` fires at 06:15 and 11:15 UTC on `1-6`, so the longest gap the
+ * schedule itself produces is Saturday's second run to Monday's first: 43 hours.
+ * GitHub has been observed creating those runs up to 12h 28m late, which puts
+ * the worst legitimate silence near 56. 60 is that, rounded up.
+ */
+export const HEARTBEAT_HOURS = 60;
+
+/**
+ * Floor and ceiling on the observed closure bound.
+ *
+ * The floor is BIST's longest actual closure in five years, so a thin or missing
+ * benchmark file cannot make the bound tighter than reality and start crying
+ * every bayram. The ceiling matters more: without it one gap in the benchmark
+ * series, a Yahoo outage or a truncated file, would silently widen the bound
+ * until this could never fire again. That is how a cache that had gone bad
+ * turned a daily refresh into a three-week replay, and a guard the data can
+ * switch off is not a guard.
+ */
+export const CLOSURE_MIN_DAYS = 7;
+export const CLOSURE_MAX_DAYS = 10;
+
+/**
+ * The longest run of days the exchange has taken off, from its own record.
+ *
+ * The same move the watchdog makes against TEFAS's latest date: ask the source
+ * what its calendar was, rather than maintain a holiday table that will be wrong
+ * the first year nobody updates it.
+ *
+ * @param {Array<{d: string}>} rows `benchmarks.jsonl`, ascending by date
+ * @param {string} [key] the series to read; rows without it are days it was shut
+ */
+export function marketClosureBound(rows, key = 'bist100') {
+  let prev = null;
+  let widest = 0;
+  for (const row of rows ?? []) {
+    if (row?.[key] == null || !row.d) continue;
+    const t = Date.parse(`${row.d}T00:00:00Z`);
+    if (!Number.isFinite(t)) continue;
+    if (prev != null) widest = Math.max(widest, Math.round((t - prev) / 86400000));
+    prev = t;
+  }
+  return Math.min(CLOSURE_MAX_DAYS, Math.max(CLOSURE_MIN_DAYS, widest));
+}
+
+/**
+ * @param {object} o
+ * @param {object|null} o.meta      `data/meta.json` as loaded
+ * @param {Date} o.now
+ * @param {number} [o.closureDays]  from `marketClosureBound`
+ * @returns {{level: 'current'|'partial'|'stale'|'unknown', latestDate: string|null,
+ *   ageDays: number|null, hoursSinceUpdate: number|null, lagging: number,
+ *   funds: number, laggingShare: number, closureDays: number}}
+ */
+export function dataFreshness({ meta, now, closureDays = CLOSURE_MIN_DAYS }) {
+  const bound = Number.isFinite(closureDays) && closureDays > 0
+    ? closureDays
+    : CLOSURE_MIN_DAYS;
+  // A page that cannot read its own date is in a worse position than one that is
+  // a day behind, and says so rather than falling back on reassurance.
+  const unreadable = {
+    level: 'unknown', latestDate: null, ageDays: null, hoursSinceUpdate: null,
+    lagging: 0, funds: 0, laggingShare: 0, closureDays: bound,
+  };
+
+  const latestDate = meta?.latestDate ?? null;
+  if (!latestDate) return unreadable;
+  const stamped = Date.parse(`${latestDate}T00:00:00Z`);
+  if (!Number.isFinite(stamped)) return unreadable;
+
+  // Floored, and never negative: `latestDate` is an Istanbul trading date while
+  // `now` is whatever clock the reader's device keeps, so a reader west of UTC
+  // is legitimately looking at a date their own calendar has not reached yet.
+  const ageDays = Math.max(0, Math.floor((now.getTime() - stamped) / 86400000));
+
+  const updated = meta.lastUpdated ? Date.parse(meta.lastUpdated) : NaN;
+  const hoursSinceUpdate = Number.isFinite(updated)
+    ? Math.max(0, (now.getTime() - updated) / 3600000)
+    : null;
+
+  const funds = meta.counts?.funds ?? 0;
+  const lagging = meta.counts?.lagging ?? 0;
+  const laggingShare = funds > 0 ? lagging / funds : 0;
+
+  // Either bound on its own is enough. They fail independently: a market that is
+  // genuinely shut leaves the heartbeat beating, and a pipeline that has stopped
+  // leaves the date frozen. Requiring both would be an AND across two unrelated
+  // failures, which is a guard that never fires.
+  const stale =
+    ageDays > bound || (hoursSinceUpdate != null && hoursSinceUpdate > HEARTBEAT_HOURS);
+
+  // Stale outranks partial. A day that is both old and half-published is an old
+  // day, and calling it mid-publication would promise a re-run that has already
+  // been tried.
+  const level = stale ? 'stale' : laggingShare > LAGGING_SHARE ? 'partial' : 'current';
+
+  return {
+    level, latestDate, ageDays, hoursSinceUpdate,
+    lagging, funds, laggingShare, closureDays: bound,
+  };
+}
+
+/**
+ * Whether this fund's own figures are older than the rest of the index.
+ *
+ * Exact, and the only staleness test on the page needing neither a clock nor a
+ * calendar: `d` is the date this fund last published and `latestDate` is the
+ * newest date anything published. A fund inside its five-day prune grace keeps
+ * its real older price instead of a zero, which is honest only if the row says
+ * so, because every return on it is measured to a different day from the rows
+ * above and below it.
+ */
+export const fundLags = (fund, meta) =>
+  !!(fund?.d && meta?.latestDate && fund.d < meta.latestDate);
+
 
 // ---------------------------------------------------------------- filtering
 
