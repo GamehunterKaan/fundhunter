@@ -121,6 +121,7 @@ export class TefasClient {
    * @param {object} body Request body (pass through `requestBody`)
    * @param {object} [opts]
    * @param {string} [opts.cacheKey] Enables caching for this call
+   * @param {boolean} [opts.refresh] Ignore any cached copy, but still write one
    * @param {(rows:any[])=>any[]} [opts.reduce] Shrink rows before caching
    */
   post(method, body, opts) {
@@ -132,8 +133,13 @@ export class TefasClient {
    * `/api/fund-returns/export` and answers with a bare array rather than the
    * `{resultList}` envelope the `/api/funds/*` methods use.
    */
-  async postUrl(url, body, { cacheKey = null, reduce = null } = {}) {
-    if (cacheKey) {
+  async postUrl(url, body, { cacheKey = null, reduce = null, refresh = false } = {}) {
+    // `refresh` skips the READ and keeps the WRITE, which is the whole point:
+    // the weekly wide read exists to replace a cached answer that has since
+    // been restated upstream, and writing the replacement anywhere other than
+    // the key the next run will read means it is discarded a day later. That
+    // was happening every week, silently, until 2026-09-07.
+    if (cacheKey && !refresh) {
       const hit = await this._readCache(cacheKey);
       if (hit) {
         this.stats.cacheHits++;

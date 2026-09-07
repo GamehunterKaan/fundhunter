@@ -16,6 +16,8 @@ import {
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
   squarify,
+  dataFreshness, marketClosureBound, fundLags,
+  HEARTBEAT_HOURS, CLOSURE_MIN_DAYS, CLOSURE_MAX_DAYS,
 } from '../core.js';
 import { parseLiveQuotes, liveClock } from '../live.js';
 import {
@@ -23,6 +25,7 @@ import {
   THEME_INDUSTRIES, THEME_OF_INDUSTRY, THEME_OVERRIDES,
 } from '../scripts/lib/taxonomy.mjs';
 import { splitRange, weeklyAnchors, ymd } from '../scripts/lib/tefas.mjs';
+import { freshnessVerdict } from '../scripts/lib/freshness.mjs';
 
 // ---------------------------------------------------------------- fixtures
 
@@ -1479,4 +1482,218 @@ test('the filters stack', () => {
 test('a leading ? or # is tolerated, as it is for the fund screen', () => {
   assert.equal(decodeShareView(`?theme=${THEME_IDS[0]}`).theme, THEME_IDS[0]);
   assert.equal(decodeShareView(`#theme=${THEME_IDS[0]}`).theme, THEME_IDS[0]);
+});
+
+// --------------------------------------------------- how current the data is
+
+// The page-side half of the watchdog, and the one that has to survive being
+// looked at every day by someone who is not debugging anything. Two ways it
+// could fail and both are worse than useless: silence on a day the data is
+// wrong, which is the hole that let a reader find four incidents first, and
+// noise on a day it is right, which is how any indicator gets tuned out before
+// the day it matters. Every case below is a day that actually happened.
+
+const clock = (iso) => new Date(iso);
+const metaAt = (latestDate, lastUpdated, funds = 2073, lagging = 2) => ({
+  latestDate, lastUpdated, counts: { funds, lagging, priced: funds - lagging },
+});
+
+test('a complete, current day says so quietly', () => {
+  // 2026-09-07 after the run finally landed: 2065 priced, no zeros, 2 funds that
+  // simply never trade.
+  const v = dataFreshness({
+    meta: metaAt('2026-09-07', '2026-09-07T05:47:19.665Z'),
+    now: clock('2026-09-07T16:30:00Z'),
+    closureDays: 7,
+  });
+  assert.equal(v.level, 'current');
+  assert.equal(v.ageDays, 0);
+});
+
+test('a weekend is quiet, and so is a bayram', () => {
+  // Sunday, on Friday's data. The pipeline ran on Saturday, TEFAS has nothing
+  // newer, and there is nothing to say — a check counting weekdays would speak
+  // up here every single week.
+  const sunday = dataFreshness({
+    meta: metaAt('2026-09-04', '2026-09-05T06:20:00Z'),
+    now: clock('2026-09-06T18:00:00Z'),
+    closureDays: 7,
+  });
+  assert.equal(sunday.level, 'current');
+  assert.equal(sunday.ageDays, 2, 'the age is still stated as a fact');
+
+  // The 2024 Kurban Bayramı shape: six days between closes, the longest run
+  // short of the 2023 earthquake week. Still inside the bound the market's own
+  // record sets, so still quiet.
+  const bayram = dataFreshness({
+    meta: metaAt('2024-06-14', '2024-06-19T06:20:00Z'),
+    now: clock('2024-06-20T07:00:00Z'),
+    closureDays: 7,
+  });
+  assert.equal(bayram.level, 'current');
+  assert.equal(bayram.ageDays, 6);
+});
+
+test('a gap longer than the market has ever taken off is stale', () => {
+  const v = dataFreshness({
+    meta: metaAt('2026-08-28', '2026-09-04T06:20:00Z'),
+    now: clock('2026-09-07T09:00:00Z'),
+    closureDays: 7,
+  });
+  assert.equal(v.level, 'stale');
+  assert.equal(v.ageDays, 10);
+});
+
+test('a pipeline that has stopped is stale even while the date still looks fine', () => {
+  // The two bounds have to be an OR. A market that is genuinely shut keeps the
+  // heartbeat beating and a dead pipeline keeps the date frozen, so requiring
+  // both would be a guard that never fires.
+  const v = dataFreshness({
+    meta: metaAt('2026-09-04', '2026-09-04T06:20:00Z'),
+    now: clock('2026-09-07T09:00:00Z'),
+    closureDays: 7,
+  });
+  assert.equal(v.ageDays, 3, 'three days is an ordinary long weekend');
+  assert.ok(v.hoursSinceUpdate > HEARTBEAT_HOURS);
+  assert.equal(v.level, 'stale');
+});
+
+test('the longest legitimate silence in the schedule does not trip the heartbeat', () => {
+  // Saturday's 11:15 run to Monday's 06:15 is 43 hours, and GitHub has created
+  // one of those up to 12h 28m late. The bound has to clear both together or it
+  // cries every Monday morning.
+  const v = dataFreshness({
+    meta: metaAt('2026-09-04', '2026-09-05T11:15:00Z'),
+    now: clock('2026-09-07T18:43:00Z'),
+    closureDays: 7,
+  });
+  assert.ok(v.hoursSinceUpdate > 55 && v.hoursSinceUpdate < HEARTBEAT_HOURS);
+  assert.equal(v.level, 'current');
+});
+
+test('a run caught mid-publication is called incomplete, not fresh', () => {
+  // Incident 10, as it reads now that a zero is refused at ingest: the 832 funds
+  // that were quoted at p=0 and -100% are 832 funds still carrying yesterday.
+  // Every check at the time compared dates, found 09-07 on both sides, and
+  // reported fresh.
+  const v = dataFreshness({
+    meta: metaAt('2026-09-07', '2026-09-07T05:47:19.665Z', 2073, 832),
+    now: clock('2026-09-07T05:50:00Z'),
+    closureDays: 7,
+  });
+  assert.equal(v.level, 'partial');
+  assert.ok(v.laggingShare > 0.4);
+});
+
+test('the handful of funds that never print do not read as an incomplete day', () => {
+  // Measured the same week: 8/2041 an hour after publication, 2/2073 once the
+  // day was done. Nine funds have rows all month and a price on none of them.
+  for (const [funds, lagging] of [[2041, 8], [2073, 2], [2065, 0]]) {
+    const v = dataFreshness({
+      meta: metaAt('2026-09-07', '2026-09-07T05:47:19.665Z', funds, lagging),
+      now: clock('2026-09-07T16:00:00Z'),
+      closureDays: 7,
+    });
+    assert.equal(v.level, 'current', `${lagging}/${funds} should not raise a flag`);
+  }
+});
+
+test('stale outranks incomplete', () => {
+  // Incident 11: three weeks stale AND 822 funds behind. Calling that
+  // mid-publication would promise a re-run that had already been tried twice.
+  const v = dataFreshness({
+    meta: metaAt('2026-08-28', '2026-09-07T05:47:00Z', 2062, 822),
+    now: clock('2026-09-07T09:00:00Z'),
+    closureDays: 7,
+  });
+  assert.equal(v.level, 'stale');
+});
+
+test('a page that cannot read its own date says so rather than reassuring', () => {
+  for (const meta of [null, {}, { latestDate: null }, { latestDate: 'yesterday' }]) {
+    assert.equal(dataFreshness({ meta, now: clock('2026-09-07T09:00:00Z') }).level, 'unknown');
+  }
+});
+
+test('a reader west of Istanbul is not shown a negative age', () => {
+  // 22:00 in Los Angeles on the 6th is 08:00 on the 7th in Istanbul, and TEFAS
+  // has published. The date is legitimately ahead of the reader's own calendar.
+  const v = dataFreshness({
+    meta: metaAt('2026-09-07', '2026-09-07T05:47:19.665Z'),
+    now: clock('2026-09-07T05:50:00Z'),
+    closureDays: 7,
+  });
+  assert.equal(v.ageDays, 0);
+});
+
+test('the closure bound comes from the market and cannot be widened away', () => {
+  const day = (n) => new Date(Date.UTC(2026, 0, n)).toISOString().slice(0, 10);
+
+  // Weekdays only: the widest run is a weekend, well under the floor.
+  const weekdays = [];
+  for (let n = 1; n <= 60; n++) {
+    const d = new Date(Date.UTC(2026, 0, n)).getUTCDay();
+    if (d !== 0 && d !== 6) weekdays.push({ d: day(n), bist100: 100 });
+  }
+  assert.equal(marketClosureBound(weekdays), CLOSURE_MIN_DAYS);
+
+  // A missing file cannot make the bound tighter than reality either.
+  assert.equal(marketClosureBound([]), CLOSURE_MIN_DAYS);
+  assert.equal(marketClosureBound(null), CLOSURE_MIN_DAYS);
+
+  // A genuine longer closure widens it, up to the ceiling and no further: a hole
+  // in the benchmark series must not be able to switch this guard off, which is
+  // exactly what a poisoned cache did to the daily refresh in incident 1.
+  assert.equal(marketClosureBound([{ d: '2026-01-01', bist100: 1 }, { d: '2026-01-10', bist100: 1 }]), 9);
+  assert.equal(
+    marketClosureBound([{ d: '2026-01-01', bist100: 1 }, { d: '2026-03-01', bist100: 1 }]),
+    CLOSURE_MAX_DAYS
+  );
+
+  // Rows without the series are days it was shut, not rows to count from.
+  assert.equal(
+    marketClosureBound([
+      { d: '2026-01-01', bist100: 1 }, { d: '2026-01-02', usdtry: 40 }, { d: '2026-01-05', bist100: 1 },
+    ]),
+    CLOSURE_MIN_DAYS
+  );
+});
+
+test('a fund is late by its own date, never by the clock', () => {
+  const meta = { latestDate: '2026-09-07' };
+  assert.equal(fundLags({ d: '2026-08-28' }, meta), true);
+  assert.equal(fundLags({ d: '2026-09-07' }, meta), false);
+  // A fund ahead of the index is not a lagging fund, and neither is a missing
+  // date on either side — an unreadable pair marks nothing rather than marking
+  // everything.
+  assert.equal(fundLags({ d: '2026-09-08' }, meta), false);
+  assert.equal(fundLags({}, meta), false);
+  assert.equal(fundLags({ d: '2026-08-28' }, {}), false);
+  assert.equal(fundLags(null, meta), false);
+});
+
+test('the page and the watchdog share one definition of an incomplete day', () => {
+  // Two thresholds that could drift apart is two answers to one question. The
+  // watchdog heals a day it thinks is mid-publication; the page marks the same
+  // day incomplete, and they must mean it about the same days.
+  const meta = metaAt('2026-09-07', '2026-09-07T05:47:19.665Z', 2073, 832);
+  const now = clock('2026-09-07T05:50:00Z');
+  assert.equal(dataFreshness({ meta, now, closureDays: 7 }).level, 'partial');
+  assert.equal(
+    freshnessVerdict({
+      siteDate: '2026-09-07', tefasDate: '2026-09-07', lagging: 832, funds: 2073, now,
+    }).level,
+    'heal'
+  );
+});
+
+test('every string the stamp and the mark can reach exists in both languages', () => {
+  const keys = [
+    'dataStampDate', 'dataToday', 'dataYesterday', 'dataAge', 'dataPartial',
+    'dataStale', 'dataUnknown', 'dataNoteCurrent', 'dataNotePartial',
+    'dataNoteStale', 'dataNoteSilent', 'dataNoteUnknown', 'fundLate', 'fundLateNote',
+  ];
+  for (const lang of LANGS) {
+    for (const key of keys) assert.ok(STRINGS[lang][key], `${lang} is missing ${key}`);
+  }
 });

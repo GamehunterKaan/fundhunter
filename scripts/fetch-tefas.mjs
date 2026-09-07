@@ -4,7 +4,7 @@
 //
 //   node scripts/fetch-tefas.mjs [--months=12] [--alloc-months=12]
 //                                [--concurrency=3] [--quick] [--no-cache]
-//                                [--allow-shrink]
+//                                [--allow-shrink] [--allow-implausible] [--wide]
 //
 // Output (under public/data):
 //   meta.json          taxonomy, kinds, categories, founders, coverage stats
@@ -21,10 +21,14 @@ import {
   TefasClient, requestBody, mapPool, ymd, addDays, splitRange, weeklyAnchors,
 } from './lib/tefas.mjs';
 import {
-  staleCutoff, partitionUniverse, lastDate, isRealPrice, PRUNE_GRACE_DAYS,
+  staleCutoff, partitionUniverse, lastDate, isRealPrice, unambiguousCategories,
+  PRUNE_GRACE_DAYS,
 } from './lib/universe.mjs';
 import { ASSETS, ASSET_CODES, GROUPS, KINDS, CATEGORY_EN } from './lib/taxonomy.mjs';
 import { collapseReason } from './lib/collapse.mjs';
+import { planWindows } from './lib/chunks.mjs';
+import { implausibleMoves, massEventReason } from './lib/plausible.mjs';
+import { carryForward, carryReport } from './lib/carry.mjs';
 // Shared with the browser so a "1-year return" means the same thing in both.
 import { returnOver, volatility, maxDrawdown } from '../core.js';
 
@@ -48,6 +52,26 @@ const WIDE_CHUNKS = 3;
 const WIDE_EVERY_MS = 7 * 24 * 3600 * 1000;
 /** Allocation is sampled weekly; this window absorbs public holidays. */
 const ALLOC_WINDOW_DAYS = 3;
+/**
+ * Weekly snapshots the wide read re-opens, for the same reason the price chunks
+ * get one: an allocation window cached while TEFAS was mid-publication holds a
+ * mix that is a few hours old and is never requested again at any run
+ * frequency. Four is a month of them — eight requests across both kinds, once a
+ * week, against the 106 that a blanket key migration cost on 2026-09-07.
+ */
+const ALLOC_WIDE_WINDOWS = 4;
+
+/**
+ * Share of a chunk's rows that may be structurally unreadable before the run is
+ * treated as a schema change rather than a bad day.
+ *
+ * Observed on 2026-09-07 over 4,082 rows: zero. `fonKodu` is always a string and
+ * `tarih` is always a plain YYYY-MM-DD — no timestamps, no Turkish-formatted
+ * numbers, no nulls. So anything above a rounding error here means the feed has
+ * changed shape, and a run that quietly drops most of its rows would look to
+ * every guard downstream exactly like a market that had gone quiet.
+ */
+const MALFORMED_LIMIT = 0.01;
 
 /**
  * The window volatility and drawdown are measured over, in trading days.
@@ -104,7 +128,6 @@ const QUICK = Boolean(args.quick);
 
 const log = (...m) => console.log(`[${new Date().toISOString().slice(11, 19)}]`, ...m);
 const pct = (n) => (n == null ? 0 : Math.round(n * 100) / 100);
-const num = (n) => (n == null || Number.isNaN(n) ? null : n);
 
 function tidyName(s) {
   return String(s || '')
@@ -166,13 +189,23 @@ function founderKey(s) {
  * was added after a throttled backfill wrote an empty universe and pruned every
  * history file behind it.
  */
-async function assertNotCollapsed(found) {
-  let before = 0;
+/**
+ * The rows the last run wrote, by code.
+ *
+ * Read once and used for two different things: how far the universe is allowed
+ * to shrink, and which fields TEFAS has stopped answering for and must be
+ * carried. Both questions are "what did we know before", so they read one file.
+ */
+async function readPreviousIndex() {
   try {
-    before = JSON.parse(await fs.readFile(path.join(OUT_DIR, 'funds.json'), 'utf8')).length;
+    const rows = JSON.parse(await fs.readFile(path.join(OUT_DIR, 'funds.json'), 'utf8'));
+    return new Map(rows.map((r) => [r.c, r]));
   } catch {
-    before = 0;
+    return new Map();
   }
+}
+
+async function assertNotCollapsed(found, before) {
   const reason = collapseReason(found, before, { allowShrink: Boolean(args['allow-shrink']) });
   if (reason) throw new Error(`${reason}. Refusing to write.`);
   if (args['allow-shrink'] && before && found < before) {
@@ -275,14 +308,44 @@ const client = new TefasClient({
  */
 let latestTag = '';
 
+/**
+ * A TEFAS date, or null if it is not one.
+ *
+ * The feed emits a plain `2026-09-07` and has done for every row ever observed.
+ * An ISO timestamp is normalised rather than refused — that is the one drift
+ * that would be harmless — and anything else is counted as malformed, because a
+ * date this code cannot compare is a fund that silently leaves the universe.
+ */
+function ymdDate(v) {
+  if (typeof v !== 'string') return null;
+  const m = v.match(/^(\d{4}-\d{2}-\d{2})(?:[T ]|$)/);
+  return m ? m[1] : null;
+}
+
+/**
+ * A number, or null.
+ *
+ * `num` returned its argument untouched for anything that was not null or the
+ * NaN value, so a price arriving as the string "3,54" would have passed straight
+ * through it, failed `isRealPrice` for being a string, and quietly dropped the
+ * fund into its prune grace — five days later, its history file. TEFAS has never
+ * done this on the price path, but it does exactly this on the FEE path
+ * (`trNumber` exists for that reason), so the shape is one field away.
+ */
+function numeric(v) {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string') return trNumber(v);
+  return null;
+}
+
 const reduceInfo = (rows) =>
   rows.map((r) => [
-    r.fonKodu,
-    r.tarih,
-    num(r.fiyat),
-    num(r.tedPaySayisi),
-    num(r.kisiSayisi),
-    num(r.portfoyBuyukluk),
+    typeof r.fonKodu === 'string' && r.fonKodu ? r.fonKodu : null,
+    ymdDate(r.tarih),
+    numeric(r.fiyat),
+    numeric(r.tedPaySayisi),
+    numeric(r.kisiSayisi),
+    numeric(r.portfoyBuyukluk),
     tidyName(r.fonUnvan),
   ]);
 
@@ -319,7 +382,7 @@ async function fetchCategories(latestDate) {
       cacheKey: USE_CACHE ? `tur-${kind}` : null,
     });
 
-    await mapPool(turler, CONCURRENCY, async (t) => {
+    const answers = await mapPool(turler, CONCURRENCY, async (t) => {
       const rows = await client.post(
         INFO_METHOD,
         requestBody({
@@ -333,10 +396,21 @@ async function fetchCategories(latestDate) {
           reduce: (r) => r.map((x) => [x.fonKodu]),
         }
       );
-      const label = tidyName(t.sfonTurAciklama);
-      if (rows.length) categories.add(label);
-      for (const [code] of rows) map.set(code, label);
+      return { code: String(t.sfonTuru), label: tidyName(t.sfonTurAciklama), rows };
     });
+    // Applied after the pool drains, in a fixed order, and only where the
+    // umbrella filter actually discriminated — see `unambiguousCategories` in
+    // scripts/lib/universe.mjs for the 31 exchange-traded funds that were
+    // wearing whichever of twelve categories happened to arrive last.
+    const { map: byType, ambiguous } = unambiguousCategories(answers);
+    for (const a of answers) if (a.rows.length) categories.add(a.label);
+    for (const [code, label] of byType) map.set(code, label);
+    if (ambiguous.length) {
+      log(
+        `  WARN ${kind}: sfonTurKod did not discriminate for ${ambiguous.length} fund(s) — ` +
+        `falling back to the export's own umbrella for them`
+      );
+    }
     log(`  categories: ${kind} -> ${turler.length} umbrella types`);
   }
   return { map, categories: [...categories].sort() };
@@ -475,40 +549,31 @@ async function fetchFundProfiles() {
 }
 
 /** Daily price/size/investor history for every kind. */
-async function fetchInfoHistory(start, end, liveChunks = 1) {
-  const grid = splitRange(start, end, MAX_DAYS_PER_REQUEST);
-  // The grid runs the newest chunk past the latest trading date, so that one is
-  // still filling up while its key stays put — and a cache keyed by the range
-  // alone would serve whichever day it was first written for until the block
-  // ends, weeks later. Tagging it with the trading date is what weeklyAnchors()
-  // does for the allocation snapshots. Same-day re-runs still hit.
-  //
-  // `liveChunks` widens that to the newest few. TEFAS restates a NAV
-  // occasionally, and a restatement inside a chunk that is already closed is
-  // never re-read at any run frequency — the request is simply never made
-  // again. Once a week the window is opened wide enough to see them.
-  const liveFrom = Math.max(0, grid.length - liveChunks);
-  const jobs = [];
-  for (const kind of KINDS.map((k) => k.id)) {
-    grid.forEach(([s, e], i) => {
-      jobs.push({ kind, s: ymd(s), e: ymd(e), open: i >= liveFrom });
-    });
-  }
-  log(`  info history: ${jobs.length} requests (${liveChunks} live chunk(s) per kind)`);
+async function fetchInfoHistory(start, end, refreshClosed = 0) {
+  // Which window is still filling, and which is final, is decided from the
+  // dates alone — see scripts/lib/chunks.mjs for the two incidents that came
+  // out of deciding it from a position in this array instead. `refreshClosed`
+  // is the wide read: re-request the newest few CLOSED chunks past the cache
+  // and write the answer back to the key the next ordinary run will read, so a
+  // restatement survives more than one day.
+  const jobs = planWindows({
+    prefix: 'info-v2',
+    kinds: KINDS.map((k) => k.id),
+    windows: splitRange(start, end, MAX_DAYS_PER_REQUEST).map(([s, e]) => [ymd(s), ymd(e)]),
+    latest: latestTag,
+    refreshClosed,
+  });
+  const forced = jobs.filter((j) => j.refresh).length;
+  log(
+    `  info history: ${jobs.length} requests` +
+    (forced ? `, ${forced} closed chunk(s) re-read for restatements` : '')
+  );
   let done = 0;
   const chunks = await mapPool(jobs, CONCURRENCY, async (j) => {
     const rows = await client.post(
       INFO_METHOD,
-      requestBody({ fonTipi: j.kind, basTarih: j.s, bitTarih: j.e }),
-      {
-        // v2 retires every entry written before the open chunk was tagged. Those
-        // were cached while the chunk was still filling, and a chunk only loses
-        // its tag once it closes — so on the day the grid rolled over, 822 funds
-        // read their newest price out of a snapshot taken three weeks earlier.
-        // A closed chunk fetched fresh is final, so this is a one-time cost.
-        cacheKey: USE_CACHE ? `info-v2-${j.kind}-${j.s}-${j.e}${j.open ? `-${latestTag}` : ''}` : null,
-        reduce: reduceInfo,
-      }
+      requestBody({ fonTipi: j.kind, basTarih: j.start, bitTarih: j.end }),
+      { cacheKey: USE_CACHE ? j.key : null, refresh: j.refresh, reduce: reduceInfo }
     );
     if (++done % 10 === 0 || done === jobs.length) log(`    info ${done}/${jobs.length}`);
     return { kind: j.kind, rows };
@@ -517,29 +582,31 @@ async function fetchInfoHistory(start, end, liveChunks = 1) {
 }
 
 /** Weekly allocation snapshots for every kind. */
-async function fetchAllocHistory(start, end) {
+async function fetchAllocHistory(start, end, refreshClosed = 0) {
   const anchors = weeklyAnchors(start, end);
-
-  const jobs = [];
-  for (const kind of KINDS.map((k) => k.id)) {
-    for (const a of anchors) {
-      jobs.push({ kind, s: ymd(addDays(a, -(ALLOC_WINDOW_DAYS - 1))), e: ymd(a) });
-    }
-  }
-  log(`  allocation history: ${jobs.length} requests (${anchors.length} weekly snapshots)`);
+  // Same policy as the prices, and for the same reason — a window whose end has
+  // reached the latest trading date is one TEFAS is still publishing into. The
+  // key of a CLOSED window is byte-identical to the one this used before, so
+  // adopting the policy costs one request per kind rather than the 106 that a
+  // blanket `dist-v2-` bump cost during the 2026-09-07 repair.
+  const jobs = planWindows({
+    prefix: 'dist',
+    kinds: KINDS.map((k) => k.id),
+    windows: anchors.map((a) => [ymd(addDays(a, -(ALLOC_WINDOW_DAYS - 1))), ymd(a)]),
+    latest: latestTag,
+    refreshClosed,
+  });
+  const forced = jobs.filter((j) => j.refresh).length;
+  log(
+    `  allocation history: ${jobs.length} requests (${anchors.length} weekly snapshots)` +
+    (forced ? `, ${forced} re-read` : '')
+  );
   let done = 0;
   const chunks = await mapPool(jobs, CONCURRENCY, async (j) => {
     const rows = await client.post(
       DIST_METHOD,
-      requestBody({ fonTipi: j.kind, basTarih: j.s, bitTarih: j.e }),
-      // Deliberately NOT bumped alongside the info chunks. These are allocation
-      // percentages rather than prices, so a window cached slightly early is a
-      // mix that is a few hours old rather than a fund priced at zero — and
-      // retiring them costs 106 requests against the info chunks' 30. Bumping
-      // both at once on 2026-09-07 turned a repair into 136 cold requests three
-      // times over and TEFAS answered 429. The weekly wide read is where these
-      // get refreshed.
-      { cacheKey: USE_CACHE ? `dist-${j.kind}-${j.s}-${j.e}` : null, reduce: reduceDist }
+      requestBody({ fonTipi: j.kind, basTarih: j.start, bitTarih: j.end }),
+      { cacheKey: USE_CACHE ? j.key : null, refresh: j.refresh, reduce: reduceDist }
     );
     if (++done % 10 === 0 || done === jobs.length) log(`    alloc ${done}/${jobs.length}`);
     return { kind: j.kind, rows };
@@ -589,12 +656,17 @@ async function main() {
     Boolean(args.wide) ||
     !lastWideRead ||
     Date.now() - Date.parse(lastWideRead) >= WIDE_EVERY_MS;
-  if (wide) log(`  wide read: re-reading the newest ${WIDE_CHUNKS} chunks for restatements`);
+  if (wide) {
+    log(
+      `  wide read: re-reading the newest ${WIDE_CHUNKS} closed price chunk(s) and ` +
+      `${ALLOC_WIDE_WINDOWS} allocation window(s) for restatements`
+    );
+  }
 
-  const infoChunks = await fetchInfoHistory(start, end, wide ? WIDE_CHUNKS : 1);
+  const infoChunks = await fetchInfoHistory(start, end, wide ? WIDE_CHUNKS : 0);
 
   log('Step 4/5 — allocation history');
-  const allocChunks = await fetchAllocHistory(allocStart, end);
+  const allocChunks = await fetchAllocHistory(allocStart, end, wide ? ALLOC_WIDE_WINDOWS : 0);
 
   log('Step 5/5 — building output');
 
@@ -602,9 +674,17 @@ async function main() {
   /** @type {Map<string, {kind:string,name:string,prices:Map<string,any[]>,alloc:Map<string,object>}>} */
   const funds = new Map();
 
+  let seenRows = 0;
+  let malformed = 0;
   for (const { kind, rows } of infoChunks) {
     for (const [code, date, price, shares, investors, size, name] of rows) {
-      if (!code) continue;
+      seenRows++;
+      // A row with no code or no usable date is not a fund that failed to
+      // print, it is a row this code cannot read. Counted rather than skipped
+      // silently: every guard downstream measures how many funds are here, so a
+      // feed that changed shape would arrive looking exactly like a quiet
+      // market and the collapse floor is the only thing that would notice.
+      if (!code || !date) { malformed++; continue; }
       let f = funds.get(code);
       if (!f) funds.set(code, (f = { kind, name, prices: new Map(), alloc: new Map() }));
       if (name) f.name = name;
@@ -629,6 +709,17 @@ async function main() {
       if (!f) continue; // present in the allocation feed but not the info feed
       f.alloc.set(date, a);
     }
+  }
+
+  if (malformed) {
+    const share = seenRows ? malformed / seenRows : 0;
+    const line = `${malformed} of ${seenRows} rows had no usable code or date (${(share * 100).toFixed(2)}%)`;
+    if (share > MALFORMED_LIMIT) {
+      throw new Error(
+        `${line} — the feed has changed shape, not the market. Refusing to write.`
+      );
+    }
+    log(`  WARN ${line}`);
   }
 
   // A fund that did not print today has not necessarily gone. Everything below
@@ -672,7 +763,39 @@ async function main() {
       + 'not an empty universe; check for throttling. Refusing to write.'
     );
   }
-  await assertNotCollapsed(active.length);
+  const previous = await readPreviousIndex();
+  await assertNotCollapsed(active.length, previous.size);
+
+  // Does any of this look like a price?
+  //
+  // Runs BEFORE the write loop on purpose: writeHistory is what puts a bad NAV
+  // on disk, and a guard that fires after the files are written is a report,
+  // not a guard. Nothing here rejects an individual price — see
+  // scripts/lib/plausible.mjs for the six funds that were checked against TEFAS
+  // and all matched — but a day where a large share of the market moves
+  // impossibly is the feed changing units, and that is refused.
+  const flagged = [];
+  let flaggedToday = 0;
+  for (const [code, f] of active) {
+    const series = [...f.prices.values()]
+      .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+      .map(([d, p]) => [d, p]);
+    for (const m of implausibleMoves(series)) {
+      if (m.date === latestDate) { flaggedToday++; flagged.push({ code, ...m }); }
+    }
+  }
+  const massEvent = args['allow-implausible']
+    ? null
+    : massEventReason(flaggedToday, priced.length);
+  if (massEvent) throw new Error(`${massEvent}. Refusing to write.`);
+  if (flagged.length) {
+    log(
+      `  ${flagged.length} fund(s) moved past their own band today: ` +
+      flagged.slice(0, 6)
+        .map((m) => `${m.code} ${m.pct > 0 ? '+' : ''}${m.pct.toFixed(1)}%`).join(' ') +
+      (flagged.length > 6 ? ' …' : '')
+    );
+  }
 
   const groupOf = Object.fromEntries(Object.entries(ASSETS).map(([k, v]) => [k, v.group]));
 
@@ -705,6 +828,7 @@ async function main() {
   let allocMissing = 0;
   let sumWarnings = 0;
   let appended = 0;
+  const carryCounts = {};
 
   await mapPool(active, 12, async ([code, f]) => {
     const prices = [...f.prices.values()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
@@ -733,7 +857,7 @@ async function main() {
 
     const profile = profiles.get(code) ?? {};
 
-    index.push({
+    const row = {
       c: code,
       n: f.name,
       k: f.kind,
@@ -791,7 +915,16 @@ async function main() {
       mddAll: priceSeries.length > RISK_WINDOW_DAYS * 1.5
         ? maxDrawdown(priceSeries)
         : null,
-    });
+    };
+
+    // A field TEFAS declined to answer for this run is not a field the fund has
+    // lost. See scripts/lib/carry.mjs: the export endpoint dropped riskDegeri
+    // for 518 of 2,142 funds on the afternoon of 2026-09-07, and publishing
+    // those nulls would have taken 466 funds out of every risk-filtered list on
+    // the site without a single guard noticing.
+    const { row: carriedRow, carried } = carryForward(row, previous.get(code));
+    for (const field of carried) carryCounts[field] = (carryCounts[field] ?? 0) + 1;
+    index.push(carriedRow);
 
     appended += await writeHistory(code, prices, f.alloc);
   });
@@ -800,6 +933,9 @@ async function main() {
 
   const pruned = await pruneHistory(new Set(index.map((r) => r.c)));
   if (pruned) log(`  pruned ${pruned} history files no longer in the universe`);
+
+  const carry = carryReport(carryCounts, index.length);
+  if (carry) log(`  ${carry.loud ? 'WARN ' : ''}${carry.line}`);
 
   const meta = {
     lastUpdated: new Date().toISOString(),
@@ -818,6 +954,16 @@ async function main() {
       // requests: meta.json already crosses the wire, funds.json does not.
       priced: priced.length,
       lagging: index.length - priced.length,
+      // Funds whose move on the latest date is larger than their own history
+      // allows. Almost always a real redenomination — 305 of 372 over the last
+      // twelve months held their new level — so this is a number to look at
+      // rather than an alarm, and it is published so the watchdog can see it
+      // without loading every history file.
+      implausible: flaggedToday,
+      // Fields TEFAS did not answer for this run and that were kept from the
+      // last one. Ordinarily a handful; a large number here means an endpoint
+      // is degraded, and the site is running on yesterday's answers for it.
+      carried: Object.values(carryCounts).reduce((a, b) => a + b, 0),
       byKind: Object.fromEntries(
         KINDS.map((k) => [k.id, index.filter((r) => r.k === k.id).length])
       ),

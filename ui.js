@@ -13,6 +13,7 @@ import {
   encodeShareView, decodeShareView, filterShares,
   OWNER_NONE, OWNER_STEPS, CROWD_THIN, CROWD_STEPS, FLOW_WAYS,
   CONVICTION_STEPS, GOOD_STEPS, FRESH_WAYS, MONEY_WAYS,
+  dataFreshness, marketClosureBound, fundLags, HEARTBEAT_HOURS,
 } from './core.js';
 import {
   taxRatesFor, taxRateFor, scoreFund, qualityFlags, predictReturn,
@@ -943,9 +944,111 @@ function startQuotes() {
   });
 }
 
+/**
+ * The bound on how long the exchange could plausibly be shut, taken from how
+ * long it has actually been shut. Recomputed only when the benchmark file
+ * changes length, so the five-year scan happens once per load rather than on
+ * every re-stamp.
+ */
+let closure = { rows: -1, days: null };
+function closureDays() {
+  if (closure.rows !== state.benchmarks.length) {
+    closure = { rows: state.benchmarks.length, days: marketClosureBound(state.benchmarks) };
+  }
+  return closure.days;
+}
+
+/**
+ * Which day every figure on the page is from, and whether that day is finished.
+ *
+ * The one thing on the site that answers the question a reader had to ask four
+ * times before anything on the page could: the watchdog in
+ * `.github/workflows/freshness.yml` knows the site is behind TEFAS, but it lives
+ * outside the app and speaks to a GitHub issue, not to the person reading a
+ * price. The verdict itself is `dataFreshness` in core.js, with a test per
+ * incident; this only dresses it.
+ *
+ * Muted and factual while the data is current — a stamp that shouts on every
+ * weekend is a stamp people stop reading, which is the same failure as the
+ * watchdog's grace period. The prose is all in the tooltip.
+ */
+/**
+ * The stamp is beside the market close stamp, and on most days they carry the
+ * same date; the long form twice over reads as one thing said twice. The tooltip
+ * keeps the full date, and the year comes back whenever it is not this one,
+ * where a bare "7 Eyl" would be the most misleading form available.
+ */
+function stampDate(iso, now) {
+  if (!iso) return fmtDate(iso, state.lang);
+  return new Intl.DateTimeFormat(state.lang === 'tr' ? 'tr-TR' : 'en-GB', {
+    day: 'numeric', month: 'short', timeZone: 'UTC',
+    year: iso.slice(0, 4) === String(now.getUTCFullYear()) ? undefined : 'numeric',
+  }).format(new Date(`${iso}T00:00:00Z`));
+}
+
+function dataStamp() {
+  const now = new Date();
+  const v = dataFreshness({ meta: state.meta, now, closureDays: closureDays() });
+  // Long in the tooltip, short on the stamp: prose gets the unambiguous form.
+  const date = fmtDate(v.latestDate, state.lang);
+  const notes = [];
+  let age;
+
+  if (v.level === 'unknown') {
+    age = null;
+    notes.push(T('dataNoteUnknown'));
+  } else {
+    age = v.ageDays === 0 ? T('dataToday')
+      : v.ageDays === 1 ? T('dataYesterday')
+      : T('dataAge', { n: fmtInt(v.ageDays, state.lang) });
+    if (v.level === 'stale') {
+      age = T('dataStale');
+      // Each clause only where it is the thing that fired: a page one hour old
+      // whose pipeline has stopped should not be told it is "0 days ago".
+      if (v.ageDays > v.closureDays) {
+        notes.push(T('dataNoteStale', { date, n: fmtInt(v.ageDays, state.lang) }));
+      }
+      if (v.hoursSinceUpdate != null && v.hoursSinceUpdate > HEARTBEAT_HOURS) {
+        notes.push(T('dataNoteSilent', { h: fmtInt(Math.round(v.hoursSinceUpdate), state.lang) }));
+      }
+    } else if (v.level === 'partial') {
+      age = T('dataPartial');
+      notes.push(T('dataNotePartial', {
+        date,
+        n: fmtInt(v.lagging, state.lang),
+        pct: fmtPct(v.laggingShare * 100, state.lang, { digits: 1 }),
+      }));
+    } else {
+      notes.push(T('dataNoteCurrent', {
+        date,
+        n: fmtInt(v.funds - v.lagging, state.lang),
+      }));
+    }
+  }
+
+  return h('span', {
+    class: `data-stamp${v.level === 'current' ? '' : ' is-flagged'}`,
+    title: notes.join(' '),
+  },
+    h('b', {}, v.level === 'unknown'
+      ? T('dataUnknown')
+      : T('dataStampDate', { date: stampDate(v.latestDate, now) })),
+    age ? h('span', {}, age) : null
+  );
+}
+
 function renderTape() {
   const rail = document.getElementById('market-tape');
-  if (!rail || !state.benchmarks.length) return;
+  if (!rail) return;
+
+  // Not conditional on the benchmarks. They are optional — a checkout without
+  // them is a site with no tape — and which day the funds are from is the one
+  // claim on this page that must not go missing because a second file did.
+  const stamp = dataStamp();
+  if (!state.benchmarks.length) {
+    rail.replaceChildren(h('div', { class: 'tape-inner' }, stamp));
+    return;
+  }
 
   const closeDate = state.benchmarks.at(-1)?.d;
   const live = state.live;
@@ -1001,6 +1104,9 @@ function renderTape() {
 
   rail.replaceChildren(
     h('div', { class: 'tape-inner' },
+      // The funds' date first: it is the subject of every page here, and the
+      // market's own stamp stays next to the tiles it labels.
+      stamp,
       // The stamp is the honest part: live and its clock when the feed answered,
       // the close date when it did not. It is re-derived on every render, so a
       // dropped refresh downgrades the label rather than leaving a stale "live".
@@ -2855,7 +2961,12 @@ function appendRows(body) {
             mark('manager', f.f),
             h('div', { class: 'name-lines' },
               h('a', { class: 'fund-name', href: `#/fon/${f.c}`, title: f.n }, f.n),
-              h('span', { class: 'fund-meta' }, `${f.f} · ${label(catOf(f), state.lang)}`))
+              h('span', { class: 'fund-meta' }, `${f.f} · ${label(catOf(f), state.lang)}`)),
+            // Its own flex item rather than part of the meta line, which is
+            // `text-overflow: ellipsis` and would eat it on a narrow viewport.
+            // The name column is the one with slack to give, and the mark only
+            // exists on the handful of rows that have not printed today.
+            lagMark(f)
           )
         ),
         // `data-label` is what the card layout on narrow screens prints above each
@@ -2913,6 +3024,30 @@ const deltaCell = (v, cls = 'num-cell', dataLabel = null) =>
     // enough — 67 funds over 100%, eight over 1000% — that this is worth a
     // branch rather than a wider column taken off the fund name.
     fmtPct(v, state.lang, { signed: true, digits: Math.abs(v) >= 1000 ? 0 : 1 })));
+
+/**
+ * The mark on a fund whose own figures are older than the rest of the index.
+ *
+ * Exact rather than inferred — `d` against `meta.latestDate`, no clock involved.
+ * Since incident 9 a fund that publishes late keeps its real previous price for
+ * five trading days instead of being deleted, and since incident 10 a fund that
+ * has been stamped with today's date but no price is treated the same way. Both
+ * are the right call, and both leave a row whose returns are measured to a
+ * different day from its neighbours' with nothing saying so.
+ *
+ * The word carries the meaning and the colour only reinforces it, so it reads
+ * the same in monochrome.
+ */
+function lagMark(f) {
+  if (!fundLags(f, state.meta)) return null;
+  return h('span', {
+    class: 'lag-mark',
+    title: T('fundLateNote', {
+      latest: fmtDate(state.meta.latestDate, state.lang),
+      own: fmtDate(f.d, state.lang),
+    }),
+  }, T('fundLate'));
+}
 
 /**
  * TEFAS's official risk value, 1–7. The number carries the meaning; the colour
@@ -3697,8 +3832,11 @@ function renderStats(f) {
       : stat(T(labelKey), fmtPct(f.r[key], state.lang, { signed: true, digits: 1 }),
           `delta ${signOf(f.r[key])}`);
 
+  // The headline figure is the one that goes stale, so the mark sits on it
+  // rather than only in the panel note further down the page.
+  const late = lagMark(f);
   return h('dl', { class: 'stat-row' },
-    stat(T('price'), `₺${fmtNum(f.p, state.lang, 4)}`),
+    stat(T('price'), late ? [`₺${fmtNum(f.p, state.lang, 4)}`, late] : `₺${fmtNum(f.p, state.lang, 4)}`),
     stat(T('size'), fmtMoney(f.sz, state.lang)),
     stat(T('investors'), fmtInt(f.iv, state.lang)),
     stat(T('riskLevel'), f.risk == null ? '—' : `${f.risk} / 7`),

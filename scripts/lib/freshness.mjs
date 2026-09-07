@@ -23,6 +23,8 @@
 // current, not as a gap to be forgiven. A gap here has always meant something
 // is wrong, at any hour.
 
+import { LAGGING_SHARE } from '../../core.js';
+
 /**
  * @param {object} o
  * @param {string|null} o.siteDate     `meta.latestDate` from the live site, YYYY-MM-DD
@@ -45,7 +47,7 @@ export function freshnessVerdict({
   funds = null,
   now,
   alertAfterHoursStuck = 6,
-  laggingHealFraction = 0.05,
+  laggingHealFraction = LAGGING_SHARE,
 }) {
   // Not knowing is its own failure, and a louder one than being a day behind: a
   // site that will not answer for its own date cannot be checked at all.
