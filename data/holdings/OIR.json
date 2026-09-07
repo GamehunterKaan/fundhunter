@@ -2,13 +2,13 @@
  "code": "OIR",
  "kapCode": null,
  "name": "OIR-Osmanlı Portföy Dengeli Fon Sepeti Fonu",
- "period": "Temmuz-2026",
- "prevPeriod": "2026-06",
- "publishedAt": "10.08.2026 17:23:08",
- "disclosure": 1646710,
+ "period": "Ağustos-2026",
+ "prevPeriod": "2026-07",
+ "publishedAt": "04.09.2026 16:44:09",
+ "disclosure": 1658967,
  "form": "A",
- "portfolioValue": 19044236.55,
- "netAssetValue": 19060980.6,
+ "portfolioValue": 20554612.29,
+ "netAssetValue": 19322396.26,
  "warnings": [],
  "holdings": [
   {
@@ -19,10 +19,23 @@
    "currency": null,
    "group": "VIOP Nakit Teminatı",
    "subgroup": null,
-   "nominal": 31370.25,
-   "value": 31370.25,
-   "weight": 0.16,
-   "prevWeight": 1.59
+   "nominal": 47221.78,
+   "value": 47221.78,
+   "weight": 0.23,
+   "prevWeight": 0.16
+  },
+  {
+   "code": "BRR - AK PORTFÖY",
+   "isin": "TRYAKPO01839",
+   "ref": null,
+   "name": "AK PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Y.Fonu Türk",
+   "nominal": 1,
+   "value": 1.69,
+   "weight": 0,
+   "prevWeight": null
   },
   {
    "code": "DAH - DENİZ",
@@ -32,10 +45,10 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 291800,
-   "value": 1009593.57,
-   "weight": 5.3,
-   "prevWeight": 5.12
+   "nominal": 372500,
+   "value": 1345693.13,
+   "weight": 6.55,
+   "prevWeight": 5.3
   },
   {
    "code": "DBA - DENİZ",
@@ -45,36 +58,49 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 3294100,
-   "value": 2262295.65,
-   "weight": 11.88,
-   "prevWeight": 9.27
+   "nominal": 3564800,
+   "value": 2703722.56,
+   "weight": 13.14,
+   "prevWeight": 11.88
   },
   {
-   "code": "DCB - DENİZ",
-   "isin": "TRYDNZP00793",
+   "code": "DNP - DENİZ",
+   "isin": "TRYDNZP01700",
    "ref": null,
    "name": "DENİZ PORTFÖY YÖNETİMİA.Ş.",
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 388473,
-   "value": 1817446.46,
-   "weight": 9.54,
+   "nominal": 1,
+   "value": 1.45,
+   "weight": 0,
+   "prevWeight": null
+  },
+  {
+   "code": "EPP - EMAA BLUE",
+   "isin": "TRYEMAA00012",
+   "ref": null,
+   "name": "EMAA BLUE PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Y.Fonu Türk",
+   "nominal": 1191353,
+   "value": 1784522.89,
+   "weight": 8.68,
    "prevWeight": null
   },
   {
    "code": "EPT - EMAA BLUE",
    "isin": "TRYEMAA00087",
    "ref": null,
-   "name": "EMAA BLUE PORTFÖY YÖNETİMİA.Ş.",
+   "name": "EMAA BLUE PORTFÖY YÖNETİMİKURUM A.Ş.",
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 950199,
-   "value": 1244519.34,
-   "weight": 6.54,
-   "prevWeight": 12.91
+   "nominal": 41991,
+   "value": 56735.05,
+   "weight": 0.28,
+   "prevWeight": 6.54
   },
   {
    "code": "FI3 - QNB PORTFÖY",
@@ -85,22 +111,48 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 1939,
-   "value": 1491873.78,
-   "weight": 7.83,
-   "prevWeight": 7.87
+   "value": 1568357.24,
+   "weight": 7.63,
+   "prevWeight": 7.83
+  },
+  {
+   "code": "FPK - FİBA PORTFÖY",
+   "isin": "TRYFIBP00013",
+   "ref": null,
+   "name": "FİBA PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Y.Fonu Türk",
+   "nominal": 6374000,
+   "value": 632976.44,
+   "weight": 3.08,
+   "prevWeight": null
+  },
+  {
+   "code": "GOL - GARANTİ",
+   "isin": "TRYGAPO01274",
+   "ref": null,
+   "name": "GARANTİ PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Y.Fonu Türk",
+   "nominal": 151691,
+   "value": 432239.86,
+   "weight": 2.1,
+   "prevWeight": null
   },
   {
    "code": "GUB - GARANTİ",
    "isin": "TRYGAPO01324",
    "ref": null,
-   "name": "GARANTİ PORTFÖY YÖNETİMİA.Ş. KURUM",
+   "name": "GARANTİ PORTFÖY YÖNETİMİA.Ş.",
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 424117,
-   "value": 1068119.58,
-   "weight": 5.61,
-   "prevWeight": 4.32
+   "value": 1101097.64,
+   "weight": 5.36,
+   "prevWeight": 5.61
   },
   {
    "code": "OHB - OYAK",
@@ -111,9 +163,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 47444,
-   "value": 1067626.07,
-   "weight": 5.61,
-   "prevWeight": 5.42
+   "value": 1145197.15,
+   "weight": 5.57,
+   "prevWeight": 5.61
   },
   {
    "code": "OPF - OSMANLI",
@@ -124,9 +176,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 397584,
-   "value": 1224104.68,
-   "weight": 6.43,
-   "prevWeight": 7.38
+   "value": 1290861.82,
+   "weight": 6.28,
+   "prevWeight": 6.43
   },
   {
    "code": "OPH - OSMANLI",
@@ -136,10 +188,10 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 48259,
-   "value": 1210872.55,
-   "weight": 6.36,
-   "prevWeight": 5.9
+   "nominal": 56745,
+   "value": 1477579.76,
+   "weight": 7.19,
+   "prevWeight": 6.36
   },
   {
    "code": "OSD - OSMANLI",
@@ -150,9 +202,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 130645,
-   "value": 1824433.13,
-   "weight": 9.58,
-   "prevWeight": 7.37
+   "value": 1882477.39,
+   "weight": 9.16,
+   "prevWeight": 9.58
   },
   {
    "code": "PLR - OSMANLI",
@@ -163,9 +215,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 1302922,
-   "value": 2135201.21,
-   "weight": 11.21,
-   "prevWeight": 10.35
+   "value": 2203079.54,
+   "weight": 10.72,
+   "prevWeight": 11.21
   },
   {
    "code": "PPI - YAPI KREDİ",
@@ -175,10 +227,10 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 675382,
-   "value": 1511590.69,
-   "weight": 7.94,
-   "prevWeight": null
+   "nominal": 474476,
+   "value": 1095587.86,
+   "weight": 5.33,
+   "prevWeight": 7.94
   },
   {
    "code": "PPK - QNB PORTFÖY",
@@ -188,9 +240,35 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 518561,
-   "value": 1145189.59,
-   "weight": 6.01,
+   "nominal": 2223,
+   "value": 5061.3,
+   "weight": 0.03,
+   "prevWeight": 6.01
+  },
+  {
+   "code": "TLK - AKTİF",
+   "isin": "TRYMKFT00497",
+   "ref": null,
+   "name": "AKTİF PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Y.Fonu Türk",
+   "nominal": 85734,
+   "value": 153308.68,
+   "weight": 0.75,
+   "prevWeight": null
+  },
+  {
+   "code": "YHT - YAPI KREDİ",
+   "isin": "TRYKCMD00019",
+   "ref": null,
+   "name": "YAPI KREDİ PORTFÖY YÖNETİMİA.Ş.",
+   "currency": "TL",
+   "group": "DİĞER",
+   "subgroup": "Y.Fonu Türk",
+   "nominal": 3894609,
+   "value": 1628889.06,
+   "weight": 7.92,
    "prevWeight": null
   }
  ]

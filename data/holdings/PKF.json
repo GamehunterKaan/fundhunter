@@ -2,15 +2,30 @@
  "code": "PKF",
  "kapCode": null,
  "name": "PKF-ATA PORTFÖY ALTIN KATILIM FONU",
- "period": "Temmuz-2026",
- "prevPeriod": "2026-06",
- "publishedAt": "05.08.2026 17:05:30",
- "disclosure": 1643673,
+ "period": "Ağustos-2026",
+ "prevPeriod": "2026-07",
+ "publishedAt": "07.09.2026 17:09:47",
+ "disclosure": 1659604,
  "form": "B",
- "portfolioValue": 380682987.9,
- "netAssetValue": 379972987.36,
- "warnings": [],
+ "portfolioValue": 398058156.25,
+ "netAssetValue": 397287735.65,
+ "warnings": [
+  "Portfolio weights sum to 216.30%, not 100%"
+ ],
  "holdings": [
+  {
+   "code": "SENETLERİ ALTIN",
+   "isin": null,
+   "ref": null,
+   "name": "TC HAZİNE VE MALİYEBAKANLIĞI",
+   "currency": null,
+   "group": "HİSSE",
+   "subgroup": null,
+   "nominal": 470000,
+   "value": 35005600,
+   "weight": 8.79,
+   "prevWeight": null
+  },
   {
    "code": "TRD171127T13",
    "isin": "TRD171127T13",
@@ -20,9 +35,9 @@
    "group": "KİRA SERTİFİKALARI",
    "subgroup": null,
    "nominal": 12000000,
-   "value": 13094704.58,
-   "weight": 3.44,
-   "prevWeight": 3.05
+   "value": 13514529.76,
+   "weight": 3.4,
+   "prevWeight": 3.44
   },
   {
    "code": "ALTIN995",
@@ -32,10 +47,10 @@
    "currency": null,
    "group": "ALTIN VE KIYMETLİ MADENLER",
    "subgroup": null,
-   "nominal": 59,
-   "value": 362512983.44,
-   "weight": 95.23,
-   "prevWeight": 94.35
+   "nominal": 48,
+   "value": 48,
+   "weight": 82.12,
+   "prevWeight": 95.23
   },
   {
    "code": "PKP",
@@ -45,10 +60,10 @@
    "currency": null,
    "group": "KATILMA BELGELERİ",
    "subgroup": null,
-   "nominal": 4128440,
-   "value": 5075235.79,
-   "weight": 1.33,
-   "prevWeight": 1.27
+   "nominal": 17834010,
+   "value": 22659839.6,
+   "weight": 5.69,
+   "prevWeight": 1.33
   },
   {
    "code": "TRY",
@@ -58,10 +73,10 @@
    "currency": null,
    "group": "VİOP NAKİT TEMİNAT İŞLEMLERİ",
    "subgroup": null,
-   "nominal": 64.09,
-   "value": 64.09,
-   "weight": 0,
-   "prevWeight": null
+   "nominal": 116.3,
+   "value": 116.3,
+   "weight": 116.3,
+   "prevWeight": 0
   }
  ]
 }
