@@ -119,3 +119,43 @@ test('a site somehow ahead of TEFAS is not stale', () => {
   });
   assert.equal(v.ok, true);
 });
+
+// 2026-09-07 again, from the watchdog's side. The site's date matched TEFAS's,
+// so this reported "fresh" while 832 of 2073 funds sat at the previous day.
+// Dates agreeing is not the same as the day being complete.
+test('a day caught mid-publication is not fresh', () => {
+  const now = at('2026-09-07T06:00:00Z');
+  const v = freshnessVerdict({
+    siteDate: '2026-09-07',
+    tefasDate: '2026-09-07',
+    lastUpdated: hoursBefore(now.toISOString(), 0.2),
+    lagging: 832,
+    funds: 2073,
+    now,
+  });
+  assert.equal(v.ok, false);
+  assert.equal(v.level, 'heal', 're-running once TEFAS finishes is the fix');
+  assert.match(v.reason, /mid-publication/);
+});
+
+test('the handful of funds that never print on a given day stay quiet', () => {
+  const now = at('2026-09-07T16:00:00Z');
+  const v = freshnessVerdict({
+    siteDate: '2026-09-07',
+    tefasDate: '2026-09-07',
+    lastUpdated: hoursBefore(now.toISOString(), 1),
+    lagging: 8,
+    funds: 2073,
+    now,
+  });
+  assert.equal(v.ok, true, '0.4% is normal, not an incident');
+});
+
+test('no lagging figure at all is not treated as a problem', () => {
+  const now = at('2026-09-07T16:00:00Z');
+  const v = freshnessVerdict({
+    siteDate: '2026-09-07', tefasDate: '2026-09-07',
+    lastUpdated: hoursBefore(now.toISOString(), 1), now,
+  });
+  assert.equal(v.ok, true);
+});

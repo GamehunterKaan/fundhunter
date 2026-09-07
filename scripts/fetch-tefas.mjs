@@ -20,7 +20,9 @@ import { fileURLToPath } from 'node:url';
 import {
   TefasClient, requestBody, mapPool, ymd, addDays, splitRange, weeklyAnchors,
 } from './lib/tefas.mjs';
-import { staleCutoff, partitionUniverse, lastDate, PRUNE_GRACE_DAYS } from './lib/universe.mjs';
+import {
+  staleCutoff, partitionUniverse, lastDate, isRealPrice, PRUNE_GRACE_DAYS,
+} from './lib/universe.mjs';
 import { ASSETS, ASSET_CODES, GROUPS, KINDS, CATEGORY_EN } from './lib/taxonomy.mjs';
 import { collapseReason } from './lib/collapse.mjs';
 // Shared with the browser so a "1-year return" means the same thing in both.
@@ -244,6 +246,14 @@ async function writeHistory(code, prices, allocByDate) {
     const rec = records.get(d) ?? { d };
     rec.a = a;
     records.set(d, rec);
+  }
+
+  // Rows written before a zero was understood to mean "not published yet" are
+  // still on disk, and nothing above would replace them: this run simply has no
+  // record for that date to overwrite them with. Drop them here so the repair
+  // needs no separate migration and cannot be forgotten.
+  for (const [d, rec] of records) {
+    if (rec.p != null && !isRealPrice(rec.p)) records.delete(d);
   }
 
   const lines = [...records.values()]
@@ -586,6 +596,9 @@ async function main() {
       let f = funds.get(code);
       if (!f) funds.set(code, (f = { kind, name, prices: new Map(), alloc: new Map() }));
       if (name) f.name = name;
+      // The name is worth taking from a row whose price has not landed yet; the
+      // row itself is not. See isRealPrice: a zero here is TEFAS mid-publication.
+      if (!isRealPrice(price)) continue;
       f.prices.set(date, [date, price, shares, investors, size]);
     }
   }

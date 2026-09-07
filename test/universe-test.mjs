@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { staleCutoff, partitionUniverse, lastDate, PRUNE_GRACE_DAYS } from '../scripts/lib/universe.mjs';
+import {
+  staleCutoff, partitionUniverse, lastDate, isRealPrice, PRUNE_GRACE_DAYS,
+} from '../scripts/lib/universe.mjs';
 
 // A fund that publishes an hour late and a fund that has wound up look the same
 // on the day. The build used to treat both as gone, which deleted the late
@@ -70,4 +72,36 @@ test('the grace default is the documented one', () => {
 test('lastDate reads the newest key without needing a sorted map', () => {
   assert.equal(lastDate(new Map([['2026-09-02', 1], ['2026-08-11', 1], ['2026-09-01', 1]])), '2026-09-02');
   assert.equal(lastDate(new Map()), null);
+});
+
+// 2026-09-07: the run landed at 05:47 UTC, while TEFAS was still publishing. It
+// had stamped rows with the day's date carrying investor counts and an empty
+// price, and 832 of 2073 funds went to the site at a price of zero and a change
+// of -100%. Every check downstream agreed they had priced, because a row for the
+// date existed.
+test('a zero is not a price, whatever shape it arrives in', () => {
+  assert.equal(isRealPrice(0), false, 'the 09-07 case');
+  assert.equal(isRealPrice(-1), false);
+  assert.equal(isRealPrice(null), false);
+  assert.equal(isRealPrice(undefined), false);
+  assert.equal(isRealPrice(NaN), false);
+  assert.equal(isRealPrice('2.5'), false, 'a string is a parse that did not happen');
+  assert.equal(isRealPrice(Infinity), false);
+});
+
+test('a real price of any plausible size is kept', () => {
+  assert.equal(isRealPrice(2.268487), true);
+  assert.equal(isRealPrice(9140.087628), true);
+  assert.equal(isRealPrice(0.000001), true, 'small is not the same as absent');
+});
+
+test('a fund whose price has not landed is late, not wiped out', () => {
+  // With the zero row refused at ingest the fund simply has no print today, so
+  // the grace window carries it at yesterday's real figure — which is the whole
+  // reason the two fixes belong together.
+  const f = ['PHE', { prices: new Map([['2026-09-04', 1]]) }];
+  const { priced, keep, dropped } = partitionUniverse([f], '2026-09-07', '2026-08-31');
+  assert.equal(priced.length, 0, 'it has not priced today');
+  assert.equal(keep.length, 1, 'and must keep yesterday, not show zero');
+  assert.equal(dropped.length, 0);
 });

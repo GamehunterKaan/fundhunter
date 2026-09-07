@@ -67,3 +67,22 @@ export function lastDate(prices) {
   for (const d of prices.keys()) if (max === null || d > max) max = d;
   return max;
 }
+
+/**
+ * Is this a price, or is it TEFAS not having published one yet?
+ *
+ * TEFAS stamps a row with the day's date as soon as it begins publishing and
+ * fills the price in afterwards, so for a few hours every morning a fund has a
+ * row for today carrying its investor count, a zero price and a zero size. That
+ * zero is the gap, not a valuation: no fund is ever worth nothing per share, and
+ * a fund that really had been wiped out would be delisted rather than quoted.
+ *
+ * Reading it as a NAV cost 832 of 2073 funds a -100% day on 2026-09-07 — the run
+ * landed at 05:47 UTC, mid-publication, and every check downstream agreed the
+ * funds had priced because a row existed. Everything keys off this now, so a
+ * fund whose price has not landed is simply one that has not printed today, and
+ * the grace window above carries it at yesterday's real figure instead.
+ */
+export function isRealPrice(p) {
+  return typeof p === 'number' && Number.isFinite(p) && p > 0;
+}

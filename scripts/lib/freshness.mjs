@@ -28,17 +28,24 @@
  * @param {string|null} o.siteDate     `meta.latestDate` from the live site, YYYY-MM-DD
  * @param {string|null} o.tefasDate    newest date TEFAS has data for, YYYY-MM-DD
  * @param {string|null} [o.lastUpdated] `meta.lastUpdated` from the live site, ISO
+ * @param {number|null} [o.lagging] funds published at a date older than latestDate
+ * @param {number|null} [o.funds] funds published in total
  * @param {Date} o.now
  * @param {number} [o.alertAfterHoursStuck] hours of being behind without the site
  *   moving at all before this stops being something a re-run will fix
+ * @param {number} [o.laggingHealFraction] share of funds behind the site's own
+ *   latest date that means the day was caught mid-publication
  * @returns {{ok: boolean, level: 'none'|'heal'|'alert', behindDays: number, reason: string}}
  */
 export function freshnessVerdict({
   siteDate,
   tefasDate,
   lastUpdated = null,
+  lagging = null,
+  funds = null,
   now,
   alertAfterHoursStuck = 6,
+  laggingHealFraction = 0.05,
 }) {
   // Not knowing is its own failure, and a louder one than being a day behind: a
   // site that will not answer for its own date cannot be checked at all.
@@ -54,6 +61,25 @@ export function freshnessVerdict({
   }
 
   if (siteDate >= tefasDate) {
+    // The dates agreeing is not the same as the day being complete. TEFAS
+    // publishes over a couple of hours, and a run that lands inside that window
+    // carries the funds whose prices have not arrived at their previous date —
+    // honestly labelled, but a large fraction of the site a day behind while
+    // this reported "fresh". A re-run once TEFAS has finished is the whole fix,
+    // so it heals rather than alerting, and the threshold is set well above the
+    // handful of funds that genuinely do not print on any given day.
+    const share = lagging != null && funds ? lagging / funds : 0;
+    if (share > laggingHealFraction) {
+      return {
+        ok: false,
+        level: 'heal',
+        behindDays: 0,
+        reason:
+          `the site is on ${siteDate} but ${lagging} of ${funds} funds ` +
+          `(${(share * 100).toFixed(1)}%) are published at an older date — ` +
+          'the day looks caught mid-publication',
+      };
+    }
     return { ok: true, level: 'none', behindDays: 0, reason: `current at ${siteDate}` };
   }
 

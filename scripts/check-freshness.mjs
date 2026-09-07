@@ -68,6 +68,8 @@ try {
     siteDate: meta.latestDate ?? null,
     tefasDate,
     lastUpdated: meta.lastUpdated ?? null,
+    lagging: meta.counts?.lagging ?? null,
+    funds: meta.counts?.funds ?? null,
     now: new Date(),
   });
   verdict.siteDate = meta.latestDate ?? null;
