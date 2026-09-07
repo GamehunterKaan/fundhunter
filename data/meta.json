@@ -1,17 +1,17 @@
 {
-  "lastUpdated": "2026-09-07T05:47:19.665Z",
+  "lastUpdated": "2026-09-07T13:00:58.838Z",
   "latestDate": "2026-09-07",
   "lastWideRead": "2026-09-03T08:29:05.416Z",
   "rangeStart": "2025-09-07",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2073,
-    "priced": 2071,
-    "lagging": 2,
+    "funds": 2065,
+    "priced": 2065,
+    "lagging": 0,
     "byKind": {
-      "YAT": 2043,
-      "BYF": 30
+      "YAT": 2034,
+      "BYF": 31
     }
   },
   "kinds": [
@@ -2190,15 +2190,15 @@
         0.0454
       ],
       [
+        "KRDMB",
+        0.0429
+      ],
+      [
         "KRDMD",
         0.0429
       ],
       [
         "KRDMA",
-        0.0429
-      ],
-      [
-        "KRDMB",
         0.0429
       ],
       [
@@ -2652,11 +2652,11 @@
         0.0012
       ],
       [
-        "USHOL",
+        "MARKA",
         0.0011
       ],
       [
-        "MARKA",
+        "USHOL",
         0.0011
       ],
       [
@@ -3845,155 +3845,155 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "health",
-        "move": 2.41,
-        "of": 16
-      },
-      {
-        "id": "banks",
-        "move": 0.28,
-        "of": 12
-      },
-      {
-        "id": "realEstate",
-        "move": -0.22,
-        "of": 63
-      },
-      {
-        "id": "metals",
-        "move": -0.71,
-        "of": 37
-      },
-      {
-        "id": "energy",
-        "move": -0.76,
-        "of": 43
-      },
-      {
-        "id": "retail",
-        "move": -0.82,
-        "of": 28
-      },
-      {
         "id": "autos",
-        "move": -1.66,
+        "move": 1.18,
         "of": 14
       },
       {
-        "id": "chemicals",
-        "move": -2.73,
-        "of": 12
-      },
-      {
-        "id": "finance",
-        "move": -2.8,
-        "of": 61
-      },
-      {
-        "id": "construction",
-        "move": -3.34,
-        "of": 36
-      },
-      {
-        "id": "defence",
-        "move": -3.96,
-        "of": 5
-      },
-      {
-        "id": "food",
-        "move": -3.96,
-        "of": 67
-      },
-      {
-        "id": "tourism",
-        "move": -4.62,
+        "id": "retail",
+        "move": 1.08,
         "of": 28
       },
       {
-        "id": "telecom",
-        "move": -4.64,
-        "of": 9
+        "id": "finance",
+        "move": 0.92,
+        "of": 61
+      },
+      {
+        "id": "metals",
+        "move": 0.84,
+        "of": 37
+      },
+      {
+        "id": "health",
+        "move": 0.81,
+        "of": 16
+      },
+      {
+        "id": "chemicals",
+        "move": -0.44,
+        "of": 12
       },
       {
         "id": "textile",
-        "move": -4.82,
+        "move": -0.59,
         "of": 33
       },
       {
+        "id": "banks",
+        "move": -1.96,
+        "of": 12
+      },
+      {
+        "id": "defence",
+        "move": -2.57,
+        "of": 5
+      },
+      {
+        "id": "energy",
+        "move": -3,
+        "of": 43
+      },
+      {
+        "id": "construction",
+        "move": -3.01,
+        "of": 36
+      },
+      {
+        "id": "realEstate",
+        "move": -3.39,
+        "of": 63
+      },
+      {
+        "id": "food",
+        "move": -3.41,
+        "of": 67
+      },
+      {
+        "id": "telecom",
+        "move": -4.49,
+        "of": 9
+      },
+      {
+        "id": "tourism",
+        "move": -5.17,
+        "of": 28
+      },
+      {
         "id": "semis",
-        "move": -5.42,
+        "move": -7.33,
         "of": 4
       },
       {
-        "id": "transport",
-        "move": -7.36,
-        "of": 13
-      },
-      {
         "id": "industrial",
-        "move": -7.56,
+        "move": -7.41,
         "of": 104
       },
       {
+        "id": "transport",
+        "move": -8.65,
+        "of": 13
+      },
+      {
         "id": "tech",
-        "move": -16.29,
+        "move": -17.39,
         "of": 28
       }
     ],
     "shares": [
       {
-        "c": "TEHOL",
-        "n": "Tera Yatirim Teknoloji Holding A.S.",
-        "move": 48.3,
-        "th": "realEstate"
-      },
-      {
-        "c": "MARTI",
-        "n": "Marti Otel Isletmeleri A.S.",
-        "move": 37.7,
-        "th": "tourism"
+        "c": "KARSN",
+        "n": "Karsan Otomotiv Sanayii ve Ticaret A.S.",
+        "move": 43,
+        "th": "industrial"
       },
       {
         "c": "KARCL",
         "n": "Kardemir Celik Sanayi AS",
-        "move": 37,
+        "move": 40.7,
         "th": "metals",
         "spec": 1
       },
       {
-        "c": "KARSN",
-        "n": "Karsan Otomotiv Sanayii ve Ticaret A.S.",
-        "move": 36.6,
-        "th": "industrial"
+        "c": "MARTI",
+        "n": "Marti Otel Isletmeleri A.S.",
+        "move": 36.1,
+        "th": "tourism"
       },
       {
-        "c": "TRHOL",
-        "n": "Tera Financial Investments Holding A.S.",
-        "move": 24.8,
+        "c": "DSTKF",
+        "n": "Destek Finans Faktoring A.S.",
+        "move": 30.9,
         "th": "finance",
+        "spec": 1
+      },
+      {
+        "c": "TEHOL",
+        "n": "Tera Yatirim Teknoloji Holding A.S.",
+        "move": 23.2,
+        "th": "realEstate"
+      },
+      {
+        "c": "CITAS",
+        "n": "Citlekci Magazacilik Gida AS",
+        "move": 20.6,
+        "th": "retail",
         "spec": 1
       },
       {
         "c": "VESTL",
         "n": "Vestel Elektronik Sanayi ve Ticaret A.S.",
-        "move": 19,
+        "move": 20.1,
         "th": "retail"
       },
       {
-        "c": "DSTKF",
-        "n": "Destek Finans Faktoring A.S.",
-        "move": 18.1,
-        "th": "finance",
-        "spec": 1
-      },
-      {
-        "c": "HALKB",
-        "n": "Turkiye Halk Bankasi Anonim Sirketi",
-        "move": 17.9,
-        "th": "banks"
+        "c": "AVOD",
+        "n": "A.V.O.D. KURUTULMUS GIDA VE TARIM URUNLERI SANAYI TICARET A.S.",
+        "move": 18.9,
+        "th": "food"
       }
     ],
-    "floor": 60846467,
+    "floor": 58664133,
     "of": 309
   },
   "peerGroups": [
@@ -4040,14 +4040,14 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 743,
-      "medianY1": 5.7934,
-      "medianVol": 23.29
+      "count": 741,
+      "medianY1": 7.06,
+      "medianVol": 22.86
     },
     "metals": {
       "count": 55,
       "medianY1": 40.176050000000004,
-      "medianVol": 25.715000000000003
+      "medianVol": 25.905
     },
     "foreign": {
       "count": 34,
@@ -4055,40 +4055,40 @@
       "medianVol": 18.485
     },
     "bonds": {
-      "count": 533,
-      "medianY1": 19.3343,
-      "medianVol": 2.83
+      "count": 530,
+      "medianY1": 19.34215,
+      "medianVol": 2.84
     },
     "cash": {
-      "count": 242,
+      "count": 240,
       "medianY1": 37.2568,
-      "medianVol": 1.7
+      "medianVol": 1.48
     },
     "fundOfFunds": {
-      "count": 153,
+      "count": 152,
       "medianY1": 0,
-      "medianVol": 7.29
+      "medianVol": 7.305
     },
     "balanced": {
       "count": 140,
-      "medianY1": 16.1161,
-      "medianVol": 12.745000000000001
+      "medianY1": 16.6816,
+      "medianVol": 12.575
     },
     "conservative": {
       "count": 173,
-      "medianY1": 22.3444,
-      "medianVol": 1.94
+      "medianY1": 22.45,
+      "medianVol": 1.75
     }
   },
-  "cashReturn": 47.54,
+  "cashReturn": 47.57,
   "cashReturns": {
-    "m1": 3.38,
-    "m3": 10.44,
-    "m6": 21.79,
-    "ytd": 30.5,
-    "y1": 47.54,
-    "y3": 246.11,
-    "y5": 429.33
+    "m1": 3.41,
+    "m3": 10.47,
+    "m6": 21.82,
+    "ytd": 30.53,
+    "y1": 47.57,
+    "y3": 251.47,
+    "y5": 414.7
   },
   "cashBasis": {
     "m1": {
@@ -4108,11 +4108,11 @@
     },
     "y3": {
       "from": "published",
-      "funds": 66
+      "funds": 47
     },
     "y5": {
       "from": "published",
-      "funds": 49
+      "funds": 34
     }
   },
   "taxDefaults": {
@@ -4125,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-07T05:48:30.115Z"
+  "analyticsBuiltAt": "2026-09-07T13:01:14.050Z"
 }
