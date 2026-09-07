@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  staleCutoff, partitionUniverse, lastDate, isRealPrice, PRUNE_GRACE_DAYS,
+  staleCutoff, partitionUniverse, lastDate, isRealPrice, PRUNE_GRACE_DAYS, unambiguousCategories
 } from '../scripts/lib/universe.mjs';
 
 // A fund that publishes an hour late and a fund that has wound up look the same
@@ -104,4 +104,67 @@ test('a fund whose price has not landed is late, not wiped out', () => {
   assert.equal(priced.length, 0, 'it has not priced today');
   assert.equal(keep.length, 1, 'and must keep yesterday, not show zero');
   assert.equal(dropped.length, 0);
+});
+
+// ------------------------------------------------- umbrella categories
+
+// Found by running the fetch twice and diffing its own output: 31 funds changed
+// category between two runs of the same code against the same day's data. The
+// cause was not a race in our pool so much as an assumption underneath it —
+// that asking TEFAS for one umbrella type returns the funds in that type.
+
+const answer = (code, label, codes) => ({ code, label, rows: codes.map((c) => [c]) });
+
+test('a fund in exactly one umbrella type takes that label', () => {
+  const { map, ambiguous } = unambiguousCategories([
+    answer('100', 'Para Piyasası Şemsiye Fonu', ['AAA', 'BBB']),
+    answer('101', 'Serbest Şemsiye Fonu', ['CCC']),
+  ]);
+  assert.equal(map.get('AAA'), 'Para Piyasası Şemsiye Fonu');
+  assert.equal(map.get('CCC'), 'Serbest Şemsiye Fonu');
+  assert.deepEqual(ambiguous, []);
+});
+
+test('a filter that returned everything under every type labels nothing', () => {
+  // The BYF shape on 2026-09-07: all twelve umbrella queries came back with the
+  // identical 31 funds, so none of the twelve labels means anything. Better to
+  // say nothing and let the caller fall back to the export's own per-fund
+  // umbrella than to publish one of twelve at random.
+  const everything = ['ETF1', 'ETF2', 'ETF3'];
+  const { map, ambiguous } = unambiguousCategories(
+    ['100', '101', '102'].map((c) => answer(c, `Umbrella ${c}`, everything))
+  );
+  assert.equal(map.size, 0);
+  assert.deepEqual(ambiguous, everything);
+});
+
+test('one bad type does not cost the funds that were classified properly', () => {
+  const { map, ambiguous } = unambiguousCategories([
+    answer('100', 'Para Piyasası Şemsiye Fonu', ['AAA', 'SHARED']),
+    answer('101', 'Serbest Şemsiye Fonu', ['SHARED']),
+    answer('102', 'Hisse Senedi Şemsiye Fonu', ['BBB']),
+  ]);
+  assert.equal(map.get('AAA'), 'Para Piyasası Şemsiye Fonu');
+  assert.equal(map.get('BBB'), 'Hisse Senedi Şemsiye Fonu');
+  assert.equal(map.has('SHARED'), false);
+  assert.deepEqual(ambiguous, ['SHARED']);
+});
+
+test('the answer does not depend on the order the responses arrived in', () => {
+  // mapPool preserves the order of its OUTPUT, but the side effects used to
+  // happen in completion order, which is whatever the network decided.
+  const answers = [
+    answer('173', 'Kıymetli Maden Şemsiye Fonu', ['AAA']),
+    answer('100', 'Para Piyasası Şemsiye Fonu', ['BBB']),
+    answer('108', 'Serbest Şemsiye Fonu', ['CCC']),
+  ];
+  const first = unambiguousCategories(answers).map;
+  const second = unambiguousCategories([...answers].reverse()).map;
+  assert.deepEqual([...first].sort(), [...second].sort());
+});
+
+test('nothing to classify is not an error', () => {
+  assert.equal(unambiguousCategories([]).map.size, 0);
+  assert.equal(unambiguousCategories(undefined).map.size, 0);
+  assert.equal(unambiguousCategories([{ code: '1', label: 'X' }]).map.size, 0);
 });

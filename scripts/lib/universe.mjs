@@ -86,3 +86,47 @@ export function lastDate(prices) {
 export function isRealPrice(p) {
   return typeof p === 'number' && Number.isFinite(p) && p > 0;
 }
+
+/**
+ * Which umbrella-category answers can be trusted.
+ *
+ * `fetchCategories` asks TEFAS for the funds in each umbrella type in turn and
+ * labels each fund with the type that returned it. That assumes the
+ * `sfonTurKod` filter actually filters, and for exchange-traded funds it does
+ * not: on 2026-09-07 all twelve BYF umbrella queries returned the identical 31
+ * funds, so every ETF on the site wore whichever of the twelve labels was
+ * applied last — and because the requests run through a pool, that was decided
+ * by which response happened to arrive first. Thirty-one funds changed category
+ * between two runs of the same code against the same day's data, which is
+ * indistinguishable from a real reclassification and appears as a diff in
+ * funds.json every night.
+ *
+ * A fund returned under more than one type is one this filter did not
+ * discriminate for, so its label here carries no information and is dropped;
+ * the caller falls back to the per-fund umbrella the export publishes. Detected
+ * rather than special-cased — nothing here knows BYF is the broken one, so the
+ * rule stops firing if TEFAS starts honouring the filter and catches YAT if it
+ * ever breaks the same way.
+ *
+ * @param {Array<{code: string, label: string, rows: Array<[string]>}>} answers
+ *   one entry per umbrella type queried
+ * @returns {{map: Map<string,string>, ambiguous: string[]}}
+ */
+export function unambiguousCategories(answers) {
+  const seen = new Map();
+  for (const a of answers ?? []) {
+    for (const [code] of a.rows ?? []) seen.set(code, (seen.get(code) ?? 0) + 1);
+  }
+  const map = new Map();
+  // Sorted by the type's own code so the surviving assignment is the same on
+  // every run, whatever order the responses came back in.
+  const ordered = [...(answers ?? [])].sort((x, y) =>
+    String(x.code) < String(y.code) ? -1 : String(x.code) > String(y.code) ? 1 : 0);
+  for (const a of ordered) {
+    for (const [code] of a.rows ?? []) {
+      if (seen.get(code) > 1) continue;
+      map.set(code, a.label);
+    }
+  }
+  return { map, ambiguous: [...seen].filter(([, n]) => n > 1).map(([code]) => code).sort() };
+}
