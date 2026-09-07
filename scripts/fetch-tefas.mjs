@@ -532,8 +532,14 @@ async function fetchAllocHistory(start, end) {
     const rows = await client.post(
       DIST_METHOD,
       requestBody({ fonTipi: j.kind, basTarih: j.s, bitTarih: j.e }),
-      // v2 for the same reason as the info chunks above.
-      { cacheKey: USE_CACHE ? `dist-v2-${j.kind}-${j.s}-${j.e}` : null, reduce: reduceDist }
+      // Deliberately NOT bumped alongside the info chunks. These are allocation
+      // percentages rather than prices, so a window cached slightly early is a
+      // mix that is a few hours old rather than a fund priced at zero — and
+      // retiring them costs 106 requests against the info chunks' 30. Bumping
+      // both at once on 2026-09-07 turned a repair into 136 cold requests three
+      // times over and TEFAS answered 429. The weekly wide read is where these
+      // get refreshed.
+      { cacheKey: USE_CACHE ? `dist-${j.kind}-${j.s}-${j.e}` : null, reduce: reduceDist }
     );
     if (++done % 10 === 0 || done === jobs.length) log(`    alloc ${done}/${jobs.length}`);
     return { kind: j.kind, rows };
