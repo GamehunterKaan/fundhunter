@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-08T11:21:43.455Z",
+  "lastUpdated": "2026-09-08T15:25:18.928Z",
   "latestDate": "2026-09-08",
   "lastWideRead": "2026-09-03T08:29:05.416Z",
   "rangeStart": "2025-09-08",
@@ -1268,11 +1268,11 @@
         0.0922
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0914
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0914
       ],
       [
@@ -2192,11 +2192,11 @@
         0.0448
       ],
       [
-        "KRDMD",
+        "KRDMA",
         0.0432
       ],
       [
-        "KRDMA",
+        "KRDMD",
         0.0432
       ],
       [
@@ -2654,11 +2654,11 @@
         0.0012
       ],
       [
-        "MARKA",
+        "USHOL",
         0.0011
       ],
       [
-        "USHOL",
+        "MARKA",
         0.0011
       ],
       [
@@ -3848,97 +3848,97 @@
     "sectors": [
       {
         "id": "textile",
-        "move": 4.76,
+        "move": 6.82,
         "of": 33
       },
       {
         "id": "chemicals",
-        "move": 4.51,
+        "move": 6.54,
         "of": 12
       },
       {
         "id": "autos",
-        "move": 3.78,
+        "move": 6.3,
         "of": 14
       },
       {
+        "id": "telecom",
+        "move": 5.35,
+        "of": 9
+      },
+      {
         "id": "health",
-        "move": 3.42,
+        "move": 5.19,
         "of": 16
       },
       {
         "id": "retail",
-        "move": 2.78,
+        "move": 4.93,
         "of": 28
-      },
-      {
-        "id": "telecom",
-        "move": 2.32,
-        "of": 9
       },
       {
         "id": "banks",
-        "move": 1.44,
+        "move": 4.83,
         "of": 12
       },
       {
-        "id": "defence",
-        "move": 0.25,
-        "of": 5
-      },
-      {
-        "id": "construction",
-        "move": 0.01,
-        "of": 36
-      },
-      {
-        "id": "realEstate",
-        "move": -0.96,
-        "of": 63
-      },
-      {
         "id": "metals",
-        "move": -1.34,
+        "move": 1.76,
         "of": 37
       },
       {
+        "id": "construction",
+        "move": 1.06,
+        "of": 36
+      },
+      {
+        "id": "defence",
+        "move": 0.84,
+        "of": 5
+      },
+      {
         "id": "food",
-        "move": -1.43,
+        "move": 0.09,
         "of": 67
       },
       {
-        "id": "tourism",
-        "move": -1.74,
-        "of": 28
-      },
-      {
-        "id": "energy",
-        "move": -1.98,
-        "of": 43
-      },
-      {
         "id": "finance",
-        "move": -2.55,
+        "move": -0.51,
         "of": 61
       },
       {
+        "id": "realEstate",
+        "move": -0.76,
+        "of": 63
+      },
+      {
+        "id": "energy",
+        "move": -0.92,
+        "of": 43
+      },
+      {
+        "id": "tourism",
+        "move": -1.25,
+        "of": 28
+      },
+      {
         "id": "industrial",
-        "move": -4.45,
+        "move": -3.54,
         "of": 104
       },
       {
         "id": "transport",
-        "move": -5.49,
+        "move": -3.63,
         "of": 13
       },
       {
         "id": "semis",
-        "move": -7.68,
+        "move": -6.22,
         "of": 4
       },
       {
         "id": "tech",
-        "move": -19.91,
+        "move": -19.52,
         "of": 28
       }
     ],
@@ -3946,8 +3946,14 @@
       {
         "c": "KARSN",
         "n": "Karsan Otomotiv Sanayii ve Ticaret A.S.",
-        "move": 44.5,
+        "move": 41.9,
         "th": "industrial"
+      },
+      {
+        "c": "KZGYO",
+        "n": "Kuzugrup Gayrimenkul Yatirim Ortakligi AS",
+        "move": 34.4,
+        "th": "realEstate"
       },
       {
         "c": "MIATK",
@@ -3958,43 +3964,37 @@
       {
         "c": "TEHOL",
         "n": "Tera Yatirim Teknoloji Holding A.S.",
-        "move": 29.5,
-        "th": "realEstate"
-      },
-      {
-        "c": "KZGYO",
-        "n": "Kuzugrup Gayrimenkul Yatirim Ortakligi AS",
-        "move": 28.6,
+        "move": 29.3,
         "th": "realEstate"
       },
       {
         "c": "CITAS",
         "n": "Citlekci Magazacilik Gida AS",
-        "move": 26.2,
+        "move": 27.8,
         "th": "retail",
         "spec": 1
       },
       {
-        "c": "KRPLS",
-        "n": "Koroplast Temizlik Ambalaj Urunleri Sanayi ve dis Ticaret AS",
-        "move": 23.5,
-        "th": "food"
-      },
-      {
-        "c": "MANAS",
-        "n": "Manas Enerji Yonetimi Sanayi ve Ticaret A.S.",
-        "move": 20.3,
-        "th": "industrial",
+        "c": "KARCL",
+        "n": "Kardemir Celik Sanayi AS",
+        "move": 22.7,
+        "th": "metals",
         "spec": 1
       },
       {
-        "c": "SKYMD",
-        "n": "Seker Yatirim Menkul Degerler A.S.",
-        "move": 19.9,
-        "th": "finance"
+        "c": "MARTI",
+        "n": "Marti Otel Isletmeleri A.S.",
+        "move": 22.5,
+        "th": "tourism"
+      },
+      {
+        "c": "BOBET",
+        "n": "Bogazici Beton Sanayi ve Ticaret AS",
+        "move": 20.7,
+        "th": "construction"
       }
     ],
-    "floor": 58525948,
+    "floor": 61157146,
     "of": 309
   },
   "peerGroups": [
@@ -4126,5 +4126,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-08T15:24:35.696Z"
+  "analyticsBuiltAt": "2026-09-08T15:25:32.191Z"
 }
