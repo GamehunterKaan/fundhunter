@@ -1,14 +1,16 @@
 {
-  "lastUpdated": "2026-09-07T16:56:29.982Z",
-  "latestDate": "2026-09-07",
+  "lastUpdated": "2026-09-08T05:22:08.077Z",
+  "latestDate": "2026-09-08",
   "lastWideRead": "2026-09-03T08:29:05.416Z",
-  "rangeStart": "2025-09-07",
+  "rangeStart": "2025-09-08",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2065,
-    "priced": 2065,
-    "lagging": 0,
+    "priced": 1639,
+    "lagging": 426,
+    "implausible": 1,
+    "carried": 466,
     "byKind": {
       "YAT": 2034,
       "BYF": 31
@@ -2190,11 +2192,11 @@
         0.0454
       ],
       [
-        "KRDMB",
+        "KRDMA",
         0.0429
       ],
       [
-        "KRDMA",
+        "KRDMB",
         0.0429
       ],
       [
@@ -3493,15 +3495,15 @@
     "tourism": [
       [
         "DOCO",
-        0.3248
+        0.325
       ],
       [
         "TABGD",
-        0.1564
+        0.1563
       ],
       [
         "GRSEL",
-        0.0761
+        0.076
       ],
       [
         "SSAAT",
@@ -3517,7 +3519,7 @@
       ],
       [
         "GSRAY",
-        0.0345
+        0.0344
       ],
       [
         "AYCES",
@@ -3525,7 +3527,7 @@
       ],
       [
         "ATATR",
-        0.026
+        0.0259
       ],
       [
         "KSTUR",
@@ -3921,7 +3923,7 @@
       },
       {
         "id": "industrial",
-        "move": -7.26,
+        "move": -7.25,
         "of": 104
       },
       {
@@ -4041,55 +4043,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 741,
-      "medianY1": 7.06,
-      "medianVol": 22.86
+      "count": 733,
+      "medianY1": 23.9328,
+      "medianVol": 22.82
     },
     "metals": {
       "count": 55,
-      "medianY1": 40.176050000000004,
-      "medianVol": 25.905
+      "medianY1": 39.51715,
+      "medianVol": 25.955
     },
     "foreign": {
-      "count": 34,
-      "medianY1": 0,
-      "medianVol": 18.485
+      "count": 33,
+      "medianY1": 25.1725,
+      "medianVol": 18.11
     },
     "bonds": {
-      "count": 530,
-      "medianY1": 19.34215,
-      "medianVol": 2.84
+      "count": 531,
+      "medianY1": 22.8407,
+      "medianVol": 2.85
     },
     "cash": {
-      "count": 240,
-      "medianY1": 37.2568,
-      "medianVol": 1.48
+      "count": 239,
+      "medianY1": 44.237,
+      "medianVol": 1.47
     },
     "fundOfFunds": {
-      "count": 152,
-      "medianY1": 0,
-      "medianVol": 7.305
+      "count": 151,
+      "medianY1": 29.0908,
+      "medianVol": 7.86
     },
     "balanced": {
-      "count": 140,
-      "medianY1": 16.6816,
-      "medianVol": 12.575
+      "count": 148,
+      "medianY1": 30.333750000000002,
+      "medianVol": 13.690000000000001
     },
     "conservative": {
-      "count": 173,
-      "medianY1": 22.45,
-      "medianVol": 1.75
+      "count": 175,
+      "medianY1": 36.565799999999996,
+      "medianVol": 1.98
     }
   },
-  "cashReturn": 47.57,
+  "cashReturn": 47.74,
   "cashReturns": {
-    "m1": 3.41,
-    "m3": 10.47,
-    "m6": 21.82,
-    "ytd": 30.53,
-    "y1": 47.57,
-    "y3": 251.47,
-    "y5": 414.7
+    "m1": 3.19,
+    "m3": 10.48,
+    "m6": 21.93,
+    "ytd": 30.69,
+    "y1": 47.74,
+    "y3": 253.99,
+    "y5": 422.61
   },
   "cashBasis": {
     "m1": {
@@ -4126,5 +4128,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-07T16:56:44.544Z"
+  "analyticsBuiltAt": "2026-09-08T05:23:21.848Z"
 }
