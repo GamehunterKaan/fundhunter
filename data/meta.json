@@ -1,18 +1,18 @@
 {
-  "lastUpdated": "2026-09-09T01:09:25.256Z",
-  "latestDate": "2026-09-08",
+  "lastUpdated": "2026-09-09T06:04:46.173Z",
+  "latestDate": "2026-09-09",
   "lastWideRead": "2026-09-03T08:29:05.416Z",
-  "rangeStart": "2025-09-08",
+  "rangeStart": "2025-09-09",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2065,
-    "priced": 1639,
-    "lagging": 426,
-    "implausible": 1,
+    "funds": 2068,
+    "priced": 1908,
+    "lagging": 160,
+    "implausible": 5,
     "carried": 466,
     "byKind": {
-      "YAT": 2034,
+      "YAT": 2037,
       "BYF": 31
     }
   },
@@ -920,6 +920,7 @@
     "ISMEN",
     "ISSEN",
     "ISVEA",
+    "ISX30",
     "ISYAT",
     "IZENR",
     "IZFAS",
@@ -995,7 +996,6 @@
     "MAKTK",
     "MANAS",
     "MARBL",
-    "MARKA",
     "MARMR",
     "MARTI",
     "MASFN",
@@ -1031,6 +1031,7 @@
     "NATEN",
     "NETAS",
     "NETCD",
+    "NETGL",
     "NIBAS",
     "NTGAZ",
     "NTHOL",
@@ -2192,15 +2193,15 @@
         0.0448
       ],
       [
-        "KRDMA",
-        0.0432
-      ],
-      [
         "KRDMD",
         0.0432
       ],
       [
         "KRDMB",
+        0.0432
+      ],
+      [
+        "KRDMA",
         0.0432
       ],
       [
@@ -2319,15 +2320,15 @@
     "industrial": [
       [
         "OZATD",
-        0.2179
+        0.2181
       ],
       [
         "ASTOR",
-        0.1994
+        0.1996
       ],
       [
         "IEYHO",
-        0.0707
+        0.0708
       ],
       [
         "LYDHO",
@@ -2351,11 +2352,11 @@
       ],
       [
         "SARKY",
-        0.016
+        0.0161
       ],
       [
         "TKNKA",
-        0.014
+        0.0141
       ],
       [
         "EGPRO",
@@ -2443,7 +2444,7 @@
       ],
       [
         "BERA",
-        0.0059
+        0.006
       ],
       [
         "INDES",
@@ -2539,7 +2540,7 @@
       ],
       [
         "AZTEK",
-        0.0024
+        0.0025
       ],
       [
         "KONKA",
@@ -2547,7 +2548,7 @@
       ],
       [
         "SANFM",
-        0.0023
+        0.0024
       ],
       [
         "SERNT",
@@ -2655,10 +2656,6 @@
       ],
       [
         "USHOL",
-        0.0011
-      ],
-      [
-        "MARKA",
         0.0011
       ],
       [
@@ -3495,7 +3492,7 @@
     "tourism": [
       [
         "DOCO",
-        0.3209
+        0.3211
       ],
       [
         "TABGD",
@@ -3923,8 +3920,8 @@
       },
       {
         "id": "industrial",
-        "move": -3.54,
-        "of": 104
+        "move": -3.53,
+        "of": 103
       },
       {
         "id": "transport",
@@ -4041,55 +4038,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 733,
-      "medianY1": 23.9328,
-      "medianVol": 22.82
+      "count": 735,
+      "medianY1": 30.135150000000003,
+      "medianVol": 22.825
     },
     "metals": {
       "count": 55,
-      "medianY1": 39.51715,
-      "medianVol": 25.955
+      "medianY1": 37.1446,
+      "medianVol": 25.905
     },
     "foreign": {
-      "count": 33,
-      "medianY1": 25.1725,
-      "medianVol": 18.11
+      "count": 34,
+      "medianY1": 23.6784,
+      "medianVol": 18.5
     },
     "bonds": {
-      "count": 531,
-      "medianY1": 22.8407,
-      "medianVol": 2.85
+      "count": 529,
+      "medianY1": 22.6678,
+      "medianVol": 2.84
     },
     "cash": {
-      "count": 239,
-      "medianY1": 44.237,
+      "count": 241,
+      "medianY1": 44.3914,
       "medianVol": 1.47
     },
     "fundOfFunds": {
-      "count": 151,
-      "medianY1": 29.0908,
-      "medianVol": 7.86
+      "count": 145,
+      "medianY1": 33.441,
+      "medianVol": 8.29
     },
     "balanced": {
       "count": 148,
-      "medianY1": 30.333750000000002,
-      "medianVol": 13.690000000000001
+      "medianY1": 35.6555,
+      "medianVol": 12.309999999999999
     },
     "conservative": {
-      "count": 175,
-      "medianY1": 36.565799999999996,
-      "medianVol": 1.98
+      "count": 181,
+      "medianY1": 41.4291,
+      "medianVol": 2.37
     }
   },
-  "cashReturn": 47.74,
+  "cashReturn": 47.75,
   "cashReturns": {
-    "m1": 3.19,
+    "m1": 3.31,
     "m3": 10.48,
-    "m6": 21.93,
-    "ytd": 30.69,
-    "y1": 47.74,
-    "y3": 253.99,
-    "y5": 422.61
+    "m6": 21.91,
+    "ytd": 30.84,
+    "y1": 47.75,
+    "y3": 253.92,
+    "y5": 424.42
   },
   "cashBasis": {
     "m1": {
@@ -4126,5 +4123,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-09T01:10:37.124Z"
+  "analyticsBuiltAt": "2026-09-09T06:04:59.122Z"
 }
