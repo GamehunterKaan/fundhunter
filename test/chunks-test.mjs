@@ -60,7 +60,9 @@ test('a wide read writes the key the next ordinary run will read', () => {
     prefix: 'info-v2', kinds: ['YAT'], windows: GRID, latest: '20260908', refreshClosed: 0,
   });
 
-  const refreshed = wide.filter((j) => j.refresh);
+  // Closed only: the open window is always refetched and is not what this is
+  // about — see 'the open window is never answered from cache' below.
+  const refreshed = wide.filter((j) => j.refresh && !j.open);
   assert.equal(refreshed.length, 2, 'the newest two CLOSED chunks');
   assert.deepEqual(refreshed.map((j) => j.end), ['20260809', '20260906']);
 
@@ -71,23 +73,42 @@ test('a wide read writes the key the next ordinary run will read', () => {
   }
 });
 
-test('the open chunk is never counted as one of the refreshed closed ones', () => {
+// The regression that made the heal job pointless on the day it shipped.
+//
+// The open chunk's key carries the trading date, which makes it fresh across
+// days and frozen within one: the first run of the morning caches TEFAS
+// mid-publication, and every later run that day reads that snapshot back. On
+// 2026-09-09 the 06:04 run wrote `1908 of 2068 priced` and the 08:05 re-run
+// wrote the identical 1908 while TEFAS had 2,045. A run that exists to find out
+// whether the day has finished must not be answered from before it started.
+test('the open window is never answered from cache', () => {
+  for (const refreshClosed of [0, 3]) {
+    const jobs = planWindows({
+      prefix: 'info-v2', kinds: KINDS, windows: GRID, latest: LATEST, refreshClosed,
+    });
+    for (const job of jobs.filter((j) => j.open)) {
+      assert.equal(job.refresh, true,
+        `an open window must be refetched even with refreshClosed=${refreshClosed}`);
+    }
+  }
+});
+
+test('an ordinary run forces nothing beyond the open window', () => {
+  const jobs = planWindows({ prefix: 'info-v2', kinds: KINDS, windows: GRID, latest: LATEST });
+  assert.equal(jobs.length, 8);
+  // Two of the eight — one open window per kind. The other six are closed and
+  // final, which is what makes a warm run cheap.
+  assert.equal(jobs.filter((j) => j.refresh).length, 2);
+  assert.deepEqual([...new Set(jobs.filter((j) => j.refresh).map((j) => j.end))], ['20261004']);
+  // One request per kind per window, and the two kinds never share a key.
+  assert.equal(new Set(jobs.map((j) => j.key)).size, 8);
+});
+
+test('asking to refresh more closed windows than exist refreshes all of them', () => {
   const jobs = planWindows({
     prefix: 'info-v2', kinds: ['YAT'], windows: GRID, latest: LATEST, refreshClosed: 99,
   });
-  const open = jobs.filter((j) => j.open);
-  assert.equal(open.length, 1);
-  assert.equal(open[0].refresh, false, 'its key already changes daily; forcing it is a wasted request');
-  // Asking for more than exist refreshes all of them rather than none.
-  assert.equal(jobs.filter((j) => j.refresh).length, 3);
-});
-
-test('an ordinary run forces nothing', () => {
-  const jobs = planWindows({ prefix: 'info-v2', kinds: KINDS, windows: GRID, latest: LATEST });
-  assert.equal(jobs.length, 8);
-  assert.equal(jobs.filter((j) => j.refresh).length, 0);
-  // One request per kind per window, and the two kinds never share a key.
-  assert.equal(new Set(jobs.map((j) => j.key)).size, 8);
+  assert.equal(jobs.filter((j) => j.refresh).length, 4, 'three closed plus the open one');
 });
 
 test('the policy does not care which order the caller lists its windows in', () => {

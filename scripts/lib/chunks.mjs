@@ -93,9 +93,20 @@ export function planWindows({ prefix, kinds, windows, latest, refreshClosed = 0 
         start: String(start),
         end: String(end),
         open,
-        // An open window is refetched every day anyway, by virtue of its key.
-        // Only a closed one can be stale in a way that needs forcing.
-        refresh: !open && refreshFrom != null && String(end) >= refreshFrom,
+        // An OPEN window is never served from cache, only written to it.
+        //
+        // Tagging its key with the trading date makes it fresh across days and
+        // does nothing at all within one, which is the half that mattered: the
+        // first run of the morning caches TEFAS mid-publication and every later
+        // run that day reads that snapshot back. On 2026-09-09 the 06:04 run
+        // wrote `1908 of 2068 priced` and the 08:05 re-run wrote the identical
+        // 1908, while TEFAS itself had 2,045 — so the re-run that exists to
+        // finish the day could not see the day had finished.
+        //
+        // That is incident 1 one level down, and it would have made the `heal`
+        // job in prices.yml a loop that retries three times and improves
+        // nothing. The saving it bought was two requests of about eighty.
+        refresh: open || (refreshFrom != null && String(end) >= refreshFrom),
         key: windowKey({ prefix, kind, start, end, latest }),
       });
     }
