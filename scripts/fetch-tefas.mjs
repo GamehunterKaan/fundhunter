@@ -30,7 +30,9 @@ import { planWindows } from './lib/chunks.mjs';
 import { implausibleMoves, massEventReason } from './lib/plausible.mjs';
 import { carryForward, carryReport } from './lib/carry.mjs';
 // Shared with the browser so a "1-year return" means the same thing in both.
-import { returnOver, volatility, maxDrawdown } from '../core.js';
+// LAGGING_SHARE is the one definition of "this day is not finished", read here,
+// by the freshness watchdog and by the stamp on the page.
+import { returnOver, volatility, maxDrawdown, LAGGING_SHARE } from '../core.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -127,6 +129,20 @@ const QUICK = Boolean(args.quick);
 // ---------------------------------------------------------------- helpers
 
 const log = (...m) => console.log(`[${new Date().toISOString().slice(11, 19)}]`, ...m);
+
+/**
+ * Hand a fact back to the workflow that started this, when there is one.
+ *
+ * A no-op outside Actions, so a local run behaves identically and nothing here
+ * needs to know whether it is in CI. Values are single-line by construction, so
+ * the plain `key=value` form is enough and no heredoc delimiter is needed.
+ */
+async function emitGithubOutput(pairs) {
+  const file = process.env.GITHUB_OUTPUT;
+  if (!file) return;
+  const lines = Object.entries(pairs).map(([k, v]) => `${k}=${String(v).replace(/[\r\n]+/g, ' ')}`);
+  await fs.appendFile(file, lines.join('\n') + '\n');
+}
 const pct = (n) => (n == null ? 0 : Math.round(n * 100) / 100);
 
 function tidyName(s) {
@@ -976,6 +992,32 @@ async function main() {
   };
 
   await fs.writeFile(path.join(OUT_DIR, 'meta.json'), JSON.stringify(meta, null, 2));
+
+  // Did this run land inside TEFAS's publication window?
+  //
+  // The data written above is real and honestly labelled either way — the funds
+  // that have not printed carry their own older date, which is incident 9's
+  // grace doing its job. But a chunk of the market sitting at yesterday's figure
+  // is a thing to fix rather than a thing to publish and forget, and the only
+  // fix is to ask again once TEFAS has finished.
+  //
+  // Reported to the workflow rather than acted on here: waiting inside this
+  // process would hold the data lock shut behind it for half an hour. See the
+  // `heal` job in .github/workflows/prices.yml, which owns the retry precisely
+  // so that it does not depend on the freshness watchdog's cron — that fires
+  // every two to five hours against a schedule of every fifteen minutes.
+  const laggingShare = index.length ? meta.counts.lagging / index.length : 0;
+  const partial = laggingShare > LAGGING_SHARE;
+  if (partial) {
+    log(
+      `  WARN caught mid-publication: ${meta.counts.lagging} of ${index.length} funds ` +
+      `(${(laggingShare * 100).toFixed(2)}%) have not printed for ${latestDate} yet`
+    );
+  }
+  await emitGithubOutput({
+    partial: String(partial),
+    lagging: `${meta.counts.lagging} of ${index.length} (${(laggingShare * 100).toFixed(2)}%)`,
+  });
   // One fund per line: still valid JSON, but a daily refresh only rewrites the
   // lines that actually changed, which keeps git deltas small.
   await fs.writeFile(

@@ -16,7 +16,7 @@ import {
   aggregateHoldings, groupHoldings, holdingGroupOf, HOLDING_GROUPS,
   queryMatcher, MATCH,
   squarify,
-  dataFreshness, marketClosureBound, fundLags,
+  dataFreshness, marketClosureBound, fundLags, LAGGING_SHARE,
   HEARTBEAT_HOURS, CLOSURE_MIN_DAYS, CLOSURE_MAX_DAYS,
 } from '../core.js';
 import { parseLiveQuotes, liveClock } from '../live.js';
@@ -1689,11 +1689,24 @@ test('the page and the watchdog share one definition of an incomplete day', () =
 
 test('every string the stamp and the mark can reach exists in both languages', () => {
   const keys = [
-    'dataStampDate', 'dataToday', 'dataYesterday', 'dataAge', 'dataPartial',
+    'dataStampDate', 'dataToday', 'dataYesterday', 'dataAge',
     'dataStale', 'dataUnknown', 'dataNoteCurrent', 'dataNotePartial',
     'dataNoteStale', 'dataNoteSilent', 'dataNoteUnknown', 'fundLate', 'fundLateNote',
   ];
   for (const lang of LANGS) {
     for (const key of keys) assert.ok(STRINGS[lang][key], `${lang} is missing ${key}`);
   }
+});
+
+// The exact numbers from 2026-09-09, pinned because three separate things now
+// branch on this one threshold and they must agree about which days are which:
+// the fetch decides whether to ask the heal job for another round, the watchdog
+// decides between healing and staying quiet, and the page decides whether to
+// say anything in the stamp's tooltip.
+test('a half-published morning and a finished one land on opposite sides', () => {
+  // 06:04Z — the run the watchdog dispatched, straight into TEFAS's window.
+  assert.ok(160 / 2068 > LAGGING_SHARE, 'the fetch must ask to be re-run');
+  // 07:42Z — publication done, and the funds still blank are the ones that
+  // never print. No heal, no tooltip, nothing to say.
+  assert.ok(30 / 2075 < LAGGING_SHARE, 'a finished day must not trigger a retry loop');
 });

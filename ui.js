@@ -1012,7 +1012,19 @@ function dataStamp() {
         notes.push(T('dataNoteSilent', { h: fmtInt(Math.round(v.hoursSinceUpdate), state.lang) }));
       }
     } else if (v.level === 'partial') {
-      age = T('dataPartial');
+      // Deliberately NOT flagged, and the age line stays as it is.
+      //
+      // A half-published day is not a fact about the site, it is a fact about
+      // the handful of funds that have not printed — 160 of 2,068 on the
+      // morning this was changed, so 92% of the page was exactly right while a
+      // red stamp over all of it said otherwise. Those funds each carry their
+      // own mark and their own older date, which is the warning, and it appears
+      // on precisely the rows and pages it is true of.
+      //
+      // The tooltip still says so, because a reader who wonders why some rows
+      // are marked should be able to find out from the thing that stamps the
+      // date. The stamp only goes red for something wrong with the WHOLE page:
+      // nothing moving at all, or not knowing what day it is showing.
       notes.push(T('dataNotePartial', {
         date,
         n: fmtInt(v.lagging, state.lang),
@@ -1027,7 +1039,8 @@ function dataStamp() {
   }
 
   return h('span', {
-    class: `data-stamp${v.level === 'current' ? '' : ' is-flagged'}`,
+    // Only a whole-page problem colours the whole page's stamp.
+    class: `data-stamp${v.level === 'stale' || v.level === 'unknown' ? ' is-flagged' : ''}`,
     title: notes.join(' '),
   },
     h('b', {}, v.level === 'unknown'

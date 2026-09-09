@@ -17,10 +17,18 @@ on:
     # Whichever lands first commits; the other finds nothing new and is gone in
     # about two minutes against a warm cache.
     #
-    # 06:15 and 11:15 UTC ≈ 09:15 and 14:15 Europe/Istanbul. A fund's price for
+    # 06:30 and 11:15 UTC ≈ 09:30 and 14:15 Europe/Istanbul. A fund's price for
     # the day is on TEFAS by mid-morning Istanbul rather than after the close,
     # so both of these ask for a day that already exists.
-    - cron: '15 6 * * 1-6'
+    #
+    # The morning fire moved from 06:15 on 2026-09-09, because publication is
+    # not instant and landing inside it is what incident 10 was. Measured that
+    # morning: 1,908 of 2,068 funds priced at 06:04Z, 2,045 by 07:42Z, and flat
+    # from there. A later start is worth having, but it is not the fix — the
+    # `heal` job below is, because no hour is late enough every day and picking
+    # one would be the same unverified timing assumption that made the
+    # watchdog's grace period a mute button.
+    - cron: '30 6 * * 1-6'
     - cron: '15 11 * * 1-6'
   workflow_dispatch:
     inputs:
@@ -28,22 +36,38 @@ on:
         description: 'Months of history to fetch'
         required: false
         default: '12'
+      heal_attempt:
+        description: 'Self-heal round; set by the heal job, not by hand'
+        required: false
+        default: '0'
 
 permissions:
   contents: write
-
-# One data job at a time across all three workflows. They each run
-# build-analytics and commit the funds.json it writes, so two of them finishing
-# together would be two rewrites of the same lines and a rebase that cannot
-# resolve itself.
-concurrency:
-  group: fundhunter-data
-  cancel-in-progress: false
 
 jobs:
   prices:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+
+    # One data job at a time across all three workflows. They each run
+    # build-analytics and commit the funds.json it writes, so two of them
+    # finishing together would be two rewrites of the same lines and a rebase
+    # that cannot resolve itself.
+    #
+    # Declared on the JOB rather than on the workflow so the `heal` job below
+    # can spend half an hour waiting without holding the queue shut behind it —
+    # concurrency groups are shared across the repo either way, so this still
+    # serialises against holdings.yml and crashes.yml.
+    concurrency:
+      group: fundhunter-data
+      cancel-in-progress: false
+
+    # Whether this run landed inside TEFAS's publication window. Written by
+    # fetch-tefas.mjs from the share of funds that had a row for today but no
+    # price in it yet.
+    outputs:
+      partial: ${{ steps.fetch.outputs.partial }}
+      lagging: ${{ steps.fetch.outputs.lagging }}
 
     steps:
       - uses: actions/checkout@v5
@@ -81,6 +105,7 @@ jobs:
         run: npm test
 
       - name: Fetch TEFAS funds and history
+        id: fetch
         run: node scripts/fetch-tefas.mjs --months=${{ github.event.inputs.months || '12' }}
 
       - name: Fetch benchmarks (BIST, FX, gold, money-market)
@@ -116,3 +141,52 @@ jobs:
       - uses: ./.github/actions/commit-data
         with:
           message: update fund prices and contents
+
+  # Finish the day that this run caught half-published.
+  #
+  # TEFAS stamps a row with the day's date as soon as it starts publishing and
+  # fills the price in afterwards, so a run that lands inside that window writes
+  # a real but incomplete day — honestly labelled since incident 10, and still a
+  # chunk of the market sitting at yesterday's figure. The only fix is to ask
+  # again later.
+  #
+  # Until now "later" meant the freshness watchdog noticing and dispatching a
+  # re-run. That is a cron, and measured over the twelve fires before this was
+  # written it lands every 123 to 290 minutes against a schedule of every 15 —
+  # GitHub drops the rest. On 2026-09-09 the site sat 7.74% unpriced from 06:04Z
+  # with no re-run at all by 07:42Z, which is the whole of the morning a reader
+  # would have been looking at it.
+  #
+  # So the run that caused the problem owns the fix, rather than an external
+  # timer that may not fire. It costs a runner sitting idle, which is free on a
+  # public repo, and it holds no data lock while it waits.
+  heal:
+    needs: prices
+    # `github.event.inputs` is null on a scheduled run, so an absent attempt
+    # reads as zero. Three rounds of thirty minutes covers ninety minutes past
+    # the first run; publication on 2026-09-09 was complete inside a hundred.
+    if: >-
+      needs.prices.outputs.partial == 'true' &&
+      fromJSON(github.event.inputs.heal_attempt || '0') < 3
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      actions: write
+
+    steps:
+      - name: Wait for TEFAS to finish publishing
+        run: |
+          echo "day was incomplete: ${{ needs.prices.outputs.lagging }}"
+          sleep 1800
+
+      - name: Ask again
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # No checkout in this job, so gh has no git remote to infer from.
+          GH_REPO: ${{ github.repository }}
+        run: |
+          next=$(( ${{ fromJSON(github.event.inputs.heal_attempt || '0') }} + 1 ))
+          echo "self-heal round $next of 3"
+          gh workflow run prices.yml \
+            -f heal_attempt="$next" \
+            -f months="${{ github.event.inputs.months || '12' }}"
