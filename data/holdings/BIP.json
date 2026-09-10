@@ -2,15 +2,28 @@
  "code": "BIP",
  "kapCode": null,
  "name": "BIP-İSTANBUL PORTFÖY BİRİNCİ PARA PİYASASI SERBEST (TL) FONU",
- "period": "Temmuz-2026",
- "prevPeriod": "2026-06",
- "publishedAt": "06.08.2026 17:53:28",
- "disclosure": 1644499,
+ "period": "Ağustos-2026",
+ "prevPeriod": "2026-07",
+ "publishedAt": "09.09.2026 17:33:37",
+ "disclosure": 1661118,
  "form": "A",
- "portfolioValue": 1791898533.87,
- "netAssetValue": 1786041369.74,
+ "portfolioValue": 4332195354.87,
+ "netAssetValue": 4330866089.12,
  "warnings": [],
  "holdings": [
+  {
+   "code": "TRT100227T13",
+   "isin": "TRT100227T13",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "BORÇLANMA SENETLERİ",
+   "subgroup": "Devlet Tahvili",
+   "nominal": 5000000,
+   "value": 5078705.45,
+   "weight": 0.12,
+   "prevWeight": null
+  },
   {
    "code": "TRFINFM92615",
    "isin": "TRFINFM92615",
@@ -20,9 +33,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Özel Sektör",
    "nominal": 5000000,
-   "value": 5196566.79,
-   "weight": 0.29,
-   "prevWeight": null
+   "value": 5413497.77,
+   "weight": 0.13,
+   "prevWeight": 0.29
   },
   {
    "code": "TRFMDAZE2617",
@@ -33,9 +46,22 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Bono",
    "nominal": 25000000,
-   "value": 28196322.21,
-   "weight": 1.57,
-   "prevWeight": 0.97
+   "value": 29317445.82,
+   "weight": 0.68,
+   "prevWeight": 1.57
+  },
+  {
+   "code": "TRFBLLYE2618",
+   "isin": "TRFBLLYE2618",
+   "ref": null,
+   "name": "BULLS YATIRIM MENKUL DEĞERLERA.Ş.",
+   "currency": "TL",
+   "group": "BORÇLANMA SENETLERİ",
+   "subgroup": "Bono",
+   "nominal": 140000000,
+   "value": 162296480.26,
+   "weight": 3.75,
+   "prevWeight": null
   },
   {
    "code": "TRFPASHA2613",
@@ -46,9 +72,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Özel Sektör",
    "nominal": 10000000,
-   "value": 8803293.2,
-   "weight": 0.49,
-   "prevWeight": 0.3
+   "value": 9131153.67,
+   "weight": 0.21,
+   "prevWeight": 0.49
   },
   {
    "code": "TRFMARBA2613",
@@ -59,8 +85,21 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Bono",
    "nominal": 35000000,
-   "value": 36097206.29,
-   "weight": 2.01,
+   "value": 37630517.83,
+   "weight": 0.87,
+   "prevWeight": 2.01
+  },
+  {
+   "code": "TRFTVSK12719",
+   "isin": "TRFTVSK12719",
+   "ref": null,
+   "name": "TV8 TV YayıncılıkA.Ş.",
+   "currency": "TL",
+   "group": "BORÇLANMA SENETLERİ",
+   "subgroup": "Bono",
+   "nominal": 50000000,
+   "value": 51988067.09,
+   "weight": 1.2,
    "prevWeight": null
   },
   {
@@ -72,21 +111,21 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Bono",
    "nominal": 10000000,
-   "value": 10120555.42,
-   "weight": 0.57,
-   "prevWeight": 0.39
+   "value": 10554631.86,
+   "weight": 0.24,
+   "prevWeight": 0.57
   },
   {
-   "code": "ASTOR",
-   "isin": "TREASTR00013",
+   "code": "TRFTTRM82714",
+   "isin": "TRFTTRM82714",
    "ref": null,
-   "name": "ASTOR ENERJİA.Ş.",
+   "name": "Tarfin TarımA.Ş.",
    "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 57201452.05,
-   "value": 57201452.05,
-   "weight": 3.19,
+   "group": "BORÇLANMA SENETLERİ",
+   "subgroup": "Bono",
+   "nominal": 5000000,
+   "value": 5199687.37,
+   "weight": 0.12,
    "prevWeight": null
   },
   {
@@ -99,8 +138,8 @@
    "subgroup": null,
    "nominal": 100939726.03,
    "value": 100939726.03,
-   "weight": 5.67,
-   "prevWeight": 45.96
+   "weight": 2.33,
+   "prevWeight": 63.87
   },
   {
    "code": "BTCIM",
@@ -112,8 +151,8 @@
    "subgroup": null,
    "nominal": 100939726.03,
    "value": 100939726.03,
-   "weight": 5.63,
-   "prevWeight": 45.96
+   "weight": 2.33,
+   "prevWeight": 63.87
   },
   {
    "code": "BTCIM",
@@ -125,8 +164,8 @@
    "subgroup": null,
    "nominal": 100939726.03,
    "value": 100939726.03,
-   "weight": 5.63,
-   "prevWeight": 45.96
+   "weight": 2.33,
+   "prevWeight": 63.87
   },
   {
    "code": "BTCIM",
@@ -138,8 +177,8 @@
    "subgroup": null,
    "nominal": 100939726.03,
    "value": 100939726.03,
-   "weight": 5.63,
-   "prevWeight": 45.96
+   "weight": 2.33,
+   "prevWeight": 63.87
   },
   {
    "code": "BTCIM",
@@ -151,8 +190,8 @@
    "subgroup": null,
    "nominal": 100939726.03,
    "value": 100939726.03,
-   "weight": 5.63,
-   "prevWeight": 45.96
+   "weight": 2.33,
+   "prevWeight": 63.87
   },
   {
    "code": "BTCIM",
@@ -164,8 +203,21 @@
    "subgroup": null,
    "nominal": 100939726.03,
    "value": 100939726.03,
-   "weight": 5.63,
-   "prevWeight": 45.96
+   "weight": 2.33,
+   "prevWeight": 63.87
+  },
+  {
+   "code": "BTCIM",
+   "isin": "TRABTCIM91F5",
+   "ref": null,
+   "name": "BATIÇİMBATI ANADOLUÇİMENTOSANAYİİA.Ş.",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 4542287.67,
+   "value": 4542287.67,
+   "weight": 0.1,
+   "prevWeight": 63.87
   },
   {
    "code": "BTCIM",
@@ -177,8 +229,8 @@
    "subgroup": null,
    "nominal": 100939726.03,
    "value": 100939726.03,
-   "weight": 5.63,
-   "prevWeight": 45.96
+   "weight": 2.33,
+   "prevWeight": 63.87
   },
   {
    "code": "BTCIM",
@@ -188,10 +240,10 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 100939726.03,
-   "value": 100939726.03,
-   "weight": 5.63,
-   "prevWeight": 45.96
+   "nominal": 12040438.36,
+   "value": 12040438.36,
+   "weight": 0.28,
+   "prevWeight": 63.87
   },
   {
    "code": "BTCIM",
@@ -201,49 +253,10 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 100939726.03,
-   "value": 100939726.03,
-   "weight": 5.63,
-   "prevWeight": 45.96
-  },
-  {
-   "code": "BTCIM",
-   "isin": "TRABTCIM91F5",
-   "ref": null,
-   "name": "BATIÇİMBATI ANADOLUÇİMENTOSANAYİİA.Ş.",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 100353424.66,
-   "value": 100353424.66,
-   "weight": 5.6,
-   "prevWeight": 45.96
-  },
-  {
-   "code": "BTCIM",
-   "isin": "TRABTCIM91F5",
-   "ref": null,
-   "name": "BATIÇİMBATI ANADOLUÇİMENTOSANAYİİA.Ş.",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 35123698.63,
-   "value": 35123698.63,
-   "weight": 1.96,
-   "prevWeight": 45.96
-  },
-  {
-   "code": "BTCIM",
-   "isin": "TRABTCIM91F5",
-   "ref": null,
-   "name": "BATIÇİMBATI ANADOLUÇİMENTOSANAYİİA.Ş.",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 100353424.66,
-   "value": 100353424.66,
-   "weight": 5.6,
-   "prevWeight": 45.96
+   "nominal": 13846504.11,
+   "value": 13846504.11,
+   "weight": 0.32,
+   "prevWeight": 63.87
   },
   {
    "code": "MGROS",
@@ -253,100 +266,217 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 4515904.11,
-   "value": 4515904.11,
-   "weight": 0.25,
-   "prevWeight": 0.93
+   "nominal": 15050547.95,
+   "value": 15050547.95,
+   "weight": 0.35,
+   "prevWeight": 0.25
   },
   {
-   "code": "SASA",
-   "isin": "TRASASAW91E4",
+   "code": "SAHOL",
+   "isin": "TRASAHOL91Q5",
    "ref": null,
-   "name": "SASA POLYESTER SANAYİA.Ş.",
+   "name": "HACI ÖMER SABANCIHOLDİNGA.Ş.",
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 63222657.53,
-   "value": 63222657.53,
-   "weight": 3.53,
-   "prevWeight": 22.07
+   "nominal": 100336986.3,
+   "value": 100336986.3,
+   "weight": 2.32,
+   "prevWeight": null
   },
   {
-   "code": "SASA",
-   "isin": "TRASASAW91E4",
+   "code": "SAHOL",
+   "isin": "TRASAHOL91Q5",
    "ref": null,
-   "name": "SASA POLYESTER SANAYİA.Ş.",
+   "name": "HACI ÖMER SABANCIHOLDİNGA.Ş.",
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 100353424.66,
-   "value": 100353424.66,
-   "weight": 5.6,
-   "prevWeight": 22.07
-  },
-  {
-   "code": "SASA",
-   "isin": "TRASASAW91E4",
-   "ref": null,
-   "name": "SASA POLYESTER SANAYİA.Ş.",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 100353424.66,
-   "value": 100353424.66,
-   "weight": 5.6,
-   "prevWeight": 22.07
-  },
-  {
-   "code": "SASA",
-   "isin": "TRASASAW91E4",
-   "ref": null,
-   "name": "SASA POLYESTER SANAYİA.Ş.",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 29303200,
-   "value": 29303200,
+   "nominal": 70536901.37,
+   "value": 70536901.37,
    "weight": 1.63,
-   "prevWeight": 22.07
+   "prevWeight": null
   },
   {
-   "code": "SASA",
-   "isin": "TRASASAW91E4",
+   "code": "SAHOL",
+   "isin": "TRASAHOL91Q5",
    "ref": null,
-   "name": "SASA POLYESTER SANAYİA.Ş.",
+   "name": "HACI ÖMER SABANCIHOLDİNGA.Ş.",
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 82289808.22,
-   "value": 82289808.22,
-   "weight": 4.59,
-   "prevWeight": 22.07
+   "nominal": 100336986.3,
+   "value": 100336986.3,
+   "weight": 2.32,
+   "prevWeight": null
   },
   {
-   "code": "TCELL",
-   "isin": "TRATCELL91M1",
+   "code": "SAHOL",
+   "isin": "TRASAHOL91Q5",
    "ref": null,
-   "name": "TURKCELLİLETİŞİMHİZMETLERİ A.Ş.",
+   "name": "HACI ÖMER SABANCIHOLDİNGA.Ş.",
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 20672805.48,
-   "value": 20672805.48,
-   "weight": 1.15,
-   "prevWeight": 3.04
+   "nominal": 100336986.3,
+   "value": 100336986.3,
+   "weight": 2.32,
+   "prevWeight": null
   },
   {
-   "code": "THYAO",
-   "isin": "TRATHYAO91M5",
+   "code": "ULKER",
+   "isin": "TREULKR00015",
    "ref": null,
-   "name": "TURK HAVA YOLLARIA.O.",
+   "name": "ÜLKER BİSKÜVİSANAYİ A.Ş.",
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 15053013.7,
-   "value": 15053013.7,
-   "weight": 0.84,
+   "nominal": 10033698.63,
+   "value": 10033698.63,
+   "weight": 0.23,
+   "prevWeight": null
+  },
+  {
+   "code": "ULKER",
+   "isin": "TREULKR00015",
+   "ref": null,
+   "name": "ÜLKER BİSKÜVİSANAYİ A.Ş.",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 100336986.3,
+   "value": 100336986.3,
+   "weight": 2.32,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT040832T18",
+   "isin": "TRT040832T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 150455301.37,
+   "value": 150455301.37,
+   "weight": 3.47,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT040832T18",
+   "isin": "TRT040832T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 304922744.11,
+   "value": 304922744.11,
+   "weight": 7.04,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT151227T16",
+   "isin": "TRT151227T16",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 1003035.34,
+   "value": 1003035.34,
+   "weight": 0.02,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT210427T18",
+   "isin": "TRT210427T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 500514635.89,
+   "value": 500514635.89,
+   "weight": 11.54,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT210427T18",
+   "isin": "TRT210427T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 323980415.62,
+   "value": 323980415.62,
+   "weight": 7.48,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT210427T18",
+   "isin": "TRT210427T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 251761870.96,
+   "value": 251761870.96,
+   "weight": 5.81,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT210427T18",
+   "isin": "TRT210427T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 150455301.37,
+   "value": 150455301.37,
+   "weight": 3.47,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT210427T18",
+   "isin": "TRT210427T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 350059334.52,
+   "value": 350059334.52,
+   "weight": 8.08,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT210427T18",
+   "isin": "TRT210427T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 107324781.64,
+   "value": 107324781.64,
+   "weight": 2.48,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT210427T18",
+   "isin": "TRT210427T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 296898461.37,
+   "value": 296898461.37,
+   "weight": 6.85,
    "prevWeight": null
   },
   {
@@ -357,10 +487,49 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 8500000,
-   "value": 8525500,
-   "weight": 0.48,
-   "prevWeight": 0.09
+   "nominal": 3000000,
+   "value": 3008630.14,
+   "weight": 0.07,
+   "prevWeight": 0.48
+  },
+  {
+   "code": "ANADOLUBANK A.S.",
+   "isin": null,
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "MEVDUAT",
+   "subgroup": null,
+   "nominal": 60000000,
+   "value": 60803343.42,
+   "weight": 1.4,
+   "prevWeight": null
+  },
+  {
+   "code": "COLENDİ BANK",
+   "isin": null,
+   "ref": null,
+   "name": "KURUM",
+   "currency": "TL",
+   "group": "MEVDUAT",
+   "subgroup": null,
+   "nominal": 100000000,
+   "value": 101400357.27,
+   "weight": 2.34,
+   "prevWeight": null
+  },
+  {
+   "code": "COLENDİ BANK",
+   "isin": null,
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "MEVDUAT",
+   "subgroup": null,
+   "nominal": 40000000,
+   "value": 40473961.32,
+   "weight": 0.93,
+   "prevWeight": null
   },
   {
    "code": "TRDKTSK42722",
@@ -370,10 +539,10 @@
    "currency": "TL",
    "group": "KİRA SERTİFİKALARI",
    "subgroup": "Özel Sektör Kira Sertifikaları",
-   "nominal": 70000000,
-   "value": 77705317.33,
-   "weight": 4.34,
-   "prevWeight": 2.68
+   "nominal": 120000000,
+   "value": 138546587.91,
+   "weight": 3.2,
+   "prevWeight": 4.34
   }
  ]
 }
