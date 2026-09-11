@@ -1,18 +1,18 @@
 {
-  "lastUpdated": "2026-09-10T14:58:25.522Z",
-  "latestDate": "2026-09-10",
+  "lastUpdated": "2026-09-11T06:04:07.949Z",
+  "latestDate": "2026-09-11",
   "lastWideRead": "2026-09-10T11:43:25.622Z",
-  "rangeStart": "2025-09-10",
+  "rangeStart": "2025-09-11",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2068,
-    "priced": 2068,
-    "lagging": 0,
-    "implausible": 4,
+    "funds": 2063,
+    "priced": 1797,
+    "lagging": 266,
+    "implausible": 6,
     "carried": 465,
     "byKind": {
-      "YAT": 2037,
+      "YAT": 2032,
       "BYF": 31
     }
   },
@@ -1563,11 +1563,11 @@
         0.0769
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0695
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0695
       ],
       [
@@ -2187,11 +2187,11 @@
         0.0745
       ],
       [
-        "KRDMB",
+        "KRDMD",
         0.0434
       ],
       [
-        "KRDMD",
+        "KRDMB",
         0.0434
       ],
       [
@@ -3490,11 +3490,11 @@
     "tourism": [
       [
         "DOCO",
-        0.3198
+        0.3197
       ],
       [
         "TABGD",
-        0.1539
+        0.154
       ],
       [
         "GRSEL",
@@ -3843,97 +3843,97 @@
     "sectors": [
       {
         "id": "textile",
-        "move": 9.58,
+        "move": 9.24,
         "of": 33
       },
       {
-        "id": "chemicals",
-        "move": 8.92,
-        "of": 12
-      },
-      {
         "id": "health",
-        "move": 8.42,
+        "move": 8.85,
         "of": 16
       },
       {
+        "id": "chemicals",
+        "move": 8.77,
+        "of": 12
+      },
+      {
         "id": "autos",
-        "move": 7.41,
+        "move": 7.34,
         "of": 14
       },
       {
         "id": "retail",
-        "move": 5.92,
+        "move": 5.87,
         "of": 28
       },
       {
         "id": "telecom",
-        "move": 4.93,
+        "move": 5.19,
         "of": 9
       },
       {
         "id": "defence",
-        "move": 3.86,
+        "move": 3.76,
         "of": 5
       },
       {
         "id": "energy",
-        "move": 3,
+        "move": 3.45,
         "of": 43
       },
       {
         "id": "metals",
-        "move": 2.71,
+        "move": 2.53,
         "of": 37
       },
       {
         "id": "realEstate",
-        "move": 2.38,
+        "move": 2.31,
         "of": 63
       },
       {
         "id": "construction",
-        "move": 1.9,
+        "move": 1.76,
         "of": 36
       },
       {
         "id": "banks",
-        "move": 1.05,
+        "move": 0.86,
         "of": 12
       },
       {
         "id": "food",
-        "move": 0.19,
+        "move": -0.4,
         "of": 67
       },
       {
         "id": "finance",
-        "move": -0.63,
+        "move": -0.83,
         "of": 61
       },
       {
         "id": "tourism",
-        "move": -1.25,
+        "move": -1.37,
         "of": 28
       },
       {
         "id": "industrial",
-        "move": -2.29,
+        "move": -2.65,
         "of": 103
       },
       {
         "id": "transport",
-        "move": -3.27,
+        "move": -3.42,
         "of": 13
       },
       {
         "id": "semis",
-        "move": -8.81,
+        "move": -8.99,
         "of": 4
       },
       {
         "id": "tech",
-        "move": -11.89,
+        "move": -12.08,
         "of": 28
       }
     ],
@@ -3941,7 +3941,7 @@
       {
         "c": "KZGYO",
         "n": "Kuzugrup Gayrimenkul Yatirim Ortakligi AS",
-        "move": 50.9,
+        "move": 46.3,
         "th": "realEstate"
       },
       {
@@ -3951,28 +3951,22 @@
         "th": "industrial"
       },
       {
-        "c": "BVSAN",
-        "n": "BULBULOGLU VINC SANAYI VE TICARET A.S.",
-        "move": 40.7,
-        "th": "industrial"
-      },
-      {
         "c": "KARSN",
         "n": "Karsan Otomotiv Sanayii ve Ticaret A.S.",
-        "move": 39.7,
+        "move": 39.9,
         "th": "industrial"
       },
       {
         "c": "MIATK",
         "n": "MIA Teknoloji AS",
-        "move": 38.2,
+        "move": 38.1,
         "th": "tech"
       },
       {
-        "c": "CITAS",
-        "n": "Citlekci Magazacilik Gida AS",
-        "move": 30.2,
-        "th": "retail"
+        "c": "BVSAN",
+        "n": "BULBULOGLU VINC SANAYI VE TICARET A.S.",
+        "move": 35.5,
+        "th": "industrial"
       },
       {
         "c": "KRPLS",
@@ -3981,13 +3975,19 @@
         "th": "food"
       },
       {
+        "c": "CITAS",
+        "n": "Citlekci Magazacilik Gida AS",
+        "move": 29.2,
+        "th": "retail"
+      },
+      {
         "c": "PETKM",
         "n": "Petkim Petrokimya Holding Anonim Sirketi",
-        "move": 25.7,
+        "move": 25,
         "th": "chemicals"
       }
     ],
-    "floor": 62019499,
+    "floor": 62327072,
     "of": 309
   },
   "peerGroups": [
@@ -4034,55 +4034,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 737,
-      "medianY1": 32.3261,
-      "medianVol": 22.85
+      "count": 734,
+      "medianY1": 30.298000000000002,
+      "medianVol": 22.86
     },
     "metals": {
       "count": 55,
-      "medianY1": 37.1219,
-      "medianVol": 25.89
+      "medianY1": 36.0699,
+      "medianVol": 25.85
     },
     "foreign": {
       "count": 34,
-      "medianY1": 27.3292,
-      "medianVol": 18.5
+      "medianY1": 22.9609,
+      "medianVol": 18.525
     },
     "bonds": {
-      "count": 523,
-      "medianY1": 23.4273,
+      "count": 525,
+      "medianY1": 22.4876,
       "medianVol": 2.84
     },
     "cash": {
-      "count": 246,
-      "medianY1": 45.2547,
+      "count": 244,
+      "medianY1": 44.7646,
       "medianVol": 1.47
     },
     "fundOfFunds": {
-      "count": 146,
-      "medianY1": 35.2649,
-      "medianVol": 7.949999999999999
+      "count": 145,
+      "medianY1": 33.65635,
+      "medianVol": 7.87
     },
     "balanced": {
-      "count": 147,
-      "medianY1": 38.2842,
-      "medianVol": 12.5
+      "count": 146,
+      "medianY1": 34.0159,
+      "medianVol": 12.49
     },
     "conservative": {
       "count": 180,
-      "medianY1": 43.6216,
-      "medianVol": 2.37
+      "medianY1": 40.847,
+      "medianVol": 2.36
     }
   },
-  "cashReturn": 47.75,
+  "cashReturn": 47.73,
   "cashReturns": {
     "m1": 3.3,
     "m3": 10.48,
-    "m6": 21.92,
-    "ytd": 30.98,
-    "y1": 47.75,
-    "y3": 254.98,
-    "y5": 425.97
+    "m6": 21.94,
+    "ytd": 31.13,
+    "y1": 47.73,
+    "y3": 255.34,
+    "y5": 425.8
   },
   "cashBasis": {
     "m1": {
@@ -4119,5 +4119,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-10T14:58:38.779Z"
+  "analyticsBuiltAt": "2026-09-11T06:05:21.527Z"
 }
