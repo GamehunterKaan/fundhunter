@@ -43,7 +43,11 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import { mergeJsonl } from './lib/jsonl.mjs';
+import { mergeJsonl, readJsonl } from './lib/jsonl.mjs';
+import {
+  historyResponseIsCurrent, quoteDateOf, yahooCacheContext, yahooCacheKey,
+} from './lib/stock-dates.mjs';
+import { stockDateSummary } from './lib/stock-freshness.mjs';
 import { THEME_OF_INDUSTRY, THEME_OVERRIDES, POOLED_INDUSTRY } from './lib/taxonomy.mjs';
 import { periodEnds, quarterLabel } from '../analytics.js';
 
@@ -82,12 +86,13 @@ const TIMEOUT_MS = 20_000;
  * Named in full here and mapped to the short keys the browser reads in shape(),
  * so both halves of the contract sit on one screen.
  */
-const COLUMNS = [
+export const COLUMNS = [
   // `logoid` is the slug of the company's mark on TradingView's own asset host,
   // and it rides along in a request that was being made anyway — 629 of the 647
   // listings carry one. fetch-logos.mjs turns it into a file in data/logos.
   'name', 'description', 'logoid', 'type', 'typespecs', 'sector', 'industry', 'currency',
-  'close', 'change', 'volume', 'average_volume_10d_calc', 'relative_volume_10d_calc',
+  'close', 'change', 'last_bar_update_time',
+  'volume', 'average_volume_10d_calc', 'relative_volume_10d_calc',
   'market_cap_basic', 'total_shares_outstanding_fundamental', 'float_shares_percent_current',
   'price_earnings_ttm', 'price_book_fq', 'price_sales_current', 'enterprise_value_ebitda_ttm',
   'earnings_per_share_diluted_ttm', 'earnings_per_share_diluted_yoy_growth_ttm',
@@ -198,7 +203,7 @@ function kindOf(r) {
  * Percentages and ratios keep two decimals, money is whole: a P/E to four places
  * implies a precision quarterly accounts do not have.
  */
-function shape(r) {
+export function shape(r) {
   const theme = r.industry === POOLED_INDUSTRY
     ? null
     : THEME_OVERRIDES[r.name] ?? THEME_OF_INDUSTRY.get(r.industry) ?? null;
@@ -219,6 +224,11 @@ function shape(r) {
     th: theme,
     p: num(r.close, 4),
     ch: num(r.change),
+    // p/ch are TradingView observations, so their date comes from that same
+    // row. It must never borrow the date of Yahoo's separate history feed.
+    qd: quoteDateOf(r.last_bar_update_time),
+    // Filled from the per-share Yahoo series below (or carried from disk).
+    hd: null,
     vol: int(r.volume),
     avgVol: int(r.average_volume_10d_calc),
     relVol: num(r.relative_volume_10d_calc),
@@ -517,7 +527,9 @@ async function pruneFundamentals(live) {
 
 // ---------------------------------------------------------------- the history
 
-const stats = { requests: 0, cacheHits: 0, retries: 0, missing: [], bytes: 0 };
+const stats = {
+  requests: 0, cacheHits: 0, retries: 0, missing: [], failures: [], bytes: 0,
+};
 let lastAt = 0;
 let gate = Promise.resolve();
 
@@ -556,10 +568,12 @@ async function writeCache(key, value) {
  * have — so it is recorded and not retried. Only 429 and 5xx are worth another
  * attempt.
  */
-async function chart(code) {
-  const key = `${code}-${HISTORY_RANGE}-${new Date().toISOString().slice(0, 10)}`;
+async function chart(code, quoteDate) {
+  const now = new Date();
+  const context = yahooCacheContext(now, quoteDate);
+  const key = yahooCacheKey(code, HISTORY_RANGE, now, quoteDate);
   const hit = await readCache(key);
-  if (hit) {
+  if (hit && historyResponseIsCurrent(hit, context)) {
     stats.cacheHits++;
     return hit;
   }
@@ -580,11 +594,15 @@ async function chart(code) {
         lastErr = new Error(`HTTP ${res.status}`);
         continue;
       }
-      if (!res.ok) return null;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       stats.bytes += text.length;
       const rows = parseChart(JSON.parse(text));
-      if (rows) await writeCache(key, rows);
+      // An after-close response without the session TradingView has already
+      // observed is an intermediate Yahoo answer. Use it for what it contains,
+      // but never poison this cache generation with it: the next run must ask
+      // Yahoo again rather than restore the same pre-publication payload.
+      if (historyResponseIsCurrent(rows, context)) await writeCache(key, rows);
       return rows;
     } catch (e) {
       lastErr = e;
@@ -601,7 +619,7 @@ async function chart(code) {
  * exchange was open but the share did not trade come back as nulls, and are
  * dropped rather than carried forward.
  */
-function parseChart(json) {
+export function parseChart(json) {
   const res = json?.chart?.result?.[0];
   if (!res?.timestamp?.length) return null;
   const zone = res.meta?.exchangeTimezoneName ?? 'Europe/Istanbul';
@@ -620,6 +638,13 @@ function parseChart(json) {
     });
   }
   return out.length ? out : null;
+}
+
+/** Carry the true last record from the file when Yahoo has no answer today. */
+async function carryStockHistory(stock) {
+  const history = await readJsonl(path.join(HIST_DIR, `${stock.c}.jsonl`));
+  stock.days = history.size || undefined;
+  stock.hd = [...history.keys()].sort().at(-1) ?? null;
 }
 
 /** Run `worker` over `items` with a fixed number in flight. */
@@ -694,9 +719,9 @@ async function main() {
   }
 
   if (FIGURES_ONLY) {
-    const carried = await carryHistory(stocks);
+    await carryHistory(stocks);
     const pruned = await pruneFundamentals(new Set(stocks.map((s) => s.c)));
-    await finish(stocks, carried, { appended: 0, files: 0, pruned }, t0);
+    await finish(stocks, stockDateSummary(stocks), { appended: 0, files: 0, pruned }, t0);
     return;
   }
 
@@ -704,39 +729,56 @@ async function main() {
   await fs.mkdir(HIST_DIR, { recursive: true });
   let appended = 0;
   let files = 0;
-  const latest = new Map();
 
   await pool(stocks, async (stock) => {
     let bars;
     try {
-      bars = await chart(stock.c);
+      bars = await chart(stock.c, stock.qd);
     } catch (e) {
       stats.missing.push(`${stock.c} (${e.message})`);
+      stats.failures.push(`${stock.c} (${e.message})`);
+      await carryStockHistory(stock);
       return;
     }
     if (!bars) {
       stats.missing.push(stock.c);
+      await carryStockHistory(stock);
       return;
     }
     const window = withinWindow(bars);
     if (!window.length) {
       stats.missing.push(`${stock.c} (no recent trades)`);
+      await carryStockHistory(stock);
       return;
     }
     const file = path.join(HIST_DIR, `${stock.c}.jsonl`);
     // Merged, not overwritten: the fetch window walks forward, and a day Yahoo
     // has stopped returning is still a day that happened.
-    const { added, total } = await mergeJsonl(file, window);
+    const { added, total, latest } = await mergeJsonl(file, window);
     appended += added;
     files++;
-    latest.set(stock.c, window.at(-1).d);
     stock.days = total;
+    stock.hd = latest;
   });
 
   const live = new Set(stocks.map((s) => s.c));
   const pruned = (await prune(live)) + (await pruneFundamentals(live));
-  const latestDate = [...latest.values()].sort().at(-1) ?? null;
-  await finish(stocks, latestDate, { appended, files, pruned }, t0);
+  const dates = stockDateSummary(stocks);
+  await finish(stocks, dates, { appended, files, pruned }, t0);
+
+  // Scanner-wide failures already throw. Per-symbol failures used to be
+  // swallowed, letting the workflow stay green; make them fail after the
+  // diagnostic file has been written. A settled quote/history mismatch does
+  // the same, proving Yahoo published the target session before completion.
+  if (stats.failures.length) {
+    throw new Error(`${stats.failures.length} Yahoo request(s) failed: ${stats.failures.slice(0, 8).join(', ')}`);
+  }
+  if (dates.historyBehindQuote) {
+    throw new Error(
+      `${dates.historyBehindQuote} Yahoo histories have not published their TradingView session: ` +
+      dates.historyBehindQuoteCodes.slice(0, 12).join(', ')
+    );
+  }
 }
 
 /**
@@ -752,9 +794,8 @@ async function carryHistory(stocks) {
   try {
     files = new Set(await fs.readdir(HIST_DIR));
   } catch {
-    return null;
+    return;
   }
-  let latest = null;
   // Counted off the history files themselves rather than copied out of the
   // previous index: `--only` writes a truncated index, and a run that trusted
   // it would quietly report that 644 shares had lost their history.
@@ -766,20 +807,31 @@ async function carryHistory(stocks) {
     stock.days = rows.length;
     try {
       const last = JSON.parse(rows.at(-1)).d;
-      if (last && (latest == null || last > latest)) latest = last;
+      stock.hd = last ?? null;
     } catch {
       // A half-written trailing line is not a reason to lose the day count.
     }
   }
-  return latest;
 }
 
 /** Write the index and say what the run did. */
-async function finish(stocks, latestDate, { appended, files, pruned }, t0) {
+async function finish(stocks, dates, { appended, files, pruned }, t0) {
+  const {
+    quoteMissingCodes: _quoteMissingCodes,
+    historyMissingCodes: _historyMissingCodes,
+    historyBehindQuoteCodes: _historyBehindQuoteCodes,
+    ...dateCoverage
+  } = dates;
   await fs.writeFile(OUT, JSON.stringify({
     builtAt: new Date().toISOString(),
     source: { figures: 'tradingview', history: 'yahoo' },
-    latestDate,
+    latestQuoteDate: dates.latestQuoteDate,
+    latestHistoryDate: dates.latestHistoryDate,
+    // Deprecated compatibility alias for the frontend and old bookmarks. It
+    // has always described Yahoo history, never the TradingView p/ch fields.
+    latestDate: dates.latestHistoryDate,
+    latestDateSource: 'yahoo-history',
+    dateCoverage,
     // Stated in the file rather than left for the reader to assume: the series
     // is a total-return one, and a chart that says "price" without saying so is
     // wrong for every company that has ever paid a dividend.
@@ -791,8 +843,11 @@ async function finish(stocks, latestDate, { appended, files, pruned }, t0) {
   const bytes = (await fs.stat(OUT)).size;
   log(`Wrote data/stocks.json (${(bytes / 1e6).toFixed(2)} MB)` +
     (files ? ` + ${files} history files` : ''));
-  log(`  ${appended} new history records appended, latest close ${latestDate}` +
+  log(`  ${appended} new history records appended, latest close ${dates.latestHistoryDate}` +
     (pruned ? `, ${pruned} delisted files pruned` : ''));
+  log(`  quote session ${dates.latestQuoteDate}; ` +
+    `${dates.historyBehindQuote} histories behind their settled quote, ` +
+    `${dates.quoteDatesMissing} quote dates and ${dates.historyDatesMissing} history dates missing`);
   if (stats.requests || stats.cacheHits) {
     log(`  Yahoo: ${stats.requests} requests, ${stats.cacheHits} cache hits, ` +
       `${stats.retries} retries, ${(stats.bytes / 1e6).toFixed(1)} MB`);
@@ -804,8 +859,10 @@ async function finish(stocks, latestDate, { appended, files, pruned }, t0) {
   log(`Done in ${((Date.now() - t0) / 1000).toFixed(1)}s`);
 }
 
-main().catch((e) => {
-  console.error('\nSTOCK FETCH FAILED:', e.message);
-  console.error(e.stack);
-  process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((e) => {
+    console.error('\nSTOCK FETCH FAILED:', e.message);
+    console.error(e.stack);
+    process.exit(1);
+  });
+}

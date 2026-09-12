@@ -5768,7 +5768,11 @@ function drawShares(fresh = false) {
   if (stamp) {
     stamp.textContent = quotes
       ? T('sharesStamp', { n: Math.round((quotes.delaySeconds ?? 900) / 60) })
-      : T('sharesClose', { date: fmtDate(shares.latestDate, state.lang) });
+      : T('sharesClose', {
+          // latestDate is kept in generated files for older clients, but it is
+          // explicitly a Yahoo-history date; p/ch carry their own qd per row.
+          date: fmtDate(shares.latestHistoryDate ?? shares.latestDate, state.lang),
+        });
   }
 }
 

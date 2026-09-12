@@ -19,7 +19,9 @@ on:
     #
     # 06:30 and 11:15 UTC ≈ 09:30 and 14:15 Europe/Istanbul. A fund's price for
     # the day is on TEFAS by mid-morning Istanbul rather than after the close,
-    # so both of these ask for a day that already exists.
+    # so both of these ask for a day that already exists. 16:30 UTC is 19:30
+    # Istanbul: that third weekday run is deliberately after Borsa Istanbul's
+    # close so Yahoo history can be verified against TradingView's session.
     #
     # The morning fire moved from 06:15 on 2026-09-09, because publication is
     # not instant and landing inside it is what incident 10 was. Measured that
@@ -30,6 +32,7 @@ on:
     # watchdog's grace period a mute button.
     - cron: '30 6 * * 1-6'
     - cron: '15 11 * * 1-6'
+    - cron: '30 16 * * 1-5'
   workflow_dispatch:
     inputs:
       months:
@@ -120,10 +123,11 @@ jobs:
         run: node scripts/fetch-sectors.mjs
 
       # One scanner request for the whole exchange, then one Yahoo request per
-      # share for its history. Everything is cached by date, so a re-run in the
-      # same day is free.
+      # share for its history. The Yahoo cache has separate pre/post-close
+      # generations, and the post-close one is accepted only when it contains
+      # TradingView's actual session date. This step is required: a failed or
+      # incomplete stock refresh must make the prices workflow red.
       - name: Fetch Borsa İstanbul shares and their history
-        continue-on-error: true
         run: node scripts/fetch-stocks.mjs
 
       # After the shares, because it reads the logoid they bring back, and before

@@ -1,23 +1,22 @@
 name: Freshness
 
-# The watchdog. Every hour it asks the live site what date it is showing and
-# TEFAS what date there is, and if those disagree it does something about it.
+# The watchdog. It compares live fund data with TEFAS and every stored stock
+# date with a fresh TradingView session stamp, then acts if either side is stale.
 #
 # It watches the OUTCOME, not the pipeline, and that is the whole point. The
 # data has gone stale four different ways now — a fetch that refused to write
 # over a poisoned cache, a commit that died in a rebase, a service worker
 # answering from yesterday's copy, a scheduled run that simply never fired — and
 # a check per failure mode would have caught the first and missed the other
-# three. From out here they are one symptom: the site is behind TEFAS. So is
-# the fifth one, whatever it turns out to be.
+# three. From out here they are one symptom: the live artifact is behind its
+# source. So is the fifth one, whatever it turns out to be.
 #
 # Two levels, from scripts/lib/freshness.mjs, and no third one that waits:
-#   heal   the site is behind TEFAS. Re-run the prices job, whatever the hour.
+#   heal   a fund or stock source is ahead. Re-run prices, whatever the hour.
 #          Most gaps are a run that did not fire and this ends them.
-#   alert  behind by more than a weekend, or behind with the site not having
-#          moved for hours, or unreadable. Re-running has already been tried and
-#          has not worked, so open an issue, which is the part that reaches a
-#          human.
+#   alert  behind for hours, behind by more than a weekend, or unreadable.
+#          Re-running has already been tried and has not worked, so open an
+#          issue, which is the part that reaches a human.
 #
 # There used to be a "grace" level that forgave a gap before 09:00 UTC. It cost
 # a day: on 2026-09-03 this ran at 04:37, saw the site a day behind, called it
@@ -27,8 +26,8 @@ name: Freshness
 # Every fifteen minutes rather than hourly, because GitHub drops most scheduled
 # fires: an hourly cron here was landing roughly every three to four hours, and
 # the gap between 04:37 and 08:00 on 09-03 is exactly the gap a reader fell into.
-# Four attempts an hour is what it takes to land about one. It is cheap — three
-# HTTP requests and no fetch — and deliberately not tied to the data jobs' own
+# Four attempts an hour is what it takes to land about one. It is cheap — four
+# HTTP requests and no bulk fetch — and deliberately not tied to the data jobs' own
 # schedule, so a run that never fires is exactly the case this still catches.
 
 on:
@@ -62,7 +61,7 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Compare the live site against TEFAS
+      - name: Compare the live site against TEFAS and TradingView
         id: check
         run: node scripts/check-freshness.mjs --github-output
 
@@ -98,7 +97,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          title="Data is stale: the site is behind TEFAS"
+          title="Data is stale: the live site is behind its sources"
           body=$(cat <<EOF
           ${{ steps.check.outputs.reason }}
 
@@ -107,6 +106,12 @@ jobs:
           | site is serving | \`${{ steps.check.outputs.site_date }}\` |
           | TEFAS has | \`${{ steps.check.outputs.tefas_date }}\` |
           | days behind | ${{ steps.check.outputs.behind_days }} |
+          | stocks built | \`${{ steps.check.outputs.stocks_built_at }}\` |
+          | TradingView quote session | \`${{ steps.check.outputs.stock_quote_date }}\` |
+          | latest Yahoo history | \`${{ steps.check.outputs.stock_history_date }}\` |
+          | stale stock quote rows | ${{ steps.check.outputs.stale_stock_quotes }} |
+          | stale stock history rows | ${{ steps.check.outputs.stale_stock_history }} |
+          | missing stock quote/history dates | ${{ steps.check.outputs.missing_stock_quotes }} / ${{ steps.check.outputs.missing_stock_history }} |
           | noticed by | [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
 
           A re-run of \`prices.yml\` has already been attempted. This issue is open
@@ -132,7 +137,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          title="Data is stale: the site is behind TEFAS"
+          title="Data is stale: the live site is behind its sources"
           for n in $(gh issue list --state open --search "$title in:title" --json number --jq '.[].number'); do
             gh issue close "$n" --comment "The site is current again — ${{ steps.check.outputs.reason }}."
             echo "closed #$n"

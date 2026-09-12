@@ -421,6 +421,14 @@ stored — it is exactly `sz / p`.
 funds, same merge-don't-overwrite rule: a day the source stops returning is still
 a day that happened.
 
+The compact rows in `data/stocks.json` date their two feeds independently:
+`qd` is the Europe/Istanbul session date of TradingView's `p`/`ch`, and `hd` is
+the newest Yahoo record in that stock's JSONL history. Top-level
+`latestQuoteDate` and `latestHistoryDate` are descriptive maxima only; freshness
+is checked per row. The old `latestDate` remains as a compatibility alias for
+`latestHistoryDate` (explicitly tagged by `latestDateSource: "yahoo-history"`)
+and must not be used to date a TradingView quote.
+
 ### Benchmarks
 
 Sourced from Yahoo Finance: `XU100.IS`, `XU030.IS`, `USDTRY=X`, `EURTRY=X`,
@@ -1096,6 +1104,11 @@ the same number as the raw one on the last day, and the only one that survives a
 split. `data/stocks.json` carries `priceBasis: "adjusted"` rather than leaving
 the reader to assume. It makes the series a total-return one, which is also what
 the fund NAVs on the other side of the chart are.
+
+Yahoo responses use separate pre-close and post-close cache generations in
+Europe/Istanbul. A post-close response is cached only if it
+contains the session TradingView stamped for that symbol. On weekends and
+exchange holidays that stamp—not the calendar—is the target date.
 
 ### Who owns it
 

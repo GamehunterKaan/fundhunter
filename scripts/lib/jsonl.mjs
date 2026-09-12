@@ -37,7 +37,7 @@ export async function readJsonl(file, key = 'd') {
  * @param {string} file Target .jsonl path
  * @param {Iterable<object>} records Records to merge in
  * @param {string} [key] Identifying field, also the sort key
- * @returns {Promise<{added:number,total:number}>}
+ * @returns {Promise<{added:number,total:number,latest:string|null}>}
  */
 export async function mergeJsonl(file, records, key = 'd') {
   const existing = await readJsonl(file, key);
@@ -50,11 +50,15 @@ export async function mergeJsonl(file, records, key = 'd') {
     existing.set(id, prev ? { ...prev, ...rec } : rec);
   }
 
-  const lines = [...existing.values()]
+  const sorted = [...existing.values()]
     .sort((a, b) => (a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0))
-    .map((r) => JSON.stringify(r));
+  const lines = sorted.map((r) => JSON.stringify(r));
 
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, lines.join('\n') + '\n');
-  return { added: existing.size - before, total: existing.size };
+  return {
+    added: existing.size - before,
+    total: existing.size,
+    latest: sorted.at(-1)?.[key] ?? null,
+  };
 }
