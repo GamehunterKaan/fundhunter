@@ -26,6 +26,21 @@ export const LIVE_REFRESH_MS = 60_000;
 export const LIVE_TIMEOUT_MS = 6_000;
 
 /**
+ * A unique URL for each poll.
+ *
+ * The source serves a changing JSON file with a ten-year `max-age`. The service
+ * worker deliberately leaves cross-origin requests alone, but that header can
+ * still make the browser's own HTTP cache replay an old market quote forever.
+ * A nonce plus `cache: 'no-store'` at the call site makes every poll reach the
+ * source instead of trusting that broken cache contract.
+ */
+export function liveRequestUrl(nonce = Date.now()) {
+  const url = new URL(LIVE_SOURCE.url);
+  url.searchParams.set('_', String(nonce));
+  return url.href;
+}
+
+/**
  * Our benchmark key -> the source's field name.
  *
  * The money-market index is deliberately absent: it is derived from TEFAS fund

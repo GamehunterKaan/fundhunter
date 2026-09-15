@@ -19,7 +19,7 @@ import {
   dataFreshness, marketClosureBound, fundLags, LAGGING_SHARE,
   HEARTBEAT_HOURS, CLOSURE_MIN_DAYS, CLOSURE_MAX_DAYS,
 } from '../core.js';
-import { parseLiveQuotes, liveClock } from '../live.js';
+import { LIVE_SOURCE, liveRequestUrl, parseLiveQuotes, liveClock } from '../live.js';
 import {
   GROUPS, ASSETS, ASSET_CODES, KINDS,
   THEME_INDUSTRIES, THEME_OF_INDUSTRY, THEME_OVERRIDES,
@@ -655,6 +655,10 @@ test('an empty code list means nothing selected, not no restriction', () => {
 });
 
 // ---------------------------------------------------------------- live quotes
+
+test('live quote polls bypass the source\'s broken long-lived HTTP cache', () => {
+  assert.equal(liveRequestUrl(1723912500000), `${LIVE_SOURCE.url}?_=1723912500000`);
+});
 
 test('parseLiveQuotes maps the feed onto our benchmark keys', () => {
   const out = parseLiveQuotes({

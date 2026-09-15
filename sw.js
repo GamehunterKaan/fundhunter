@@ -36,7 +36,7 @@
 
 // Bump to retire every previous cache. There is no build step and no hashed
 // filenames, so this constant is the only thing that can force one.
-const VERSION = 'fh-v1';
+const VERSION = 'fh-v2';
 
 /** Paths whose freshness is the point, and the one subtree inside them that is not. */
 const DATA = /\/data\//;

@@ -103,7 +103,7 @@ test('activating retires every previous version and keeps this one', async () =>
   const sw = boot();
   await sw.lifecycle('activate');
   assert.ok(sw.deleted.includes('fh-old'));
-  assert.ok(!sw.deleted.includes('fh-v1'));
+  assert.ok(!sw.deleted.includes('fh-v2'));
 });
 
 test('a market feed is never intercepted', () => {

@@ -30,7 +30,10 @@ import {
   consistency, sinceVisit, newSince, VISIT_MIN_DAYS,
   correlationMatrix, CORRELATION_HIGH,
 } from './analytics.js';
-import { LIVE_SOURCE, LIVE_REFRESH_MS, LIVE_TIMEOUT_MS, parseLiveQuotes, liveClock } from './live.js';
+import {
+  LIVE_SOURCE, LIVE_REFRESH_MS, LIVE_TIMEOUT_MS,
+  liveRequestUrl, parseLiveQuotes, liveClock,
+} from './live.js';
 import {
   QUOTE_SOURCE, QUOTE_REFRESH_MS, QUOTE_TIMEOUT_MS, MIN_COVERAGE,
   MARKETS, scanRequest, parseQuotes, quoteFor, estimateMove, sessionOpen, foreignTickers,
@@ -792,7 +795,10 @@ const TAPE_DAYS = 30;
 
 async function loadLive() {
   try {
-    const r = await fetch(LIVE_SOURCE.url, { signal: AbortSignal.timeout(LIVE_TIMEOUT_MS) });
+    const r = await fetch(liveRequestUrl(), {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(LIVE_TIMEOUT_MS),
+    });
     if (!r.ok) return null;
     return parseLiveQuotes(await r.json());
   } catch {
