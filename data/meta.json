@@ -1,19 +1,19 @@
 {
-  "lastUpdated": "2026-09-15T01:42:14.706Z",
-  "latestDate": "2026-09-14",
+  "lastUpdated": "2026-09-15T06:50:46.394Z",
+  "latestDate": "2026-09-15",
   "lastWideRead": "2026-09-10T11:43:25.622Z",
-  "rangeStart": "2025-09-14",
+  "rangeStart": "2025-09-15",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2066,
-    "priced": 2065,
-    "lagging": 1,
-    "implausible": 5,
+    "funds": 2068,
+    "priced": 2027,
+    "lagging": 41,
+    "implausible": 1,
     "carried": 465,
     "byKind": {
       "YAT": 2033,
-      "BYF": 33
+      "BYF": 35
     }
   },
   "kinds": [
@@ -1268,11 +1268,11 @@
         0.0941
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.094
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.094
       ],
       [
@@ -1564,11 +1564,11 @@
         0.0745
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0648
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0648
       ],
       [
@@ -2192,15 +2192,15 @@
         0.0417
       ],
       [
-        "KRDMB",
-        0.0413
-      ],
-      [
         "KRDMD",
         0.0413
       ],
       [
         "KRDMA",
+        0.0413
+      ],
+      [
+        "KRDMB",
         0.0413
       ],
       [
@@ -3491,15 +3491,15 @@
     "tourism": [
       [
         "DOCO",
-        0.3132
+        0.3125
       ],
       [
         "TABGD",
-        0.154
+        0.1542
       ],
       [
         "GRSEL",
-        0.0764
+        0.0765
       ],
       [
         "SSAAT",
@@ -3507,7 +3507,7 @@
       ],
       [
         "NTHOL",
-        0.0511
+        0.0512
       ],
       [
         "FENER",
@@ -3547,7 +3547,7 @@
       ],
       [
         "KERVN",
-        0.0144
+        0.0145
       ],
       [
         "KUVVA",
@@ -3909,7 +3909,7 @@
       },
       {
         "id": "tourism",
-        "move": -1.71,
+        "move": -1.7,
         "of": 28
       },
       {
@@ -3934,7 +3934,7 @@
       },
       {
         "id": "tech",
-        "move": -11.57,
+        "move": -11.34,
         "of": 28
       }
     ],
@@ -3988,7 +3988,7 @@
         "th": "autos"
       }
     ],
-    "floor": 57694099,
+    "floor": 58889200,
     "of": 309
   },
   "peerGroups": [
@@ -4035,55 +4035,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 736,
-      "medianY1": 34.4732,
-      "medianVol": 22.87
+      "count": 740,
+      "medianY1": 32.588,
+      "medianVol": 22.92
     },
     "metals": {
-      "count": 55,
-      "medianY1": 34.72355,
-      "medianVol": 25.88
+      "count": 56,
+      "medianY1": 33.8057,
+      "medianVol": 25.835
     },
     "foreign": {
       "count": 34,
-      "medianY1": 42.3982,
-      "medianVol": 17.645
+      "medianY1": 35.0724,
+      "medianVol": 17.68
     },
     "bonds": {
-      "count": 528,
-      "medianY1": 23.08125,
+      "count": 530,
+      "medianY1": 23.011,
       "medianVol": 2.85
     },
     "cash": {
-      "count": 252,
-      "medianY1": 45.2102,
-      "medianVol": 1.48
+      "count": 247,
+      "medianY1": 45.2652,
+      "medianVol": 1.47
     },
     "fundOfFunds": {
-      "count": 140,
-      "medianY1": 37.1154,
-      "medianVol": 8.52
+      "count": 141,
+      "medianY1": 35.2121,
+      "medianVol": 8.55
     },
     "balanced": {
-      "count": 142,
-      "medianY1": 38.6298,
-      "medianVol": 12.305
+      "count": 138,
+      "medianY1": 36.51,
+      "medianVol": 12.46
     },
     "conservative": {
-      "count": 179,
-      "medianY1": 44.33115,
-      "medianVol": 2.36
+      "count": 182,
+      "medianY1": 44.2671,
+      "medianVol": 1.96
     }
   },
-  "cashReturn": 47.54,
+  "cashReturn": 47.7,
   "cashReturns": {
-    "m1": 3.39,
-    "m3": 10.44,
-    "m6": 22.01,
-    "ytd": 31.53,
-    "y1": 47.54,
-    "y3": 255.5,
-    "y5": 427.03
+    "m1": 3.17,
+    "m3": 10.42,
+    "m6": 22.02,
+    "ytd": 31.68,
+    "y1": 47.7,
+    "y3": 255.57,
+    "y5": 427.33
   },
   "cashBasis": {
     "m1": {
@@ -4120,5 +4120,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-15T01:42:28.132Z"
+  "analyticsBuiltAt": "2026-09-15T06:51:01.338Z"
 }
