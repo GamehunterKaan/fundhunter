@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-15T11:59:29.125Z",
+  "lastUpdated": "2026-09-15T15:33:37.622Z",
   "latestDate": "2026-09-15",
   "lastWideRead": "2026-09-10T11:43:25.622Z",
   "rangeStart": "2025-09-15",
@@ -7,9 +7,9 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2068,
-    "priced": 2065,
-    "lagging": 3,
-    "implausible": 3,
+    "priced": 2066,
+    "lagging": 2,
+    "implausible": 4,
     "carried": 465,
     "byKind": {
       "YAT": 2033,
@@ -1264,11 +1264,11 @@
         0.0957
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0951
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0951
       ],
       [
@@ -2192,11 +2192,11 @@
         0.0413
       ],
       [
-        "KRDMB",
+        "KRDMD",
         0.0413
       ],
       [
-        "KRDMD",
+        "KRDMB",
         0.0413
       ],
       [
@@ -3843,98 +3843,98 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "telecom",
-        "move": 3.73,
-        "of": 9
-      },
-      {
         "id": "finance",
-        "move": 2.28,
+        "move": 3.21,
         "of": 61
       },
       {
+        "id": "telecom",
+        "move": 2.26,
+        "of": 9
+      },
+      {
         "id": "metals",
-        "move": 2.23,
+        "move": 2.19,
         "of": 37
       },
       {
-        "id": "textile",
-        "move": 1.6,
-        "of": 33
-      },
-      {
-        "id": "realEstate",
-        "move": 1.15,
-        "of": 63
-      },
-      {
         "id": "energy",
-        "move": 1.03,
+        "move": 1.78,
         "of": 43
       },
       {
+        "id": "realEstate",
+        "move": 0.15,
+        "of": 63
+      },
+      {
         "id": "retail",
-        "move": 0.62,
+        "move": -0.41,
         "of": 28
       },
       {
         "id": "autos",
-        "move": 0.49,
+        "move": -0.69,
         "of": 14
       },
       {
+        "id": "textile",
+        "move": -1.85,
+        "of": 33
+      },
+      {
         "id": "industrial",
-        "move": -0.86,
+        "move": -1.97,
         "of": 103
       },
       {
         "id": "tourism",
-        "move": -0.96,
+        "move": -2.37,
         "of": 28
       },
       {
         "id": "banks",
-        "move": -1.45,
+        "move": -2.64,
         "of": 12
       },
       {
         "id": "food",
-        "move": -2.68,
+        "move": -2.95,
         "of": 67
       },
       {
-        "id": "chemicals",
-        "move": -2.7,
-        "of": 12
-      },
-      {
         "id": "defence",
-        "move": -3.6,
+        "move": -3.82,
         "of": 5
       },
       {
+        "id": "chemicals",
+        "move": -4.18,
+        "of": 12
+      },
+      {
         "id": "construction",
-        "move": -3.61,
+        "move": -4.79,
         "of": 36
       },
       {
         "id": "transport",
-        "move": -5.18,
+        "move": -7.15,
         "of": 13
       },
       {
         "id": "health",
-        "move": -9.35,
+        "move": -10.28,
         "of": 16
       },
       {
         "id": "semis",
-        "move": -10.3,
+        "move": -11.38,
         "of": 4
       },
       {
         "id": "tech",
-        "move": -12.74,
+        "move": -13.21,
         "of": 28
       }
     ],
@@ -3958,38 +3958,40 @@
         "th": "tourism"
       },
       {
-        "c": "EGEEN",
-        "n": "Ege Endustri ve Ticaret A.S.",
-        "move": 31.6,
-        "th": "autos"
-      },
-      {
         "c": "KARCL",
         "n": "Kardemir Celik Sanayi AS",
-        "move": 31,
+        "move": 39.4,
         "th": "metals",
         "spec": 1
       },
       {
         "c": "CEOEM",
         "n": "CEO Event Medya AS",
-        "move": 27.8,
+        "move": 31.4,
         "th": "tourism"
       },
       {
-        "c": "ISVEA",
-        "n": "Isvea Seramik ve Banyo Urunleri Sanayi A.S.",
-        "move": 20.7,
-        "th": "retail"
+        "c": "PATEK",
+        "n": "Pasifik Teknoloji AS",
+        "move": 29.2,
+        "th": "tech"
       },
       {
-        "c": "KRGYO",
-        "n": "Korfez Gayrimenkul Yatirim Ortakligi AS",
-        "move": 20.7,
-        "th": "realEstate"
+        "c": "BIGEN",
+        "n": "Birlesim Grup Enerji Yatirimlari AS",
+        "move": 27.8,
+        "th": "energy",
+        "spec": 1
+      },
+      {
+        "c": "TRHOL",
+        "n": "Tera Financial Investments Holding A.S.",
+        "move": 24.3,
+        "th": "finance",
+        "spec": 1
       }
     ],
-    "floor": 53819471,
+    "floor": 55790377,
     "of": 310
   },
   "peerGroups": [
@@ -4121,5 +4123,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-15T15:19:57.120Z"
+  "analyticsBuiltAt": "2026-09-15T15:34:49.360Z"
 }
