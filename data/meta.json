@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-09-15T19:46:27.908Z",
-  "latestDate": "2026-09-15",
+  "lastUpdated": "2026-09-16T06:07:03.988Z",
+  "latestDate": "2026-09-16",
   "lastWideRead": "2026-09-10T11:43:25.622Z",
-  "rangeStart": "2025-09-15",
+  "rangeStart": "2025-09-16",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2068,
-    "priced": 2066,
-    "lagging": 2,
-    "implausible": 4,
+    "priced": 1915,
+    "lagging": 153,
+    "implausible": 8,
     "carried": 465,
     "byKind": {
       "YAT": 2033,
@@ -918,6 +918,7 @@
     "ISGSY",
     "ISGYO",
     "ISKPL",
+    "ISMDL",
     "ISMEN",
     "ISSEN",
     "ISVEA",
@@ -1264,11 +1265,11 @@
         0.0957
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0951
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0951
       ],
       [
@@ -1564,11 +1565,11 @@
         0.0751
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0644
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0644
       ],
       [
@@ -3519,7 +3520,7 @@
       ],
       [
         "BJKAS",
-        0.03
+        0.0301
       ],
       [
         "ATATR",
@@ -3844,7 +3845,7 @@
     "sectors": [
       {
         "id": "finance",
-        "move": 3.21,
+        "move": 3.28,
         "of": 61
       },
       {
@@ -3863,6 +3864,11 @@
         "of": 43
       },
       {
+        "id": "textile",
+        "move": 1.57,
+        "of": 33
+      },
+      {
         "id": "realEstate",
         "move": 0.15,
         "of": 63
@@ -3876,11 +3882,6 @@
         "id": "autos",
         "move": -0.69,
         "of": 14
-      },
-      {
-        "id": "textile",
-        "move": -1.85,
-        "of": 33
       },
       {
         "id": "industrial",
@@ -3991,7 +3992,7 @@
         "spec": 1
       }
     ],
-    "floor": 55790377,
+    "floor": 55918500,
     "of": 310
   },
   "peerGroups": [
@@ -4038,55 +4039,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 739,
-      "medianY1": 32.5205,
-      "medianVol": 22.89
+      "count": 733,
+      "medianY1": 23.82775,
+      "medianVol": 22.52
     },
     "metals": {
       "count": 56,
-      "medianY1": 33.8057,
-      "medianVol": 25.835
+      "medianY1": 32.6251,
+      "medianVol": 25.845
     },
     "foreign": {
       "count": 34,
-      "medianY1": 35.0724,
-      "medianVol": 17.7
+      "medianY1": 27.2831,
+      "medianVol": 17.68
     },
     "bonds": {
-      "count": 529,
-      "medianY1": 23.0173,
+      "count": 526,
+      "medianY1": 22.1037,
       "medianVol": 2.85
     },
     "cash": {
-      "count": 247,
-      "medianY1": 45.3433,
+      "count": 250,
+      "medianY1": 45.2515,
       "medianVol": 1.47
     },
     "fundOfFunds": {
       "count": 142,
-      "medianY1": 35.1708,
-      "medianVol": 8.76
+      "medianY1": 30.53,
+      "medianVol": 8.555
     },
     "balanced": {
-      "count": 140,
-      "medianY1": 36.4683,
-      "medianVol": 12.46
+      "count": 141,
+      "medianY1": 32.784800000000004,
+      "medianVol": 12.82
     },
     "conservative": {
-      "count": 181,
-      "medianY1": 43.93025,
-      "medianVol": 2.05
+      "count": 186,
+      "medianY1": 42.9861,
+      "medianVol": 2.0149999999999997
     }
   },
-  "cashReturn": 47.7,
+  "cashReturn": 47.66,
   "cashReturns": {
-    "m1": 3.17,
-    "m3": 10.42,
-    "m6": 22.02,
-    "ytd": 31.68,
-    "y1": 47.7,
-    "y3": 255.57,
-    "y5": 427.33
+    "m1": 3.26,
+    "m3": 10.4,
+    "m6": 22,
+    "ytd": 31.8,
+    "y1": 47.66,
+    "y3": 254.96,
+    "y5": 427.58
   },
   "cashBasis": {
     "m1": {
@@ -4123,5 +4124,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-15T19:46:40.466Z"
+  "analyticsBuiltAt": "2026-09-16T06:07:16.178Z"
 }
