@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-09-17T19:48:17.940Z",
-  "latestDate": "2026-09-17",
+  "lastUpdated": "2026-09-18T05:04:42.308Z",
+  "latestDate": "2026-09-18",
   "lastWideRead": "2026-09-17T12:00:53.927Z",
-  "rangeStart": "2025-09-17",
+  "rangeStart": "2025-09-18",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2069,
-    "priced": 2061,
-    "lagging": 8,
-    "implausible": 10,
+    "priced": 1272,
+    "lagging": 797,
+    "implausible": 5,
     "carried": 466,
     "byKind": {
       "YAT": 2034,
@@ -1271,11 +1271,11 @@
         0.0937
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0932
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0932
       ],
       [
@@ -1567,11 +1567,11 @@
         0.0786
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0616
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0616
       ],
       [
@@ -2195,15 +2195,15 @@
         0.0412
       ],
       [
-        "KRDMD",
-        0.04
-      ],
-      [
         "KRDMA",
         0.04
       ],
       [
         "KRDMB",
+        0.04
+      ],
+      [
+        "KRDMD",
         0.04
       ],
       [
@@ -3494,15 +3494,15 @@
     "tourism": [
       [
         "DOCO",
-        0.3207
+        0.3214
       ],
       [
         "TABGD",
-        0.1591
+        0.159
       ],
       [
         "GRSEL",
-        0.0778
+        0.0777
       ],
       [
         "SSAAT",
@@ -3514,11 +3514,11 @@
       ],
       [
         "FENER",
-        0.0433
+        0.0432
       ],
       [
         "GSRAY",
-        0.0352
+        0.0351
       ],
       [
         "AYCES",
@@ -3526,7 +3526,7 @@
       ],
       [
         "BJKAS",
-        0.0277
+        0.0276
       ],
       [
         "KSTUR",
@@ -3538,7 +3538,7 @@
       ],
       [
         "MAALT",
-        0.0223
+        0.0222
       ],
       [
         "TSPOR",
@@ -3546,7 +3546,7 @@
       ],
       [
         "BLUME",
-        0.0168
+        0.0167
       ],
       [
         "KUVVA",
@@ -4041,54 +4041,54 @@
   "peerStats": {
     "equity": {
       "count": 729,
-      "medianY1": 5.4932,
-      "medianVol": 23.28
+      "medianY1": 3.6168,
+      "medianVol": 23.46
     },
     "metals": {
       "count": 55,
-      "medianY1": 31.07365,
+      "medianY1": 31.1515,
       "medianVol": 25.89
     },
     "foreign": {
-      "count": 33,
+      "count": 34,
       "medianY1": 0,
-      "medianVol": 18.38
+      "medianVol": 18.634999999999998
     },
     "bonds": {
-      "count": 526,
-      "medianY1": 18.4082,
-      "medianVol": 2.825
+      "count": 534,
+      "medianY1": 18.08545,
+      "medianVol": 2.81
     },
     "cash": {
-      "count": 251,
-      "medianY1": 37.1669,
-      "medianVol": 1.48
+      "count": 244,
+      "medianY1": 31.28,
+      "medianVol": 1.47
     },
     "fundOfFunds": {
-      "count": 138,
-      "medianY1": 0,
+      "count": 139,
+      "medianY1": 15.053049999999999,
       "medianVol": 8.18
     },
     "balanced": {
-      "count": 147,
-      "medianY1": 8.25,
-      "medianVol": 13.79
+      "count": 144,
+      "medianY1": 0,
+      "medianVol": 13.725
     },
     "conservative": {
       "count": 190,
-      "medianY1": 27.8915,
-      "medianVol": 2.11
+      "medianY1": 22.2011,
+      "medianVol": 2.17
     }
   },
-  "cashReturn": 47.57,
+  "cashReturn": 47.54,
   "cashReturns": {
-    "m1": 3.21,
-    "m3": 10.35,
-    "m6": 21.87,
-    "ytd": 31.88,
-    "y1": 47.57,
-    "y3": 252.54,
-    "y5": 417.15
+    "m1": 3.19,
+    "m3": 10.34,
+    "m6": 21.97,
+    "ytd": 31.99,
+    "y1": 47.54,
+    "y3": 252.85,
+    "y5": 417.58
   },
   "cashBasis": {
     "m1": {
@@ -4125,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-17T19:48:32.184Z"
+  "analyticsBuiltAt": "2026-09-18T05:04:54.676Z"
 }
