@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-18T14:58:13.839Z",
+  "lastUpdated": "2026-09-18T17:29:22.229Z",
   "latestDate": "2026-09-18",
   "lastWideRead": "2026-09-17T12:00:53.927Z",
   "rangeStart": "2025-09-18",
@@ -1265,11 +1265,11 @@
         0.0972
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0948
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0948
       ],
       [
@@ -1565,11 +1565,11 @@
         0.072
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0656
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0656
       ],
       [
@@ -2193,15 +2193,15 @@
         0.042
       ],
       [
+        "KRDMA",
+        0.0418
+      ],
+      [
         "KRDMB",
         0.0418
       ],
       [
         "KRDMD",
-        0.0418
-      ],
-      [
-        "KRDMA",
         0.0418
       ],
       [
@@ -3844,154 +3844,154 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "telecom",
-        "move": -4.94,
-        "of": 9
-      },
-      {
         "id": "banks",
-        "move": -5.35,
+        "move": -5.08,
         "of": 12
       },
       {
+        "id": "telecom",
+        "move": -5.19,
+        "of": 9
+      },
+      {
         "id": "energy",
-        "move": -5.73,
+        "move": -5.94,
         "of": 43
       },
       {
-        "id": "autos",
-        "move": -5.93,
-        "of": 14
-      },
-      {
         "id": "retail",
-        "move": -6.01,
+        "move": -6,
         "of": 28
       },
       {
+        "id": "autos",
+        "move": -6.05,
+        "of": 14
+      },
+      {
         "id": "transport",
-        "move": -6.56,
+        "move": -6.23,
         "of": 13
       },
       {
         "id": "defence",
-        "move": -6.74,
+        "move": -6.65,
         "of": 5
       },
       {
         "id": "metals",
-        "move": -8.33,
+        "move": -8.27,
         "of": 37
       },
       {
         "id": "tourism",
-        "move": -9.12,
+        "move": -8.97,
         "of": 28
       },
       {
         "id": "construction",
-        "move": -9.38,
+        "move": -9.19,
         "of": 36
       },
       {
         "id": "food",
-        "move": -9.89,
+        "move": -10.08,
         "of": 67
       },
       {
         "id": "realEstate",
-        "move": -10.11,
+        "move": -10.17,
         "of": 63
       },
       {
         "id": "textile",
-        "move": -12.42,
+        "move": -11.77,
         "of": 33
       },
       {
         "id": "chemicals",
-        "move": -14.21,
+        "move": -14.12,
         "of": 12
       },
       {
         "id": "finance",
-        "move": -16.05,
+        "move": -15.92,
         "of": 61
       },
       {
         "id": "industrial",
-        "move": -18.06,
+        "move": -17.99,
         "of": 103
       },
       {
         "id": "semis",
-        "move": -24.77,
+        "move": -24.64,
         "of": 4
       },
       {
         "id": "tech",
-        "move": -25.06,
+        "move": -24.94,
         "of": 28
       },
       {
         "id": "health",
-        "move": -25.96,
+        "move": -26.14,
         "of": 16
       }
     ],
     "shares": [
       {
-        "c": "CEOEM",
-        "n": "CEO Event Medya AS",
-        "move": 17.2,
-        "th": "tourism"
-      },
-      {
         "c": "TKFEN",
         "n": "Tekfen Holding Anonim Sirketi",
-        "move": 15.3,
+        "move": 15.7,
         "th": "construction",
         "spec": 1
       },
       {
+        "c": "CEOEM",
+        "n": "CEO Event Medya AS",
+        "move": 14.9,
+        "th": "tourism"
+      },
+      {
         "c": "ENERY",
         "n": "Enerya Enerji A.S.",
-        "move": 12.4,
+        "move": 11.6,
         "th": "energy"
       },
       {
         "c": "BAHKM",
         "n": "Bahadir Kimya Sanayi Ve Ticaret Anonim Sirketi",
-        "move": 7.4,
+        "move": 7.7,
         "th": "industrial",
         "spec": 1
       },
       {
-        "c": "HRKET",
-        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 7,
-        "th": "transport"
-      },
-      {
-        "c": "RYGYO",
-        "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 5.4,
-        "th": "realEstate"
+        "c": "BMSTL",
+        "n": "BMS Birlesik Metal Sanayi ve Ticaret AS Class B",
+        "move": 7.3,
+        "th": "metals"
       },
       {
         "c": "KGYO",
         "n": "KORAY GAYRIMENKUL YATIRIM ORTAKLIGI A.S. Class B",
-        "move": 4.6,
+        "move": 7.1,
         "th": "realEstate"
+      },
+      {
+        "c": "HRKET",
+        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
+        "move": 6.6,
+        "th": "transport"
       },
       {
         "c": "AHGAZ",
         "n": "Ahlatci Dogal Gaz Dagitim Enerji ve Yatirim AS",
-        "move": 4.5,
+        "move": 6.3,
         "th": "energy"
       }
     ],
-    "floor": 51745278,
+    "floor": 52494841,
     "of": 310
   },
   "peerGroups": [
@@ -4123,5 +4123,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-18T14:58:28.354Z"
+  "analyticsBuiltAt": "2026-09-18T17:30:36.192Z"
 }
