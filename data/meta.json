@@ -1,18 +1,18 @@
 {
-  "lastUpdated": "2026-09-21T13:09:56.260Z",
+  "lastUpdated": "2026-09-21T17:00:57.154Z",
   "latestDate": "2026-09-21",
   "lastWideRead": "2026-09-17T12:00:53.927Z",
   "rangeStart": "2025-09-21",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2069,
-    "priced": 2060,
+    "funds": 2068,
+    "priced": 2059,
     "lagging": 9,
     "implausible": 5,
     "carried": 467,
     "byKind": {
-      "YAT": 2034,
+      "YAT": 2033,
       "BYF": 35
     }
   },
@@ -474,7 +474,6 @@
     "TEB PORTFÖY",
     "TERA PORTFÖY",
     "TRIVE PORTFÖY",
-    "TUNA PORTFÖY",
     "ÜNLÜ PORTFÖY",
     "V PORTFÖY",
     "VAKIF KATILIM PORTFÖY",
@@ -1275,11 +1274,11 @@
         0.0978
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0955
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0955
       ],
       [
@@ -2203,11 +2202,11 @@
         0.0417
       ],
       [
-        "KRDMB",
+        "KRDMD",
         0.0417
       ],
       [
-        "KRDMD",
+        "KRDMB",
         0.0417
       ],
       [
@@ -3859,97 +3858,97 @@
     "sectors": [
       {
         "id": "defence",
-        "move": -3.41,
+        "move": -3.4,
         "of": 5
       },
       {
         "id": "retail",
-        "move": -5.32,
+        "move": -4.57,
         "of": 28
       },
       {
         "id": "banks",
-        "move": -5.5,
+        "move": -4.69,
         "of": 12
       },
       {
         "id": "transport",
-        "move": -6.37,
+        "move": -5.27,
         "of": 13
       },
       {
-        "id": "energy",
-        "move": -6.58,
-        "of": 43
-      },
-      {
         "id": "autos",
-        "move": -7.35,
+        "move": -6.37,
         "of": 14
       },
       {
         "id": "telecom",
-        "move": -7.37,
+        "move": -6.72,
         "of": 9
       },
       {
+        "id": "energy",
+        "move": -7.07,
+        "of": 43
+      },
+      {
         "id": "metals",
-        "move": -9.05,
+        "move": -8.39,
         "of": 37
       },
       {
         "id": "tourism",
-        "move": -10.3,
+        "move": -9.6,
         "of": 28
       },
       {
         "id": "construction",
-        "move": -10.37,
+        "move": -10.39,
         "of": 36
       },
       {
         "id": "realEstate",
-        "move": -10.83,
+        "move": -10.62,
         "of": 63
       },
       {
         "id": "food",
-        "move": -12.46,
+        "move": -11.74,
         "of": 67
       },
       {
         "id": "textile",
-        "move": -12.49,
+        "move": -12.68,
         "of": 33
       },
       {
         "id": "chemicals",
-        "move": -13.35,
+        "move": -13.4,
         "of": 12
       },
       {
         "id": "finance",
-        "move": -20.61,
+        "move": -20.38,
         "of": 61
       },
       {
         "id": "industrial",
-        "move": -21.24,
+        "move": -21.23,
         "of": 104
       },
       {
         "id": "semis",
-        "move": -24.21,
+        "move": -23.45,
         "of": 4
       },
       {
         "id": "health",
-        "move": -24.48,
+        "move": -24.17,
         "of": 16
       },
       {
         "id": "tech",
-        "move": -25.67,
+        "move": -26.09,
         "of": 28
       }
     ],
@@ -3957,55 +3956,54 @@
       {
         "c": "TKFEN",
         "n": "Tekfen Holding Anonim Sirketi",
-        "move": 12.6,
+        "move": 10.2,
         "th": "construction",
         "spec": 1
       },
       {
         "c": "RYGYO",
         "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 8.2,
+        "move": 8.8,
+        "th": "realEstate"
+      },
+      {
+        "c": "CEOEM",
+        "n": "CEO Event Medya AS",
+        "move": 6.4,
+        "th": "tourism"
+      },
+      {
+        "c": "ISDMR",
+        "n": "Iskenderun Demir ve Celik AS",
+        "move": 4.5,
+        "th": "metals"
+      },
+      {
+        "c": "TAVHL",
+        "n": "TAV Havalimanlari Holding A.S.",
+        "move": 2.8,
+        "th": "transport"
+      },
+      {
+        "c": "AHGAZ",
+        "n": "Ahlatci Dogal Gaz Dagitim Enerji ve Yatirim AS",
+        "move": 2.6,
+        "th": "energy"
+      },
+      {
+        "c": "ISGYO",
+        "n": "Is Gayrimenkul Yatirim Ortakligi A.S.",
+        "move": 2.6,
         "th": "realEstate"
       },
       {
         "c": "BMSTL",
         "n": "BMS Birlesik Metal Sanayi ve Ticaret AS Class B",
-        "move": 5.6,
+        "move": 2.6,
         "th": "metals"
-      },
-      {
-        "c": "ISDMR",
-        "n": "Iskenderun Demir ve Celik AS",
-        "move": 3.9,
-        "th": "metals"
-      },
-      {
-        "c": "AHGAZ",
-        "n": "Ahlatci Dogal Gaz Dagitim Enerji ve Yatirim AS",
-        "move": 2.1,
-        "th": "energy"
-      },
-      {
-        "c": "BAHKM",
-        "n": "Bahadir Kimya Sanayi Ve Ticaret Anonim Sirketi",
-        "move": 2.1,
-        "th": "industrial",
-        "spec": 1
-      },
-      {
-        "c": "TAVHL",
-        "n": "TAV Havalimanlari Holding A.S.",
-        "move": 1.8,
-        "th": "transport"
-      },
-      {
-        "c": "ENERY",
-        "n": "Enerya Enerji A.S.",
-        "move": 1.1,
-        "th": "energy"
       }
     ],
-    "floor": 49594481,
+    "floor": 50785513,
     "of": 310
   },
   "peerGroups": [
@@ -4072,7 +4070,7 @@
       "medianVol": 2.81
     },
     "cash": {
-      "count": 230,
+      "count": 229,
       "medianY1": 43.9685,
       "medianVol": 1.48
     },
@@ -4137,5 +4135,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-21T16:52:58.401Z"
+  "analyticsBuiltAt": "2026-09-21T17:02:10.562Z"
 }
