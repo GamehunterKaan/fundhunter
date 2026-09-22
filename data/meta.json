@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-22T11:57:04.054Z",
+  "lastUpdated": "2026-09-22T15:30:52.862Z",
   "latestDate": "2026-09-22",
   "lastWideRead": "2026-09-17T12:00:53.927Z",
   "rangeStart": "2025-09-22",
@@ -7,8 +7,8 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2066,
-    "priced": 2051,
-    "lagging": 15,
+    "priced": 2058,
+    "lagging": 8,
     "implausible": 6,
     "carried": 466,
     "byKind": {
@@ -1274,11 +1274,11 @@
         0.0991
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0964
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0964
       ],
       [
@@ -2198,15 +2198,15 @@
         0.0757
       ],
       [
-        "KRDMB",
-        0.042
-      ],
-      [
         "KRDMA",
         0.042
       ],
       [
         "KRDMD",
+        0.042
+      ],
+      [
+        "KRDMB",
         0.042
       ],
       [
@@ -3858,152 +3858,153 @@
     "sectors": [
       {
         "id": "defence",
-        "move": -0.16,
+        "move": -0.54,
         "of": 5
       },
       {
         "id": "transport",
-        "move": -0.99,
+        "move": -1.46,
         "of": 13
       },
       {
-        "id": "autos",
-        "move": -3.02,
-        "of": 14
+        "id": "retail",
+        "move": -3.79,
+        "of": 28
       },
       {
         "id": "banks",
-        "move": -3.06,
+        "move": -4.07,
         "of": 12
       },
       {
-        "id": "retail",
-        "move": -3.44,
-        "of": 28
+        "id": "autos",
+        "move": -4.18,
+        "of": 14
       },
       {
         "id": "telecom",
-        "move": -3.77,
+        "move": -4.87,
         "of": 9
       },
       {
-        "id": "tourism",
-        "move": -6.58,
-        "of": 28
-      },
-      {
         "id": "energy",
-        "move": -7.85,
+        "move": -7.07,
         "of": 43
       },
       {
+        "id": "tourism",
+        "move": -7.53,
+        "of": 28
+      },
+      {
         "id": "metals",
-        "move": -7.86,
+        "move": -8.15,
         "of": 37
       },
       {
         "id": "construction",
-        "move": -8.73,
+        "move": -8.55,
         "of": 36
       },
       {
         "id": "realEstate",
-        "move": -9.55,
+        "move": -9.57,
         "of": 63
       },
       {
         "id": "chemicals",
-        "move": -10.78,
+        "move": -11.1,
         "of": 12
       },
       {
-        "id": "textile",
-        "move": -13.04,
-        "of": 33
-      },
-      {
         "id": "food",
-        "move": -13.3,
+        "move": -13.11,
         "of": 68
       },
       {
+        "id": "textile",
+        "move": -13.17,
+        "of": 33
+      },
+      {
         "id": "semis",
-        "move": -17,
+        "move": -17.41,
         "of": 4
       },
       {
         "id": "health",
-        "move": -21.51,
+        "move": -21.13,
         "of": 16
       },
       {
         "id": "industrial",
-        "move": -22.01,
+        "move": -21.86,
         "of": 103
       },
       {
         "id": "tech",
-        "move": -23.27,
+        "move": -23.04,
         "of": 28
       },
       {
         "id": "finance",
-        "move": -23.9,
+        "move": -24.03,
         "of": 61
       }
     ],
     "shares": [
       {
-        "c": "UNLU",
-        "n": "Unlu Yatirim Holding A.S.",
-        "move": 24,
-        "th": "finance"
-      },
-      {
         "c": "HRKET",
         "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 19,
+        "move": 23.5,
         "th": "transport"
       },
       {
-        "c": "RYGYO",
-        "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 9.1,
-        "th": "realEstate"
+        "c": "UNLU",
+        "n": "Unlu Yatirim Holding A.S.",
+        "move": 14.7,
+        "th": "finance"
       },
       {
         "c": "TKFEN",
         "n": "Tekfen Holding Anonim Sirketi",
-        "move": 7,
+        "move": 12.2,
         "th": "construction",
         "spec": 1
       },
       {
-        "c": "ISGYO",
-        "n": "Is Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 6.4,
+        "c": "RYGYO",
+        "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
+        "move": 10.4,
         "th": "realEstate"
+      },
+      {
+        "c": "AHGAZ",
+        "n": "Ahlatci Dogal Gaz Dagitim Enerji ve Yatirim AS",
+        "move": 7.9,
+        "th": "energy"
       },
       {
         "c": "HUNER",
         "n": "Hun Yenilenebilir Enerji Uretim AS",
-        "move": 6.4,
+        "move": 7.2,
         "th": "energy"
       },
       {
-        "c": "TAVHL",
-        "n": "TAV Havalimanlari Holding A.S.",
-        "move": 5.5,
-        "th": "transport"
+        "c": "ISGYO",
+        "n": "Is Gayrimenkul Yatirim Ortakligi A.S.",
+        "move": 5.9,
+        "th": "realEstate"
       },
       {
-        "c": "LMKDC",
-        "n": "Limak Dogu Anadolu Cimento Sanayi Ve Ticaret AS",
-        "move": 4.1,
-        "th": "construction"
+        "c": "CRFSA",
+        "n": "CarrefourSA Carrefour Sabanci Ticaret Merkezi A.S.",
+        "move": 5.8,
+        "th": "retail",
+        "spec": 1
       }
     ],
-    "floor": 48138656,
+    "floor": 50267023,
     "of": 310
   },
   "peerGroups": [
@@ -4050,9 +4051,9 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 730,
-      "medianY1": 13.74165,
-      "medianVol": 23.34
+      "count": 731,
+      "medianY1": 13.765,
+      "medianVol": 23.345
     },
     "metals": {
       "count": 55,
@@ -4080,9 +4081,9 @@
       "medianVol": 7.59
     },
     "balanced": {
-      "count": 138,
-      "medianY1": 26.37945,
-      "medianVol": 14.235
+      "count": 137,
+      "medianY1": 26.165,
+      "medianVol": 14.1
     },
     "conservative": {
       "count": 203,
@@ -4135,5 +4136,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-22T15:02:06.382Z"
+  "analyticsBuiltAt": "2026-09-22T15:32:04.733Z"
 }
