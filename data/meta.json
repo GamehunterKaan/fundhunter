@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-22T05:52:03.192Z",
+  "lastUpdated": "2026-09-22T06:22:58.864Z",
   "latestDate": "2026-09-22",
   "lastWideRead": "2026-09-17T12:00:53.927Z",
   "rangeStart": "2025-09-22",
@@ -7,9 +7,9 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2066,
-    "priced": 1669,
-    "lagging": 397,
-    "implausible": 6,
+    "priced": 1810,
+    "lagging": 256,
+    "implausible": 8,
     "carried": 466,
     "byKind": {
       "YAT": 2030,
@@ -1274,11 +1274,11 @@
         0.0978
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0955
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0955
       ],
       [
@@ -2198,15 +2198,15 @@
         0.0751
       ],
       [
+        "KRDMA",
+        0.042
+      ],
+      [
         "KRDMB",
         0.042
       ],
       [
         "KRDMD",
-        0.042
-      ],
-      [
-        "KRDMA",
         0.042
       ],
       [
@@ -4050,9 +4050,9 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 730,
-      "medianY1": 13.7183,
-      "medianVol": 23.36
+      "count": 732,
+      "medianY1": 13.74165,
+      "medianVol": 23.35
     },
     "metals": {
       "count": 55,
@@ -4065,29 +4065,29 @@
       "medianVol": 17.775
     },
     "bonds": {
-      "count": 539,
-      "medianY1": 22.0253,
+      "count": 542,
+      "medianY1": 22.010550000000002,
       "medianVol": 2.81
     },
     "cash": {
-      "count": 223,
-      "medianY1": 43.28415,
+      "count": 222,
+      "medianY1": 43.4627,
       "medianVol": 1.47
     },
     "fundOfFunds": {
-      "count": 142,
-      "medianY1": 25.7035,
-      "medianVol": 7.785
+      "count": 141,
+      "medianY1": 26.495350000000002,
+      "medianVol": 7.79
     },
     "balanced": {
-      "count": 135,
-      "medianY1": 26.5939,
-      "medianVol": 14.03
+      "count": 136,
+      "medianY1": 26.473950000000002,
+      "medianVol": 14.059999999999999
     },
     "conservative": {
-      "count": 206,
-      "medianY1": 35.243,
-      "medianVol": 2.065
+      "count": 202,
+      "medianY1": 35.162800000000004,
+      "medianVol": 2.01
     }
   },
   "cashReturn": 47.47,
@@ -4135,5 +4135,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-22T05:52:19.309Z"
+  "analyticsBuiltAt": "2026-09-22T06:23:13.094Z"
 }
