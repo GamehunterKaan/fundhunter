@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-23T11:57:56.982Z",
+  "lastUpdated": "2026-09-23T15:26:19.309Z",
   "latestDate": "2026-09-23",
   "lastWideRead": "2026-09-17T12:00:53.927Z",
   "rangeStart": "2025-09-23",
@@ -1570,11 +1570,11 @@
         0.0884
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0696
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0696
       ],
       [
@@ -3858,97 +3858,97 @@
     "sectors": [
       {
         "id": "transport",
-        "move": 3.03,
+        "move": 2.59,
         "of": 13
       },
       {
         "id": "defence",
-        "move": 0.76,
+        "move": 0.72,
         "of": 5
       },
       {
         "id": "retail",
-        "move": 0.11,
+        "move": -0.04,
         "of": 28
       },
       {
         "id": "banks",
-        "move": -0.77,
+        "move": -0.72,
         "of": 12
       },
       {
         "id": "telecom",
-        "move": -1.41,
+        "move": -0.83,
         "of": 9
       },
       {
         "id": "autos",
-        "move": -1.82,
+        "move": -2.1,
         "of": 14
       },
       {
         "id": "construction",
-        "move": -3.09,
+        "move": -3.72,
         "of": 36
       },
       {
-        "id": "chemicals",
-        "move": -4.2,
-        "of": 12
-      },
-      {
         "id": "energy",
-        "move": -4.43,
+        "move": -4.51,
         "of": 44
       },
       {
+        "id": "chemicals",
+        "move": -4.66,
+        "of": 12
+      },
+      {
         "id": "metals",
-        "move": -5.72,
+        "move": -6.46,
         "of": 37
       },
       {
         "id": "tourism",
-        "move": -6.78,
+        "move": -7.88,
         "of": 28
       },
       {
         "id": "realEstate",
-        "move": -7.52,
+        "move": -8.21,
         "of": 63
       },
       {
         "id": "textile",
-        "move": -9.88,
+        "move": -10.5,
         "of": 33
       },
       {
         "id": "food",
-        "move": -10.84,
+        "move": -10.92,
         "of": 67
       },
       {
         "id": "semis",
-        "move": -16.18,
+        "move": -15.76,
         "of": 4
       },
       {
         "id": "health",
-        "move": -18.87,
+        "move": -19.26,
         "of": 16
       },
       {
-        "id": "tech",
-        "move": -19.78,
-        "of": 28
-      },
-      {
         "id": "industrial",
-        "move": -19.93,
+        "move": -20.43,
         "of": 103
       },
       {
+        "id": "tech",
+        "move": -21.23,
+        "of": 28
+      },
+      {
         "id": "finance",
-        "move": -25.43,
+        "move": -25.69,
         "of": 61
       }
     ],
@@ -3956,15 +3956,8 @@
       {
         "c": "HRKET",
         "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 35.1,
+        "move": 36.8,
         "th": "transport"
-      },
-      {
-        "c": "BAHKM",
-        "n": "Bahadir Kimya Sanayi Ve Ticaret Anonim Sirketi",
-        "move": 21.6,
-        "th": "industrial",
-        "spec": 1
       },
       {
         "c": "UNLU",
@@ -3973,38 +3966,45 @@
         "th": "finance"
       },
       {
-        "c": "RYGYO",
-        "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 18.1,
-        "th": "realEstate"
-      },
-      {
-        "c": "TKFEN",
-        "n": "Tekfen Holding Anonim Sirketi",
-        "move": 15,
-        "th": "construction",
+        "c": "BAHKM",
+        "n": "Bahadir Kimya Sanayi Ve Ticaret Anonim Sirketi",
+        "move": 20,
+        "th": "industrial",
         "spec": 1
       },
       {
         "c": "TUKAS",
         "n": "Tukas Gida Sanayi ve Ticaret Anonim Sirketi",
-        "move": 12.5,
+        "move": 17,
         "th": "food"
       },
       {
-        "c": "RYSAS",
-        "n": "Reysas Tasimacilik ve Lojistik Ticaret Anonim Sirketi",
-        "move": 9.8,
+        "c": "RYGYO",
+        "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
+        "move": 16,
+        "th": "realEstate"
+      },
+      {
+        "c": "TKFEN",
+        "n": "Tekfen Holding Anonim Sirketi",
+        "move": 15.4,
+        "th": "construction",
+        "spec": 1
+      },
+      {
+        "c": "TAVHL",
+        "n": "TAV Havalimanlari Holding A.S.",
+        "move": 9.6,
         "th": "transport"
       },
       {
-        "c": "LOGO",
-        "n": "Logo Yazilim Sanayi ve Ticaret A.S.",
-        "move": 9.4,
-        "th": "tech"
+        "c": "TUCLK",
+        "n": "Tugcelik Aluminyum ve Metal Mamulleri Sanayi ve Ticaret A.S.",
+        "move": 8.8,
+        "th": "metals"
       }
     ],
-    "floor": 46377835,
+    "floor": 48424076,
     "of": 310
   },
   "peerGroups": [
@@ -4136,5 +4136,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-23T15:17:20.207Z"
+  "analyticsBuiltAt": "2026-09-23T15:27:31.367Z"
 }
