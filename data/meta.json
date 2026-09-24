@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-24T12:15:04.978Z",
+  "lastUpdated": "2026-09-24T15:48:30.819Z",
   "latestDate": "2026-09-24",
   "lastWideRead": "2026-09-24T12:15:04.978Z",
   "rangeStart": "2025-09-24",
@@ -2210,7 +2210,7 @@
         0.0425
       ],
       [
-        "KRDMA",
+        "KRDMB",
         0.0415
       ],
       [
@@ -2218,7 +2218,7 @@
         0.0415
       ],
       [
-        "KRDMB",
+        "KRDMA",
         0.0415
       ],
       [
@@ -3857,98 +3857,98 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "chemicals",
-        "move": 5.5,
-        "of": 12
-      },
-      {
         "id": "telecom",
-        "move": 4.93,
+        "move": 5.08,
         "of": 9
       },
       {
+        "id": "chemicals",
+        "move": 4.52,
+        "of": 12
+      },
+      {
         "id": "transport",
-        "move": 4.6,
+        "move": 3.25,
         "of": 13
       },
       {
         "id": "banks",
-        "move": 3.35,
+        "move": 3.1,
         "of": 12
       },
       {
         "id": "retail",
-        "move": 2.99,
+        "move": 2.28,
         "of": 28
       },
       {
         "id": "defence",
-        "move": 2.82,
+        "move": 2,
         "of": 5
       },
       {
-        "id": "construction",
-        "move": 1.87,
-        "of": 36
-      },
-      {
         "id": "autos",
-        "move": 1.71,
+        "move": 1.47,
         "of": 14
       },
       {
+        "id": "construction",
+        "move": 0.67,
+        "of": 36
+      },
+      {
         "id": "metals",
-        "move": 0.68,
+        "move": 0.48,
         "of": 37
       },
       {
         "id": "energy",
-        "move": 0.49,
+        "move": -0.15,
         "of": 44
       },
       {
         "id": "textile",
-        "move": -1.98,
+        "move": -4.02,
         "of": 33
       },
       {
         "id": "realEstate",
-        "move": -4.51,
+        "move": -5.09,
         "of": 63
       },
       {
         "id": "tourism",
-        "move": -4.82,
+        "move": -5.63,
         "of": 28
       },
       {
-        "id": "semis",
-        "move": -7.53,
-        "of": 4
-      },
-      {
         "id": "food",
-        "move": -7.59,
+        "move": -8.21,
         "of": 67
       },
       {
+        "id": "semis",
+        "move": -8.49,
+        "of": 4
+      },
+      {
         "id": "tech",
-        "move": -12.16,
+        "move": -13.74,
         "of": 28
       },
       {
         "id": "industrial",
-        "move": -13.76,
+        "move": -14.28,
         "of": 103
       },
       {
         "id": "health",
-        "move": -14.87,
+        "move": -14.94,
         "of": 16
       },
       {
         "id": "finance",
-        "move": -20.99,
+        "move": -21.46,
         "of": 61
       }
     ],
@@ -3963,50 +3963,50 @@
       {
         "c": "TUKAS",
         "n": "Tukas Gida Sanayi ve Ticaret Anonim Sirketi",
-        "move": 25.1,
+        "move": 24.6,
         "th": "food"
       },
       {
-        "c": "TCKRC",
-        "n": "Kirac Galvaniz Telekominikasyon Metal Makine Insaat Elektrik Sanayi Ve Ticaret AS",
-        "move": 20.4,
-        "th": "metals"
+        "c": "UNLU",
+        "n": "Unlu Yatirim Holding A.S.",
+        "move": 17.9,
+        "th": "finance"
       },
       {
-        "c": "CRFSA",
-        "n": "CarrefourSA Carrefour Sabanci Ticaret Merkezi A.S.",
-        "move": 18.3,
-        "th": "retail",
+        "c": "AKFIS",
+        "n": "Akfen insaat Turizm ve Ticaret AS",
+        "move": 17.7,
+        "th": "construction",
         "spec": 1
       },
       {
         "c": "TKFEN",
         "n": "Tekfen Holding Anonim Sirketi",
-        "move": 18.2,
+        "move": 16.6,
         "th": "construction",
         "spec": 1
       },
       {
-        "c": "AKFIS",
-        "n": "Akfen insaat Turizm ve Ticaret AS",
-        "move": 18.1,
-        "th": "construction",
+        "c": "TCKRC",
+        "n": "Kirac Galvaniz Telekominikasyon Metal Makine Insaat Elektrik Sanayi Ve Ticaret AS",
+        "move": 16.6,
+        "th": "metals"
+      },
+      {
+        "c": "CRFSA",
+        "n": "CarrefourSA Carrefour Sabanci Ticaret Merkezi A.S.",
+        "move": 16.2,
+        "th": "retail",
         "spec": 1
       },
       {
         "c": "MASFN",
         "n": "Masfen Enerji AS",
-        "move": 15.9,
+        "move": 16,
         "th": "construction"
-      },
-      {
-        "c": "UNLU",
-        "n": "Unlu Yatirim Holding A.S.",
-        "move": 15.5,
-        "th": "finance"
       }
     ],
-    "floor": 43046835,
+    "floor": 44295177,
     "of": 310
   },
   "peerGroups": [
@@ -4138,5 +4138,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-24T15:20:49.431Z"
+  "analyticsBuiltAt": "2026-09-24T15:49:43.921Z"
 }
