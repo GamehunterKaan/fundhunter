@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-09-24T20:03:04.335Z",
-  "latestDate": "2026-09-24",
+  "lastUpdated": "2026-09-25T05:18:23.786Z",
+  "latestDate": "2026-09-25",
   "lastWideRead": "2026-09-24T12:15:04.978Z",
-  "rangeStart": "2025-09-24",
+  "rangeStart": "2025-09-25",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2063,
-    "priced": 2058,
-    "lagging": 5,
-    "implausible": 5,
+    "priced": 1346,
+    "lagging": 717,
+    "implausible": 1,
     "carried": 464,
     "byKind": {
       "YAT": 2027,
@@ -1274,11 +1274,11 @@
         0.0996
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0968
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0968
       ],
       [
@@ -1570,11 +1570,11 @@
         0.0882
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0722
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0722
       ],
       [
@@ -2210,15 +2210,15 @@
         0.0425
       ],
       [
-        "KRDMD",
-        0.0415
-      ],
-      [
         "KRDMB",
         0.0415
       ],
       [
         "KRDMA",
+        0.0415
+      ],
+      [
+        "KRDMD",
         0.0415
       ],
       [
@@ -3505,15 +3505,15 @@
     "tourism": [
       [
         "DOCO",
-        0.3315
+        0.3319
       ],
       [
         "TABGD",
-        0.1652
+        0.1651
       ],
       [
         "GRSEL",
-        0.0797
+        0.0796
       ],
       [
         "NTHOL",
@@ -3521,11 +3521,11 @@
       ],
       [
         "SSAAT",
-        0.0535
+        0.0534
       ],
       [
         "FENER",
-        0.0446
+        0.0445
       ],
       [
         "GSRAY",
@@ -3537,7 +3537,7 @@
       ],
       [
         "KSTUR",
-        0.0244
+        0.0243
       ],
       [
         "MAALT",
@@ -3918,7 +3918,7 @@
       },
       {
         "id": "tourism",
-        "move": -5.63,
+        "move": -5.62,
         "of": 28
       },
       {
@@ -4053,55 +4053,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 731,
-      "medianY1": 20.5874,
-      "medianVol": 23.265
+      "count": 727,
+      "medianY1": 3.7862999999999998,
+      "medianVol": 23.355
     },
     "metals": {
       "count": 55,
-      "medianY1": 28.6713,
-      "medianVol": 25.68
+      "medianY1": 25.9108,
+      "medianVol": 25.71
     },
     "foreign": {
-      "count": 35,
-      "medianY1": 40.884,
-      "medianVol": 18.53
+      "count": 36,
+      "medianY1": 10.93,
+      "medianVol": 17.795
     },
     "bonds": {
-      "count": 542,
-      "medianY1": 22.4215,
+      "count": 539,
+      "medianY1": 17.9744,
       "medianVol": 2.82
     },
     "cash": {
       "count": 226,
-      "medianY1": 45.0701,
+      "medianY1": 41.11,
       "medianVol": 1.47
     },
     "fundOfFunds": {
-      "count": 139,
-      "medianY1": 31.268099999999997,
-      "medianVol": 7.8
+      "count": 140,
+      "medianY1": 22.3535,
+      "medianVol": 7.904999999999999
     },
     "balanced": {
-      "count": 136,
-      "medianY1": 32.51,
-      "medianVol": 13.665
+      "count": 134,
+      "medianY1": 14.92365,
+      "medianVol": 13.895
     },
     "conservative": {
-      "count": 199,
-      "medianY1": 43.1241,
-      "medianVol": 1.9849999999999999
+      "count": 206,
+      "medianY1": 26.5571,
+      "medianVol": 1.96
     }
   },
-  "cashReturn": 46.64,
+  "cashReturn": 46.62,
   "cashReturns": {
     "m1": 3.03,
-    "m3": 10.08,
+    "m3": 10.06,
     "m6": 21.37,
-    "ytd": 32.12,
-    "y1": 46.64,
-    "y3": 255.5,
-    "y5": 429.45
+    "ytd": 32.25,
+    "y1": 46.62,
+    "y3": 254.94,
+    "y5": 426.44
   },
   "cashBasis": {
     "m1": {
@@ -4138,5 +4138,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-24T20:03:18.513Z"
+  "analyticsBuiltAt": "2026-09-25T05:18:37.554Z"
 }
