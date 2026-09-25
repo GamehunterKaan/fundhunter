@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-25T05:18:23.786Z",
+  "lastUpdated": "2026-09-25T05:49:20.295Z",
   "latestDate": "2026-09-25",
   "lastWideRead": "2026-09-24T12:15:04.978Z",
   "rangeStart": "2025-09-25",
@@ -7,8 +7,8 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2063,
-    "priced": 1346,
-    "lagging": 717,
+    "priced": 1617,
+    "lagging": 446,
     "implausible": 1,
     "carried": 464,
     "byKind": {
@@ -1053,6 +1053,7 @@
     "OFSYM",
     "ONCSM",
     "ONRYT",
+    "OPD25",
     "OPK30",
     "OPT25",
     "OPTGY",
@@ -1274,11 +1275,11 @@
         0.0996
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0968
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0968
       ],
       [
@@ -1570,11 +1571,11 @@
         0.0882
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0722
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0722
       ],
       [
@@ -2210,7 +2211,7 @@
         0.0425
       ],
       [
-        "KRDMB",
+        "KRDMD",
         0.0415
       ],
       [
@@ -2218,7 +2219,7 @@
         0.0415
       ],
       [
-        "KRDMD",
+        "KRDMB",
         0.0415
       ],
       [
@@ -4065,12 +4066,12 @@
     "foreign": {
       "count": 36,
       "medianY1": 10.93,
-      "medianVol": 17.795
+      "medianVol": 17.799999999999997
     },
     "bonds": {
       "count": 539,
       "medianY1": 17.9744,
-      "medianVol": 2.82
+      "medianVol": 2.83
     },
     "cash": {
       "count": 226,
@@ -4080,11 +4081,11 @@
     "fundOfFunds": {
       "count": 140,
       "medianY1": 22.3535,
-      "medianVol": 7.904999999999999
+      "medianVol": 7.91
     },
     "balanced": {
       "count": 134,
-      "medianY1": 14.92365,
+      "medianY1": 14.56055,
       "medianVol": 13.895
     },
     "conservative": {
@@ -4138,5 +4139,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-25T05:18:37.554Z"
+  "analyticsBuiltAt": "2026-09-25T05:49:33.668Z"
 }
