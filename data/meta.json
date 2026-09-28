@@ -1,18 +1,18 @@
 {
-  "lastUpdated": "2026-09-28T02:00:00.560Z",
-  "latestDate": "2026-09-25",
+  "lastUpdated": "2026-09-28T08:44:00.615Z",
+  "latestDate": "2026-09-28",
   "lastWideRead": "2026-09-24T12:15:04.978Z",
-  "rangeStart": "2025-09-25",
+  "rangeStart": "2025-09-28",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2063,
-    "priced": 2054,
-    "lagging": 9,
-    "implausible": 3,
+    "funds": 2062,
+    "priced": 2049,
+    "lagging": 13,
+    "implausible": 2,
     "carried": 464,
     "byKind": {
-      "YAT": 2027,
+      "YAT": 2026,
       "BYF": 36
     }
   },
@@ -1053,7 +1053,6 @@
     "OFSYM",
     "ONCSM",
     "ONRYT",
-    "OPD25",
     "OPK30",
     "OPT25",
     "OPTGY",
@@ -1571,11 +1570,11 @@
         0.0931
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0721
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0721
       ],
       [
@@ -2211,11 +2210,11 @@
         0.0445
       ],
       [
-        "KRDMD",
+        "KRDMB",
         0.0438
       ],
       [
-        "KRDMB",
+        "KRDMD",
         0.0438
       ],
       [
@@ -3506,11 +3505,11 @@
     "tourism": [
       [
         "DOCO",
-        0.339
+        0.3391
       ],
       [
         "TABGD",
-        0.1651
+        0.165
       ],
       [
         "GRSEL",
@@ -3550,7 +3549,7 @@
       ],
       [
         "TSPOR",
-        0.0192
+        0.0191
       ],
       [
         "BLUME",
@@ -3859,97 +3858,97 @@
     "sectors": [
       {
         "id": "telecom",
-        "move": 1.87,
+        "move": 1.11,
         "of": 9
       },
       {
-        "id": "chemicals",
-        "move": 0.94,
-        "of": 12
-      },
-      {
         "id": "transport",
-        "move": 0.15,
+        "move": -0.65,
         "of": 13
       },
       {
-        "id": "retail",
-        "move": -0.62,
-        "of": 28
-      },
-      {
-        "id": "semis",
-        "move": -0.85,
-        "of": 4
-      },
-      {
         "id": "autos",
-        "move": -1.15,
+        "move": -1.18,
         "of": 14
       },
       {
-        "id": "construction",
-        "move": -1.38,
-        "of": 36
+        "id": "retail",
+        "move": -1.41,
+        "of": 28
       },
       {
-        "id": "defence",
-        "move": -2.12,
-        "of": 5
-      },
-      {
-        "id": "metals",
-        "move": -2.28,
-        "of": 37
-      },
-      {
-        "id": "energy",
-        "move": -2.33,
-        "of": 44
-      },
-      {
-        "id": "banks",
-        "move": -2.95,
+        "id": "chemicals",
+        "move": -2.36,
         "of": 12
       },
       {
         "id": "tourism",
-        "move": -4.06,
+        "move": -2.38,
         "of": 28
+      },
+      {
+        "id": "banks",
+        "move": -2.56,
+        "of": 12
+      },
+      {
+        "id": "construction",
+        "move": -2.64,
+        "of": 36
+      },
+      {
+        "id": "defence",
+        "move": -3.32,
+        "of": 5
+      },
+      {
+        "id": "metals",
+        "move": -3.47,
+        "of": 37
+      },
+      {
+        "id": "semis",
+        "move": -4.51,
+        "of": 4
+      },
+      {
+        "id": "energy",
+        "move": -4.57,
+        "of": 44
       },
       {
         "id": "realEstate",
-        "move": -4.12,
+        "move": -6.02,
         "of": 63
       },
       {
-        "id": "tech",
-        "move": -6.7,
-        "of": 28
-      },
-      {
         "id": "textile",
-        "move": -7.31,
+        "move": -7.91,
         "of": 33
       },
       {
         "id": "food",
-        "move": -8.97,
+        "move": -8.3,
         "of": 67
       },
       {
+        "id": "tech",
+        "move": -9.26,
+        "of": 28
+      },
+      {
         "id": "health",
-        "move": -12.74,
+        "move": -12.88,
         "of": 16
       },
       {
         "id": "industrial",
-        "move": -13.24,
+        "move": -15.75,
         "of": 103
       },
       {
         "id": "finance",
-        "move": -20.66,
+        "move": -21.33,
         "of": 61
       }
     ],
@@ -3957,54 +3956,54 @@
       {
         "c": "HRKET",
         "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 37,
+        "move": 40.4,
         "th": "transport",
         "spec": 1
       },
       {
-        "c": "UNLU",
-        "n": "Unlu Yatirim Holding A.S.",
-        "move": 32.8,
-        "th": "finance"
+        "c": "ETILR",
+        "n": "Etiler Gida ve Ticari Yatirimlar Sanayi ve Ticaret A.S.",
+        "move": 31.9,
+        "th": "tourism"
       },
       {
         "c": "TUCLK",
         "n": "Tugcelik Aluminyum ve Metal Mamulleri Sanayi ve Ticaret A.S.",
-        "move": 21.7,
+        "move": 23.1,
         "th": "metals"
+      },
+      {
+        "c": "MIATK",
+        "n": "MIA Teknoloji AS",
+        "move": 22.3,
+        "th": "tech"
       },
       {
         "c": "TUKAS",
         "n": "Tukas Gida Sanayi ve Ticaret Anonim Sirketi",
-        "move": 20.5,
+        "move": 21.7,
         "th": "food"
       },
       {
-        "c": "GLRMK",
-        "n": "Gulermak Agir Sanayi Insaat Ve Taahhut A.S.",
-        "move": 18.4,
-        "th": "construction"
+        "c": "GMTAS",
+        "n": "Gimat Magazacilik Insaat Sanayi ve Ticaret A.S.",
+        "move": 19.5,
+        "th": "retail"
       },
       {
-        "c": "ETILR",
-        "n": "Etiler Gida ve Ticari Yatirimlar Sanayi ve Ticaret A.S.",
-        "move": 17.5,
-        "th": "tourism"
+        "c": "SKYMD",
+        "n": "Seker Yatirim Menkul Degerler A.S.",
+        "move": 19.1,
+        "th": "finance"
       },
       {
-        "c": "RYGYO",
-        "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 17.1,
-        "th": "realEstate"
-      },
-      {
-        "c": "ARDYZ",
-        "n": "ARD Grup Bilisim Teknolojileri AS",
-        "move": 14,
-        "th": "tech"
+        "c": "UNLU",
+        "n": "Unlu Yatirim Holding A.S.",
+        "move": 16.6,
+        "th": "finance"
       }
     ],
-    "floor": 42839533,
+    "floor": 37414360,
     "of": 310
   },
   "peerGroups": [
@@ -4051,55 +4050,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 727,
-      "medianY1": 3.6709,
-      "medianVol": 23.4
+      "count": 725,
+      "medianY1": 19.869500000000002,
+      "medianVol": 23.39
     },
     "metals": {
-      "count": 54,
-      "medianY1": 25.9837,
-      "medianVol": 25.76
+      "count": 56,
+      "medianY1": 28.281399999999998,
+      "medianVol": 25.66
     },
     "foreign": {
-      "count": 36,
-      "medianY1": 10.93,
-      "medianVol": 17.814999999999998
+      "count": 35,
+      "medianY1": 40.5136,
+      "medianVol": 18.55
     },
     "bonds": {
-      "count": 541,
-      "medianY1": 17.96,
-      "medianVol": 2.83
+      "count": 542,
+      "medianY1": 22.075650000000003,
+      "medianVol": 2.84
     },
     "cash": {
-      "count": 226,
-      "medianY1": 41.11,
-      "medianVol": 1.47
+      "count": 225,
+      "medianY1": 44.816649999999996,
+      "medianVol": 1.48
     },
     "fundOfFunds": {
-      "count": 141,
-      "medianY1": 21.5602,
-      "medianVol": 8.06
+      "count": 137,
+      "medianY1": 30.8238,
+      "medianVol": 8.33
     },
     "balanced": {
-      "count": 133,
-      "medianY1": 15.7626,
-      "medianVol": 13.93
+      "count": 137,
+      "medianY1": 32.0999,
+      "medianVol": 13.8
     },
     "conservative": {
       "count": 205,
-      "medianY1": 27.60045,
-      "medianVol": 1.935
+      "medianY1": 43.1777,
+      "medianVol": 1.88
     }
   },
-  "cashReturn": 46.62,
+  "cashReturn": 46.39,
   "cashReturns": {
-    "m1": 3.02,
-    "m3": 10.06,
-    "m6": 21.37,
-    "ytd": 32.24,
-    "y1": 46.62,
-    "y3": 254.94,
-    "y5": 426.44
+    "m1": 3.09,
+    "m3": 10.01,
+    "m6": 21.34,
+    "ytd": 32.62,
+    "y1": 46.39,
+    "y3": 255.91,
+    "y5": 430.54
   },
   "cashBasis": {
     "m1": {
@@ -4136,5 +4135,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-28T02:00:16.245Z"
+  "analyticsBuiltAt": "2026-09-28T08:45:11.242Z"
 }
