@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-28T08:44:00.615Z",
+  "lastUpdated": "2026-09-28T14:19:15.776Z",
   "latestDate": "2026-09-28",
   "lastWideRead": "2026-09-24T12:15:04.978Z",
   "rangeStart": "2025-09-28",
@@ -7,10 +7,10 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2062,
-    "priced": 2049,
-    "lagging": 13,
+    "priced": 2052,
+    "lagging": 10,
     "implausible": 2,
-    "carried": 464,
+    "carried": 465,
     "byKind": {
       "YAT": 2026,
       "BYF": 36
@@ -1274,11 +1274,11 @@
         0.0989
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.095
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.095
       ],
       [
@@ -2214,11 +2214,11 @@
         0.0438
       ],
       [
-        "KRDMD",
+        "KRDMA",
         0.0438
       ],
       [
-        "KRDMA",
+        "KRDMD",
         0.0438
       ],
       [
@@ -3858,97 +3858,97 @@
     "sectors": [
       {
         "id": "telecom",
-        "move": 1.11,
+        "move": 0.93,
         "of": 9
       },
       {
         "id": "transport",
-        "move": -0.65,
+        "move": -0.54,
         "of": 13
       },
       {
-        "id": "autos",
-        "move": -1.18,
-        "of": 14
-      },
-      {
         "id": "retail",
-        "move": -1.41,
+        "move": -0.68,
         "of": 28
       },
       {
+        "id": "defence",
+        "move": -1.66,
+        "of": 5
+      },
+      {
+        "id": "autos",
+        "move": -1.76,
+        "of": 14
+      },
+      {
+        "id": "construction",
+        "move": -2.32,
+        "of": 36
+      },
+      {
         "id": "chemicals",
-        "move": -2.36,
+        "move": -2.48,
         "of": 12
       },
       {
         "id": "tourism",
-        "move": -2.38,
+        "move": -2.72,
         "of": 28
       },
       {
         "id": "banks",
-        "move": -2.56,
+        "move": -2.73,
         "of": 12
       },
       {
-        "id": "construction",
-        "move": -2.64,
-        "of": 36
-      },
-      {
-        "id": "defence",
-        "move": -3.32,
-        "of": 5
-      },
-      {
         "id": "metals",
-        "move": -3.47,
+        "move": -3.48,
         "of": 37
       },
       {
-        "id": "semis",
-        "move": -4.51,
-        "of": 4
-      },
-      {
         "id": "energy",
-        "move": -4.57,
+        "move": -4.45,
         "of": 44
       },
       {
+        "id": "semis",
+        "move": -5.01,
+        "of": 4
+      },
+      {
         "id": "realEstate",
-        "move": -6.02,
+        "move": -5.9,
         "of": 63
       },
       {
-        "id": "textile",
-        "move": -7.91,
-        "of": 33
-      },
-      {
         "id": "food",
-        "move": -8.3,
+        "move": -8.82,
         "of": 67
       },
       {
+        "id": "textile",
+        "move": -9.5,
+        "of": 33
+      },
+      {
         "id": "tech",
-        "move": -9.26,
+        "move": -9.75,
         "of": 28
       },
       {
         "id": "health",
-        "move": -12.88,
+        "move": -12.99,
         "of": 16
       },
       {
         "id": "industrial",
-        "move": -15.75,
+        "move": -15.96,
         "of": 103
       },
       {
         "id": "finance",
-        "move": -21.33,
+        "move": -21.72,
         "of": 61
       }
     ],
@@ -3956,14 +3956,14 @@
       {
         "c": "HRKET",
         "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 40.4,
+        "move": 34.4,
         "th": "transport",
         "spec": 1
       },
       {
         "c": "ETILR",
         "n": "Etiler Gida ve Ticari Yatirimlar Sanayi ve Ticaret A.S.",
-        "move": 31.9,
+        "move": 28.5,
         "th": "tourism"
       },
       {
@@ -3973,37 +3973,37 @@
         "th": "metals"
       },
       {
-        "c": "MIATK",
-        "n": "MIA Teknoloji AS",
-        "move": 22.3,
-        "th": "tech"
+        "c": "SKYMD",
+        "n": "Seker Yatirim Menkul Degerler A.S.",
+        "move": 22.2,
+        "th": "finance"
       },
       {
         "c": "TUKAS",
         "n": "Tukas Gida Sanayi ve Ticaret Anonim Sirketi",
-        "move": 21.7,
+        "move": 20.7,
+        "th": "food"
+      },
+      {
+        "c": "HUNER",
+        "n": "Hun Yenilenebilir Enerji Uretim AS",
+        "move": 15.2,
+        "th": "energy"
+      },
+      {
+        "c": "BALSU",
+        "n": "Balsu Gida Sanayi ve Ticaret Anonim Sirketi",
+        "move": 13.6,
         "th": "food"
       },
       {
         "c": "GMTAS",
         "n": "Gimat Magazacilik Insaat Sanayi ve Ticaret A.S.",
-        "move": 19.5,
+        "move": 13.3,
         "th": "retail"
-      },
-      {
-        "c": "SKYMD",
-        "n": "Seker Yatirim Menkul Degerler A.S.",
-        "move": 19.1,
-        "th": "finance"
-      },
-      {
-        "c": "UNLU",
-        "n": "Unlu Yatirim Holding A.S.",
-        "move": 16.6,
-        "th": "finance"
       }
     ],
-    "floor": 37414360,
+    "floor": 38522954,
     "of": 310
   },
   "peerGroups": [
@@ -4051,13 +4051,13 @@
   "peerStats": {
     "equity": {
       "count": 725,
-      "medianY1": 19.869500000000002,
-      "medianVol": 23.39
+      "medianY1": 19.849,
+      "medianVol": 23.37
     },
     "metals": {
-      "count": 56,
-      "medianY1": 28.281399999999998,
-      "medianVol": 25.66
+      "count": 55,
+      "medianY1": 28.3019,
+      "medianVol": 25.71
     },
     "foreign": {
       "count": 35,
@@ -4075,14 +4075,14 @@
       "medianVol": 1.48
     },
     "fundOfFunds": {
-      "count": 137,
-      "medianY1": 30.8238,
-      "medianVol": 8.33
+      "count": 138,
+      "medianY1": 31.0219,
+      "medianVol": 8.455
     },
     "balanced": {
       "count": 137,
-      "medianY1": 32.0999,
-      "medianVol": 13.8
+      "medianY1": 32.17995,
+      "medianVol": 13.91
     },
     "conservative": {
       "count": 205,
@@ -4135,5 +4135,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-28T08:45:11.242Z"
+  "analyticsBuiltAt": "2026-09-28T14:19:30.259Z"
 }
