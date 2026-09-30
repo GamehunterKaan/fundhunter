@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-30T08:58:10.184Z",
+  "lastUpdated": "2026-09-30T12:53:35.684Z",
   "latestDate": "2026-09-30",
   "lastWideRead": "2026-09-24T12:15:04.978Z",
   "rangeStart": "2025-09-30",
@@ -7,9 +7,9 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2060,
-    "priced": 2042,
-    "lagging": 18,
-    "implausible": 8,
+    "priced": 2044,
+    "lagging": 16,
+    "implausible": 5,
     "carried": 459,
     "byKind": {
       "YAT": 2024,
@@ -605,7 +605,7 @@
     "tourism",
     "textile"
   ],
-  "marketYield": 2,
+  "marketYield": 2.02,
   "themeCoverage": 97.2,
   "listedCodes": [
     "A1CAP",
@@ -1274,11 +1274,11 @@
         0.0989
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.095
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.095
       ],
       [
@@ -1408,12 +1408,12 @@
         0.0058
       ],
       [
-        "AKGRT",
+        "VAKFA",
         0.0057
       ],
       [
-        "VAKFA",
-        0.0056
+        "AKGRT",
+        0.0057
       ],
       [
         "ESCAR",
@@ -1570,11 +1570,11 @@
         0.0961
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0731
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0731
       ],
       [
@@ -1662,10 +1662,6 @@
         0.0072
       ],
       [
-        "SVGYO",
-        0.007
-      ],
-      [
         "ASGYO",
         0.0069
       ],
@@ -1682,6 +1678,10 @@
         0.0064
       ],
       [
+        "SVGYO",
+        0.0063
+      ],
+      [
         "KZBGY",
         0.0058
       ],
@@ -1691,19 +1691,19 @@
       ],
       [
         "MARMR",
-        0.0046
+        0.0051
       ],
       [
         "ZERGY",
-        0.0044
+        0.0042
+      ],
+      [
+        "ZGYO",
+        0.004
       ],
       [
         "BKRGY",
         0.0037
-      ],
-      [
-        "ZGYO",
-        0.0036
       ],
       [
         "SURGY",
@@ -1758,12 +1758,12 @@
         0.0025
       ],
       [
-        "SEGYO",
+        "LXGYO",
         0.0024
       ],
       [
-        "LXGYO",
-        0.0023
+        "SEGYO",
+        0.0024
       ],
       [
         "BEGYO",
@@ -1835,44 +1835,44 @@
     "semis": [
       [
         "CWENE",
-        0.4747
+        0.4763
       ],
       [
         "SMRTG",
-        0.1962
+        0.1969
       ],
       [
         "EMPAE",
-        0.1695
+        0.1666
       ],
       [
         "INTET",
-        0.1596
+        0.1602
       ]
     ],
     "tech": [
       [
         "ODINE",
-        0.1345
+        0.1346
       ],
       [
         "ARDYZ",
-        0.1099
+        0.11
       ],
       [
         "GESAN",
-        0.1099
+        0.11
       ],
       [
         "LOGO",
         0.0707
       ],
       [
-        "NETCD",
-        0.0628
+        "MIATK",
+        0.0622
       ],
       [
-        "MIATK",
+        "NETCD",
         0.0621
       ],
       [
@@ -1881,7 +1881,7 @@
       ],
       [
         "PATEK",
-        0.0479
+        0.048
       ],
       [
         "BINHO",
@@ -1921,7 +1921,7 @@
       ],
       [
         "LINK",
-        0.0172
+        0.0173
       ],
       [
         "ESCOM",
@@ -2005,11 +2005,11 @@
     "energy": [
       [
         "TUPRS",
-        0.3277
+        0.3278
       ],
       [
         "KCHOL",
-        0.2409
+        0.241
       ],
       [
         "ENJSA",
@@ -2072,15 +2072,15 @@
         0.0075
       ],
       [
-        "ECOGR",
-        0.0073
-      ],
-      [
         "ENTRA",
         0.0073
       ],
       [
         "LYDHO",
+        0.007
+      ],
+      [
+        "ECOGR",
         0.007
       ],
       [
@@ -2093,7 +2093,7 @@
       ],
       [
         "GWIND",
-        0.0048
+        0.0049
       ],
       [
         "ALFAS",
@@ -2149,7 +2149,7 @@
       ],
       [
         "BESTE",
-        0.0017
+        0.0016
       ],
       [
         "KONTR",
@@ -2183,11 +2183,11 @@
     "metals": [
       [
         "EREGL",
-        0.2231
+        0.2232
       ],
       [
         "ISDMR",
-        0.1592
+        0.1593
       ],
       [
         "TRALT",
@@ -2195,18 +2195,18 @@
       ],
       [
         "BRSAN",
-        0.0805
+        0.0806
       ],
       [
         "KARCL",
-        0.0595
+        0.0596
       ],
       [
         "TRMET",
         0.0446
       ],
       [
-        "KRDMB",
+        "KRDMD",
         0.0433
       ],
       [
@@ -2214,7 +2214,7 @@
         0.0433
       ],
       [
-        "KRDMD",
+        "KRDMB",
         0.0433
       ],
       [
@@ -2243,7 +2243,7 @@
       ],
       [
         "EKDMR",
-        0.0087
+        0.0085
       ],
       [
         "MEGMT",
@@ -2337,7 +2337,7 @@
       ],
       [
         "OZATD",
-        0.1421
+        0.142
       ],
       [
         "TTRAK",
@@ -2377,7 +2377,7 @@
       ],
       [
         "DOFRB",
-        0.0142
+        0.0135
       ],
       [
         "ULUSE",
@@ -2400,20 +2400,20 @@
         0.0101
       ],
       [
+        "TKNKA",
+        0.0096
+      ],
+      [
         "KARSN",
         0.0094
       ],
       [
         "MCARD",
-        0.0091
+        0.009
       ],
       [
         "INDES",
         0.0089
-      ],
-      [
-        "TKNKA",
-        0.0087
       ],
       [
         "BINBN",
@@ -2609,7 +2609,7 @@
       ],
       [
         "MEKAG",
-        0.0019
+        0.0018
       ],
       [
         "ARENA",
@@ -2851,7 +2851,7 @@
       ],
       [
         "UCAYM",
-        0.0031
+        0.003
       ],
       [
         "NATEN",
@@ -2951,11 +2951,11 @@
     "chemicals": [
       [
         "GUBRF",
-        0.5451
+        0.5452
       ],
       [
         "PETKM",
-        0.1928
+        0.1929
       ],
       [
         "HEKTS",
@@ -2963,7 +2963,7 @@
       ],
       [
         "POLTK",
-        0.0438
+        0.0439
       ],
       [
         "KLKIM",
@@ -2979,7 +2979,7 @@
       ],
       [
         "GENKM",
-        0.018
+        0.0177
       ],
       [
         "BAGFS",
@@ -3001,7 +3001,7 @@
     "food": [
       [
         "CCOLA",
-        0.242
+        0.2418
       ],
       [
         "AEFES",
@@ -3029,7 +3029,7 @@
       ],
       [
         "EFOR",
-        0.0337
+        0.0336
       ],
       [
         "ALKLC",
@@ -3084,20 +3084,20 @@
         0.0082
       ],
       [
+        "AKHAN",
+        0.0082
+      ],
+      [
         "BESLR",
         0.008
       ],
       [
-        "AKHAN",
-        0.0078
-      ],
-      [
         "MEYSU",
-        0.0077
+        0.0079
       ],
       [
         "BORSK",
-        0.0058
+        0.0057
       ],
       [
         "GOKNR",
@@ -3505,19 +3505,19 @@
     "tourism": [
       [
         "DOCO",
-        0.3483
+        0.3478
       ],
       [
         "TABGD",
-        0.1666
+        0.1664
       ],
       [
         "GRSEL",
-        0.0781
+        0.078
       ],
       [
         "NTHOL",
-        0.0568
+        0.0567
       ],
       [
         "SSAAT",
@@ -3529,11 +3529,11 @@
       ],
       [
         "GSRAY",
-        0.0322
+        0.0321
       ],
       [
         "AYCES",
-        0.026
+        0.0259
       ],
       [
         "KSTUR",
@@ -3545,7 +3545,7 @@
       ],
       [
         "BJKAS",
-        0.0202
+        0.0201
       ],
       [
         "TSPOR",
@@ -3556,12 +3556,12 @@
         0.0179
       ],
       [
-        "MERIT",
-        0.014
+        "ATATR",
+        0.0151
       ],
       [
-        "ATATR",
-        0.0138
+        "MERIT",
+        0.014
       ],
       [
         "KERVN",
@@ -3857,153 +3857,154 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "telecom",
-        "move": -2.9,
-        "of": 9
-      },
-      {
         "id": "retail",
-        "move": -3.12,
+        "move": -4.34,
         "of": 28
       },
       {
+        "id": "telecom",
+        "move": -4.52,
+        "of": 9
+      },
+      {
         "id": "construction",
-        "move": -3.72,
+        "move": -5.43,
         "of": 36
       },
       {
+        "id": "tourism",
+        "move": -5.58,
+        "of": 28
+      },
+      {
         "id": "transport",
-        "move": -4.03,
+        "move": -5.63,
         "of": 13
       },
       {
         "id": "energy",
-        "move": -4.24,
+        "move": -5.72,
         "of": 44
       },
       {
         "id": "banks",
-        "move": -4.38,
+        "move": -6.35,
         "of": 12
-      },
-      {
-        "id": "tourism",
-        "move": -4.78,
-        "of": 28
       },
       {
         "id": "autos",
-        "move": -4.99,
+        "move": -6.71,
         "of": 14
       },
       {
-        "id": "metals",
-        "move": -6.05,
-        "of": 37
-      },
-      {
         "id": "realEstate",
-        "move": -6.76,
+        "move": -7.08,
         "of": 63
       },
       {
-        "id": "food",
-        "move": -7.14,
-        "of": 67
+        "id": "metals",
+        "move": -7.31,
+        "of": 37
       },
       {
         "id": "chemicals",
-        "move": -7.19,
+        "move": -8.03,
         "of": 12
       },
       {
+        "id": "food",
+        "move": -8.45,
+        "of": 67
+      },
+      {
         "id": "defence",
-        "move": -8.99,
+        "move": -10.02,
         "of": 5
       },
       {
         "id": "textile",
-        "move": -10.5,
+        "move": -13.04,
         "of": 33
       },
       {
         "id": "tech",
-        "move": -14.94,
+        "move": -16.14,
         "of": 28
       },
       {
         "id": "health",
-        "move": -15.61,
+        "move": -16.17,
         "of": 16
       },
       {
         "id": "finance",
-        "move": -20.17,
+        "move": -20.74,
         "of": 61
       },
       {
-        "id": "semis",
-        "move": -20.21,
-        "of": 4
+        "id": "industrial",
+        "move": -21.56,
+        "of": 103
       },
       {
-        "id": "industrial",
-        "move": -21.02,
-        "of": 103
+        "id": "semis",
+        "move": -21.58,
+        "of": 4
       }
     ],
     "shares": [
       {
         "c": "ZGYO",
         "n": "Z Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 53.2,
+        "move": 55.9,
         "th": "realEstate"
       },
       {
         "c": "CITAS",
         "n": "Citlekci Magazacilik Gida AS",
-        "move": 47.3,
+        "move": 49.8,
         "th": "retail"
       },
       {
         "c": "SKYMD",
         "n": "Seker Yatirim Menkul Degerler A.S.",
-        "move": 30.8,
+        "move": 29,
         "th": "finance"
       },
       {
         "c": "AKFIS",
         "n": "Akfen insaat Turizm ve Ticaret AS",
-        "move": 26.6,
+        "move": 27.3,
         "th": "construction",
         "spec": 1
       },
       {
-        "c": "VRGYO",
-        "n": "Vera Konsept Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 24.8,
-        "th": "realEstate"
-      },
-      {
         "c": "MIATK",
         "n": "MIA Teknoloji AS",
-        "move": 21.3,
+        "move": 15.4,
         "th": "tech"
       },
       {
-        "c": "ETILR",
-        "n": "Etiler Gida ve Ticari Yatirimlar Sanayi ve Ticaret A.S.",
-        "move": 16.4,
-        "th": "tourism"
+        "c": "HRKET",
+        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
+        "move": 13.7,
+        "th": "transport",
+        "spec": 1
       },
       {
         "c": "TUCLK",
         "n": "Tugcelik Aluminyum ve Metal Mamulleri Sanayi ve Ticaret A.S.",
-        "move": 15,
+        "move": 11.4,
+        "th": "metals"
+      },
+      {
+        "c": "DMSAS",
+        "n": "Demisas Dokum Emaye Mamulleri Sanayi A.S.",
+        "move": 11.4,
         "th": "metals"
       }
     ],
-    "floor": 31275676,
+    "floor": 32158481,
     "of": 310
   },
   "peerGroups": [
@@ -4071,23 +4072,23 @@
     },
     "cash": {
       "count": 219,
-      "medianY1": 44.884,
+      "medianY1": 44.845150000000004,
       "medianVol": 1.47
     },
     "fundOfFunds": {
       "count": 137,
       "medianY1": 29.4874,
-      "medianVol": 9.08
+      "medianVol": 8.48
     },
     "balanced": {
-      "count": 145,
-      "medianY1": 31.2735,
-      "medianVol": 13.96
+      "count": 146,
+      "medianY1": 31.26175,
+      "medianVol": 13.94
     },
     "conservative": {
-      "count": 205,
-      "medianY1": 43.0712,
-      "medianVol": 1.88
+      "count": 204,
+      "medianY1": 43.18,
+      "medianVol": 1.7650000000000001
     }
   },
   "cashReturn": 46.51,
@@ -4135,5 +4136,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-09-30T08:59:20.003Z"
+  "analyticsBuiltAt": "2026-09-30T12:53:49.214Z"
 }
