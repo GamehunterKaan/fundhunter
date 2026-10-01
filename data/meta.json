@@ -1,14 +1,14 @@
 {
-  "lastUpdated": "2026-10-01T07:00:33.638Z",
+  "lastUpdated": "2026-10-01T12:26:22.980Z",
   "latestDate": "2026-10-01",
-  "lastWideRead": "2026-09-24T12:15:04.978Z",
+  "lastWideRead": "2026-10-01T12:26:22.980Z",
   "rangeStart": "2025-10-01",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2056,
-    "priced": 1956,
-    "lagging": 100,
+    "priced": 2041,
+    "lagging": 15,
     "implausible": 5,
     "carried": 458,
     "byKind": {
@@ -605,7 +605,7 @@
     "tourism",
     "textile"
   ],
-  "marketYield": 2.02,
+  "marketYield": 2.08,
   "themeCoverage": 97.2,
   "listedCodes": [
     "A1CAP",
@@ -1313,7 +1313,7 @@
     "finance": [
       [
         "DSTKF",
-        0.207
+        0.2071
       ],
       [
         "INVES",
@@ -1404,16 +1404,16 @@
         0.0063
       ],
       [
-        "VAKFA",
-        0.006
-      ],
-      [
         "OYYAT",
         0.006
       ],
       [
         "AKGRT",
         0.006
+      ],
+      [
+        "VAKFA",
+        0.0057
       ],
       [
         "GEDIK",
@@ -1563,27 +1563,27 @@
       ],
       [
         "ZRGYO",
-        0.0984
+        0.0985
       ],
       [
         "TRGYO",
-        0.0971
-      ],
-      [
-        "EKGYO",
-        0.0734
+        0.0972
       ],
       [
         "DMLKT",
         0.0734
       ],
       [
+        "EKGYO",
+        0.0734
+      ],
+      [
         "RGYAS",
-        0.0681
+        0.0682
       ],
       [
         "YGGYO",
-        0.0533
+        0.0534
       ],
       [
         "ALARK",
@@ -1619,7 +1619,7 @@
       ],
       [
         "PSGYO",
-        0.012
+        0.0121
       ],
       [
         "PAGYO",
@@ -1655,7 +1655,7 @@
       ],
       [
         "VKGYO",
-        0.0077
+        0.0078
       ],
       [
         "SRVGY",
@@ -1668,10 +1668,6 @@
       [
         "FZLGY",
         0.007
-      ],
-      [
-        "SVGYO",
-        0.0064
       ],
       [
         "ALGYO",
@@ -1690,15 +1686,19 @@
         0.0059
       ],
       [
-        "MARMR",
-        0.0052
+        "SVGYO",
+        0.0058
       ],
       [
-        "ZERGY",
-        0.0043
+        "MARMR",
+        0.0048
       ],
       [
         "ZGYO",
+        0.0045
+      ],
+      [
+        "ZERGY",
         0.0041
       ],
       [
@@ -1754,12 +1754,12 @@
         0.0026
       ],
       [
-        "MSGYO",
+        "LXGYO",
         0.0025
       ],
       [
-        "LXGYO",
-        0.0024
+        "MSGYO",
+        0.0025
       ],
       [
         "SEGYO",
@@ -1767,7 +1767,7 @@
       ],
       [
         "BEGYO",
-        0.0022
+        0.0023
       ],
       [
         "EDIP",
@@ -1835,65 +1835,65 @@
     "semis": [
       [
         "CWENE",
-        0.4583
+        0.4633
       ],
       [
         "SMRTG",
-        0.2008
+        0.203
       ],
       [
         "EMPAE",
-        0.1771
+        0.1681
       ],
       [
         "INTET",
-        0.1638
+        0.1656
       ]
     ],
     "tech": [
       [
         "ODINE",
-        0.1256
+        0.1259
       ],
       [
         "GESAN",
-        0.1042
+        0.1044
       ],
       [
         "ARDYZ",
-        0.1032
+        0.1034
       ],
       [
         "LOGO",
-        0.0729
+        0.0731
       ],
       [
         "NETCD",
-        0.0644
+        0.0626
       ],
       [
         "MIATK",
-        0.0601
+        0.0602
       ],
       [
         "HTTBT",
-        0.0536
+        0.0537
       ],
       [
         "PATEK",
-        0.0518
+        0.0519
       ],
       [
         "BINHO",
-        0.0458
+        0.0459
       ],
       [
         "FORTE",
-        0.035
+        0.0351
       ],
       [
         "ATATP",
-        0.0317
+        0.0318
       ],
       [
         "NETAS",
@@ -1905,7 +1905,7 @@
       ],
       [
         "FONET",
-        0.0217
+        0.0218
       ],
       [
         "ALCTL",
@@ -1913,7 +1913,7 @@
       ],
       [
         "REEDR",
-        0.0181
+        0.0182
       ],
       [
         "LINK",
@@ -1921,7 +1921,7 @@
       ],
       [
         "AGROT",
-        0.0176
+        0.0177
       ],
       [
         "ESCOM",
@@ -1957,7 +1957,7 @@
       ],
       [
         "KFEIN",
-        0.0064
+        0.0065
       ],
       [
         "SMART",
@@ -2005,11 +2005,11 @@
     "energy": [
       [
         "TUPRS",
-        0.3279
+        0.3281
       ],
       [
         "KCHOL",
-        0.2391
+        0.2392
       ],
       [
         "ENJSA",
@@ -2021,11 +2021,11 @@
       ],
       [
         "AHGAZ",
-        0.0509
+        0.051
       ],
       [
         "AKSEN",
-        0.0404
+        0.0405
       ],
       [
         "AYGAZ",
@@ -2077,7 +2077,7 @@
       ],
       [
         "ECOGR",
-        0.0071
+        0.0065
       ],
       [
         "LYDHO",
@@ -2113,7 +2113,7 @@
       ],
       [
         "ODAS",
-        0.0037
+        0.0038
       ],
       [
         "NTGAZ",
@@ -2183,11 +2183,11 @@
     "metals": [
       [
         "EREGL",
-        0.2242
+        0.2243
       ],
       [
         "ISDMR",
-        0.1597
+        0.1598
       ],
       [
         "TRALT",
@@ -2219,7 +2219,7 @@
       ],
       [
         "CVKMD",
-        0.0414
+        0.0415
       ],
       [
         "KCAER",
@@ -2243,7 +2243,7 @@
       ],
       [
         "EKDMR",
-        0.0087
+        0.0082
       ],
       [
         "MEGMT",
@@ -2251,7 +2251,7 @@
       ],
       [
         "BUCIM",
-        0.0065
+        0.0066
       ],
       [
         "KOCMT",
@@ -2323,7 +2323,7 @@
       ],
       [
         "FORMT",
-        0.0009
+        0.001
       ],
       [
         "BMSCH",
@@ -2333,23 +2333,23 @@
     "industrial": [
       [
         "ASTOR",
-        0.2314
+        0.2316
       ],
       [
         "OZATD",
-        0.1361
+        0.1362
       ],
       [
         "TTRAK",
-        0.0495
+        0.0496
       ],
       [
         "IEYHO",
-        0.0432
+        0.0433
       ],
       [
         "EUPWR",
-        0.0402
+        0.0403
       ],
       [
         "KLYPV",
@@ -2373,11 +2373,11 @@
       ],
       [
         "POLHO",
-        0.0163
+        0.0164
       ],
       [
         "DOFRB",
-        0.0144
+        0.0136
       ],
       [
         "ULUSE",
@@ -2397,23 +2397,23 @@
       ],
       [
         "TKNKA",
-        0.0102
+        0.0104
       ],
       [
         "KARSN",
-        0.0099
+        0.01
       ],
       [
         "GEREL",
         0.0097
       ],
       [
-        "MCARD",
-        0.0096
-      ],
-      [
         "INDES",
         0.0095
+      ],
+      [
+        "MCARD",
+        0.0093
       ],
       [
         "BERA",
@@ -2481,7 +2481,7 @@
       ],
       [
         "SMRVA",
-        0.0048
+        0.0049
       ],
       [
         "PENTA",
@@ -2497,7 +2497,7 @@
       ],
       [
         "INTEM",
-        0.0044
+        0.0045
       ],
       [
         "EKOS",
@@ -2505,7 +2505,7 @@
       ],
       [
         "FRMPL",
-        0.0044
+        0.0043
       ],
       [
         "MANAS",
@@ -2609,7 +2609,7 @@
       ],
       [
         "MEKAG",
-        0.002
+        0.0019
       ],
       [
         "ARENA",
@@ -2747,7 +2747,7 @@
     "construction": [
       [
         "ENKAI",
-        0.4399
+        0.44
       ],
       [
         "OYAKC",
@@ -2783,7 +2783,7 @@
       ],
       [
         "CMENT",
-        0.0186
+        0.0187
       ],
       [
         "MASFN",
@@ -2851,7 +2851,7 @@
       ],
       [
         "UCAYM",
-        0.0031
+        0.003
       ],
       [
         "NATEN",
@@ -2951,7 +2951,7 @@
     "chemicals": [
       [
         "GUBRF",
-        0.5491
+        0.5492
       ],
       [
         "PETKM",
@@ -2979,7 +2979,7 @@
       ],
       [
         "GENKM",
-        0.018
+        0.0179
       ],
       [
         "BAGFS",
@@ -3001,15 +3001,15 @@
     "food": [
       [
         "CCOLA",
-        0.2419
+        0.2421
       ],
       [
         "AEFES",
-        0.1168
+        0.1169
       ],
       [
         "KENT",
-        0.1004
+        0.1005
       ],
       [
         "AGHOL",
@@ -3017,11 +3017,11 @@
       ],
       [
         "TBORG",
-        0.0434
+        0.0435
       ],
       [
         "ARMGD",
-        0.0382
+        0.0383
       ],
       [
         "ULKER",
@@ -3065,11 +3065,11 @@
       ],
       [
         "TUKAS",
-        0.0097
+        0.0098
       ],
       [
         "OFSYM",
-        0.009
+        0.0091
       ],
       [
         "LYDYE",
@@ -3084,16 +3084,16 @@
         0.0084
       ],
       [
-        "AKHAN",
-        0.0083
+        "BESLR",
+        0.008
       ],
       [
         "MEYSU",
-        0.008
+        0.0078
       ],
       [
-        "BESLR",
-        0.008
+        "AKHAN",
+        0.0076
       ],
       [
         "GOKNR",
@@ -3105,7 +3105,7 @@
       ],
       [
         "ATAKP",
-        0.005
+        0.0051
       ],
       [
         "KRVGD",
@@ -3129,7 +3129,7 @@
       ],
       [
         "SEGMN",
-        0.0039
+        0.004
       ],
       [
         "METRO",
@@ -3165,7 +3165,7 @@
       ],
       [
         "ELITE",
-        0.0027
+        0.0028
       ],
       [
         "YAPRK",
@@ -3505,31 +3505,31 @@
     "tourism": [
       [
         "DOCO",
-        0.3489
+        0.3494
       ],
       [
         "TABGD",
-        0.1675
+        0.1677
       ],
       [
         "GRSEL",
-        0.0847
+        0.0849
       ],
       [
         "NTHOL",
-        0.0531
+        0.0532
       ],
       [
         "SSAAT",
-        0.0509
+        0.051
       ],
       [
         "FENER",
-        0.0436
+        0.0437
       ],
       [
         "GSRAY",
-        0.0319
+        0.032
       ],
       [
         "AYCES",
@@ -3537,11 +3537,11 @@
       ],
       [
         "KSTUR",
-        0.0228
+        0.0229
       ],
       [
         "BJKAS",
-        0.0206
+        0.0207
       ],
       [
         "MAALT",
@@ -3556,11 +3556,11 @@
         0.0174
       ],
       [
-        "ATATR",
-        0.0152
+        "MERIT",
+        0.0138
       ],
       [
-        "MERIT",
+        "ATATR",
         0.0137
       ],
       [
@@ -3589,7 +3589,7 @@
       ],
       [
         "BYDNR",
-        0.0052
+        0.0053
       ],
       [
         "MARTI",
@@ -3753,97 +3753,97 @@
   },
   "bist100": [
     "AEFES",
+    "AGHOL",
+    "AHGAZ",
     "AKBNK",
+    "AKCNS",
+    "AKFYE",
     "AKSA",
     "AKSEN",
     "ALARK",
+    "ALBRK",
     "ALTNY",
+    "ANHYT",
     "ANSGR",
     "ARCLK",
     "ASELS",
     "ASTOR",
-    "BALSU",
+    "AYGAZ",
     "BERA",
     "BIMAS",
+    "BINHO",
     "BRSAN",
     "BRYAT",
-    "BSOKE",
     "BTCIM",
     "CANTE",
     "CCOLA",
     "CIMSA",
     "CVKMD",
     "CWENE",
-    "DAPGM",
     "DOAS",
     "DOHOL",
-    "DSTKF",
     "ECILC",
-    "EFOR",
+    "ECZYT",
+    "EGEEN",
+    "EGGUB",
     "EKGYO",
     "ENERY",
     "ENJSA",
     "ENKAI",
+    "ENTRA",
     "EREGL",
-    "ESEN",
-    "EUPWR",
     "EUREN",
     "FENER",
     "FROTO",
     "GARAN",
-    "GENIL",
-    "GESAN",
     "GLRMK",
+    "GLYHO",
     "GRSEL",
-    "GRTHO",
-    "GSRAY",
     "GUBRF",
+    "GWIND",
     "HALKB",
     "HEKTS",
-    "IEYHO",
     "ISCTR",
+    "ISDMR",
     "ISMEN",
-    "IZENR",
+    "KARSN",
+    "KATMR",
+    "KCAER",
     "KCHOL",
-    "KLRHO",
+    "KORDS",
     "KRDMD",
-    "KTLEV",
-    "KUYAS",
-    "MAGEN",
+    "LMKDC",
     "MAVI",
     "MGROS",
-    "MIATK",
     "MPARK",
     "OBAMS",
     "ODAS",
-    "ODINE",
     "OTKAR",
     "OYAKC",
     "PAHOL",
-    "PASEU",
-    "PATEK",
     "PETKM",
     "PGSUS",
-    "PSGYO",
-    "QUAGR",
-    "RALYH",
-    "REEDR",
+    "RGYAS",
+    "RYSAS",
     "SAHOL",
-    "SARKY",
     "SASA",
     "SISE",
-    "SKBNK",
+    "SNGYO",
     "SOKM",
+    "TABGD",
     "TAVHL",
     "TCELL",
+    "TCKRC",
     "THYAO",
     "TKFEN",
     "TOASO",
     "TRALT",
     "TRENJ",
+    "TRGYO",
     "TRMET",
     "TSKB",
     "TTKOM",
+    "TTRAK",
     "TUKAS",
     "TUPRS",
     "TURSG",
@@ -3857,154 +3857,153 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "retail",
-        "move": -4.78,
-        "of": 28
-      },
-      {
         "id": "telecom",
-        "move": -4.93,
+        "move": -2.54,
         "of": 9
       },
       {
-        "id": "construction",
-        "move": -5.06,
-        "of": 36
-      },
-      {
-        "id": "energy",
-        "move": -5.73,
-        "of": 44
-      },
-      {
-        "id": "tourism",
-        "move": -6.14,
-        "of": 28
-      },
-      {
-        "id": "transport",
-        "move": -6.57,
-        "of": 13
-      },
-      {
-        "id": "banks",
-        "move": -6.64,
-        "of": 12
-      },
-      {
-        "id": "realEstate",
-        "move": -7.33,
-        "of": 63
-      },
-      {
-        "id": "autos",
-        "move": -7.37,
-        "of": 14
-      },
-      {
-        "id": "metals",
-        "move": -7.88,
-        "of": 37
-      },
-      {
-        "id": "food",
-        "move": -8.44,
-        "of": 67
-      },
-      {
-        "id": "chemicals",
-        "move": -8.58,
-        "of": 12
-      },
-      {
         "id": "defence",
-        "move": -11.12,
+        "move": -2.78,
         "of": 5
       },
       {
+        "id": "tourism",
+        "move": -3.35,
+        "of": 28
+      },
+      {
+        "id": "retail",
+        "move": -3.78,
+        "of": 28
+      },
+      {
+        "id": "autos",
+        "move": -4.28,
+        "of": 14
+      },
+      {
+        "id": "banks",
+        "move": -4.6,
+        "of": 12
+      },
+      {
+        "id": "transport",
+        "move": -4.6,
+        "of": 13
+      },
+      {
+        "id": "construction",
+        "move": -5.01,
+        "of": 36
+      },
+      {
+        "id": "realEstate",
+        "move": -5.06,
+        "of": 63
+      },
+      {
+        "id": "energy",
+        "move": -5.21,
+        "of": 44
+      },
+      {
+        "id": "food",
+        "move": -5.66,
+        "of": 67
+      },
+      {
+        "id": "metals",
+        "move": -7.07,
+        "of": 37
+      },
+      {
+        "id": "chemicals",
+        "move": -8.03,
+        "of": 12
+      },
+      {
         "id": "textile",
-        "move": -13.02,
+        "move": -8.5,
         "of": 33
       },
       {
         "id": "tech",
-        "move": -14.75,
+        "move": -9.15,
         "of": 28
       },
       {
         "id": "health",
-        "move": -15.12,
+        "move": -12.11,
         "of": 16
       },
       {
-        "id": "finance",
-        "move": -20.1,
-        "of": 61
+        "id": "semis",
+        "move": -16.61,
+        "of": 4
       },
       {
         "id": "industrial",
-        "move": -20.9,
+        "move": -17.82,
         "of": 103
       },
       {
-        "id": "semis",
-        "move": -21.23,
-        "of": 4
+        "id": "finance",
+        "move": -18.36,
+        "of": 61
       }
     ],
     "shares": [
       {
+        "c": "CITAS",
+        "n": "Citlekci Magazacilik Gida AS",
+        "move": 82.9,
+        "th": "retail"
+      },
+      {
         "c": "ZGYO",
         "n": "Z Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 61.4,
+        "move": 32.1,
         "th": "realEstate"
       },
       {
-        "c": "CITAS",
-        "n": "Citlekci Magazacilik Gida AS",
-        "move": 49.8,
-        "th": "retail"
+        "c": "DMSAS",
+        "n": "Demisas Dokum Emaye Mamulleri Sanayi A.S.",
+        "move": 28.2,
+        "th": "metals"
       },
       {
         "c": "SKYMD",
         "n": "Seker Yatirim Menkul Degerler A.S.",
-        "move": 34.7,
+        "move": 25.1,
         "th": "finance"
       },
       {
         "c": "AKFIS",
         "n": "Akfen insaat Turizm ve Ticaret AS",
-        "move": 27.6,
+        "move": 21.4,
         "th": "construction",
         "spec": 1
       },
       {
-        "c": "MIATK",
-        "n": "MIA Teknoloji AS",
-        "move": 15.5,
-        "th": "tech"
+        "c": "KGYO",
+        "n": "KORAY GAYRIMENKUL YATIRIM ORTAKLIGI A.S. Class B",
+        "move": 20,
+        "th": "realEstate"
       },
       {
-        "c": "DMSAS",
-        "n": "Demisas Dokum Emaye Mamulleri Sanayi A.S.",
-        "move": 15.5,
-        "th": "metals"
+        "c": "GRTHO",
+        "n": "Grainturk Holding A.S.",
+        "move": 19,
+        "th": "industrial"
       },
       {
         "c": "ETILR",
         "n": "Etiler Gida ve Ticari Yatirimlar Sanayi ve Ticaret A.S.",
-        "move": 12.2,
+        "move": 15.7,
         "th": "tourism"
-      },
-      {
-        "c": "HRKET",
-        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 11,
-        "th": "transport",
-        "spec": 1
       }
     ],
-    "floor": 33472330,
+    "floor": 33804650,
     "of": 310
   },
   "peerGroups": [
@@ -4051,9 +4050,9 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 700,
-      "medianY1": 12.0043,
-      "medianVol": 23.585
+      "count": 703,
+      "medianY1": 12.1872,
+      "medianVol": 23.59
     },
     "metals": {
       "count": 55,
@@ -4061,34 +4060,34 @@
       "medianVol": 26.02
     },
     "foreign": {
-      "count": 34,
-      "medianY1": 22.9389,
-      "medianVol": 18.73
+      "count": 35,
+      "medianY1": 22.4649,
+      "medianVol": 18.56
     },
     "bonds": {
-      "count": 548,
-      "medianY1": 21.1016,
-      "medianVol": 2.855
+      "count": 549,
+      "medianY1": 21.1075,
+      "medianVol": 2.85
     },
     "cash": {
-      "count": 222,
-      "medianY1": 43.9062,
+      "count": 225,
+      "medianY1": 44.0301,
       "medianVol": 1.47
     },
     "fundOfFunds": {
       "count": 151,
-      "medianY1": 21.12645,
-      "medianVol": 8.12
+      "medianY1": 20.792099999999998,
+      "medianVol": 8.32
     },
     "balanced": {
-      "count": 148,
-      "medianY1": 23.3342,
+      "count": 138,
+      "medianY1": 23.657449999999997,
       "medianVol": 14.4
     },
     "conservative": {
-      "count": 198,
-      "medianY1": 39.67335,
-      "medianVol": 1.7149999999999999
+      "count": 200,
+      "medianY1": 38.5192,
+      "medianVol": 1.845
     }
   },
   "cashReturn": 46.46,
@@ -4136,5 +4135,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-01T07:00:51.706Z"
+  "analyticsBuiltAt": "2026-10-01T12:27:35.150Z"
 }
