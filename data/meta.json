@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-01T05:58:27.725Z",
+  "lastUpdated": "2026-10-01T06:29:37.063Z",
   "latestDate": "2026-10-01",
   "lastWideRead": "2026-09-24T12:15:04.978Z",
   "rangeStart": "2025-10-01",
@@ -7,9 +7,9 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2055,
-    "priced": 1739,
-    "lagging": 316,
-    "implausible": 2,
+    "priced": 1888,
+    "lagging": 167,
+    "implausible": 4,
     "carried": 458,
     "byKind": {
       "YAT": 2019,
@@ -1274,11 +1274,11 @@
         0.0989
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.095
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.095
       ],
       [
@@ -1570,11 +1570,11 @@
         0.0961
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0731
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0731
       ],
       [
@@ -2206,11 +2206,11 @@
         0.0446
       ],
       [
-        "KRDMD",
+        "KRDMB",
         0.0433
       ],
       [
-        "KRDMB",
+        "KRDMD",
         0.0433
       ],
       [
@@ -4051,9 +4051,9 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 704,
-      "medianY1": 11.63,
-      "medianVol": 23.575
+      "count": 700,
+      "medianY1": 12.0043,
+      "medianVol": 23.585
     },
     "metals": {
       "count": 55,
@@ -4071,19 +4071,19 @@
       "medianVol": 2.86
     },
     "cash": {
-      "count": 221,
-      "medianY1": 43.968149999999994,
+      "count": 222,
+      "medianY1": 43.9062,
       "medianVol": 1.47
     },
     "fundOfFunds": {
-      "count": 146,
-      "medianY1": 22.0074,
-      "medianVol": 8.219999999999999
+      "count": 151,
+      "medianY1": 21.12645,
+      "medianVol": 8.12
     },
     "balanced": {
-      "count": 149,
-      "medianY1": 23.657449999999997,
-      "medianVol": 14.365
+      "count": 147,
+      "medianY1": 23.4144,
+      "medianVol": 14.425
     },
     "conservative": {
       "count": 200,
@@ -4091,13 +4091,13 @@
       "medianVol": 1.7149999999999999
     }
   },
-  "cashReturn": 46.47,
+  "cashReturn": 46.46,
   "cashReturns": {
     "m1": 2.95,
     "m3": 9.95,
     "m6": 21.31,
     "ytd": 32.98,
-    "y1": 46.47,
+    "y1": 46.46,
     "y3": 254.78,
     "y5": 430
   },
@@ -4136,5 +4136,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-01T05:58:42.701Z"
+  "analyticsBuiltAt": "2026-10-01T06:29:50.702Z"
 }
