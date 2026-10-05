@@ -1,18 +1,18 @@
 {
-  "lastUpdated": "2026-10-03T15:08:12.093Z",
-  "latestDate": "2026-10-02",
+  "lastUpdated": "2026-10-05T05:50:04.905Z",
+  "latestDate": "2026-10-05",
   "lastWideRead": "2026-10-01T12:26:22.980Z",
-  "rangeStart": "2025-10-02",
+  "rangeStart": "2025-10-05",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2054,
-    "priced": 2041,
-    "lagging": 13,
+    "funds": 2051,
+    "priced": 1303,
+    "lagging": 748,
     "implausible": 4,
     "carried": 457,
     "byKind": {
-      "YAT": 2018,
+      "YAT": 2015,
       "BYF": 36
     }
   },
@@ -1570,11 +1570,11 @@
         0.0968
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0752
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0752
       ],
       [
@@ -2210,11 +2210,11 @@
         0.0435
       ],
       [
-        "KRDMB",
+        "KRDMA",
         0.0426
       ],
       [
-        "KRDMA",
+        "KRDMB",
         0.0426
       ],
       [
@@ -3505,19 +3505,19 @@
     "tourism": [
       [
         "DOCO",
-        0.346
+        0.3465
       ],
       [
         "TABGD",
-        0.1729
+        0.1728
       ],
       [
         "GRSEL",
-        0.0798
+        0.0797
       ],
       [
         "NTHOL",
-        0.053
+        0.0529
       ],
       [
         "SSAAT",
@@ -4050,55 +4050,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 703,
-      "medianY1": 15.0553,
-      "medianVol": 23.555
+      "count": 708,
+      "medianY1": 0,
+      "medianVol": 23.47
     },
     "metals": {
       "count": 56,
-      "medianY1": 22.9459,
-      "medianVol": 25.95
+      "medianY1": 21.26655,
+      "medianVol": 25.87
     },
     "foreign": {
-      "count": 36,
-      "medianY1": 34.1824,
-      "medianVol": 17.845
+      "count": 35,
+      "medianY1": 0,
+      "medianVol": 18.57
     },
     "bonds": {
-      "count": 545,
-      "medianY1": 21.4337,
-      "medianVol": 2.89
+      "count": 542,
+      "medianY1": 17.90685,
+      "medianVol": 2.885
     },
     "cash": {
       "count": 226,
-      "medianY1": 44.4954,
-      "medianVol": 1.47
+      "medianY1": 36.83,
+      "medianVol": 1.48
     },
     "fundOfFunds": {
-      "count": 147,
-      "medianY1": 30.78085,
-      "medianVol": 8.31
+      "count": 145,
+      "medianY1": 0,
+      "medianVol": 9.015
     },
     "balanced": {
-      "count": 143,
-      "medianY1": 29.89,
-      "medianVol": 14.135000000000002
+      "count": 137,
+      "medianY1": 2.86,
+      "medianVol": 13.915
     },
     "conservative": {
-      "count": 198,
-      "medianY1": 42.99125,
-      "medianVol": 1.72
+      "count": 202,
+      "medianY1": 23.8013,
+      "medianVol": 1.705
     }
   },
-  "cashReturn": 46.44,
+  "cashReturn": 46.22,
   "cashReturns": {
-    "m1": 2.94,
-    "m3": 9.94,
-    "m6": 21.3,
-    "ytd": 33.11,
-    "y1": 46.44,
-    "y3": 256.01,
-    "y5": 431.13
+    "m1": 3.03,
+    "m3": 9.92,
+    "m6": 21.26,
+    "ytd": 33.49,
+    "y1": 46.22,
+    "y3": 253.33,
+    "y5": 423.05
   },
   "cashBasis": {
     "m1": {
@@ -4135,5 +4135,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-04T16:14:49.108Z"
+  "analyticsBuiltAt": "2026-10-05T05:50:17.863Z"
 }
