@@ -2,12 +2,12 @@
  "code": "BTL",
  "kapCode": "OPTLR",
  "name": "BTL-OSMANLI PORTFÖY BIST TLREF ENDEKSİ (TL) BORSA YATIRIM",
- "period": "Ağustos-2026",
- "prevPeriod": "2026-07",
- "publishedAt": "04.09.2026 16:55:53",
- "disclosure": 1658996,
+ "period": "Eylül-2026",
+ "prevPeriod": "2026-08",
+ "publishedAt": "05.10.2026 12:12:31",
+ "disclosure": 1671829,
  "form": "A",
- "portfolioValue": 144094649.43,
+ "portfolioValue": 148165388.05,
  "netAssetValue": null,
  "warnings": [],
  "holdings": [
@@ -20,9 +20,22 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 180000,
-   "value": 198080.24,
-   "weight": 0.14,
+   "value": 184025.36,
+   "weight": 0.12,
    "prevWeight": 0.14
+  },
+  {
+   "code": "TRB170327T15",
+   "isin": "TRB170327T15",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 117000000,
+   "value": 117118570.68,
+   "weight": 79.05,
+   "prevWeight": null
   },
   {
    "code": "TRT051033T12",
@@ -32,23 +45,10 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 2002049.32,
-   "value": 2002049.32,
-   "weight": 1.39,
-   "prevWeight": null
-  },
-  {
-   "code": "TRT080131T12",
-   "isin": "TRT080131T12",
-   "ref": null,
-   "name": "HAZİNE",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 114115249.32,
-   "value": 114115249.32,
-   "weight": 79.19,
-   "prevWeight": null
+   "nominal": 2000000,
+   "value": 2002026.85,
+   "weight": 1.35,
+   "prevWeight": 1.39
   },
   {
    "code": "TPP",
@@ -58,10 +58,10 @@
    "currency": null,
    "group": "TPP",
    "subgroup": null,
-   "nominal": 27779270.55,
-   "value": 27779270.55,
-   "weight": 19.28,
-   "prevWeight": 0.17
+   "nominal": 28860765.16,
+   "value": 28860765.16,
+   "weight": 19.48,
+   "prevWeight": 19.28
   }
  ]
 }
