@@ -282,6 +282,21 @@ test('positions repeated in a filing add up instead of overwriting', () => {
   assert.equal(est.count, 2);
 });
 
+test('leverage preserves full share exposure and scales the estimated move', () => {
+  // A fund can borrow to hold 175% of its net assets in shares. Keep this
+  // regression independent of a real fund's changing monthly allocation.
+  const est = estimateMove([
+    share('ASELS', 175),
+    { code: 'BORROWING', weight: -75, group: 'T.REPO' },
+  ], onMarket('bist', { ASELS: { price: 1, change: 2 } }));
+
+  assert.equal(est.priced, 175, 'leverage should survive as leverage');
+  assert.ok(Math.abs(est.move - 3.5) < 1e-10);
+  assert.equal(est.total, 100);
+  assert.equal(est.reliable, true);
+  assert.equal(est.count, 1, 'borrowing is not priced as a share');
+});
+
 test('a filing whose weights are not a portfolio is marked unreliable', () => {
   // Around a dozen filings parse into weights summing to millions. Their row
   // prices are still real prices, so the table keeps them; no total derived
@@ -415,13 +430,6 @@ test('the committed holdings match the tickers the exchange actually lists', asy
   assert.deepEqual(mispriced.slice(0, 5), [], 'non-share rows were given a share price');
   assert.ok(priceable > 250, `only ${priceable} funds cleared the coverage floor`);
   assert.ok(mostlyPriced > 50, `only ${mostlyPriced} funds are almost fully priced`);
-
-  // Coverage above 100% is not an error to clamp away: a handful of funds
-  // borrow to hold more shares than they have net assets, and a fund with 175%
-  // of itself in shares really does move 1.75 times what the market does.
-  const levered = JSON.parse(await fs.readFile(new URL('IIE.json', dir), 'utf8'));
-  assert.ok(estimateMove(levered.holdings, quotes).priced > 100,
-    'leverage should survive as leverage');
 });
 
 test('the funds holding foreign shares are found and asked for', async () => {
