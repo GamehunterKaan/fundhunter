@@ -1,18 +1,18 @@
 {
-  "lastUpdated": "2026-10-12T02:24:13.047Z",
-  "latestDate": "2026-10-09",
+  "lastUpdated": "2026-10-12T09:41:32.578Z",
+  "latestDate": "2026-10-12",
   "lastWideRead": "2026-10-11T09:47:25.448Z",
-  "rangeStart": "2025-10-09",
+  "rangeStart": "2025-10-12",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
-    "funds": 2042,
-    "priced": 2031,
-    "lagging": 11,
-    "implausible": 18,
+    "funds": 2037,
+    "priced": 2030,
+    "lagging": 7,
+    "implausible": 1,
     "carried": 534,
     "byKind": {
-      "YAT": 2006,
+      "YAT": 2001,
       "BYF": 36
     }
   },
@@ -1044,7 +1044,6 @@
     "OFSYM",
     "ONCSM",
     "ONRYT",
-    "OPGLD",
     "OPK30",
     "OPT25",
     "OPTGY",
@@ -3497,23 +3496,23 @@
     "tourism": [
       [
         "DOCO",
-        0.3473
+        0.3468
       ],
       [
         "TABGD",
-        0.1712
+        0.1714
       ],
       [
         "GRSEL",
-        0.0822
+        0.0823
       ],
       [
         "NTHOL",
-        0.052
+        0.0521
       ],
       [
         "SSAAT",
-        0.0515
+        0.0516
       ],
       [
         "FENER",
@@ -3521,7 +3520,7 @@
       ],
       [
         "GSRAY",
-        0.0314
+        0.0315
       ],
       [
         "AYCES",
@@ -3537,7 +3536,7 @@
       ],
       [
         "BJKAS",
-        0.0199
+        0.02
       ],
       [
         "TSPOR",
@@ -3573,7 +3572,7 @@
       ],
       [
         "BYDNR",
-        0.0057
+        0.0058
       ],
       [
         "BIGCH",
@@ -3850,151 +3849,151 @@
     "sectors": [
       {
         "id": "food",
-        "move": 6.32,
+        "move": 3.52,
         "of": 67
       },
       {
+        "id": "banks",
+        "move": 0.89,
+        "of": 12
+      },
+      {
         "id": "metals",
-        "move": 3.41,
+        "move": 0.84,
         "of": 37
       },
       {
-        "id": "transport",
-        "move": 3.14,
-        "of": 13
-      },
-      {
         "id": "tourism",
-        "move": 2.56,
+        "move": 0.48,
         "of": 28
       },
       {
         "id": "chemicals",
-        "move": 1.89,
+        "move": 0.12,
         "of": 12
       },
       {
-        "id": "banks",
-        "move": 0.7,
-        "of": 12
+        "id": "transport",
+        "move": -0.12,
+        "of": 13
       },
       {
         "id": "energy",
-        "move": 0.65,
+        "move": -0.13,
         "of": 44
       },
       {
+        "id": "finance",
+        "move": -0.22,
+        "of": 61
+      },
+      {
+        "id": "health",
+        "move": -0.54,
+        "of": 16
+      },
+      {
+        "id": "autos",
+        "move": -0.71,
+        "of": 14
+      },
+      {
+        "id": "telecom",
+        "move": -0.96,
+        "of": 9
+      },
+      {
+        "id": "realEstate",
+        "move": -0.98,
+        "of": 63
+      },
+      {
         "id": "construction",
-        "move": 0.45,
+        "move": -2.14,
         "of": 36
       },
       {
         "id": "textile",
-        "move": 0.22,
+        "move": -2.42,
         "of": 33
       },
       {
-        "id": "telecom",
-        "move": 0.05,
-        "of": 9
-      },
-      {
-        "id": "health",
-        "move": 0.03,
-        "of": 16
-      },
-      {
-        "id": "realEstate",
-        "move": -0.11,
-        "of": 63
-      },
-      {
-        "id": "autos",
-        "move": -0.26,
-        "of": 14
-      },
-      {
-        "id": "finance",
-        "move": -0.37,
-        "of": 61
-      },
-      {
         "id": "retail",
-        "move": -0.43,
-        "of": 28
-      },
-      {
-        "id": "semis",
-        "move": -0.93,
-        "of": 4
-      },
-      {
-        "id": "tech",
-        "move": -2.43,
+        "move": -2.56,
         "of": 28
       },
       {
         "id": "industrial",
-        "move": -3.31,
+        "move": -7.26,
         "of": 103
       },
       {
+        "id": "tech",
+        "move": -7.51,
+        "of": 28
+      },
+      {
         "id": "defence",
-        "move": -6.06,
+        "move": -7.68,
         "of": 5
+      },
+      {
+        "id": "semis",
+        "move": -8.03,
+        "of": 4
       }
     ],
     "shares": [
       {
         "c": "HEDEF",
         "n": "Hedef Holding AS",
-        "move": 78.2,
-        "th": "finance"
-      },
-      {
-        "c": "CRDFA",
-        "n": "Creditwest Faktoring A.S.",
-        "move": 76.8,
+        "move": 64.9,
         "th": "finance"
       },
       {
         "c": "HDFGS",
         "n": "Hedef Girisim Sermayesi Yatirim Ortakligi A.S.",
-        "move": 60.4,
+        "move": 61.2,
         "th": "finance"
       },
       {
-        "c": "INFO",
-        "n": "INFO YATIRIM MENKUL DEGERLER A.S",
-        "move": 55.2,
-        "th": "finance"
+        "c": "LYDYE",
+        "n": "Lydia Yesil Enerji kaynaklari A.S.",
+        "move": 60.9,
+        "th": "food"
       },
       {
-        "c": "USHOL",
-        "n": "US Yatirim Holding A.S.",
-        "move": 50.4,
-        "th": "industrial"
+        "c": "TMPOL",
+        "n": "Temapol Polimer Plastik Ve Insaat Sanayi Ticaret A..S",
+        "move": 60.9,
+        "th": "chemicals"
+      },
+      {
+        "c": "CRDFA",
+        "n": "Creditwest Faktoring A.S.",
+        "move": 60.7,
+        "th": "finance"
       },
       {
         "c": "GEREL",
         "n": "Gersan Elektrik Ticaret ve Sanayi A.S.",
-        "move": 48.2,
+        "move": 46.9,
         "th": "industrial"
       },
       {
-        "c": "PASEU",
-        "n": "Pasifik Eurasia Lojistik dis Ticaret AS",
-        "move": 42.5,
-        "th": "transport"
+        "c": "INFO",
+        "n": "INFO YATIRIM MENKUL DEGERLER A.S",
+        "move": 45.7,
+        "th": "finance"
       },
       {
         "c": "LYDHO",
         "n": "Lydia Holding A.S.",
-        "move": 39.1,
+        "move": 33.7,
         "th": "energy"
       }
     ],
-    "floor": 31738642,
+    "floor": 29968209,
     "of": 310
   },
   "peerGroups": [
@@ -4041,55 +4040,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 681,
-      "medianY1": 19.08895,
-      "medianVol": 23.28
+      "count": 673,
+      "medianY1": 18.9556,
+      "medianVol": 23.22
     },
     "metals": {
-      "count": 54,
-      "medianY1": 14.03275,
-      "medianVol": 25.72
+      "count": 56,
+      "medianY1": 17.39725,
+      "medianVol": 25.5
     },
     "foreign": {
       "count": 36,
-      "medianY1": 34.5082,
+      "medianY1": 35.3903,
       "medianVol": 17.9
     },
     "bonds": {
-      "count": 533,
-      "medianY1": 21.9803,
-      "medianVol": 2.89
+      "count": 525,
+      "medianY1": 22.1841,
+      "medianVol": 2.91
     },
     "cash": {
-      "count": 257,
-      "medianY1": 43.92744999999999,
-      "medianVol": 1.4849999999999999
+      "count": 263,
+      "medianY1": 43.5561,
+      "medianVol": 1.49
     },
     "fundOfFunds": {
-      "count": 142,
-      "medianY1": 29.35135,
-      "medianVol": 9.18
+      "count": 143,
+      "medianY1": 29.5307,
+      "medianVol": 9.21
     },
     "balanced": {
-      "count": 144,
-      "medianY1": 30.6559,
-      "medianVol": 13.815
+      "count": 141,
+      "medianY1": 30.8038,
+      "medianVol": 14.07
     },
     "conservative": {
-      "count": 195,
-      "medianY1": 42.901849999999996,
-      "medianVol": 1.64
+      "count": 200,
+      "medianY1": 42.6909,
+      "medianVol": 1.7
     }
   },
-  "cashReturn": 45.96,
+  "cashReturn": 45.75,
   "cashReturns": {
-    "m1": 2.68,
-    "m3": 9.64,
-    "m6": 20.86,
-    "ytd": 33.72,
-    "y1": 45.96,
-    "y3": 255.81,
-    "y5": 434.11
+    "m1": 2.77,
+    "m3": 9.61,
+    "m6": 20.83,
+    "ytd": 34.12,
+    "y1": 45.75,
+    "y3": 255.99,
+    "y5": 435.64
   },
   "cashBasis": {
     "m1": {
@@ -4126,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-12T02:24:26.154Z"
+  "analyticsBuiltAt": "2026-10-12T09:42:41.889Z"
 }
