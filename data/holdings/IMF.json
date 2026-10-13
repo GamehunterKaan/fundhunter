@@ -3,12 +3,12 @@
  "kapCode": null,
  "name": "IMF-İSTANBUL PORTFÖY MAESTRO SERBEST FON",
  "period": "Eylül-2026",
- "prevPeriod": "2026-07",
- "publishedAt": "15.09.2026 18:02:26",
- "disclosure": 1663152,
+ "prevPeriod": "2026-08",
+ "publishedAt": "07.10.2026 11:37:15",
+ "disclosure": 1674293,
  "form": "A",
- "portfolioValue": 382987896.62,
- "netAssetValue": 382313622.25,
+ "portfolioValue": 376780158.51,
+ "netAssetValue": 375252658.9,
  "warnings": [],
  "holdings": [
   {
@@ -20,7 +20,7 @@
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Türk",
    "nominal": 4300,
-   "value": 356255,
+   "value": 318845,
    "weight": 0.09,
    "prevWeight": 0.09
   },
@@ -33,9 +33,9 @@
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Türk",
    "nominal": 320000,
-   "value": 7142400,
-   "weight": 1.87,
-   "prevWeight": 1.71
+   "value": 6694400,
+   "weight": 1.78,
+   "prevWeight": 1.87
   },
   {
    "code": "PGSUS",
@@ -45,10 +45,23 @@
    "currency": "TL",
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Türk",
-   "nominal": 50000,
-   "value": 7710000,
-   "weight": 2.01,
-   "prevWeight": 2.02
+   "nominal": 100000,
+   "value": 14160000,
+   "weight": 3.76,
+   "prevWeight": 2.01
+  },
+  {
+   "code": "ORCL.US",
+   "isin": "US68389X1054",
+   "ref": null,
+   "name": "ORACLECORP",
+   "currency": "USD",
+   "group": "HİSSE SENETLERİ",
+   "subgroup": "Hisse Yabancı",
+   "nominal": 2000,
+   "value": 14006958.44,
+   "weight": 3.72,
+   "prevWeight": null
   },
   {
    "code": "OTEX",
@@ -59,9 +72,9 @@
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Yabancı",
    "nominal": 4000,
-   "value": 6149801.75,
-   "weight": 1.61,
-   "prevWeight": 1.76
+   "value": 6219902.05,
+   "weight": 1.65,
+   "prevWeight": 1.61
   },
   {
    "code": "PDD.US",
@@ -72,9 +85,9 @@
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Yabancı",
    "nominal": 2000,
-   "value": 7529693.24,
-   "weight": 1.97,
-   "prevWeight": null
+   "value": 7383661.93,
+   "weight": 1.96,
+   "prevWeight": 1.97
   },
   {
    "code": "TEB A.Ş.",
@@ -84,10 +97,10 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 380000,
-   "value": 381093.15,
+   "nominal": 379000,
+   "value": 380090.27,
    "weight": 0.1,
-   "prevWeight": 0.05
+   "prevWeight": 4.88
   },
   {
    "code": "TEB A.Ş.",
@@ -97,23 +110,10 @@
    "currency": "USD",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 378000,
-   "value": 18306729,
-   "weight": 4.78,
-   "prevWeight": 0.05
-  },
-  {
-   "code": "F_PGSUS0926",
-   "isin": "TRVXIST05OC4",
-   "ref": null,
-   "name": null,
-   "currency": "TL",
-   "group": "Uzun",
-   "subgroup": null,
-   "nominal": 500,
-   "value": 7815000,
-   "weight": 0,
-   "prevWeight": null
+   "nominal": 81000,
+   "value": 3966561.9,
+   "weight": 1.05,
+   "prevWeight": 4.88
   },
   {
    "code": "F_XAGUSD1026",
@@ -123,10 +123,10 @@
    "currency": "USD",
    "group": "Uzun",
    "subgroup": null,
-   "nominal": 770,
-   "value": 24183528.02,
+   "nominal": 610,
+   "value": 18185853.82,
    "weight": 0,
-   "prevWeight": null
+   "prevWeight": 0
   },
   {
    "code": "F_XAUUSD1026",
@@ -136,10 +136,10 @@
    "currency": "USD",
    "group": "Uzun",
    "subgroup": null,
-   "nominal": 626,
-   "value": 133111984.77,
+   "nominal": 650,
+   "value": 132863418.73,
    "weight": 0,
-   "prevWeight": null
+   "prevWeight": 0
   },
   {
    "code": "F_XU0301026",
@@ -149,8 +149,21 @@
    "currency": "TL",
    "group": "Kısa",
    "subgroup": null,
-   "nominal": 115,
-   "value": 20504500,
+   "nominal": 75,
+   "value": 11655750,
+   "weight": 0,
+   "prevWeight": 0
+  },
+  {
+   "code": "F_XU0301226",
+   "isin": "TRVXIST05E95",
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "Kısa",
+   "subgroup": null,
+   "nominal": 300,
+   "value": 48957000,
    "weight": 0,
    "prevWeight": null
   },
@@ -162,10 +175,10 @@
    "currency": null,
    "group": "VIOP Nakit Teminatı",
    "subgroup": null,
-   "nominal": 131482760.84,
-   "value": 131482760.84,
-   "weight": 34.33,
-   "prevWeight": 35.2
+   "nominal": 122933880.01,
+   "value": 122933880.01,
+   "weight": 32.63,
+   "prevWeight": 34.33
   },
   {
    "code": "DES2",
@@ -176,9 +189,9 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
    "nominal": 200000,
-   "value": 6056831.63,
-   "weight": 1.58,
-   "prevWeight": 1.52
+   "value": 6076712.43,
+   "weight": 1.61,
+   "prevWeight": 1.58
   },
   {
    "code": "SQQQ",
@@ -189,9 +202,9 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
    "nominal": 14000,
-   "value": 26374504.47,
-   "weight": 6.89,
-   "prevWeight": 6.57
+   "value": 22581108.02,
+   "weight": 5.99,
+   "prevWeight": 6.89
   },
   {
    "code": "IBM-İSTANBUL",
@@ -202,9 +215,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 3423538,
-   "value": 13474894.93,
-   "weight": 3.52,
-   "prevWeight": 3.43
+   "value": 13448502.88,
+   "weight": 3.57,
+   "prevWeight": 3.52
   },
   {
    "code": "IMR-İSTANBUL",
@@ -215,9 +228,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 1075,
-   "value": 6183440.17,
-   "weight": 1.61,
-   "prevWeight": 1.6
+   "value": 6249048.21,
+   "weight": 1.66,
+   "prevWeight": 1.61
   },
   {
    "code": "VMG-İSTANBUL",
@@ -228,9 +241,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 979955,
-   "value": 62259751.48,
-   "weight": 16.26,
-   "prevWeight": 16.43
+   "value": 62170141.46,
+   "weight": 16.5,
+   "prevWeight": 16.26
   },
   {
    "code": "ACN - ISTANBUL",
@@ -241,9 +254,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Yabancı",
    "nominal": 7007837,
-   "value": 89579740.96,
-   "weight": 23.38,
-   "prevWeight": 22.97
+   "value": 90190345.91,
+   "weight": 23.93,
+   "prevWeight": 23.38
   },
   {
    "code": "CAD",
@@ -253,8 +266,8 @@
    "currency": "CAD",
    "group": "DİĞER",
    "subgroup": "Döviz",
-   "nominal": 1148.73,
-   "value": 40119.17,
+   "nominal": 2311.29,
+   "value": 79421.93,
    "weight": 0,
    "prevWeight": 0
   },
@@ -267,7 +280,7 @@
    "group": "DİĞER",
    "subgroup": "Döviz",
    "nominal": 141.59,
-   "value": 7953.87,
+   "value": 7799.15,
    "weight": 0,
    "prevWeight": 0
   },
@@ -279,8 +292,8 @@
    "currency": "USD",
    "group": "DİĞER",
    "subgroup": "Döviz",
-   "nominal": 2863.6,
-   "value": 138685.58,
+   "nominal": 1628.04,
+   "value": 79724.96,
    "weight": 0,
    "prevWeight": 0
   }
