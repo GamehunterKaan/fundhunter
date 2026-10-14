@@ -1,2468 +1,32 @@
 {
- "builtAt": "2026-10-14T05:20:30.805Z",
+ "builtAt": "2026-10-14T05:51:28.184Z",
  "source": "tradingview",
  "marketYield": 2.13,
  "marketIndexSize": 100,
  "counts": {
-  "metals": 56,
   "industrial": 159,
-  "tech": 174,
-  "semis": 70,
-  "finance": 94,
-  "food": 93,
-  "autos": 37,
   "realEstate": 81,
-  "tourism": 43,
-  "telecom": 17,
-  "construction": 43,
-  "chemicals": 26,
-  "retail": 44,
-  "banks": 24,
-  "energy": 78,
-  "defence": 50,
+  "food": 93,
   "textile": 41,
+  "retail": 44,
+  "tourism": 43,
+  "energy": 78,
+  "metals": 56,
+  "banks": 24,
   "transport": 23,
-  "health": 92
+  "construction": 43,
+  "tech": 174,
+  "finance": 94,
+  "autos": 37,
+  "defence": 50,
+  "chemicals": 26,
+  "health": 92,
+  "telecom": 17,
+  "semis": 70
  },
  "listings": {
   "bist": {
-   "ERCB": [
-    "metals",
-    0
-   ],
-   "KARTN": [
-    "industrial",
-    0
-   ],
-   "LINK": [
-    "tech",
-    0
-   ],
-   "CWENE": [
-    "semis",
-    0
-   ],
-   "TURSG": [
-    "finance",
-    2.72
-   ],
-   "KRPLS": [
-    "food",
-    0
-   ],
-   "ADEL": [
-    "autos",
-    2.33
-   ],
-   "SARKY": [
-    "industrial",
-    1.87
-   ],
-   "DURDO": [
-    "industrial",
-    0
-   ],
-   "HLGYO": [
-    "realEstate",
-    21.67
-   ],
-   "MHRGY": [
-    "realEstate",
-    2.29
-   ],
-   "FLAP": [
-    "tourism",
-    0.64
-   ],
-   "IHYAY": [
-    "telecom",
-    0
-   ],
-   "CEMTS": [
-    "metals",
-    3.97
-   ],
-   "QUAGR": [
-    "construction",
-    0
-   ],
-   "KCAER": [
-    "metals",
-    1.6
-   ],
-   "AKSGY": [
-    "realEstate",
-    4.84
-   ],
-   "IHLAS": [
-    "realEstate",
-    0
-   ],
-   "NTHOL": [
-    "tourism",
-    0
-   ],
-   "KRONT": [
-    "telecom",
-    0
-   ],
-   "LIDFA": [
-    "finance",
-    6.03
-   ],
-   "ELITE": [
-    "food",
-    0.26
-   ],
-   "FENER": [
-    "tourism",
-    0
-   ],
-   "PRZMA": [
-    "industrial",
-    0
-   ],
-   "SUMAS": [
-    "industrial",
-    0.89
-   ],
-   "METRO": [
-    "food",
-    0
-   ],
-   "DSTKF": [
-    "finance",
-    0
-   ],
-   "PETUN": [
-    "food",
-    2.45
-   ],
-   "QUICK": [
-    "finance",
-    0
-   ],
-   "GOKNR": [
-    "food",
-    4.78
-   ],
-   "RNPOL": [
-    "industrial",
-    0
-   ],
-   "EDATA": [
-    "industrial",
-    0
-   ],
-   "UFUK": [
-    "finance",
-    0
-   ],
-   "PENTA": [
-    "industrial",
-    0
-   ],
-   "OPTGY": [
-    null,
-    null
-   ],
-   "SODSN": [
-    "chemicals",
-    0
-   ],
-   "BESLR": [
-    "food",
-    0
-   ],
-   "KONKA": [
-    "industrial",
-    0
-   ],
-   "TMSN": [
-    "industrial",
-    0
-   ],
-   "EKDMR": [
-    "metals",
-    0
-   ],
-   "EUPWR": [
-    "industrial",
-    0
-   ],
-   "CITAS": [
-    "retail",
-    0
-   ],
-   "ALVES": [
-    "industrial",
-    0
-   ],
-   "SKBNK": [
-    "banks",
-    1.23
-   ],
-   "NATEN": [
-    "construction",
-    0
-   ],
-   "PAMEL": [
-    "energy",
-    0
-   ],
-   "INTEM": [
-    "industrial",
-    0
-   ],
-   "SDTTR": [
-    "defence",
-    0.1
-   ],
-   "KATMR": [
-    "defence",
-    0
-   ],
-   "SEKFK": [
-    "finance",
-    0
-   ],
-   "NUGYO": [
-    "realEstate",
-    0
-   ],
-   "BRSAN": [
-    "metals",
-    0
-   ],
-   "CONSE": [
-    "energy",
-    0
-   ],
-   "MGROS": [
-    "retail",
-    1.63
-   ],
-   "VRGYO": [
-    "realEstate",
-    0
-   ],
-   "CEMAS": [
-    "metals",
-    0
-   ],
-   "CRDFA": [
-    "finance",
-    0
-   ],
-   "DURKN": [
-    "food",
-    0.64
-   ],
-   "AAGYO": [
-    "realEstate",
-    null
-   ],
-   "BAYRK": [
-    "textile",
-    0
-   ],
-   "OYYAT": [
-    "finance",
-    14.16
-   ],
-   "INTET": [
-    "semis",
-    0
-   ],
-   "SEKUR": [
-    "industrial",
-    0
-   ],
-   "VESTL": [
-    "retail",
-    0
-   ],
-   "HATSN": [
-    "industrial",
-    0
-   ],
-   "SANFM": [
-    "industrial",
-    0.88
-   ],
-   "GMSTR": [
-    null,
-    null
-   ],
-   "TEZOL": [
-    "food",
-    6.34
-   ],
-   "KUYAS": [
-    "realEstate",
-    0
-   ],
-   "TCKRC": [
-    "metals",
-    0
-   ],
-   "EKOS": [
-    "industrial",
-    0
-   ],
-   "AKMGY": [
-    "realEstate",
-    7.63
-   ],
-   "GLDTR": [
-    null,
-    null
-   ],
-   "IHGZT": [
-    "telecom",
-    0
-   ],
-   "EUYO": [
-    "finance",
-    0
-   ],
-   "TATEN": [
-    "energy",
-    0
-   ],
-   "LYDHO": [
-    "energy",
-    0
-   ],
-   "KENT": [
-    "food",
-    0
-   ],
-   "TLMAN": [
-    "transport",
-    0
-   ],
-   "SELVA": [
-    "food",
-    0
-   ],
-   "DESA": [
-    "textile",
-    2.97
-   ],
-   "AGESA": [
-    "finance",
-    3
-   ],
-   "ULKER": [
-    "food",
-    6.56
-   ],
-   "OYLUM": [
-    "food",
-    0
-   ],
-   "SERNT": [
-    "industrial",
-    0
-   ],
-   "ATSYH": [
-    null,
-    0
-   ],
-   "QNBFK": [
-    "finance",
-    0
-   ],
-   "BMSCH": [
-    "metals",
-    0
-   ],
-   "BNTAS": [
-    "industrial",
-    0
-   ],
-   "VAKFA": [
-    "finance",
-    0
-   ],
-   "ALTIN": [
-    null,
-    null
-   ],
-   "EMKEL": [
-    "industrial",
-    0
-   ],
-   "KFEIN": [
-    "tech",
-    0.35
-   ],
-   "ENSRI": [
-    "food",
-    0
-   ],
-   "MTRYO": [
-    null,
-    0.66
-   ],
-   "PNLSN": [
-    "construction",
-    2.09
-   ],
-   "KRSTL": [
-    "food",
-    0
-   ],
-   "EMPAE": [
-    "semis",
-    0.22
-   ],
-   "GEDIK": [
-    "finance",
-    7.65
-   ],
-   "LKMNH": [
-    "health",
-    4.25
-   ],
-   "DERIM": [
-    "textile",
-    0
-   ],
-   "ARSAN": [
-    "textile",
-    0
-   ],
-   "MSGYO": [
-    "realEstate",
-    8.76
-   ],
-   "SKYLP": [
-    "industrial",
-    0
-   ],
-   "QNBTR": [
-    "banks",
-    0
-   ],
-   "ANSGR": [
-    "finance",
-    5.69
-   ],
-   "TCELL": [
-    "telecom",
-    3.74
-   ],
-   "KMPUR": [
-    "industrial",
-    0
-   ],
-   "KAREL": [
-    "tech",
-    0
-   ],
-   "BMSTL": [
-    "metals",
-    0
-   ],
-   "MOBTL": [
-    "industrial",
-    0
-   ],
-   "ALKIM": [
-    "metals",
-    0
-   ],
-   "PSGYO": [
-    "realEstate",
-    0.59
-   ],
-   "ULUUN": [
-    "food",
-    0
-   ],
-   "ORMA": [
-    "metals",
-    0
-   ],
-   "ALKA": [
-    "metals",
-    0
-   ],
-   "SAYAS": [
-    "industrial",
-    0
-   ],
-   "MAVI": [
-    "textile",
-    4.45
-   ],
-   "ASELS": [
-    "defence",
-    0.07
-   ],
-   "ESEN": [
-    "energy",
-    0
-   ],
-   "DERHL": [
-    "textile",
-    0
-   ],
-   "BURCE": [
-    "metals",
-    0
-   ],
-   "RODRG": [
-    "textile",
-    0
-   ],
-   "BRYAT": [
-    null,
-    11.91
-   ],
-   "ALBTN": [
-    "construction",
-    0
-   ],
-   "BIMAS": [
-    "retail",
-    1.64
-   ],
-   "BUCIM": [
-    "metals",
-    1.34
-   ],
-   "OFSYM": [
-    "food",
-    1.55
-   ],
-   "HATEK": [
-    "textile",
-    0
-   ],
-   "ENERY": [
-    "energy",
-    0.11
-   ],
-   "TUREX": [
-    "finance",
-    0
-   ],
-   "YYLGD": [
-    "food",
-    0
-   ],
-   "TSGYO": [
-    "realEstate",
-    0
-   ],
-   "EFOR": [
-    "food",
-    0.13
-   ],
-   "YUNSA": [
-    "textile",
-    5.92
-   ],
-   "TATGD": [
-    "food",
-    0
-   ],
-   "EBEBK": [
-    "retail",
-    1.22
-   ],
-   "MACKO": [
-    "telecom",
-    16.1
-   ],
-   "SELEC": [
-    "health",
-    0.55
-   ],
-   "KCHOL": [
-    "energy",
-    3.3
-   ],
-   "KRTEK": [
-    "textile",
-    0
-   ],
-   "AKHAN": [
-    "food",
-    0
-   ],
-   "HURGZ": [
-    "telecom",
-    0
-   ],
-   "FORTE": [
-    "tech",
-    0
-   ],
-   "MCARD": [
-    "industrial",
-    0
-   ],
-   "KONYA": [
-    "construction",
-    0
-   ],
-   "YYAPI": [
-    "construction",
-    0
-   ],
-   "FRMPL": [
-    "industrial",
-    0
-   ],
-   "GLRYH": [
-    "finance",
-    0
-   ],
-   "HEKTS": [
-    "chemicals",
-    0
-   ],
-   "SANKO": [
-    "textile",
-    0
-   ],
-   "PAHOL": [
-    null,
-    0
-   ],
-   "PKENT": [
-    "tourism",
-    0
-   ],
-   "AYGAZ": [
-    "energy",
-    4.35
-   ],
-   "TTKOM": [
-    "telecom",
-    0
-   ],
-   "KPEKS": [
-    "industrial",
-    0
-   ],
-   "LIDER": [
-    "finance",
-    1.58
-   ],
-   "BESTE": [
-    "energy",
-    0
-   ],
-   "KOCMT": [
-    "metals",
-    0
-   ],
-   "TKNSA": [
-    "retail",
-    0
-   ],
-   "AGROT": [
-    "tech",
-    0
-   ],
-   "ARASE": [
-    "energy",
-    2.09
-   ],
-   "PGSUS": [
-    "transport",
-    0
-   ],
-   "PLTUR": [
-    "transport",
-    8.12
-   ],
-   "EUREN": [
-    "industrial",
-    0
-   ],
-   "ASUZU": [
-    "autos",
-    5.75
-   ],
-   "OYAKC": [
-    "construction",
-    4.86
-   ],
-   "DGATE": [
-    "industrial",
-    0
-   ],
-   "BINHO": [
-    "tech",
-    0
-   ],
-   "HEDEF": [
-    "finance",
-    0
-   ],
-   "DOAS": [
-    "retail",
-    21.08
-   ],
-   "DEVA": [
-    "health",
-    0
-   ],
-   "SSAAT": [
-    "tourism",
-    null
-   ],
-   "IEYHO": [
-    "industrial",
-    0
-   ],
-   "MERIT": [
-    "tourism",
-    1.06
-   ],
-   "MNDRS": [
-    "textile",
-    0
-   ],
-   "ANHYT": [
-    "finance",
-    7.94
-   ],
-   "GZNMI": [
-    "tourism",
-    0
-   ],
-   "VAKFN": [
-    "finance",
-    0
-   ],
-   "BARMA": [
-    "industrial",
-    0
-   ],
-   "INDES": [
-    "industrial",
-    1.88
-   ],
-   "NTGAZ": [
-    "energy",
-    8.13
-   ],
-   "INFO": [
-    "finance",
-    0
-   ],
-   "Z30KP": [
-    null,
-    null
-   ],
-   "DAPGM": [
-    "realEstate",
-    0
-   ],
-   "ODAS": [
-    "energy",
-    0
-   ],
-   "HOROZ": [
-    "transport",
-    0
-   ],
-   "DOFER": [
-    "metals",
-    0.86
-   ],
-   "ISBTR": [
-    "banks",
-    0
-   ],
-   "OZKGY": [
-    "realEstate",
-    1.66
-   ],
-   "ARTMS": [
-    "retail",
-    0
-   ],
-   "SKYMD": [
-    "finance",
-    0
-   ],
-   "ENDAE": [
-    "finance",
-    0
-   ],
-   "YIGIT": [
-    "industrial",
-    0
-   ],
-   "SILVR": [
-    "industrial",
-    0
-   ],
-   "APX30": [
-    null,
-    null
-   ],
-   "KSTUR": [
-    "tourism",
-    0.86
-   ],
-   "SAHOL": [
-    "banks",
-    1.68
-   ],
-   "AKSEN": [
-    "energy",
-    0
-   ],
-   "TKNKA": [
-    "industrial",
-    0
-   ],
-   "A1CAP": [
-    "finance",
-    0
-   ],
-   "TNZTP": [
-    "health",
-    0
-   ],
-   "PATEK": [
-    "tech",
-    0
-   ],
-   "AKFYE": [
-    "energy",
-    0
-   ],
-   "BALSU": [
-    "food",
-    0
-   ],
-   "MAKIM": [
-    "tech",
-    0
-   ],
-   "OZSUB": [
-    "food",
-    1.64
-   ],
-   "GLBMD": [
-    "finance",
-    0
-   ],
-   "MEKAG": [
-    "industrial",
-    0
-   ],
-   "DITAS": [
-    "autos",
-    0
-   ],
-   "KLMSN": [
-    "industrial",
-    0
-   ],
-   "IZENR": [
-    "energy",
-    0
-   ],
-   "ONRYT": [
-    "tech",
-    0
-   ],
-   "ZEDUR": [
-    "tourism",
-    0
-   ],
-   "INTEK": [
-    "industrial",
-    0
-   ],
-   "GOZDE": [
-    "finance",
-    0
-   ],
-   "RYSAS": [
-    "transport",
-    0
-   ],
-   "UCAYM": [
-    "construction",
-    0
-   ],
-   "DOFRB": [
-    "industrial",
-    0
-   ],
-   "KERVN": [
-    "tourism",
-    0
-   ],
-   "HKTM": [
-    "industrial",
-    0
-   ],
-   "HDFGS": [
-    "finance",
-    0
-   ],
-   "GSDHO": [
-    "transport",
-    0
-   ],
-   "EUHOL": [
-    "finance",
-    0
-   ],
-   "IHEVA": [
-    "retail",
-    0
-   ],
-   "GLCVY": [
-    "finance",
-    6.56
-   ],
-   "ALFAS": [
-    "energy",
-    0.57
-   ],
-   "KOPOL": [
-    "textile",
-    0
-   ],
-   "LUKSK": [
-    "food",
-    0
-   ],
-   "TEKTU": [
-    "tourism",
-    0
-   ],
-   "CEOEM": [
-    "tourism",
-    0
-   ],
-   "OYAYO": [
-    "finance",
-    0
-   ],
-   "MOGAN": [
-    "energy",
-    0
-   ],
-   "YAPRK": [
-    "food",
-    0.28
-   ],
-   "BYDNR": [
-    "tourism",
-    3.12
-   ],
-   "HUNER": [
-    "energy",
-    0
-   ],
-   "GMTAS": [
-    "retail",
-    0.63
-   ],
-   "KTSKR": [
-    "food",
-    10.33
-   ],
-   "LXGYO": [
-    "realEstate",
-    0
-   ],
-   "GENKM": [
-    "chemicals",
-    2.74
-   ],
-   "ZSR25": [
-    null,
-    null
-   ],
-   "PRKAB": [
-    "industrial",
-    0
-   ],
-   "BAKAB": [
-    "industrial",
-    0
-   ],
-   "KZBGY": [
-    "realEstate",
-    0
-   ],
-   "KORDS": [
-    "textile",
-    0
-   ],
-   "VKING": [
-    "food",
-    0
-   ],
-   "ARZUM": [
-    "industrial",
-    0
-   ],
-   "AGYO": [
-    "realEstate",
-    0
-   ],
-   "SAFKR": [
-    "industrial",
-    0
-   ],
-   "USHOL": [
-    "industrial",
-    0
-   ],
-   "HTTBT": [
-    "tech",
-    0
-   ],
-   "ATATR": [
-    "tourism",
-    0
-   ],
-   "TMPOL": [
-    "chemicals",
-    0
-   ],
-   "ANGEN": [
-    "health",
-    0
-   ],
-   "CGCAM": [
-    "retail",
-    0
-   ],
-   "OPX30": [
-    null,
-    null
-   ],
-   "TRCAS": [
-    "energy",
-    6.06
-   ],
-   "ZRE20": [
-    null,
-    null
-   ],
-   "TGSAS": [
-    "industrial",
-    0.27
-   ],
-   "MEDTR": [
-    "health",
-    1.3
-   ],
-   "KRVGD": [
-    "food",
-    0
-   ],
-   "Z30KE": [
-    null,
-    null
-   ],
-   "ERBOS": [
-    "metals",
-    2.35
-   ],
-   "BASCM": [
-    "construction",
-    0
-   ],
-   "ISGYO": [
-    "realEstate",
-    0.38
-   ],
-   "TARKM": [
-    "chemicals",
-    0
-   ],
-   "MARTI": [
-    "tourism",
-    0
-   ],
-   "TERA": [
-    "finance",
-    0
-   ],
-   "BOSSA": [
-    "textile",
-    0
-   ],
-   "QTEMZ": [
-    null,
-    null
-   ],
-   "GLRMK": [
-    "construction",
-    0
-   ],
-   "DYOBY": [
-    "industrial",
-    0
-   ],
-   "IZFAS": [
-    "industrial",
-    0
-   ],
-   "HALKB": [
-    "banks",
-    0
-   ],
-   "CCOLA": [
-    "food",
-    1.73
-   ],
-   "ALCTL": [
-    "tech",
-    0
-   ],
-   "SMRVA": [
-    "industrial",
-    2.85
-   ],
-   "TRHOL": [
-    "finance",
-    0
-   ],
-   "BORSK": [
-    "food",
-    3.84
-   ],
-   "ZGYO": [
-    "realEstate",
-    0
-   ],
-   "ENKAI": [
-    "construction",
-    5.04
-   ],
-   "GOODY": [
-    "autos",
-    0
-   ],
-   "DENGE": [
-    "finance",
-    0
-   ],
-   "BIZIM": [
-    "retail",
-    0
-   ],
-   "GRTHO": [
-    "industrial",
-    0.82
-   ],
-   "DCTTR": [
-    "industrial",
-    0
-   ],
-   "GSRAY": [
-    "tourism",
-    0
-   ],
-   "KTLEV": [
-    "finance",
-    0.97
-   ],
-   "ARCLK": [
-    "retail",
-    0
-   ],
-   "NETAS": [
-    "tech",
-    0
-   ],
-   "TAVHL": [
-    "transport",
-    1.35
-   ],
-   "MEPET": [
-    "retail",
-    0
-   ],
-   "CELHA": [
-    "metals",
-    0
-   ],
-   "OBASE": [
-    "tech",
-    0
-   ],
-   "SRVGY": [
-    "realEstate",
-    3.45
-   ],
-   "AYEN": [
-    "energy",
-    3.14
-   ],
-   "RTALB": [
-    "health",
-    0
-   ],
-   "BRKO": [
-    "retail",
-    0
-   ],
-   "SMRTG": [
-    "semis",
-    0
-   ],
-   "GENTS": [
-    "industrial",
-    5.46
-   ],
-   "ODINE": [
-    "tech",
-    0
-   ],
-   "AKENR": [
-    "energy",
-    0
-   ],
-   "MARBL": [
-    "construction",
-    0
-   ],
-   "GARAN": [
-    "banks",
-    4.06
-   ],
-   "MERKO": [
-    "food",
-    0
-   ],
    "BAHKM": [
-    "industrial",
-    0
-   ],
-   "MAALT": [
-    "tourism",
-    0
-   ],
-   "GOLTS": [
-    "construction",
-    1.65
-   ],
-   "ADGYO": [
-    "finance",
-    0
-   ],
-   "USAK": [
-    "industrial",
-    0
-   ],
-   "VANGD": [
-    "food",
-    0
-   ],
-   "AVPGY": [
-    "realEstate",
-    9.93
-   ],
-   "BRKVY": [
-    "finance",
-    1.06
-   ],
-   "GUNDG": [
-    "food",
-    0.15
-   ],
-   "TRENJ": [
-    "energy",
-    0
-   ],
-   "PNSUT": [
-    "food",
-    0
-   ],
-   "EKSUN": [
-    "food",
-    0
-   ],
-   "OZRDN": [
-    "industrial",
-    0
-   ],
-   "SONME": [
-    "textile",
-    0.54
-   ],
-   "ONCSM": [
-    "health",
-    0
-   ],
-   "KUVVA": [
-    "tourism",
-    0
-   ],
-   "TKFEN": [
-    "construction",
-    0.13
-   ],
-   "TBORG": [
-    "food",
-    7.77
-   ],
-   "ACSEL": [
-    "chemicals",
-    0
-   ],
-   "DARDL": [
-    "food",
-    0
-   ],
-   "SUWEN": [
-    "tech",
-    3.51
-   ],
-   "BERA": [
-    "industrial",
-    0
-   ],
-   "OTKAR": [
-    "defence",
-    0
-   ],
-   "ISKPL": [
-    "industrial",
-    0.01
-   ],
-   "PKART": [
-    "industrial",
-    0
-   ],
-   "OPTLR": [
-    null,
-    null
-   ],
-   "YESIL": [
-    null,
-    0
-   ],
-   "ATLAS": [
-    null,
-    0.58
-   ],
-   "BRLSM": [
-    "metals",
-    0
-   ],
-   "REEDR": [
-    "tech",
-    0
-   ],
-   "INVEO": [
-    "finance",
-    0
-   ],
-   "ALTNY": [
-    "defence",
-    0
-   ],
-   "BALAT": [
-    "autos",
-    0
-   ],
-   "PEKGY": [
-    "realEstate",
-    0
-   ],
-   "ADESE": [
-    "realEstate",
-    0
-   ],
-   "PENGD": [
-    "food",
-    0
-   ],
-   "BASGZ": [
-    "energy",
-    5.02
-   ],
-   "YKBNK": [
-    "banks",
-    0
-   ],
-   "BKRGY": [
-    "realEstate",
-    0
-   ],
-   "DESPC": [
-    "industrial",
-    0
-   ],
-   "MPARK": [
-    "health",
-    0
-   ],
-   "VAKKO": [
-    "textile",
-    11.14
-   ],
-   "MOPAS": [
-    "retail",
-    3.17
-   ],
-   "KRDMA": [
-    "metals",
-    0
-   ],
-   "EMNIS": [
-    "industrial",
-    0
-   ],
-   "TRILC": [
-    "health",
-    0
-   ],
-   "ALARK": [
-    "realEstate",
-    2.89
-   ],
-   "SVGYO": [
-    "realEstate",
-    0.26
-   ],
-   "KLNMA": [
-    "finance",
-    0
-   ],
-   "ULAS": [
-    "tourism",
-    0
-   ],
-   "ATAGY": [
-    "realEstate",
-    0
-   ],
-   "ETILR": [
-    "tourism",
-    0
-   ],
-   "TURGG": [
-    "realEstate",
-    0
-   ],
-   "SMART": [
-    "tech",
-    0
-   ],
-   "FROTO": [
-    "autos",
-    13.12
-   ],
-   "PRDGS": [
-    "finance",
-    0
-   ],
-   "ENTRA": [
-    "energy",
-    0
-   ],
-   "ORCAY": [
-    "food",
-    0
-   ],
-   "GARFA": [
-    "finance",
-    0
-   ],
-   "ATAKP": [
-    "food",
-    2.07
-   ],
-   "IHLGM": [
-    "realEstate",
-    0
-   ],
-   "CEMZY": [
-    "food",
-    0
-   ],
-   "AYDEM": [
-    "energy",
-    0
-   ],
-   "AVHOL": [
-    "health",
-    0
-   ],
-   "YGGYO": [
-    "realEstate",
-    4.98
-   ],
-   "YAYLA": [
-    "construction",
-    0
-   ],
-   "GOLDA": [
-    "food",
-    null
-   ],
-   "KARSN": [
-    "industrial",
-    0
-   ],
-   "DOGUB": [
-    "construction",
-    0
-   ],
-   "YBTAS": [
-    "construction",
-    0
-   ],
-   "IZINV": [
-    "food",
-    0
-   ],
-   "EGSER": [
-    "industrial",
-    0
-   ],
-   "SEGMN": [
-    "food",
-    3.18
-   ],
-   "ANELE": [
-    "construction",
-    0
-   ],
-   "CASA": [
-    "industrial",
-    0
-   ],
-   "ISCTR": [
-    "banks",
-    4.25
-   ],
-   "TSKB": [
-    "finance",
-    5.38
-   ],
-   "SURGY": [
-    "realEstate",
-    0
-   ],
-   "RYGYO": [
-    "realEstate",
-    0
-   ],
-   "TOASO": [
-    "autos",
-    7.71
-   ],
-   "IDGYO": [
-    "realEstate",
-    0
-   ],
-   "ESCAR": [
-    "finance",
-    2.28
-   ],
-   "GRNYO": [
-    "finance",
-    0
-   ],
-   "KLYPV": [
-    "industrial",
-    0
-   ],
-   "KOTON": [
-    "textile",
-    0
-   ],
-   "ISDMR": [
-    "metals",
-    7.13
-   ],
-   "OZYSR": [
-    "metals",
-    0
-   ],
-   "KLRHO": [
-    "food",
-    0
-   ],
-   "CIMSA": [
-    "construction",
-    1.84
-   ],
-   "TABGD": [
-    "tourism",
-    2.26
-   ],
-   "TRGYO": [
-    "realEstate",
-    5.4
-   ],
-   "BEYAZ": [
-    "retail",
-    1.8
-   ],
-   "ZOREN": [
-    "energy",
-    0
-   ],
-   "ALBRK": [
-    "banks",
-    2.95
-   ],
-   "KNFRT": [
-    "food",
-    0
-   ],
-   "SOKE": [
-    "food",
-    0
-   ],
-   "AHSGY": [
-    "realEstate",
-    1.23
-   ],
-   "VBTYZ": [
-    "tech",
-    0
-   ],
-   "DUNYH": [
-    "food",
-    0
-   ],
-   "DNISI": [
-    "industrial",
-    0
-   ],
-   "AKSA": [
-    "textile",
-    5.56
-   ],
-   "ECZYT": [
-    "finance",
-    2.72
-   ],
-   "MEGAP": [
-    "textile",
-    0
-   ],
-   "MNDTR": [
-    "industrial",
-    0
-   ],
-   "HUBVC": [
-    "finance",
-    0
-   ],
-   "AVGYO": [
-    "realEstate",
-    0
-   ],
-   "ENPRA": [
-    "banks",
-    null
-   ],
-   "DGNMO": [
-    "retail",
-    0
-   ],
-   "PSDTC": [
-    "textile",
-    2.02
-   ],
-   "MAKTK": [
-    "industrial",
-    0
-   ],
-   "MRSHL": [
-    "industrial",
-    0
-   ],
-   "SANEL": [
-    "industrial",
-    0
-   ],
-   "ERSU": [
-    "food",
-    0
-   ],
-   "SEGYO": [
-    "realEstate",
-    0
-   ],
-   "SOKM": [
-    "retail",
-    0
-   ],
-   "ARENA": [
-    "industrial",
-    0
-   ],
-   "IHAAS": [
-    "industrial",
-    0
-   ],
-   "ALCAR": [
-    "industrial",
-    11
-   ],
-   "CMBTN": [
-    "construction",
-    0
-   ],
-   "EKIM": [
-    "finance",
-    null
-   ],
-   "VEYAS": [
-    "energy",
-    0
-   ],
-   "GIPTA": [
-    "industrial",
-    9.09
-   ],
-   "ISGSY": [
-    "finance",
-    0
-   ],
-   "EDIP": [
-    "realEstate",
-    0
-   ],
-   "ZPT10": [
-    null,
-    null
-   ],
-   "BULGS": [
-    "finance",
-    1.35
-   ],
-   "EGEEN": [
-    "autos",
-    0
-   ],
-   "POLTK": [
-    "chemicals",
-    0
-   ],
-   "CVKMD": [
-    "metals",
-    0
-   ],
-   "LOGO": [
-    "tech",
-    3.73
-   ],
-   "BIGCH": [
-    "tourism",
-    2.8
-   ],
-   "TEHOL": [
-    "realEstate",
-    0
-   ],
-   "FORMT": [
-    "metals",
-    0
-   ],
-   "THYAO": [
-    "transport",
-    2.41
-   ],
-   "FMIZP": [
-    "autos",
-    1.83
-   ],
-   "CLEBI": [
-    "transport",
-    7.62
-   ],
-   "CRFSA": [
-    "retail",
-    0
-   ],
-   "KUTPO": [
-    "retail",
-    0
-   ],
-   "PINSU": [
-    "food",
-    0
-   ],
-   "DIRIT": [
-    "textile",
-    0
-   ],
-   "BOBET": [
-    "construction",
-    2.63
-   ],
-   "OSTIM": [
-    null,
-    0
-   ],
-   "AZTEK": [
-    "industrial",
-    4.73
-   ],
-   "POLHO": [
-    "industrial",
-    0
-   ],
-   "CATES": [
-    "energy",
-    0
-   ],
-   "ASGYO": [
-    "realEstate",
-    1.77
-   ],
-   "ARDYZ": [
-    "tech",
-    0.05
-   ],
-   "EKGYO": [
-    "realEstate",
-    3.04
-   ],
-   "MEYSU": [
-    "food",
-    0.63
-   ],
-   "NUHCM": [
-    "construction",
-    10.44
-   ],
-   "MASFN": [
-    "construction",
-    0
-   ],
-   "AKGRT": [
-    "finance",
-    0
-   ],
-   "OBAMS": [
-    "food",
-    0.8
-   ],
-   "DGGYO": [
-    "realEstate",
-    0
-   ],
-   "EPLAS": [
-    "industrial",
-    0
-   ],
-   "DMSAS": [
-    "metals",
-    0
-   ],
-   "ZPLIB": [
-    null,
-    null
-   ],
-   "MMCAS": [
-    "transport",
-    0
-   ],
-   "NIBAS": [
-    "construction",
-    0
-   ],
-   "ORGE": [
-    "construction",
-    0
-   ],
-   "TRALT": [
-    "metals",
-    0
-   ],
-   "OPT25": [
-    null,
-    null
-   ],
-   "SISE": [
-    "retail",
-    1.56
-   ],
-   "ATATP": [
-    "tech",
-    0.43
-   ],
-   "MARMR": [
-    "realEstate",
-    0
-   ],
-   "NETCD": [
-    "tech",
-    5.06
-   ],
-   "AVOD": [
-    "food",
-    0
-   ],
-   "TSPOR": [
-    "tourism",
-    0
-   ],
-   "IZMDC": [
-    "metals",
-    0
-   ],
-   "USDTR": [
-    null,
-    null
-   ],
-   "CANTE": [
-    "energy",
-    0
-   ],
-   "OTTO": [
-    "food",
-    0
-   ],
-   "ETYAT": [
-    "finance",
-    0
-   ],
-   "JANTS": [
-    "autos",
-    0.23
-   ],
-   "BINBN": [
-    "industrial",
-    0
-   ],
-   "ARMGD": [
-    "food",
-    0
-   ],
-   "FADE": [
-    "food",
-    0
-   ],
-   "AFYON": [
-    "construction",
-    12.27
-   ],
-   "ULUSE": [
-    "industrial",
-    0
-   ],
-   "ENJSA": [
-    "energy",
-    4.53
-   ],
-   "BLUME": [
-    "tourism",
-    0
-   ],
-   "MZHLD": [
-    "industrial",
-    0
-   ],
-   "RUBNS": [
-    "textile",
-    0
-   ],
-   "LMKDC": [
-    "construction",
-    8.5
-   ],
-   "BAGFS": [
-    "chemicals",
-    0
-   ],
-   "ECOGR": [
-    "energy",
-    0
-   ],
-   "KRDMB": [
-    "metals",
-    0
-   ],
-   "KAYSE": [
-    "health",
-    0
-   ],
-   "BANVT": [
-    "food",
-    0
-   ],
-   "NETGL": [
-    "industrial",
-    0
-   ],
-   "DOKTA": [
-    "autos",
-    0
-   ],
-   "PRKME": [
-    "metals",
-    0
-   ],
-   "TTRAK": [
-    "industrial",
-    19.36
-   ],
-   "INVES": [
-    "finance",
-    0
-   ],
-   "KGYO": [
-    "realEstate",
-    0
-   ],
-   "AKBNK": [
-    "banks",
-    3.22
-   ],
-   "VERTU": [
-    "finance",
-    0
-   ],
-   "OZGYO": [
-    "realEstate",
-    0.94
-   ],
-   "PARSN": [
-    "autos",
-    0
-   ],
-   "SAMAT": [
-    "industrial",
-    0
-   ],
-   "DOCO": [
-    "tourism",
-    1.28
-   ],
-   "VESBE": [
-    "retail",
-    1.13
-   ],
-   "A1YEN": [
-    "energy",
-    0
-   ],
-   "APBDL": [
-    null,
-    null
-   ],
-   "SASA": [
-    "textile",
-    0
-   ],
-   "OZATD": [
-    "industrial",
-    0
-   ],
-   "RAYSG": [
-    "finance",
-    0
-   ],
-   "GESAN": [
-    "tech",
-    0
-   ],
-   "KBORU": [
-    "industrial",
-    1.9
-   ],
-   "MRGYO": [
-    "realEstate",
-    0
-   ],
-   "LILAK": [
-    "food",
-    6.45
-   ],
-   "AGHOL": [
-    "food",
-    2.04
-   ],
-   "ICUGS": [
-    "finance",
-    0
-   ],
-   "ALKLC": [
-    "food",
-    0.05
-   ],
-   "AEFES": [
-    "food",
-    1.6
-   ],
-   "ISFIN": [
-    "finance",
-    0
-   ],
-   "DZGYO": [
-    "realEstate",
-    0
-   ],
-   "KZGYO": [
-    "realEstate",
-    0
-   ],
-   "TUCLK": [
-    "metals",
-    0
-   ],
-   "BEGYO": [
-    "realEstate",
-    0
-   ],
-   "KLSYN": [
-    "retail",
-    1.06
-   ],
-   "ORZAX": [
-    "health",
-    null
-   ],
-   "PAPIL": [
-    "tech",
-    0
-   ],
-   "ISVEA": [
-    "industrial",
-    null
-   ],
-   "INGRM": [
-    "industrial",
-    0
-   ],
-   "BRKSN": [
-    "industrial",
-    1.94
-   ],
-   "AKSUE": [
-    "energy",
-    0
-   ],
-   "TUPRS": [
-    "energy",
-    4.45
-   ],
-   "TRMET": [
-    "metals",
-    0
-   ],
-   "UNLU": [
-    "finance",
-    0
-   ],
-   "YONGA": [
-    "retail",
-    0
-   ],
-   "IMASM": [
-    "industrial",
-    0
-   ],
-   "SNGYO": [
-    "realEstate",
-    0
-   ],
-   "ISMEN": [
-    "finance",
-    10.99
-   ],
-   "RGYAS": [
-    "realEstate",
-    0.85
-   ],
-   "RUZYE": [
-    "food",
-    0
-   ],
-   "VKGYO": [
-    "realEstate",
-    4.82
-   ],
-   "GSDDE": [
-    "transport",
-    0
-   ],
-   "AVTUR": [
-    null,
-    0
-   ],
-   "BRMEN": [
-    "textile",
-    0
-   ],
-   "ARFYE": [
-    "energy",
-    0
-   ],
-   "BFREN": [
-    "autos",
-    0
-   ],
-   "DMLKT": [
-    "realEstate",
-    null
-   ],
-   "KIMMR": [
-    "retail",
-    3.88
-   ],
-   "MTRKS": [
-    "tech",
-    0.89
-   ],
-   "KAPLM": [
-    "industrial",
-    0
-   ],
-   "ICBCT": [
-    "banks",
-    0
-   ],
-   "KONTR": [
-    "energy",
-    0.78
-   ],
-   "BSOKE": [
-    "construction",
-    0
-   ],
-   "TDGYO": [
-    "realEstate",
-    0
-   ],
-   "AKCNS": [
-    "construction",
-    0.89
-   ],
-   "AYES": [
-    "metals",
-    1.46
-   ],
-   "BJKAS": [
-    "tourism",
-    0
-   ],
-   "ISSEN": [
-    "textile",
-    0.72
-   ],
-   "BIENY": [
-    "construction",
-    0
-   ],
-   "YKSLN": [
-    "industrial",
-    0
-   ],
-   "GUBRF": [
-    "chemicals",
-    0
-   ],
-   "TUKAS": [
-    "food",
-    0
-   ],
-   "KLKIM": [
-    "chemicals",
-    3.01
-   ],
-   "VSNMD": [
-    "construction",
-    0.92
-   ],
-   "GENIL": [
-    "health",
-    0.94
-   ],
-   "CUSAN": [
-    "metals",
-    0
-   ],
-   "RALYH": [
-    "construction",
-    0
-   ],
-   "ULUFA": [
-    "finance",
-    8.07
-   ],
-   "EGEPO": [
-    "health",
-    0
-   ],
-   "PCILT": [
-    "telecom",
-    8.39
-   ],
-   "GATEG": [
-    "industrial",
-    0
-   ],
-   "EKIZ": [
-    "food",
-    0
-   ],
-   "DAGI": [
-    "textile",
-    0
-   ],
-   "MIATK": [
-    "tech",
-    0
-   ],
-   "GRSEL": [
-    "tourism",
-    0.52
-   ],
-   "YEOTK": [
-    "energy",
-    0
-   ],
-   "FRIGO": [
-    "food",
-    0
-   ],
-   "KARCL": [
-    "metals",
-    0
-   ],
-   "ISGLK": [
-    null,
-    null
-   ],
-   "ISBIR": [
-    "textile",
-    1.72
-   ],
-   "SOHOE": [
-    "energy",
-    0
-   ],
-   "GLYHO": [
-    "finance",
-    0.36
-   ],
-   "ESCOM": [
-    "tech",
-    0
-   ],
-   "DMRGD": [
-    "food",
-    0
-   ],
-   "ASTOR": [
-    "industrial",
-    0.77
-   ],
-   "KRGYO": [
-    "realEstate",
-    1.03
-   ],
-   "MANAS": [
-    "industrial",
-    0
-   ],
-   "SUNTK": [
-    "textile",
-    4.35
-   ],
-   "GWIND": [
-    "energy",
-    3.22
-   ],
-   "AYCES": [
-    "tourism",
-    0
-   ],
-   "KLGYO": [
-    "realEstate",
-    0
-   ],
-   "COSMO": [
-    "industrial",
-    0
-   ],
-   "VAKBN": [
-    "banks",
-    0
-   ],
-   "OPK30": [
-    null,
-    null
-   ],
-   "HRKET": [
-    "transport",
-    0
-   ],
-   "EUKYO": [
-    "finance",
-    0
-   ],
-   "BIGEN": [
-    "energy",
-    0
-   ],
-   "EGEGY": [
-    "realEstate",
-    1.78
-   ],
-   "ZPBDL": [
-    null,
-    null
-   ],
-   "VERUS": [
-    "finance",
-    0
-   ],
-   "MAGEN": [
-    "energy",
-    0
-   ],
-   "ISYAT": [
-    null,
-    0
-   ],
-   "VKFYO": [
-    "finance",
-    0
-   ],
-   "BTCIM": [
-    "construction",
-    0
-   ],
-   "KLSER": [
-    "industrial",
-    0
-   ],
-   "PAGYO": [
-    "realEstate",
-    6.24
-   ],
-   "LRSHO": [
-    "food",
-    0
-   ],
-   "EYGYO": [
-    "realEstate",
-    1.52
-   ],
-   "GEDZA": [
     "industrial",
     0
    ],
@@ -2470,19 +34,1215 @@
     "realEstate",
     0
    ],
-   "METEN": [
-    "energy",
-    null
+   "ALKLC": [
+    "food",
+    0.05
    ],
-   "YATAS": [
+   "DIRIT": [
+    "textile",
+    0
+   ],
+   "BIMAS": [
+    "retail",
+    1.64
+   ],
+   "KERVN": [
+    "tourism",
+    0
+   ],
+   "ORCAY": [
+    "food",
+    0
+   ],
+   "IZENR": [
+    "energy",
+    0
+   ],
+   "CEMTS": [
+    "metals",
+    3.97
+   ],
+   "KARSN": [
     "industrial",
     0
    ],
-   "BURVA": [
+   "BIGCH": [
+    "tourism",
+    2.8
+   ],
+   "BKRGY": [
+    "realEstate",
+    0
+   ],
+   "ISCTR": [
+    "banks",
+    4.25
+   ],
+   "EMKEL": [
     "industrial",
+    0
+   ],
+   "ZRGYO": [
+    "realEstate",
+    0.49
+   ],
+   "ZRE20": [
+    null,
+    null
+   ],
+   "OPK30": [
+    null,
+    null
+   ],
+   "MEGMT": [
+    "metals",
+    0
+   ],
+   "SURGY": [
+    "realEstate",
+    0
+   ],
+   "KRDMA": [
+    "metals",
+    0
+   ],
+   "PASEU": [
+    "transport",
+    0
+   ],
+   "YAPRK": [
+    "food",
+    0.28
+   ],
+   "DOHOL": [
+    "retail",
+    1.64
+   ],
+   "ANELE": [
+    "construction",
+    0
+   ],
+   "EDIP": [
+    "realEstate",
+    0
+   ],
+   "OSTIM": [
+    null,
+    0
+   ],
+   "ERSU": [
+    "food",
+    0
+   ],
+   "KFEIN": [
+    "tech",
+    0.35
+   ],
+   "VRGYO": [
+    "realEstate",
+    0
+   ],
+   "OBAMS": [
+    "food",
+    0.8
+   ],
+   "TSGYO": [
+    "realEstate",
+    0
+   ],
+   "BRKVY": [
+    "finance",
+    1.06
+   ],
+   "ARFYE": [
+    "energy",
+    0
+   ],
+   "BJKAS": [
+    "tourism",
+    0
+   ],
+   "AYCES": [
+    "tourism",
+    0
+   ],
+   "KORDS": [
+    "textile",
+    0
+   ],
+   "SANKO": [
+    "textile",
+    0
+   ],
+   "GWIND": [
+    "energy",
+    3.22
+   ],
+   "MARBL": [
+    "construction",
+    0
+   ],
+   "TMSN": [
+    "industrial",
+    0
+   ],
+   "RUBNS": [
+    "textile",
+    0
+   ],
+   "VKING": [
+    "food",
+    0
+   ],
+   "DGNMO": [
+    "retail",
+    0
+   ],
+   "BULGS": [
+    "finance",
+    1.35
+   ],
+   "BMSCH": [
+    "metals",
+    0
+   ],
+   "KENT": [
+    "food",
+    0
+   ],
+   "AKSUE": [
+    "energy",
+    0
+   ],
+   "SANEL": [
+    "industrial",
+    0
+   ],
+   "UNLU": [
+    "finance",
+    0
+   ],
+   "PATEK": [
+    "tech",
+    0
+   ],
+   "HOROZ": [
+    "transport",
+    0
+   ],
+   "AKYHO": [
+    "industrial",
+    0
+   ],
+   "AKSA": [
+    "textile",
+    5.56
+   ],
+   "ATLAS": [
+    null,
+    0.58
+   ],
+   "DERHL": [
+    "textile",
+    0
+   ],
+   "YAYLA": [
+    "construction",
+    0
+   ],
+   "ATATP": [
+    "tech",
+    0.43
+   ],
+   "MAALT": [
+    "tourism",
+    0
+   ],
+   "REEDR": [
+    "tech",
+    0
+   ],
+   "FMIZP": [
+    "autos",
+    1.83
+   ],
+   "ERBOS": [
+    "metals",
+    2.35
+   ],
+   "OFSYM": [
+    "food",
+    1.55
+   ],
+   "LUKSK": [
+    "food",
+    0
+   ],
+   "EKDMR": [
+    "metals",
+    0
+   ],
+   "CVKMD": [
+    "metals",
+    0
+   ],
+   "ENKAI": [
+    "construction",
+    5.04
+   ],
+   "BRKSN": [
+    "industrial",
+    1.94
+   ],
+   "BRSAN": [
+    "metals",
+    0
+   ],
+   "TRGYO": [
+    "realEstate",
+    5.4
+   ],
+   "SAMAT": [
+    "industrial",
+    0
+   ],
+   "AKFIS": [
+    "construction",
+    0
+   ],
+   "IHLGM": [
+    "realEstate",
+    0
+   ],
+   "VAKFA": [
+    "finance",
+    0
+   ],
+   "GLCVY": [
+    "finance",
+    6.56
+   ],
+   "ASELS": [
+    "defence",
+    0.07
+   ],
+   "PGSUS": [
+    "transport",
+    0
+   ],
+   "IZMDC": [
+    "metals",
+    0
+   ],
+   "AYGAZ": [
+    "energy",
+    4.35
+   ],
+   "HUNER": [
+    "energy",
+    0
+   ],
+   "VAKFN": [
+    "finance",
+    0
+   ],
+   "KAREL": [
+    "tech",
+    0
+   ],
+   "ARSAN": [
+    "textile",
+    0
+   ],
+   "ONRYT": [
+    "tech",
+    0
+   ],
+   "MOPAS": [
+    "retail",
+    3.17
+   ],
+   "ALARK": [
+    "realEstate",
+    2.89
+   ],
+   "DOGUB": [
+    "construction",
+    0
+   ],
+   "PETKM": [
+    "chemicals",
+    0
+   ],
+   "IHLAS": [
+    "realEstate",
+    0
+   ],
+   "BANVT": [
+    "food",
+    0
+   ],
+   "ASTOR": [
+    "industrial",
+    0.77
+   ],
+   "ESCAR": [
+    "finance",
+    2.28
+   ],
+   "BRYAT": [
+    null,
+    11.91
+   ],
+   "HEDEF": [
+    "finance",
+    0
+   ],
+   "GOLDA": [
+    "food",
+    null
+   ],
+   "DYOBY": [
+    "industrial",
+    0
+   ],
+   "KONTR": [
+    "energy",
+    0.78
+   ],
+   "ZGYO": [
+    "realEstate",
+    0
+   ],
+   "BAKAB": [
+    "industrial",
+    0
+   ],
+   "NIBAS": [
+    "construction",
+    0
+   ],
+   "MERKO": [
+    "food",
+    0
+   ],
+   "AVTUR": [
+    null,
+    0
+   ],
+   "AGYO": [
+    "realEstate",
+    0
+   ],
+   "ATAGY": [
+    "realEstate",
+    0
+   ],
+   "BORLS": [
+    "finance",
+    0
+   ],
+   "KLSER": [
+    "industrial",
+    0
+   ],
+   "SEGMN": [
+    "food",
+    3.18
+   ],
+   "NETAS": [
+    "tech",
+    0
+   ],
+   "ESCOM": [
+    "tech",
+    0
+   ],
+   "GEDIK": [
+    "finance",
+    7.65
+   ],
+   "TBORG": [
+    "food",
+    7.77
+   ],
+   "ORGE": [
+    "construction",
+    0
+   ],
+   "TRMET": [
+    "metals",
+    0
+   ],
+   "DAGI": [
+    "textile",
+    0
+   ],
+   "GLYHO": [
+    "finance",
+    0.36
+   ],
+   "FRIGO": [
+    "food",
+    0
+   ],
+   "ENTRA": [
+    "energy",
+    0
+   ],
+   "INVES": [
+    "finance",
+    0
+   ],
+   "GARAN": [
+    "banks",
+    4.06
+   ],
+   "HALKB": [
+    "banks",
+    0
+   ],
+   "FONET": [
+    "tech",
+    0
+   ],
+   "BIGEN": [
+    "energy",
+    0
+   ],
+   "KIMMR": [
+    "retail",
+    3.88
+   ],
+   "YUNSA": [
+    "textile",
+    5.92
+   ],
+   "ALVES": [
+    "industrial",
+    0
+   ],
+   "GATEG": [
+    "industrial",
+    0
+   ],
+   "GRTHO": [
+    "industrial",
+    0.82
+   ],
+   "SNGYO": [
+    "realEstate",
+    0
+   ],
+   "GSRAY": [
+    "tourism",
+    0
+   ],
+   "MASFN": [
+    "construction",
+    0
+   ],
+   "LIDFA": [
+    "finance",
+    6.03
+   ],
+   "SOHOE": [
+    "energy",
+    0
+   ],
+   "A1YEN": [
+    "energy",
+    0
+   ],
+   "AHSGY": [
+    "realEstate",
+    1.23
+   ],
+   "BESLR": [
+    "food",
+    0
+   ],
+   "RYSAS": [
+    "transport",
+    0
+   ],
+   "ARASE": [
+    "energy",
+    2.09
+   ],
+   "TURGG": [
+    "realEstate",
+    0
+   ],
+   "THYAO": [
+    "transport",
+    2.41
+   ],
+   "LIDER": [
+    "finance",
+    1.58
+   ],
+   "PENTA": [
+    "industrial",
+    0
+   ],
+   "OYYAT": [
+    "finance",
+    14.16
+   ],
+   "AKBNK": [
+    "banks",
+    3.22
+   ],
+   "Z30KE": [
+    null,
+    null
+   ],
+   "AVGYO": [
+    "realEstate",
+    0
+   ],
+   "GIPTA": [
+    "industrial",
+    9.09
+   ],
+   "SASA": [
+    "textile",
+    0
+   ],
+   "AKHAN": [
+    "food",
+    0
+   ],
+   "NUGYO": [
+    "realEstate",
     0
    ],
    "BIOEN": [
+    "energy",
+    0
+   ],
+   "BALAT": [
+    "autos",
+    0
+   ],
+   "NTGAZ": [
+    "energy",
+    8.13
+   ],
+   "ORZAX": [
+    "health",
+    null
+   ],
+   "KATMR": [
+    "defence",
+    0
+   ],
+   "DMRGD": [
+    "food",
+    0
+   ],
+   "TERA": [
+    "finance",
+    0
+   ],
+   "EUKYO": [
+    "finance",
+    0
+   ],
+   "CASA": [
+    "industrial",
+    0
+   ],
+   "ULAS": [
+    "tourism",
+    0
+   ],
+   "AHGAZ": [
+    "energy",
+    0.12
+   ],
+   "IMASM": [
+    "industrial",
+    0
+   ],
+   "MIATK": [
+    "tech",
+    0
+   ],
+   "SARAE": [
+    "construction",
+    null
+   ],
+   "DCTTR": [
+    "industrial",
+    0
+   ],
+   "GOKNR": [
+    "food",
+    4.78
+   ],
+   "TLMAN": [
+    "transport",
+    0
+   ],
+   "EUREN": [
+    "industrial",
+    0
+   ],
+   "BRKO": [
+    "retail",
+    0
+   ],
+   "ETYAT": [
+    "finance",
+    0
+   ],
+   "ISSEN": [
+    "textile",
+    0.72
+   ],
+   "PARSN": [
+    "autos",
+    0
+   ],
+   "CRDFA": [
+    "finance",
+    0
+   ],
+   "IZINV": [
+    "food",
+    0
+   ],
+   "SELVA": [
+    "food",
+    0
+   ],
+   "DENGE": [
+    "finance",
+    0
+   ],
+   "EGSER": [
+    "industrial",
+    0
+   ],
+   "IHGZT": [
+    "telecom",
+    0
+   ],
+   "MEDTR": [
+    "health",
+    1.3
+   ],
+   "DESA": [
+    "textile",
+    2.97
+   ],
+   "ECILC": [
+    "health",
+    2.92
+   ],
+   "KUVVA": [
+    "tourism",
+    0
+   ],
+   "AGROT": [
+    "tech",
+    0
+   ],
+   "KOCMT": [
+    "metals",
+    0
+   ],
+   "MEPET": [
+    "retail",
+    0
+   ],
+   "EGEPO": [
+    "health",
+    0
+   ],
+   "USHOL": [
+    "industrial",
+    0
+   ],
+   "MZHLD": [
+    "industrial",
+    0
+   ],
+   "EKOS": [
+    "industrial",
+    0
+   ],
+   "COSMO": [
+    "industrial",
+    0
+   ],
+   "KRVGD": [
+    "food",
+    0
+   ],
+   "EKSUN": [
+    "food",
+    0
+   ],
+   "TDGYO": [
+    "realEstate",
+    0
+   ],
+   "OPX30": [
+    null,
+    null
+   ],
+   "SONME": [
+    "textile",
+    0.54
+   ],
+   "GMTAS": [
+    "retail",
+    0.63
+   ],
+   "SNPAM": [
+    "textile",
+    0
+   ],
+   "ALKIM": [
+    "metals",
+    0
+   ],
+   "ASUZU": [
+    "autos",
+    5.75
+   ],
+   "TRILC": [
+    "health",
+    0
+   ],
+   "GENKM": [
+    "chemicals",
+    2.74
+   ],
+   "EKIM": [
+    "finance",
+    null
+   ],
+   "BOSSA": [
+    "textile",
+    0
+   ],
+   "TKFEN": [
+    "construction",
+    0.13
+   ],
+   "KRTEK": [
+    "textile",
+    0
+   ],
+   "TABGD": [
+    "tourism",
+    2.26
+   ],
+   "GLRYH": [
+    "finance",
+    0
+   ],
+   "SEKFK": [
+    "finance",
+    0
+   ],
+   "INFO": [
+    "finance",
+    0
+   ],
+   "RAYSG": [
+    "finance",
+    0
+   ],
+   "KTSKR": [
+    "food",
+    10.33
+   ],
+   "DSTKF": [
+    "finance",
+    0
+   ],
+   "EKIZ": [
+    "food",
+    0
+   ],
+   "TOASO": [
+    "autos",
+    7.71
+   ],
+   "EGEGY": [
+    "realEstate",
+    1.78
+   ],
+   "INTEM": [
+    "industrial",
+    0
+   ],
+   "MRSHL": [
+    "industrial",
+    0
+   ],
+   "MARMR": [
+    "realEstate",
+    0
+   ],
+   "SUWEN": [
+    "tech",
+    3.51
+   ],
+   "MEYSU": [
+    "food",
+    0.63
+   ],
+   "DGGYO": [
+    "realEstate",
+    0
+   ],
+   "ERCB": [
+    "metals",
+    0
+   ],
+   "ULUUN": [
+    "food",
+    0
+   ],
+   "CITAS": [
+    "retail",
+    0
+   ],
+   "MNDTR": [
+    "industrial",
+    0
+   ],
+   "EGEEN": [
+    "autos",
+    0
+   ],
+   "ENERY": [
+    "energy",
+    0.11
+   ],
+   "TUPRS": [
+    "energy",
+    4.45
+   ],
+   "OPTLR": [
+    null,
+    null
+   ],
+   "GUBRF": [
+    "chemicals",
+    0
+   ],
+   "RYGYO": [
+    "realEstate",
+    0
+   ],
+   "GEDZA": [
+    "industrial",
+    0
+   ],
+   "QTEMZ": [
+    null,
+    null
+   ],
+   "MAGEN": [
+    "energy",
+    0
+   ],
+   "TCELL": [
+    "telecom",
+    3.74
+   ],
+   "ISBTR": [
+    "banks",
+    0
+   ],
+   "ARTMS": [
+    "retail",
+    0
+   ],
+   "GSDHO": [
+    "transport",
+    0
+   ],
+   "ZGOLD": [
+    null,
+    null
+   ],
+   "KARCL": [
+    "metals",
+    0
+   ],
+   "ISDMR": [
+    "metals",
+    7.13
+   ],
+   "USAK": [
+    "industrial",
+    0
+   ],
+   "KLGYO": [
+    "realEstate",
+    0
+   ],
+   "SMRVA": [
+    "industrial",
+    2.85
+   ],
+   "HKTM": [
+    "industrial",
+    0
+   ],
+   "KLKIM": [
+    "chemicals",
+    3.01
+   ],
+   "ALFAS": [
+    "energy",
+    0.57
+   ],
+   "VKGYO": [
+    "realEstate",
+    4.82
+   ],
+   "BYDNR": [
+    "tourism",
+    3.12
+   ],
+   "GENIL": [
+    "health",
+    0.94
+   ],
+   "IEYHO": [
+    "industrial",
+    0
+   ],
+   "SKBNK": [
+    "banks",
+    1.23
+   ],
+   "OYAYO": [
+    "finance",
+    0
+   ],
+   "CMENT": [
+    "construction",
+    0
+   ],
+   "INTEK": [
+    "industrial",
+    0
+   ],
+   "KPEKS": [
+    "industrial",
+    0
+   ],
+   "BFREN": [
+    "autos",
+    0
+   ],
+   "GLRMK": [
+    "construction",
+    0
+   ],
+   "BRMEN": [
+    "textile",
+    0
+   ],
+   "DOKTA": [
+    "autos",
+    0
+   ],
+   "DITAS": [
+    "autos",
+    0
+   ],
+   "SAYAS": [
+    "industrial",
+    0
+   ],
+   "GLDTR": [
+    null,
+    null
+   ],
+   "PCILT": [
+    "telecom",
+    8.39
+   ],
+   "TNZTP": [
+    "health",
+    0
+   ],
+   "MTRYO": [
+    null,
+    0.66
+   ],
+   "MMCAS": [
+    "transport",
+    0
+   ],
+   "OSMEN": [
+    "finance",
+    3.32
+   ],
+   "OTKAR": [
+    "defence",
+    0
+   ],
+   "VKFYO": [
+    "finance",
+    0
+   ],
+   "APX30": [
+    null,
+    null
+   ],
+   "TEZOL": [
+    "food",
+    6.34
+   ],
+   "MSGYO": [
+    "realEstate",
+    8.76
+   ],
+   "USDTR": [
+    null,
+    null
+   ],
+   "HDFGS": [
+    "finance",
+    0
+   ],
+   "KUYAS": [
+    "realEstate",
+    0
+   ],
+   "GENTS": [
+    "industrial",
+    5.46
+   ],
+   "EMPAE": [
+    "semis",
+    0.22
+   ],
+   "MACKO": [
+    "telecom",
+    16.1
+   ],
+   "CATES": [
+    "energy",
+    0
+   ],
+   "MGROS": [
+    "retail",
+    1.63
+   ],
+   "ASGYO": [
+    "realEstate",
+    1.77
+   ],
+   "BESTE": [
+    "energy",
+    0
+   ],
+   "TEHOL": [
+    "realEstate",
+    0
+   ],
+   "GOODY": [
+    "autos",
+    0
+   ],
+   "FZLGY": [
+    "realEstate",
+    0
+   ],
+   "BLUME": [
+    "tourism",
+    0
+   ],
+   "DMLKT": [
+    "realEstate",
+    null
+   ],
+   "MERIT": [
+    "tourism",
+    1.06
+   ],
+   "RODRG": [
+    "textile",
+    0
+   ],
+   "RALYH": [
+    "construction",
+    0
+   ],
+   "AKSGY": [
+    "realEstate",
+    4.84
+   ],
+   "TTRAK": [
+    "industrial",
+    19.36
+   ],
+   "YIGIT": [
+    "industrial",
+    0
+   ],
+   "BSOKE": [
+    "construction",
+    0
+   ],
+   "CELHA": [
+    "metals",
+    0
+   ],
+   "BMSTL": [
+    "metals",
+    0
+   ],
+   "INDES": [
+    "industrial",
+    1.88
+   ],
+   "BAYRK": [
+    "textile",
+    0
+   ],
+   "MAKTK": [
+    "industrial",
+    0
+   ],
+   "ARMGD": [
+    "food",
+    0
+   ],
+   "ZPLIB": [
+    null,
+    null
+   ],
+   "AZTEK": [
+    "industrial",
+    4.73
+   ],
+   "YONGA": [
+    "retail",
+    0
+   ],
+   "DAPGM": [
+    "realEstate",
+    0
+   ],
+   "KONYA": [
+    "construction",
+    0
+   ],
+   "CANTE": [
     "energy",
     0
    ],
@@ -2490,15 +1250,67 @@
     "chemicals",
     2.7
    ],
-   "EREGL": [
-    "metals",
-    1.46
+   "ODINE": [
+    "tech",
+    0
    ],
-   "AKYHO": [
+   "FRMPL": [
     "industrial",
     0
    ],
-   "BORLS": [
+   "KCHOL": [
+    "energy",
+    3.3
+   ],
+   "PEKGY": [
+    "realEstate",
+    0
+   ],
+   "KRONT": [
+    "telecom",
+    0
+   ],
+   "TUKAS": [
+    "food",
+    0
+   ],
+   "YEOTK": [
+    "energy",
+    0
+   ],
+   "CIMSA": [
+    "construction",
+    1.84
+   ],
+   "LOGO": [
+    "tech",
+    3.73
+   ],
+   "YYLGD": [
+    "food",
+    0
+   ],
+   "GRSEL": [
+    "tourism",
+    0.52
+   ],
+   "PLTUR": [
+    "transport",
+    8.12
+   ],
+   "DARDL": [
+    "food",
+    0
+   ],
+   "VERUS": [
+    "finance",
+    0
+   ],
+   "DNISI": [
+    "industrial",
+    0
+   ],
+   "QNBFK": [
     "finance",
     0
    ],
@@ -2506,2341 +1318,1353 @@
     "autos",
     0
    ],
-   "PASEU": [
+   "AVOD": [
+    "food",
+    0
+   ],
+   "ZPT10": [
+    null,
+    null
+   ],
+   "VSNMD": [
+    "construction",
+    0.92
+   ],
+   "DERIM": [
+    "textile",
+    0
+   ],
+   "PNLSN": [
+    "construction",
+    2.09
+   ],
+   "KUTPO": [
+    "retail",
+    0
+   ],
+   "ANGEN": [
+    "health",
+    0
+   ],
+   "YKBNK": [
+    "banks",
+    0
+   ],
+   "PINSU": [
+    "food",
+    0
+   ],
+   "HURGZ": [
+    "telecom",
+    0
+   ],
+   "FROTO": [
+    "autos",
+    13.12
+   ],
+   "SMART": [
+    "tech",
+    0
+   ],
+   "NATEN": [
+    "construction",
+    0
+   ],
+   "AGESA": [
+    "finance",
+    3
+   ],
+   "EUPWR": [
+    "industrial",
+    0
+   ],
+   "DOFER": [
+    "metals",
+    0.86
+   ],
+   "HRKET": [
     "transport",
+    0
+   ],
+   "DZGYO": [
+    "realEstate",
+    0
+   ],
+   "SKTAS": [
+    "textile",
+    0
+   ],
+   "BTCIM": [
+    "construction",
+    0
+   ],
+   "ALCTL": [
+    "tech",
+    0
+   ],
+   "VANGD": [
+    "food",
+    0
+   ],
+   "ARCLK": [
+    "retail",
+    0
+   ],
+   "ISGYO": [
+    "realEstate",
+    0.38
+   ],
+   "ADGYO": [
+    "finance",
+    0
+   ],
+   "KOTON": [
+    "textile",
+    0
+   ],
+   "BASCM": [
+    "construction",
+    0
+   ],
+   "KONKA": [
+    "industrial",
+    0
+   ],
+   "TKNSA": [
+    "retail",
+    0
+   ],
+   "GEREL": [
+    "industrial",
+    0
+   ],
+   "GARFA": [
+    "finance",
+    0
+   ],
+   "BASGZ": [
+    "energy",
+    5.02
+   ],
+   "KZBGY": [
+    "realEstate",
+    0
+   ],
+   "SUMAS": [
+    "industrial",
+    0.89
+   ],
+   "GLBMD": [
+    "finance",
+    0
+   ],
+   "KARTN": [
+    "industrial",
+    0
+   ],
+   "KSTUR": [
+    "tourism",
+    0.86
+   ],
+   "PKENT": [
+    "tourism",
+    0
+   ],
+   "GUNDG": [
+    "food",
+    0.15
+   ],
+   "IZFAS": [
+    "industrial",
+    0
+   ],
+   "BIZIM": [
+    "retail",
+    0
+   ],
+   "AKENR": [
+    "energy",
+    0
+   ],
+   "ICBCT": [
+    "banks",
+    0
+   ],
+   "Z30KP": [
+    null,
+    null
+   ],
+   "AVHOL": [
+    "health",
+    0
+   ],
+   "TUREX": [
+    "finance",
+    0
+   ],
+   "SANFM": [
+    "industrial",
+    0.88
+   ],
+   "MRGYO": [
+    "realEstate",
+    0
+   ],
+   "MAKIM": [
+    "tech",
+    0
+   ],
+   "MOGAN": [
+    "energy",
+    0
+   ],
+   "VAKKO": [
+    "textile",
+    11.14
+   ],
+   "BUCIM": [
+    "metals",
+    1.34
+   ],
+   "OPTGY": [
+    null,
+    null
+   ],
+   "UCAYM": [
+    "construction",
+    0
+   ],
+   "KCAER": [
+    "metals",
+    1.6
+   ],
+   "ANSGR": [
+    "finance",
+    5.69
+   ],
+   "BIGTK": [
+    "telecom",
+    0
+   ],
+   "BERA": [
+    "industrial",
     0
    ],
    "SEYKM": [
     "health",
     0
    ],
-   "ZGOLD": [
-    null,
-    null
+   "ACSEL": [
+    "chemicals",
+    0
    ],
-   "BIGTK": [
+   "INVEO": [
+    "finance",
+    0
+   ],
+   "DMSAS": [
+    "metals",
+    0
+   ],
+   "HATSN": [
+    "industrial",
+    0
+   ],
+   "VESTL": [
+    "retail",
+    0
+   ],
+   "TMPOL": [
+    "chemicals",
+    0
+   ],
+   "ELITE": [
+    "food",
+    0.26
+   ],
+   "YGGYO": [
+    "realEstate",
+    4.98
+   ],
+   "TTKOM": [
     "telecom",
     0
    ],
-   "SNICA": [
+   "IHEVA": [
+    "retail",
+    0
+   ],
+   "KRSTL": [
+    "food",
+    0
+   ],
+   "HLGYO": [
+    "realEstate",
+    21.67
+   ],
+   "HEKTS": [
+    "chemicals",
+    0
+   ],
+   "ISKPL": [
     "industrial",
+    0.01
+   ],
+   "SDTTR": [
+    "defence",
+    0.1
+   ],
+   "SELEC": [
+    "health",
+    0.55
+   ],
+   "ARDYZ": [
+    "tech",
+    0.05
+   ],
+   "ISGSY": [
+    "finance",
+    0
+   ],
+   "ZOREN": [
+    "energy",
+    0
+   ],
+   "ECZYT": [
+    "finance",
+    2.72
+   ],
+   "CEOEM": [
+    "tourism",
+    0
+   ],
+   "TCKRC": [
+    "metals",
+    0
+   ],
+   "LILAK": [
+    "food",
+    6.45
+   ],
+   "CGCAM": [
+    "retail",
+    0
+   ],
+   "IHAAS": [
+    "industrial",
+    0
+   ],
+   "FENER": [
+    "tourism",
+    0
+   ],
+   "YBTAS": [
+    "construction",
+    0
+   ],
+   "DUNYH": [
+    "food",
+    0
+   ],
+   "ENDAE": [
+    "finance",
+    0
+   ],
+   "SODSN": [
+    "chemicals",
     0
    ],
    "BVSAN": [
     "industrial",
     1.39
    ],
-   "PETKM": [
-    "chemicals",
-    0
-   ],
-   "ECILC": [
-    "health",
-    2.92
-   ],
-   "SNPAM": [
-    "textile",
-    0
-   ],
-   "AKFGY": [
-    "realEstate",
-    0.56
-   ],
-   "AKFIS": [
-    "construction",
-    0
-   ],
-   "OSMEN": [
-    "finance",
-    3.32
-   ],
-   "SKTAS": [
-    "textile",
-    0
-   ],
-   "CMENT": [
-    "construction",
-    0
-   ],
-   "FONET": [
-    "tech",
-    0
-   ],
-   "MERCN": [
+   "OZRDN": [
     "industrial",
-    1.97
+    0
    ],
-   "ALGYO": [
+   "RUZYE": [
+    "food",
+    0
+   ],
+   "KGYO": [
     "realEstate",
-    1.71
+    0
+   ],
+   "TUCLK": [
+    "metals",
+    0
+   ],
+   "EYGYO": [
+    "realEstate",
+    1.52
+   ],
+   "OZGYO": [
+    "realEstate",
+    0.94
    ],
    "ATEKS": [
     "textile",
     0
    ],
+   "KOPOL": [
+    "textile",
+    0
+   ],
+   "LXGYO": [
+    "realEstate",
+    0
+   ],
+   "TRALT": [
+    "metals",
+    0
+   ],
+   "HUBVC": [
+    "finance",
+    0
+   ],
+   "EPLAS": [
+    "industrial",
+    0
+   ],
+   "BORSK": [
+    "food",
+    3.84
+   ],
    "BETAE": [
     "industrial",
     null
    ],
-   "DOHOL": [
-    "retail",
-    1.64
-   ],
-   "AHGAZ": [
-    "energy",
-    0.12
-   ],
-   "LYDYE": [
-    "food",
+   "VERTU": [
+    "finance",
     0
    ],
-   "FZLGY": [
-    "realEstate",
+   "KLNMA": [
+    "finance",
+    0
+   ],
+   "ZSR25": [
+    null,
+    null
+   ],
+   "SERNT": [
+    "industrial",
     0
    ],
    "BLCYT": [
     "textile",
     0
    ],
-   "ZRGYO": [
-    "realEstate",
-    0.49
+   "ETILR": [
+    "tourism",
+    0
    ],
-   "GEREL": [
+   "GSDDE": [
+    "transport",
+    0
+   ],
+   "KLYPV": [
     "industrial",
     0
+   ],
+   "MEGAP": [
+    "textile",
+    0
+   ],
+   "PNSUT": [
+    "food",
+    0
+   ],
+   "ULKER": [
+    "food",
+    6.56
+   ],
+   "AKCNS": [
+    "construction",
+    0.89
+   ],
+   "OZSUB": [
+    "food",
+    1.64
+   ],
+   "KMPUR": [
+    "industrial",
+    0
+   ],
+   "EKGYO": [
+    "realEstate",
+    3.04
+   ],
+   "AFYON": [
+    "construction",
+    12.27
+   ],
+   "RGYAS": [
+    "realEstate",
+    0.85
+   ],
+   "ISBIR": [
+    "textile",
+    1.72
+   ],
+   "YESIL": [
+    null,
+    0
+   ],
+   "APBDL": [
+    null,
+    null
+   ],
+   "BIENY": [
+    "construction",
+    0
+   ],
+   "MTRKS": [
+    "tech",
+    0.89
+   ],
+   "SARKY": [
+    "industrial",
+    1.87
+   ],
+   "NETCD": [
+    "tech",
+    5.06
+   ],
+   "QUAGR": [
+    "construction",
+    0
+   ],
+   "BRLSM": [
+    "metals",
+    0
+   ],
+   "BURVA": [
+    "industrial",
+    0
+   ],
+   "DOAS": [
+    "retail",
+    21.08
+   ],
+   "SVGYO": [
+    "realEstate",
+    0.26
+   ],
+   "EFOR": [
+    "food",
+    0.13
+   ],
+   "QUICK": [
+    "finance",
+    0
+   ],
+   "TRHOL": [
+    "finance",
+    0
+   ],
+   "QNBTR": [
+    "banks",
+    0
+   ],
+   "SSAAT": [
+    "tourism",
+    null
+   ],
+   "NUHCM": [
+    "construction",
+    10.44
+   ],
+   "TSPOR": [
+    "tourism",
+    0
+   ],
+   "TKNKA": [
+    "industrial",
+    0
+   ],
+   "CUSAN": [
+    "metals",
+    0
+   ],
+   "CLEBI": [
+    "transport",
+    7.62
+   ],
+   "GOZDE": [
+    "finance",
+    0
+   ],
+   "AVPGY": [
+    "realEstate",
+    9.93
+   ],
+   "OYLUM": [
+    "food",
+    0
+   ],
+   "PAGYO": [
+    "realEstate",
+    6.24
+   ],
+   "CMBTN": [
+    "construction",
+    0
+   ],
+   "INGRM": [
+    "industrial",
+    0
+   ],
+   "SUNTK": [
+    "textile",
+    4.35
+   ],
+   "METEN": [
+    "energy",
+    null
+   ],
+   "KBORU": [
+    "industrial",
+    1.9
+   ],
+   "ESEN": [
+    "energy",
+    0
+   ],
+   "ALGYO": [
+    "realEstate",
+    1.71
+   ],
+   "EUHOL": [
+    "finance",
+    0
+   ],
+   "KTLEV": [
+    "finance",
+    0.97
+   ],
+   "POLHO": [
+    "industrial",
+    0
+   ],
+   "KRDMB": [
+    "metals",
+    0
+   ],
+   "ATSYH": [
+    null,
+    0
+   ],
+   "YKSLN": [
+    "industrial",
+    0
+   ],
+   "KZGYO": [
+    "realEstate",
+    0
+   ],
+   "INTET": [
+    "semis",
+    0
+   ],
+   "GOLTS": [
+    "construction",
+    1.65
+   ],
+   "CWENE": [
+    "semis",
+    0
+   ],
+   "CEMAS": [
+    "metals",
+    0
+   ],
+   "TATGD": [
+    "food",
+    0
+   ],
+   "PAMEL": [
+    "energy",
+    0
+   ],
+   "ICUGS": [
+    "finance",
+    0
+   ],
+   "FORMT": [
+    "metals",
+    0
+   ],
+   "PSGYO": [
+    "realEstate",
+    0.59
+   ],
+   "UFUK": [
+    "finance",
+    0
+   ],
+   "FORTE": [
+    "tech",
+    0
+   ],
+   "GRNYO": [
+    "finance",
+    0
+   ],
+   "ENPRA": [
+    "banks",
+    null
+   ],
+   "SNICA": [
+    "industrial",
+    0
+   ],
+   "AEFES": [
+    "food",
+    1.6
+   ],
+   "OZYSR": [
+    "metals",
+    0
+   ],
+   "BNTAS": [
+    "industrial",
+    0
+   ],
+   "VEYAS": [
+    "energy",
+    0
+   ],
+   "VAKBN": [
+    "banks",
+    0
+   ],
+   "PENGD": [
+    "food",
+    0
+   ],
+   "KLSYN": [
+    "retail",
+    1.06
+   ],
+   "KRGYO": [
+    "realEstate",
+    1.03
+   ],
+   "AAGYO": [
+    "realEstate",
+    null
+   ],
+   "SRVGY": [
+    "realEstate",
+    3.45
+   ],
+   "MAVI": [
+    "textile",
+    4.45
+   ],
+   "ISMEN": [
+    "finance",
+    10.99
+   ],
+   "OZKGY": [
+    "realEstate",
+    1.66
+   ],
+   "DURDO": [
+    "industrial",
+    0
+   ],
+   "BAGFS": [
+    "chemicals",
+    0
+   ],
+   "PRKME": [
+    "metals",
+    0
+   ],
+   "ALBTN": [
+    "construction",
+    0
+   ],
+   "ATATR": [
+    "tourism",
+    0
+   ],
+   "LRSHO": [
+    "food",
+    0
+   ],
+   "IDGYO": [
+    "realEstate",
+    0
+   ],
+   "LYDYE": [
+    "food",
+    0
+   ],
+   "PRKAB": [
+    "industrial",
+    0
+   ],
+   "CONSE": [
+    "energy",
+    0
+   ],
+   "PETUN": [
+    "food",
+    2.45
+   ],
+   "HATEK": [
+    "textile",
+    0
+   ],
+   "LINK": [
+    "tech",
+    0
+   ],
+   "MARTI": [
+    "tourism",
+    0
+   ],
+   "FADE": [
+    "food",
+    0
+   ],
+   "BOBET": [
+    "construction",
+    2.63
+   ],
+   "ARENA": [
+    "industrial",
+    0
+   ],
+   "TRCAS": [
+    "energy",
+    6.06
+   ],
+   "AKFYE": [
+    "energy",
+    0
+   ],
+   "KAPLM": [
+    "industrial",
+    0
+   ],
+   "SKYLP": [
+    "industrial",
+    0
+   ],
+   "BALSU": [
+    "food",
+    0
+   ],
+   "PSDTC": [
+    "textile",
+    2.02
+   ],
+   "METRO": [
+    "food",
+    0
+   ],
+   "CCOLA": [
+    "food",
+    1.73
+   ],
+   "GMSTR": [
+    null,
+    null
+   ],
+   "ECOGR": [
+    "energy",
+    0
+   ],
+   "MERCN": [
+    "industrial",
+    1.97
+   ],
+   "TARKM": [
+    "chemicals",
+    0
+   ],
+   "VBTYZ": [
+    "tech",
+    0
+   ],
+   "EMNIS": [
+    "industrial",
+    0
+   ],
+   "NETGL": [
+    "industrial",
+    0
+   ],
+   "ALBRK": [
+    "banks",
+    2.95
+   ],
+   "SKYMD": [
+    "finance",
+    0
+   ],
+   "SEKUR": [
+    "industrial",
+    0
+   ],
+   "TGSAS": [
+    "industrial",
+    0.27
+   ],
+   "ATAKP": [
+    "food",
+    2.07
+   ],
+   "AYDEM": [
+    "energy",
+    0
+   ],
+   "CRFSA": [
+    "retail",
+    0
+   ],
+   "EUYO": [
+    "finance",
+    0
+   ],
+   "DOFRB": [
+    "industrial",
+    0
+   ],
+   "TEKTU": [
+    "tourism",
+    0
+   ],
+   "OBASE": [
+    "tech",
+    0
+   ],
+   "ONCSM": [
+    "health",
+    0
+   ],
+   "DESPC": [
+    "industrial",
+    0
+   ],
+   "BEGYO": [
+    "realEstate",
+    0
+   ],
+   "AKMGY": [
+    "realEstate",
+    7.63
+   ],
+   "KRDMD": [
+    "metals",
+    0
+   ],
+   "OZATD": [
+    "industrial",
+    0
+   ],
+   "AYEN": [
+    "energy",
+    3.14
+   ],
+   "TATEN": [
+    "energy",
+    0
+   ],
+   "SEGYO": [
+    "realEstate",
+    0
+   ],
+   "SAFKR": [
+    "industrial",
+    0
+   ],
+   "ORMA": [
+    "metals",
+    0
+   ],
+   "LYDHO": [
+    "energy",
+    0
+   ],
+   "MHRGY": [
+    "realEstate",
+    2.29
+   ],
+   "GESAN": [
+    "tech",
+    0
+   ],
+   "AKGRT": [
+    "finance",
+    0
+   ],
+   "AYES": [
+    "metals",
+    1.46
+   ],
+   "MPARK": [
+    "health",
+    0
+   ],
+   "MANAS": [
+    "industrial",
+    0
+   ],
+   "ZEDUR": [
+    "tourism",
+    0
+   ],
+   "JANTS": [
+    "autos",
+    0.23
+   ],
+   "TSKB": [
+    "finance",
+    5.38
+   ],
+   "AGHOL": [
+    "food",
+    2.04
+   ],
+   "DOCO": [
+    "tourism",
+    1.28
+   ],
+   "AKFGY": [
+    "realEstate",
+    0.56
+   ],
+   "ALTIN": [
+    null,
+    null
+   ],
+   "OYAKC": [
+    "construction",
+    4.86
+   ],
+   "KLMSN": [
+    "industrial",
+    0
+   ],
+   "ADESE": [
+    "realEstate",
+    0
+   ],
+   "ISFIN": [
+    "finance",
+    0
+   ],
+   "AKSEN": [
+    "energy",
+    0
+   ],
+   "BINBN": [
+    "industrial",
+    0
+   ],
+   "TURSG": [
+    "finance",
+    2.72
+   ],
+   "ANHYT": [
+    "finance",
+    7.94
+   ],
+   "DEVA": [
+    "health",
+    0
+   ],
+   "KRPLS": [
+    "food",
+    0
+   ],
+   "EREGL": [
+    "metals",
+    1.46
+   ],
+   "TRENJ": [
+    "energy",
+    0
+   ],
+   "YYAPI": [
+    "construction",
+    0
+   ],
+   "RNPOL": [
+    "industrial",
+    0
+   ],
+   "PKART": [
+    "industrial",
+    0
+   ],
+   "A1CAP": [
+    "finance",
+    0
+   ],
+   "MEKAG": [
+    "industrial",
+    0
+   ],
+   "ADEL": [
+    "autos",
+    2.33
+   ],
+   "SOKE": [
+    "food",
+    0
+   ],
+   "BARMA": [
+    "industrial",
+    0
+   ],
+   "YATAS": [
+    "industrial",
+    0
+   ],
+   "PRDGS": [
+    "finance",
+    0
+   ],
+   "ODAS": [
+    "energy",
+    0
+   ],
+   "LMKDC": [
+    "construction",
+    8.5
+   ],
+   "ULUSE": [
+    "industrial",
+    0
+   ],
+   "SMRTG": [
+    "semis",
+    0
+   ],
+   "TAVHL": [
+    "transport",
+    1.35
+   ],
+   "IHYAY": [
+    "telecom",
+    0
+   ],
+   "BINHO": [
+    "tech",
+    0
+   ],
+   "SAHOL": [
+    "banks",
+    1.68
+   ],
+   "ISYAT": [
+    null,
+    0
+   ],
+   "CEMZY": [
+    "food",
+    0
+   ],
+   "ENSRI": [
+    "food",
+    0
+   ],
+   "OTTO": [
+    "food",
+    0
+   ],
+   "KLRHO": [
+    "food",
+    0
+   ],
+   "MOBTL": [
+    "industrial",
+    0
+   ],
+   "PAHOL": [
+    null,
+    0
+   ],
+   "ALTNY": [
+    "defence",
+    0
+   ],
+   "GZNMI": [
+    "tourism",
+    0
+   ],
+   "ULUFA": [
+    "finance",
+    8.07
+   ],
+   "PAPIL": [
+    "tech",
+    0
+   ],
+   "NTHOL": [
+    "tourism",
+    0
+   ],
+   "KNFRT": [
+    "food",
+    0
+   ],
+   "ALCAR": [
+    "industrial",
+    11
+   ],
+   "BEYAZ": [
+    "retail",
+    1.8
    ],
    "EGPRO": [
     "industrial",
     3.95
    ],
-   "SARAE": [
-    "construction",
-    null
+   "MCARD": [
+    "industrial",
+    0
    ],
-   "MEGMT": [
+   "ALKA": [
     "metals",
     0
    ],
-   "KRDMD": [
+   "EBEBK": [
+    "retail",
+    1.22
+   ],
+   "LKMNH": [
+    "health",
+    4.25
+   ],
+   "MNDRS": [
+    "textile",
+    0
+   ],
+   "OPT25": [
+    null,
+    null
+   ],
+   "ISVEA": [
+    "industrial",
+    null
+   ],
+   "PRZMA": [
+    "industrial",
+    0
+   ],
+   "DGATE": [
+    "industrial",
+    0
+   ],
+   "EDATA": [
+    "industrial",
+    0
+   ],
+   "SISE": [
+    "retail",
+    1.56
+   ],
+   "ENJSA": [
+    "energy",
+    4.53
+   ],
+   "SOKM": [
+    "retail",
+    0
+   ],
+   "VESBE": [
+    "retail",
+    1.13
+   ],
+   "ZPBDL": [
+    null,
+    null
+   ],
+   "HTTBT": [
+    "tech",
+    0
+   ],
+   "KAYSE": [
+    "health",
+    0
+   ],
+   "FLAP": [
+    "tourism",
+    0.64
+   ],
+   "ISGLK": [
+    null,
+    null
+   ],
+   "BURCE": [
     "metals",
+    0
+   ],
+   "DURKN": [
+    "food",
+    0.64
+   ],
+   "RTALB": [
+    "health",
+    0
+   ],
+   "POLTK": [
+    "chemicals",
+    0
+   ],
+   "ARZUM": [
+    "industrial",
+    0
+   ],
+   "SILVR": [
+    "industrial",
     0
    ]
   },
   "us": {
-   "MOS": [
-    "chemicals",
-    4.67
-   ],
-   "SQM": [
-    "chemicals",
-    2.51
-   ],
-   "INDA": [
-    null,
-    null
-   ],
-   "MTUAY": [
-    "defence",
-    0.76
-   ],
-   "EWW": [
-    null,
-    null
-   ],
-   "GM": [
-    "autos",
-    0.84
-   ],
-   "WPC": [
-    "realEstate",
-    5.82
-   ],
-   "KTOS": [
-    "defence",
-    0
-   ],
-   "DE": [
-    "industrial",
-    1.02
-   ],
-   "APH": [
-    "tech",
-    0.58
-   ],
-   "TSN": [
-    "food",
-    3.81
-   ],
-   "EWH": [
-    null,
-    null
-   ],
-   "ANET": [
-    "tech",
-    0
-   ],
-   "BR": [
-    "tech",
-    2.41
-   ],
-   "SHLS": [
+   "ALAB": [
     "semis",
     0
-   ],
-   "PLUG": [
-    "semis",
-    0
-   ],
-   "XPEV": [
-    "autos",
-    0
-   ],
-   "MOBI": [
-    "health",
-    0
-   ],
-   "SAIC": [
-    "tech",
-    1.11
-   ],
-   "TENB": [
-    "tech",
-    0
-   ],
-   "HROW": [
-    "health",
-    0
-   ],
-   "ROCK": [
-    "metals",
-    0
-   ],
-   "DDOG": [
-    "tech",
-    0
-   ],
-   "GRMN": [
-    "tech",
-    0
-   ],
-   "MRAM": [
-    "semis",
-    0
-   ],
-   "ACA": [
-    "construction",
-    0.14
-   ],
-   "VTRS": [
-    "health",
-    2.74
-   ],
-   "DBE": [
-    null,
-    null
-   ],
-   "THRM": [
-    "autos",
-    0
-   ],
-   "MTZ": [
-    "construction",
-    0
-   ],
-   "FTAI": [
-    "defence",
-    1.03
-   ],
-   "XLK": [
-    null,
-    null
-   ],
-   "CW": [
-    "defence",
-    0.2
-   ],
-   "NFLX": [
-    "tech",
-    0
-   ],
-   "OLED": [
-    "semis",
-    2.6
-   ],
-   "PDSB": [
-    "health",
-    0
-   ],
-   "ARRY": [
-    "industrial",
-    0
-   ],
-   "EADSY": [
-    "defence",
-    1.38
-   ],
-   "DGX": [
-    "health",
-    1.43
-   ],
-   "SVNDY": [
-    "retail",
-    2.24
-   ],
-   "MC": [
-    "finance",
-    4.51
-   ],
-   "PENG": [
-    "semis",
-    0
-   ],
-   "O": [
-    "realEstate",
-    5.93
-   ],
-   "GSK": [
-    "health",
-    3.81
-   ],
-   "FICO": [
-    "finance",
-    0
-   ],
-   "FAN": [
-    null,
-    null
-   ],
-   "BKR": [
-    "energy",
-    1.64
-   ],
-   "P": [
-    "tech",
-    0
-   ],
-   "GEV": [
-    "industrial",
-    0.18
-   ],
-   "NVDU": [
-    null,
-    null
-   ],
-   "PONY": [
-    "tech",
-    0
-   ],
-   "WVE": [
-    "health",
-    0
-   ],
-   "LDOS": [
-    "tech",
-    1.41
-   ],
-   "CHTR": [
-    "telecom",
-    0
-   ],
-   "IXN": [
-    null,
-    null
-   ],
-   "ITA": [
-    null,
-    null
-   ],
-   "WELL": [
-    "realEstate",
-    1.33
-   ],
-   "IDR": [
-    "metals",
-    0
-   ],
-   "MXI": [
-    null,
-    null
-   ],
-   "TM": [
-    "autos",
-    3.22
-   ],
-   "VXX": [
-    null,
-    null
-   ],
-   "BRO": [
-    "finance",
-    1.04
-   ],
-   "RYCEY": [
-    "defence",
-    0.76
-   ],
-   "SIMO": [
-    "semis",
-    0.81
-   ],
-   "ZD": [
-    "tech",
-    0
-   ],
-   "HXL": [
-    "defence",
-    0.84
-   ],
-   "RSPG": [
-    null,
-    null
-   ],
-   "UDOW": [
-    null,
-    null
-   ],
-   "CPRT": [
-    "retail",
-    0
-   ],
-   "PM": [
-    "food",
-    2.91
-   ],
-   "CIBR": [
-    null,
-    null
-   ],
-   "CMCSA": [
-    "telecom",
-    6.38
-   ],
-   "SNOW": [
-    "tech",
-    0
-   ],
-   "IDXX": [
-    "health",
-    0
-   ],
-   "KOPN": [
-    "semis",
-    0
-   ],
-   "GILD": [
-    "health",
-    2.16
-   ],
-   "COPX": [
-    null,
-    null
-   ],
-   "HOCPY": [
-    "health",
-    0.94
-   ],
-   "AMGN": [
-    "health",
-    2.38
-   ],
-   "RNMBY": [
-    "defence",
-    0.88
-   ],
-   "ODFL": [
-    "transport",
-    0.63
-   ],
-   "BIDU": [
-    "tech",
-    0
-   ],
-   "SKHY": [
-    "semis",
-    0
-   ],
-   "BIIB": [
-    "health",
-    0
-   ],
-   "ADM": [
-    "food",
-    2.57
-   ],
-   "CCEP": [
-    "food",
-    2.27
-   ],
-   "GLD": [
-    null,
-    null
-   ],
-   "F": [
-    "autos",
-    5
-   ],
-   "DRS": [
-    "defence",
-    1.01
-   ],
-   "CF": [
-    "chemicals",
-    1.83
-   ],
-   "SPEM": [
-    null,
-    null
-   ],
-   "TDIV": [
-    null,
-    null
-   ],
-   "WHR": [
-    "retail",
-    9.35
-   ],
-   "LTC": [
-    "realEstate",
-    5.3
-   ],
-   "URNM": [
-    null,
-    null
-   ],
-   "LOAR": [
-    "defence",
-    0
-   ],
-   "KEYS": [
-    "tech",
-    0
-   ],
-   "SNPS": [
-    "tech",
-    0
-   ],
-   "FCX": [
-    "metals",
-    0.82
-   ],
-   "XYLD": [
-    null,
-    null
-   ],
-   "RBRK": [
-    "tech",
-    0
-   ],
-   "WWD": [
-    "industrial",
-    0.37
-   ],
-   "IGM": [
-    null,
-    null
-   ],
-   "CUBI": [
-    "banks",
-    0
-   ],
-   "HLT": [
-    "tourism",
-    0.18
-   ],
-   "SRAD": [
-    "tech",
-    0
-   ],
-   "PLTR": [
-    "tech",
-    0
-   ],
-   "QBTS": [
-    "tech",
-    0
-   ],
-   "EQIX": [
-    "realEstate",
-    1.95
-   ],
-   "VSNT": [
-    "telecom",
-    0
-   ],
-   "ACHR": [
-    "defence",
-    0
-   ],
-   "VEEV": [
-    "tech",
-    0
-   ],
-   "XME": [
-    null,
-    null
-   ],
-   "PPA": [
-    null,
-    null
-   ],
-   "BAC": [
-    "banks",
-    2.13
-   ],
-   "BIL": [
-    null,
-    null
-   ],
-   "CIFR": [
-    "tech",
-    0
-   ],
-   "HL": [
-    "metals",
-    0.09
-   ],
-   "LHX": [
-    "defence",
-    2.08
-   ],
-   "IDRV": [
-    null,
-    null
-   ],
-   "RCAT": [
-    "tech",
-    0
-   ],
-   "PVH": [
-    "textile",
-    0.18
-   ],
-   "BX": [
-    "finance",
-    4.56
-   ],
-   "META": [
-    "tech",
-    0.28
-   ],
-   "NRGV": [
-    "industrial",
-    0
-   ],
-   "CQQQ": [
-    null,
-    null
-   ],
-   "TTC": [
-    "industrial",
-    1.6
-   ],
-   "STE": [
-    "health",
-    1.18
-   ],
-   "LITP": [
-    null,
-    null
-   ],
-   "DCO": [
-    "defence",
-    0
-   ],
-   "HAGHY": [
-    "defence",
-    0.57
-   ],
-   "EMB": [
-    null,
-    null
-   ],
-   "HAIL": [
-    null,
-    null
-   ],
-   "KBR": [
-    "tech",
-    1.88
-   ],
-   "NTES": [
-    "tech",
-    2.33
-   ],
-   "SPSB": [
-    null,
-    null
-   ],
-   "WDAY": [
-    "tech",
-    0
-   ],
-   "HWM": [
-    "defence",
-    0.23
-   ],
-   "COIN": [
-    "finance",
-    0
-   ],
-   "SOLS": [
-    "chemicals",
-    0.37
-   ],
-   "AMPX": [
-    "industrial",
-    0
-   ],
-   "BEEM": [
-    "industrial",
-    0
-   ],
-   "RDWR": [
-    "tech",
-    0
-   ],
-   "RIOT": [
-    "tech",
-    0
-   ],
-   "UHS": [
-    "health",
-    0.45
-   ],
-   "XOM": [
-    "energy",
-    2.39
-   ],
-   "ALC": [
-    "health",
-    0.52
-   ],
-   "XBI": [
-    null,
-    null
-   ],
-   "ROK": [
-    "industrial",
-    1.27
-   ],
-   "TJX": [
-    "retail",
-    1.28
-   ],
-   "DECK": [
-    "textile",
-    0
-   ],
-   "IXJ": [
-    null,
-    null
-   ],
-   "ALGM": [
-    "semis",
-    0
-   ],
-   "AAPB": [
-    null,
-    null
-   ],
-   "DIA": [
-    null,
-    null
-   ],
-   "NCLH": [
-    "tourism",
-    0
-   ],
-   "SNDK": [
-    "tech",
-    0
-   ],
-   "TSLA": [
-    "autos",
-    0
-   ],
-   "QLYS": [
-    "tech",
-    0
-   ],
-   "VMRK": [
-    "realEstate",
-    4.56
-   ],
-   "CBRS": [
-    "tech",
-    0
-   ],
-   "GOEVQ": [
-    "autos",
-    0
-   ],
-   "IBM": [
-    "tech",
-    2.97
-   ],
-   "VSH": [
-    "semis",
-    1.25
-   ],
-   "IQQ": [
-    null,
-    null
-   ],
-   "GNRC": [
-    "industrial",
-    0
-   ],
-   "CCL": [
-    "tourism",
-    1.7
-   ],
-   "BILI": [
-    "tech",
-    0
-   ],
-   "LEA": [
-    "autos",
-    2.63
-   ],
-   "EWG": [
-    null,
-    null
-   ],
-   "PSI": [
-    null,
-    null
-   ],
-   "LYV": [
-    "tourism",
-    0
-   ],
-   "PCAR": [
-    "industrial",
-    1.26
-   ],
-   "CWEN": [
-    "energy",
-    6.1
-   ],
-   "TSLL": [
-    null,
-    null
-   ],
-   "A": [
-    "health",
-    0.59
-   ],
-   "NDAQ": [
-    "finance",
-    1.23
-   ],
-   "ROBT": [
-    null,
-    null
-   ],
-   "MVIS": [
-    "semis",
-    0
-   ],
-   "TTWO": [
-    "tech",
-    0
-   ],
-   "CBT": [
-    "chemicals",
-    2.48
-   ],
-   "PI": [
-    "semis",
-    0
-   ],
-   "HONA": [
-    "defence",
-    0
-   ],
-   "LIN": [
-    "chemicals",
-    1.29
-   ],
-   "PSLV": [
-    null,
-    0
-   ],
-   "MU": [
-    "semis",
-    0.05
-   ],
-   "HII": [
-    "defence",
-    2.09
-   ],
-   "BDX": [
-    "health",
-    2.22
-   ],
-   "IAU": [
-    null,
-    null
-   ],
-   "VZ": [
-    "telecom",
-    6.53
-   ],
-   "JNK": [
-    null,
-    null
-   ],
-   "ENPH": [
-    "industrial",
-    0
-   ],
-   "NVT": [
-    "tech",
-    0.51
-   ],
-   "ROG": [
-    "chemicals",
-    0
-   ],
-   "GSIE": [
-    null,
-    null
-   ],
-   "HCA": [
-    "health",
-    0.67
-   ],
-   "SMPL": [
-    "food",
-    0
-   ],
-   "MRVL": [
-    "semis",
-    0.09
-   ],
-   "OR": [
-    "metals",
-    0.68
-   ],
-   "GS": [
-    "finance",
-    2.01
-   ],
-   "KIM": [
-    "realEstate",
-    4.75
-   ],
-   "GD": [
-    "defence",
-    1.84
-   ],
-   "OSCR": [
-    "health",
-    0
-   ],
-   "CVX": [
-    "energy",
-    3.28
-   ],
-   "LRCX": [
-    "industrial",
-    0.36
-   ],
-   "PRU": [
-    "finance",
-    4.89
-   ],
-   "GOOGL": [
-    "tech",
-    0.24
-   ],
-   "NET": [
-    "tech",
-    0
-   ],
-   "AXON": [
-    "defence",
-    0
-   ],
-   "HSBC": [
-    "banks",
-    3.95
-   ],
-   "MAXNQ": [
-    "energy",
-    0
-   ],
-   "CLS": [
-    "tech",
-    0
-   ],
-   "BBJP": [
-    null,
-    null
-   ],
-   "MCD": [
-    "tourism",
-    3.16
-   ],
-   "CPRI": [
-    "retail",
-    0
-   ],
-   "RSP": [
-    null,
-    null
-   ],
-   "ADSK": [
-    "tech",
-    0
-   ],
-   "FINMY": [
-    "defence",
-    0.73
-   ],
-   "INCY": [
-    "health",
-    0
-   ],
-   "COHR": [
-    "semis",
-    0
-   ],
-   "CL": [
-    "food",
-    2.33
-   ],
-   "ABT": [
-    "health",
-    2.44
-   ],
-   "BLDP": [
-    "industrial",
-    0
-   ],
-   "PHO": [
-    null,
-    null
-   ],
-   "ONON": [
-    "textile",
-    0
-   ],
-   "TSM": [
-    "semis",
-    0.67
-   ],
-   "JKS": [
-    "semis",
-    17.15
-   ],
-   "ETN": [
-    "industrial",
-    1.02
-   ],
-   "GRVY": [
-    "tech",
-    3.71
-   ],
-   "PSX": [
-    "energy",
-    1.78
-   ],
-   "VGNT": [
-    "industrial",
-    0
-   ],
-   "HYG": [
-    null,
-    null
-   ],
-   "PICK": [
-    null,
-    null
-   ],
-   "ADP": [
-    "tech",
-    2.48
-   ],
-   "BP": [
-    "energy",
-    4.27
-   ],
-   "ECH": [
-    null,
-    null
-   ],
-   "CSIQ": [
-    "semis",
-    0
-   ],
-   "HUBS": [
-    "tech",
-    0
-   ],
-   "SITM": [
-    "semis",
-    0
-   ],
-   "XRAY": [
-    "health",
-    3.75
-   ],
-   "VWOB": [
-    null,
-    null
-   ],
-   "NOC": [
-    "defence",
-    1.97
-   ],
-   "PBJ": [
-    null,
-    null
-   ],
-   "FSLR": [
-    "semis",
-    0
-   ],
-   "FTNT": [
-    "tech",
-    0
-   ],
-   "PLTK": [
-    "tech",
-    17.94
-   ],
-   "SE": [
-    "tech",
-    0
-   ],
-   "SAN": [
-    "banks",
-    1.49
-   ],
-   "GEHC": [
-    "health",
-    0.21
-   ],
-   "DKNG": [
-    "tourism",
-    0
-   ],
-   "ONDS": [
-    "tech",
-    0
-   ],
-   "MNTK": [
-    "industrial",
-    0
-   ],
-   "SBNY": [
-    "banks",
-    0
-   ],
-   "ATI": [
-    "metals",
-    0
-   ],
-   "EAT": [
-    "tourism",
-    0
-   ],
-   "SAFRY": [
-    "defence",
-    0.74
-   ],
-   "UEC": [
-    "metals",
-    0
-   ],
-   "BB": [
-    "tech",
-    0
-   ],
-   "ITT": [
-    "autos",
-    0.75
-   ],
-   "STT": [
-    "finance",
-    1.92
-   ],
-   "COPA": [
-    null,
-    null
-   ],
-   "USFD": [
-    "food",
-    0
-   ],
-   "NVEC": [
-    "semis",
-    3.63
-   ],
-   "GLDM": [
-    null,
-    null
-   ],
-   "MCHP": [
-    "semis",
-    2.47
-   ],
-   "MRK": [
-    "health",
-    2.34
-   ],
-   "CNH": [
-    "industrial",
-    0.86
    ],
    "ESGE": [
     null,
     null
    ],
-   "CMG": [
-    "tourism",
-    0
-   ],
-   "SOXX": [
-    null,
-    null
-   ],
-   "GT": [
-    "autos",
-    0
-   ],
-   "SYNA": [
-    "semis",
-    0
-   ],
-   "DELL": [
-    "tech",
-    0.4
-   ],
-   "QQQM": [
-    null,
-    null
-   ],
-   "OVV": [
-    "energy",
-    1.84
-   ],
-   "HOOD": [
-    "finance",
-    0
-   ],
-   "BG": [
-    "food",
-    2.73
-   ],
-   "ONTO": [
-    "tech",
-    0
-   ],
-   "PLTM": [
-    null,
-    null
-   ],
-   "ENS": [
-    "industrial",
-    0.6
-   ],
-   "APTV": [
-    "industrial",
-    0
-   ],
-   "LUNR": [
-    "defence",
-    0
-   ],
-   "HEI": [
-    "defence",
-    0.08
-   ],
-   "SCHE": [
-    null,
-    null
-   ],
-   "KULR": [
-    "industrial",
-    0
-   ],
-   "KO": [
-    "food",
-    2.34
-   ],
-   "CNC": [
-    "health",
-    0
-   ],
-   "WST": [
-    "health",
-    0.24
-   ],
-   "HON": [
-    "industrial",
-    3.74
-   ],
-   "CRML": [
-    "metals",
-    0
-   ],
-   "HUM": [
-    "health",
-    0.82
-   ],
-   "ARM": [
-    "semis",
-    0
-   ],
-   "GLXY": [
-    "finance",
-    0
-   ],
-   "SPCX": [
-    "telecom",
-    0
-   ],
-   "INSM": [
-    "health",
-    0
-   ],
-   "STLD": [
-    "metals",
-    0.87
-   ],
-   "XAR": [
-    null,
-    null
-   ],
-   "VRSK": [
-    "tech",
-    1.1
-   ],
-   "FROG": [
-    "tech",
-    0
-   ],
-   "MDT": [
-    "health",
-    3.11
-   ],
-   "REX": [
-    "chemicals",
-    0
-   ],
-   "PALL": [
-    null,
-    null
-   ],
-   "LULU": [
-    "textile",
-    0
-   ],
-   "ALV": [
-    "autos",
-    3.15
-   ],
-   "QS": [
-    "industrial",
-    0
-   ],
-   "NEE": [
-    "energy",
-    3.1
-   ],
-   "ZTS": [
-    "health",
-    2.76
-   ],
-   "BTDR": [
-    "tech",
-    0
-   ],
-   "IVV": [
-    null,
-    null
-   ],
-   "MSFT": [
-    "tech",
-    0.67
-   ],
-   "PAYX": [
-    "tech",
-    4.34
-   ],
-   "XT": [
-    null,
-    null
-   ],
-   "MPC": [
-    "energy",
-    0.87
-   ],
-   "QQQI": [
-    null,
-    null
-   ],
-   "UTHR": [
-    "health",
-    0
-   ],
-   "ACN": [
-    "tech",
-    3.03
-   ],
-   "JBS": [
-    "food",
-    0.01
-   ],
-   "MSTR": [
-    "tech",
-    0
-   ],
-   "TE": [
-    "industrial",
-    0
-   ],
-   "COO": [
-    "health",
-    0
-   ],
-   "PGY": [
-    "tech",
-    0
-   ],
-   "VRRM": [
-    "transport",
-    0
-   ],
-   "DINO": [
-    "energy",
-    1.65
-   ],
-   "ORA": [
-    "energy",
-    0.52
-   ],
-   "PDBC": [
-    null,
-    null
-   ],
-   "SSM": [
-    "autos",
-    0
-   ],
-   "PSA": [
-    "realEstate",
-    4.15
-   ],
-   "URA": [
-    null,
-    null
-   ],
-   "COMB": [
-    null,
-    null
-   ],
-   "RBLX": [
-    "tech",
-    0
-   ],
-   "SLV": [
-    null,
-    null
-   ],
-   "DOC": [
-    "realEstate",
-    6.44
-   ],
-   "UUUU": [
-    "metals",
-    0
-   ],
-   "IREN": [
-    "tech",
-    0
-   ],
-   "AJG": [
-    "finance",
-    1.18
-   ],
-   "WM": [
-    "industrial",
-    1.73
-   ],
-   "ORCL": [
-    "tech",
-    1.46
-   ],
-   "QTEC": [
-    null,
-    null
-   ],
-   "ZETA": [
-    "tech",
-    0
-   ],
-   "REET": [
-    null,
-    null
-   ],
-   "HSY": [
-    "food",
-    3.49
-   ],
-   "ACES": [
-    null,
-    null
-   ],
-   "ZINC": [
-    null,
-    null
-   ],
-   "SPTE": [
-    null,
-    null
-   ],
-   "PANW": [
-    "tech",
-    0
-   ],
-   "CDNS": [
-    "tech",
-    0
-   ],
-   "BAX": [
-    "health",
-    0.16
-   ],
-   "COP": [
-    "energy",
-    2.44
-   ],
-   "DJD": [
-    null,
-    null
-   ],
-   "AKAM": [
-    "tech",
-    0
-   ],
-   "SYY": [
-    "food",
-    2.76
-   ],
-   "NVDA": [
-    "semis",
-    0.23
-   ],
-   "SCHD": [
-    null,
-    null
-   ],
-   "MS": [
-    "finance",
-    2.18
-   ],
-   "EW": [
-    "health",
-    0
-   ],
-   "OXM": [
-    "textile",
-    11
-   ],
-   "DAR": [
-    "food",
-    0
-   ],
-   "RUN": [
-    "semis",
-    0
-   ],
-   "C": [
-    "banks",
-    1.87
-   ],
-   "IOO": [
-    null,
-    null
-   ],
-   "FXI": [
-    null,
-    null
-   ],
-   "ROST": [
-    "retail",
-    0.77
-   ],
-   "IFLN": [
-    null,
-    null
-   ],
-   "CSX": [
-    "transport",
-    1.15
-   ],
-   "MMM": [
-    "industrial",
-    1.91
-   ],
-   "BBVA": [
-    "banks",
-    3.32
-   ],
-   "INTU": [
-    "tech",
-    1.57
-   ],
-   "LITE": [
-    "industrial",
-    0
-   ],
-   "CTSH": [
-    "tech",
-    2.18
-   ],
-   "IMO": [
-    "energy",
-    1.89
-   ],
-   "CVLT": [
-    "tech",
-    0
-   ],
-   "DBO": [
-    null,
-    null
-   ],
-   "AZN": [
-    "health",
-    0
-   ],
-   "COR": [
-    "health",
-    0.74
-   ],
-   "SARO": [
-    "transport",
-    0
-   ],
-   "RNW": [
-    "energy",
-    0
-   ],
-   "ISRG": [
-    "health",
-    0
-   ],
-   "RDDT": [
-    "tech",
-    0
-   ],
-   "ASML": [
-    "semis",
-    0.44
-   ],
-   "ALB": [
-    "chemicals",
-    1.65
-   ],
-   "LOGI": [
-    "tech",
-    1.64
-   ],
-   "PG": [
-    "food",
-    2.8
-   ],
-   "TER": [
-    "semis",
-    0.13
-   ],
-   "DVLT": [
-    "semis",
-    0
-   ],
-   "NTCT": [
-    "tech",
-    0
-   ],
-   "SHOE": [
-    "retail",
-    4.84
-   ],
-   "DOYU": [
-    "industrial",
-    0
-   ],
-   "RTX": [
-    "defence",
-    1.51
-   ],
-   "KRMN": [
-    "defence",
-    0
-   ],
-   "ROP": [
-    "tech",
-    0.97
-   ],
-   "SAABY": [
-    "defence",
-    0.19
-   ],
-   "JPM": [
-    "banks",
-    1.79
-   ],
-   "BKSY": [
-    "tech",
-    0
-   ],
-   "TQQQ": [
-    null,
-    null
-   ],
-   "LI": [
-    "autos",
-    0
-   ],
-   "NOW": [
-    "tech",
-    0
-   ],
-   "AMSC": [
-    "industrial",
-    0
-   ],
-   "PPLT": [
-    null,
-    null
-   ],
-   "BBWI": [
-    "retail",
-    4.6
-   ],
-   "SYK": [
-    "health",
-    1.25
-   ],
-   "CRWV": [
-    "tech",
-    0
-   ],
-   "FINX": [
-    null,
-    null
-   ],
-   "RMD": [
-    "health",
-    1.05
-   ],
-   "TMC": [
-    "metals",
-    0
-   ],
-   "SATL": [
-    "defence",
-    0
-   ],
-   "CHKP": [
-    "tech",
-    0
-   ],
-   "ESE": [
-    "tech",
-    0.12
-   ],
-   "BOTZ": [
-    null,
-    null
-   ],
-   "UAL": [
-    "transport",
-    0
-   ],
-   "ANDE": [
-    "industrial",
-    1.22
-   ],
-   "KMB": [
-    "food",
-    5.16
-   ],
-   "GMAB": [
-    "health",
-    0
-   ],
-   "OILK": [
-    null,
-    null
-   ],
-   "TMO": [
-    "health",
-    0.28
-   ],
-   "CRSR": [
-    "tech",
-    0
-   ],
-   "RIVN": [
-    "autos",
-    0
-   ],
-   "V": [
-    "finance",
-    0.69
-   ],
-   "CVE": [
-    "energy",
-    1.88
-   ],
-   "JD": [
-    "tech",
-    3.67
-   ],
-   "IMMR": [
-    "tech",
-    3.67
-   ],
-   "FFIV": [
-    "tech",
-    0
-   ],
-   "WDC": [
-    "tech",
-    0.14
-   ],
-   "IWM": [
-    null,
-    null
-   ],
-   "TTE": [
-    "energy",
-    4.37
-   ],
-   "MA": [
-    "finance",
-    0.57
-   ],
-   "XLV": [
-    null,
-    null
-   ],
-   "TAK": [
-    "health",
-    3.11
-   ],
-   "TBCH": [
-    "retail",
-    0
-   ],
-   "SPY": [
-    null,
-    null
-   ],
-   "SPG": [
-    "realEstate",
-    4.42
-   ],
-   "VST": [
-    "energy",
-    0.58
-   ],
-   "CCJ": [
-    "metals",
-    0.19
-   ],
-   "NU": [
-    "banks",
-    0
-   ],
-   "WFC": [
-    "banks",
-    2.22
-   ],
-   "GNTX": [
-    "autos",
-    2.32
-   ],
-   "MPWR": [
-    "semis",
-    0.57
-   ],
-   "CME": [
-    "finance",
-    4.08
-   ],
-   "LQD": [
-    null,
-    null
-   ],
-   "TTMI": [
-    "tech",
-    0
-   ],
-   "FLEX": [
-    "semis",
-    0
-   ],
-   "AEIS": [
-    "semis",
-    0.14
-   ],
-   "VGK": [
-    null,
-    null
-   ],
-   "MDLZ": [
-    "food",
-    3.27
-   ],
-   "VC": [
-    "autos",
-    1.65
-   ],
-   "FCEL": [
-    "tech",
-    0
-   ],
-   "CVS": [
-    "retail",
-    3.03
-   ],
-   "MCK": [
-    "health",
-    0.36
-   ],
-   "VFC": [
-    "textile",
-    2.28
-   ],
-   "UNH": [
-    "health",
-    2.39
-   ],
-   "ADBE": [
-    "tech",
-    0
-   ],
-   "KNDI": [
-    "autos",
-    0
-   ],
-   "DD": [
-    "chemicals",
-    1.86
-   ],
-   "MUFG": [
-    "banks",
-    2.65
-   ],
-   "S": [
-    "tech",
-    0
-   ],
-   "TKR": [
-    "industrial",
-    1.23
-   ],
-   "KORU": [
-    null,
-    null
-   ],
-   "NVTS": [
-    "semis",
-    0
-   ],
-   "ABNB": [
-    "tourism",
-    0
-   ],
-   "OKTA": [
-    "tech",
-    0
-   ],
-   "ROKU": [
-    "tech",
-    0
-   ],
-   "SHOP": [
-    "industrial",
-    0
-   ],
-   "WMT": [
-    "retail",
-    0.86
-   ],
-   "ALGN": [
-    "health",
-    0
-   ],
-   "CDRE": [
-    "defence",
-    1.53
-   ],
-   "RPRX": [
-    "health",
-    1.6
-   ],
-   "QNDX": [
-    null,
-    null
-   ],
-   "MNST": [
-    "food",
-    0
-   ],
-   "VICR": [
-    "tech",
-    0
-   ],
-   "BE": [
-    "semis",
-    0
-   ],
-   "BWA": [
-    "industrial",
-    1.13
-   ],
-   "CRCL": [
-    "tech",
-    0
-   ],
-   "GCC": [
-    null,
-    null
-   ],
-   "POWI": [
-    "semis",
-    1.81
-   ],
-   "BNY": [
-    "finance",
-    1.55
-   ],
-   "BABA": [
-    "tech",
-    0.93
-   ],
-   "QTUM": [
-    null,
-    null
-   ],
-   "WTAI": [
-    null,
-    null
-   ],
-   "IGV": [
-    null,
-    null
-   ],
-   "WAB": [
-    "industrial",
-    0.41
-   ],
-   "PBW": [
-    null,
-    null
-   ],
-   "UPRO": [
-    null,
-    null
-   ],
-   "NXPI": [
-    "semis",
-    1.8
-   ],
-   "MDB": [
-    "tech",
-    0
-   ],
-   "PEP": [
-    "food",
-    4.58
-   ],
-   "HAP": [
-    null,
-    null
-   ],
-   "BCI": [
-    null,
-    null
-   ],
-   "LSCC": [
-    "semis",
-    0
-   ],
-   "IONQ": [
-    "tech",
-    0
-   ],
-   "CAN": [
-    "semis",
-    0
-   ],
-   "FIRY": [
-    "tech",
-    0
-   ],
-   "MAGS": [
-    null,
-    null
-   ],
-   "AGNC": [
-    "realEstate",
-    16.59
-   ],
-   "CSCO": [
-    "tech",
-    1.44
-   ],
-   "ABBV": [
-    "health",
-    2.43
-   ],
-   "AMKR": [
-    "semis",
-    0.69
-   ],
-   "BAESY": [
-    "defence",
-    1.72
-   ],
-   "ENTG": [
-    "industrial",
-    0.25
-   ],
-   "AOSL": [
-    "semis",
-    0
-   ],
-   "AMT": [
-    "realEstate",
-    3.87
-   ],
-   "TCEHY": [
-    "tech",
-    1.11
-   ],
-   "INTC": [
-    "semis",
-    0
-   ],
-   "ARR": [
-    "realEstate",
-    20.95
-   ],
-   "COPP": [
-    null,
-    null
-   ],
-   "AEP": [
-    "energy",
-    3.06
-   ],
-   "IXC": [
-    null,
-    null
-   ],
-   "FTGC": [
-    null,
-    null
-   ],
-   "AVGO": [
-    "semis",
-    0.73
-   ],
-   "PUK": [
-    "finance",
-    2.2
-   ],
-   "FANG": [
-    "energy",
-    2.18
-   ],
-   "SOXS": [
-    null,
-    null
-   ],
-   "TDG": [
-    "defence",
-    0
-   ],
-   "DFJ": [
-    null,
-    null
-   ],
-   "SMTC": [
-    "semis",
-    0
-   ],
-   "AGX": [
-    "construction",
-    0.52
-   ],
-   "CAT": [
-    "industrial",
-    0.77
-   ],
-   "EWS": [
-    null,
-    null
-   ],
-   "GLW": [
-    "tech",
-    0.76
-   ],
-   "MICC": [
-    "food",
-    0
-   ],
-   "CRWD": [
-    "tech",
-    0
-   ],
-   "HY": [
-    "industrial",
-    4.54
-   ],
-   "UCO": [
-    null,
-    null
-   ],
-   "ATEN": [
-    "tech",
-    0.84
-   ],
    "DMC": [
     "food",
     3.99
-   ],
-   "ROBO": [
-    null,
-    null
    ],
    "APAM": [
     "finance",
     10.67
    ],
-   "XEL": [
-    "energy",
-    3.17
+   "C": [
+    "banks",
+    1.87
    ],
-   "RIO": [
-    "metals",
-    4.89
+   "ACA": [
+    "construction",
+    0.14
    ],
-   "THNQ": [
+   "OILK": [
     null,
     null
    ],
-   "BSX": [
+   "HROW": [
     "health",
     0
    ],
-   "NTSK": [
-    "tech",
-    0
-   ],
-   "EEM": [
-    null,
-    null
-   ],
-   "ARKX": [
-    null,
-    null
-   ],
-   "SAP": [
-    "tech",
-    0.98
-   ],
-   "UFO": [
-    null,
-    null
-   ],
-   "QYLD": [
-    null,
-    null
-   ],
-   "DOV": [
-    "industrial",
-    1.09
-   ],
-   "VSEC": [
-    "construction",
-    0.24
-   ],
-   "PZZA": [
-    "tourism",
-    9.35
-   ],
-   "DRIV": [
-    null,
-    null
-   ],
-   "MXL": [
+   "PI": [
     "semis",
     0
    ],
-   "HMC": [
-    "autos",
-    3.29
-   ],
-   "DAL": [
-    "transport",
-    0.97
-   ],
-   "KOID": [
-    null,
-    null
-   ],
-   "FTCI": [
-    "tech",
-    0
-   ],
-   "ELV": [
-    "health",
-    1.63
-   ],
-   "QQQ": [
-    null,
-    null
-   ],
-   "NKE": [
-    "textile",
-    4.64
-   ],
-   "CRI": [
-    "retail",
-    3.12
-   ],
-   "KHC": [
-    "food",
-    7.13
-   ],
-   "U": [
-    "tech",
-    0
-   ],
-   "LPLA": [
-    "finance",
-    0.36
-   ],
-   "HPQ": [
-    "tech",
-    4.02
-   ],
-   "RCL": [
-    "tourism",
-    1.96
-   ],
-   "SIVR": [
+   "PALL": [
     null,
     null
    ],
@@ -4848,359 +2672,467 @@
     "tech",
     0
    ],
-   "MAR": [
-    "tourism",
-    0.76
-   ],
-   "EWZ": [
+   "IFLN": [
     null,
     null
-   ],
-   "EMLC": [
-    null,
-    null
-   ],
-   "DTE": [
-    "energy",
-    3.64
-   ],
-   "LH": [
-    "health",
-    0.91
-   ],
-   "HERO": [
-    null,
-    null
-   ],
-   "ESTC": [
-    "tech",
-    0
-   ],
-   "DCH": [
-    "autos",
-    0
-   ],
-   "SHV": [
-    null,
-    null
-   ],
-   "RDW": [
-    "defence",
-    0
-   ],
-   "EMR": [
-    "tech",
-    1.37
-   ],
-   "THLLY": [
-    "defence",
-    1.11
-   ],
-   "AMZN": [
-    "tech",
-    0
-   ],
-   "ECL": [
-    "chemicals",
-    1.03
-   ],
-   "KWEB": [
-    null,
-    null
-   ],
-   "REMX": [
-    null,
-    null
-   ],
-   "RRX": [
-    "industrial",
-    0.86
-   ],
-   "TECH": [
-    "health",
-    0.44
-   ],
-   "ARES": [
-    "finance",
-    4.38
-   ],
-   "XLE": [
-    null,
-    null
-   ],
-   "SDY": [
-    null,
-    null
-   ],
-   "LCID": [
-    "autos",
-    0
-   ],
-   "CDW": [
-    "tech",
-    1.75
-   ],
-   "MELI": [
-    "tech",
-    0
-   ],
-   "CI": [
-    "health",
-    2.18
-   ],
-   "ITRI": [
-    "tech",
-    0
-   ],
-   "VRT": [
-    "semis",
-    0.1
-   ],
-   "TRMB": [
-    "tech",
-    0
-   ],
-   "HD": [
-    "retail",
-    3.2
-   ],
-   "RSPH": [
-    null,
-    null
-   ],
-   "SOLV": [
-    "health",
-    0
-   ],
-   "KKR": [
-    "finance",
-    0.83
-   ],
-   "HPE": [
-    "tech",
-    0.81
-   ],
-   "AON": [
-    "finance",
-    1.14
-   ],
-   "SDIV": [
-    null,
-    null
-   ],
-   "VTR": [
-    "realEstate",
-    2.44
-   ],
-   "TMUS": [
-    "telecom",
-    2.69
-   ],
-   "EQT": [
-    "energy",
-    1.24
-   ],
-   "PFE": [
-    "health",
-    6.06
-   ],
-   "GFS": [
-    "semis",
-    0.5
-   ],
-   "JNJ": [
-    "health",
-    2
    ],
    "DVA": [
     "health",
     0
    ],
-   "PL": [
+   "RMBS": [
+    "semis",
+    0
+   ],
+   "AGNC": [
+    "realEstate",
+    16.59
+   ],
+   "ADBE": [
     "tech",
     0
    ],
-   "GEN": [
-    "tech",
-    2.14
+   "UHS": [
+    "health",
+    0.45
    ],
-   "ASTS": [
+   "TEM": [
+    "tech",
+    0
+   ],
+   "SPCX": [
     "telecom",
     0
    ],
-   "PHG": [
-    "health",
-    3.4
-   ],
-   "VGT": [
-    null,
-    null
-   ],
-   "LAR": [
-    "metals",
+   "OKLO": [
+    "industrial",
     0
    ],
-   "FTDS": [
+   "LITP": [
     null,
     null
    ],
-   "SLB": [
-    "energy",
-    2.4
-   ],
-   "BNO": [
-    null,
-    null
-   ],
-   "AVAV": [
-    "defence",
-    0
-   ],
-   "PWR": [
-    "construction",
-    0.06
-   ],
-   "SWKS": [
-    "semis",
-    3.8
-   ],
-   "TXN": [
-    "semis",
-    2.02
-   ],
-   "MCHI": [
-    null,
-    null
-   ],
-   "BAH": [
-    "industrial",
-    3.15
-   ],
-   "JCI": [
-    "industrial",
-    1.03
-   ],
-   "REGN": [
-    "health",
-    0.49
-   ],
-   "MSFU": [
-    null,
-    null
-   ],
-   "IHAK": [
-    null,
-    null
-   ],
-   "APLD": [
+   "NOW": [
     "tech",
     0
    ],
-   "NIO": [
-    "autos",
+   "PSLV": [
+    null,
     0
    ],
-   "DLR": [
-    "realEstate",
-    2.71
-   ],
-   "FIX": [
+   "VSEC": [
     "construction",
-    0.18
+    0.24
    ],
-   "KURE": [
-    null,
-    null
-   ],
-   "BLNK": [
+   "BWA": [
     "industrial",
-    0
+    1.13
    ],
-   "EMHY": [
+   "VRT": [
+    "semis",
+    0.1
+   ],
+   "SPTE": [
     null,
     null
    ],
-   "PYPL": [
+   "CMCSA": [
+    "telecom",
+    6.38
+   ],
+   "ALC": [
+    "health",
+    0.52
+   ],
+   "ENTG": [
     "industrial",
-    1
+    0.25
    ],
-   "PATH": [
-    "tech",
-    0
-   ],
-   "RACE": [
-    "autos",
-    1.03
-   ],
-   "FIW": [
-    null,
-    null
-   ],
-   "BWXT": [
+   "CW": [
     "defence",
-    0.76
+    0.2
    ],
-   "SHEL": [
-    "energy",
+   "IAU": [
+    null,
+    null
+   ],
+   "BDX": [
+    "health",
+    2.22
+   ],
+   "TGT": [
+    "retail",
     2.98
+   ],
+   "GM": [
+    "autos",
+    0.84
+   ],
+   "BILI": [
+    "tech",
+    0
+   ],
+   "AMPX": [
+    "industrial",
+    0
+   ],
+   "LMT": [
+    "defence",
+    2.7
+   ],
+   "QQQ": [
+    null,
+    null
+   ],
+   "WH": [
+    "tourism",
+    2.32
+   ],
+   "SIMO": [
+    "semis",
+    0.81
+   ],
+   "LI": [
+    "autos",
+    0
+   ],
+   "AIQ": [
+    null,
+    null
+   ],
+   "GEHC": [
+    "health",
+    0.21
+   ],
+   "RBLX": [
+    "tech",
+    0
+   ],
+   "SYY": [
+    "food",
+    2.76
+   ],
+   "INTU": [
+    "tech",
+    1.57
+   ],
+   "ECL": [
+    "chemicals",
+    1.03
+   ],
+   "SE": [
+    "tech",
+    0
+   ],
+   "NU": [
+    "banks",
+    0
+   ],
+   "SIVR": [
+    null,
+    null
+   ],
+   "IXC": [
+    null,
+    null
+   ],
+   "PDBC": [
+    null,
+    null
+   ],
+   "PSX": [
+    "energy",
+    1.78
+   ],
+   "QLYS": [
+    "tech",
+    0
+   ],
+   "SKHY": [
+    "semis",
+    0
+   ],
+   "FINMY": [
+    "defence",
+    0.73
+   ],
+   "WM": [
+    "industrial",
+    1.73
+   ],
+   "TSN": [
+    "food",
+    3.81
+   ],
+   "MC": [
+    "finance",
+    4.51
+   ],
+   "ADP": [
+    "tech",
+    2.48
+   ],
+   "PH": [
+    "industrial",
+    0.79
+   ],
+   "DJD": [
+    null,
+    null
+   ],
+   "OKTA": [
+    "tech",
+    0
+   ],
+   "MS": [
+    "finance",
+    2.18
+   ],
+   "MTD": [
+    "health",
+    0
+   ],
+   "IBKR": [
+    "finance",
+    0.38
+   ],
+   "SBNY": [
+    "banks",
+    0
+   ],
+   "STX": [
+    "tech",
+    0.39
+   ],
+   "VMRK": [
+    "realEstate",
+    4.56
+   ],
+   "BBVA": [
+    "banks",
+    3.32
+   ],
+   "GILD": [
+    "health",
+    2.16
+   ],
+   "CME": [
+    "finance",
+    4.08
+   ],
+   "CIBR": [
+    null,
+    null
+   ],
+   "FFIV": [
+    "tech",
+    0
+   ],
+   "ARES": [
+    "finance",
+    4.38
+   ],
+   "ENPH": [
+    "industrial",
+    0
+   ],
+   "BABA": [
+    "tech",
+    0.93
+   ],
+   "BNY": [
+    "finance",
+    1.55
+   ],
+   "TECH": [
+    "health",
+    0.44
    ],
    "SU": [
     "energy",
     2.33
    ],
-   "TDY": [
-    "defence",
+   "S": [
+    "tech",
     0
    ],
-   "ESGU": [
-    null,
-    null
-   ],
-   "CRM": [
-    "tech",
-    0.74
-   ],
-   "NVDL": [
-    null,
-    null
-   ],
-   "IQV": [
+   "MDT": [
     "health",
-    0
+    3.11
    ],
-   "NTR": [
-    "chemicals",
-    3.19
+   "EWH": [
+    null,
+    null
    ],
-   "DVN": [
-    "energy",
-    2.29
+   "XAR": [
+    null,
+    null
    ],
-   "AAL": [
-    "transport",
-    0
-   ],
-   "HUT": [
-    "tech",
-    0
-   ],
-   "NTAP": [
-    "tech",
-    0.87
-   ],
-   "PDD": [
-    "retail",
-    0
-   ],
-   "AIR": [
+   "HONA": [
     "defence",
     0
+   ],
+   "SMH": [
+    null,
+    null
+   ],
+   "ESGD": [
+    null,
+    null
+   ],
+   "KWEB": [
+    null,
+    null
+   ],
+   "SHOE": [
+    "retail",
+    4.84
+   ],
+   "AVEM": [
+    null,
+    null
+   ],
+   "BX": [
+    "finance",
+    4.56
+   ],
+   "NVDA": [
+    "semis",
+    0.23
+   ],
+   "ENS": [
+    "industrial",
+    0.6
+   ],
+   "TMO": [
+    "health",
+    0.28
+   ],
+   "TXT": [
+    "defence",
+    0.11
+   ],
+   "GSK": [
+    "health",
+    3.81
+   ],
+   "GFS": [
+    "semis",
+    0.5
+   ],
+   "AOSL": [
+    "semis",
+    0
+   ],
+   "CCJ": [
+    "metals",
+    0.19
+   ],
+   "QNDX": [
+    null,
+    null
+   ],
+   "FIX": [
+    "construction",
+    0.18
    ],
    "CSGP": [
     "tech",
     0
    ],
-   "USL": [
+   "WMT": [
+    "retail",
+    0.86
+   ],
+   "AJG": [
+    "finance",
+    1.18
+   ],
+   "BLK": [
+    "finance",
+    2.07
+   ],
+   "UPRO": [
+    null,
+    null
+   ],
+   "SATL": [
+    "defence",
+    0
+   ],
+   "NTES": [
+    "tech",
+    2.33
+   ],
+   "MCHP": [
+    "semis",
+    2.47
+   ],
+   "JCI": [
+    "industrial",
+    1.03
+   ],
+   "TDG": [
+    "defence",
+    0
+   ],
+   "STM": [
+    "semis",
+    0.61
+   ],
+   "ITT": [
+    "autos",
+    0.75
+   ],
+   "GCC": [
+    null,
+    null
+   ],
+   "META": [
+    "tech",
+    0.28
+   ],
+   "IXJ": [
+    null,
+    null
+   ],
+   "KO": [
+    "food",
+    2.34
+   ],
+   "VRNS": [
+    "tech",
+    0
+   ],
+   "BKSY": [
+    "tech",
+    0
+   ],
+   "MXL": [
+    "semis",
+    0
+   ],
+   "RSP": [
+    null,
+    null
+   ],
+   "WFC": [
+    "banks",
+    2.22
+   ],
+   "IOO": [
+    null,
+    null
+   ],
+   "IVE": [
+    null,
+    null
+   ],
+   "RSPH": [
+    null,
+    null
+   ],
+   "XYLD": [
     null,
     null
    ],
@@ -5208,15 +3140,1047 @@
     "finance",
     6.31
    ],
+   "SMCI": [
+    "tech",
+    0
+   ],
+   "SOXX": [
+    null,
+    null
+   ],
+   "EAT": [
+    "tourism",
+    0
+   ],
+   "SOLS": [
+    "chemicals",
+    0.37
+   ],
+   "PAYX": [
+    "tech",
+    4.34
+   ],
+   "ROCK": [
+    "metals",
+    0
+   ],
+   "KBGGY": [
+    "defence",
+    20.74
+   ],
+   "SJNK": [
+    null,
+    null
+   ],
+   "ICLN": [
+    null,
+    null
+   ],
+   "PLTR": [
+    "tech",
+    0
+   ],
+   "BNO": [
+    null,
+    null
+   ],
+   "CRM": [
+    "tech",
+    0.74
+   ],
+   "GRMN": [
+    "tech",
+    0
+   ],
+   "CAT": [
+    "industrial",
+    0.77
+   ],
+   "DECK": [
+    "textile",
+    0
+   ],
+   "COPP": [
+    null,
+    null
+   ],
+   "SAIC": [
+    "tech",
+    1.11
+   ],
+   "CLS": [
+    "tech",
+    0
+   ],
+   "KHC": [
+    "food",
+    7.13
+   ],
+   "NVT": [
+    "tech",
+    0.51
+   ],
+   "XT": [
+    null,
+    null
+   ],
+   "VONE": [
+    null,
+    null
+   ],
+   "DOYU": [
+    "industrial",
+    0
+   ],
+   "NTCT": [
+    "tech",
+    0
+   ],
+   "PBW": [
+    null,
+    null
+   ],
+   "IONQ": [
+    "tech",
+    0
+   ],
+   "CI": [
+    "health",
+    2.18
+   ],
+   "RDWR": [
+    "tech",
+    0
+   ],
+   "CCEP": [
+    "food",
+    2.27
+   ],
+   "OLED": [
+    "semis",
+    2.6
+   ],
+   "FTAI": [
+    "defence",
+    1.03
+   ],
+   "IMO": [
+    "energy",
+    1.89
+   ],
+   "DIA": [
+    null,
+    null
+   ],
+   "NDAQ": [
+    "finance",
+    1.23
+   ],
+   "CAMT": [
+    "tech",
+    0
+   ],
+   "GOOGL": [
+    "tech",
+    0.24
+   ],
+   "ALGN": [
+    "health",
+    0
+   ],
+   "EMR": [
+    "tech",
+    1.37
+   ],
+   "ALV": [
+    "autos",
+    3.15
+   ],
+   "OR": [
+    "metals",
+    0.68
+   ],
+   "REX": [
+    "chemicals",
+    0
+   ],
+   "KBR": [
+    "tech",
+    1.88
+   ],
+   "EXC": [
+    "energy",
+    3.94
+   ],
+   "GNRC": [
+    "industrial",
+    0
+   ],
+   "WAB": [
+    "industrial",
+    0.41
+   ],
+   "CUBI": [
+    "banks",
+    0
+   ],
+   "ALGM": [
+    "semis",
+    0
+   ],
+   "VICR": [
+    "tech",
+    0
+   ],
+   "SQM": [
+    "chemicals",
+    2.51
+   ],
+   "URNM": [
+    null,
+    null
+   ],
+   "JNK": [
+    null,
+    null
+   ],
+   "LOAR": [
+    "defence",
+    0
+   ],
+   "IVV": [
+    null,
+    null
+   ],
+   "THLLY": [
+    "defence",
+    1.11
+   ],
+   "SAP": [
+    "tech",
+    0.98
+   ],
+   "DGP": [
+    null,
+    null
+   ],
+   "SNDK": [
+    "tech",
+    0
+   ],
+   "BHP": [
+    "metals",
+    3.93
+   ],
+   "SOXS": [
+    null,
+    null
+   ],
+   "MSTX": [
+    null,
+    null
+   ],
+   "UFO": [
+    null,
+    null
+   ],
+   "SCHE": [
+    null,
+    null
+   ],
+   "AVAV": [
+    "defence",
+    0
+   ],
+   "MTSI": [
+    "semis",
+    0
+   ],
+   "CCL": [
+    "tourism",
+    1.7
+   ],
+   "PPLT": [
+    null,
+    null
+   ],
+   "FTGC": [
+    null,
+    null
+   ],
+   "ZD": [
+    "tech",
+    0
+   ],
+   "EQT": [
+    "energy",
+    1.24
+   ],
+   "GD": [
+    "defence",
+    1.84
+   ],
+   "QTUM": [
+    null,
+    null
+   ],
+   "AON": [
+    "finance",
+    1.14
+   ],
+   "XRAY": [
+    "health",
+    3.75
+   ],
+   "ITA": [
+    null,
+    null
+   ],
+   "EMHY": [
+    null,
+    null
+   ],
+   "EWY": [
+    null,
+    null
+   ],
+   "MVIS": [
+    "semis",
+    0
+   ],
+   "SHV": [
+    null,
+    null
+   ],
+   "ONON": [
+    "textile",
+    0
+   ],
+   "MOBI": [
+    "health",
+    0
+   ],
+   "EMLC": [
+    null,
+    null
+   ],
+   "HAIL": [
+    null,
+    null
+   ],
+   "ROKU": [
+    "tech",
+    0
+   ],
+   "DT": [
+    "tech",
+    0
+   ],
+   "GLW": [
+    "tech",
+    0.76
+   ],
+   "MA": [
+    "finance",
+    0.57
+   ],
+   "IDRV": [
+    null,
+    null
+   ],
+   "GRVY": [
+    "tech",
+    3.71
+   ],
+   "AEP": [
+    "energy",
+    3.06
+   ],
+   "OXLC": [
+    "finance",
+    59.3
+   ],
+   "EWS": [
+    null,
+    null
+   ],
+   "PLTM": [
+    null,
+    null
+   ],
+   "COR": [
+    "health",
+    0.74
+   ],
+   "VSH": [
+    "semis",
+    1.25
+   ],
+   "JBS": [
+    "food",
+    0.01
+   ],
+   "CMG": [
+    "tourism",
+    0
+   ],
+   "QQQI": [
+    null,
+    null
+   ],
+   "COP": [
+    "energy",
+    2.44
+   ],
+   "HOOD": [
+    "finance",
+    0
+   ],
+   "CRML": [
+    "metals",
+    0
+   ],
+   "HII": [
+    "defence",
+    2.09
+   ],
+   "TCEHY": [
+    "tech",
+    1.11
+   ],
+   "SVNDY": [
+    "retail",
+    2.24
+   ],
+   "DINO": [
+    "energy",
+    1.65
+   ],
+   "EIX": [
+    "energy",
+    6.22
+   ],
+   "BLOK": [
+    null,
+    null
+   ],
+   "CSIQ": [
+    "semis",
+    0
+   ],
+   "XLK": [
+    null,
+    null
+   ],
+   "PLTK": [
+    "tech",
+    17.94
+   ],
+   "MGV": [
+    null,
+    null
+   ],
+   "CAH": [
+    "health",
+    0.86
+   ],
+   "TTE": [
+    "energy",
+    4.37
+   ],
+   "OUST": [
+    "semis",
+    0
+   ],
+   "QQQM": [
+    null,
+    null
+   ],
+   "MCO": [
+    "finance",
+    0.86
+   ],
+   "TAK": [
+    "health",
+    3.11
+   ],
+   "TE": [
+    "industrial",
+    0
+   ],
+   "NVDU": [
+    null,
+    null
+   ],
+   "SNPS": [
+    "tech",
+    0
+   ],
+   "APTV": [
+    "industrial",
+    0
+   ],
+   "TTMI": [
+    "tech",
+    0
+   ],
+   "RDDT": [
+    "tech",
+    0
+   ],
+   "PHG": [
+    "health",
+    3.4
+   ],
+   "KIM": [
+    "realEstate",
+    4.75
+   ],
+   "KOPN": [
+    "semis",
+    0
+   ],
+   "COPA": [
+    null,
+    null
+   ],
+   "DDOG": [
+    "tech",
+    0
+   ],
+   "MSI": [
+    "tech",
+    1.08
+   ],
+   "JD": [
+    "tech",
+    3.67
+   ],
+   "WAT": [
+    "health",
+    0
+   ],
+   "LAR": [
+    "metals",
+    0
+   ],
+   "VC": [
+    "autos",
+    1.65
+   ],
+   "HUM": [
+    "health",
+    0.82
+   ],
+   "SAFRY": [
+    "defence",
+    0.74
+   ],
+   "CRUS": [
+    "semis",
+    0
+   ],
+   "ORCL": [
+    "tech",
+    1.46
+   ],
    "DRAM": [
     null,
     null
    ],
-   "FAST": [
+   "NRGV": [
     "industrial",
-    1.86
+    0
+   ],
+   "IQV": [
+    "health",
+    0
+   ],
+   "SMTC": [
+    "semis",
+    0
+   ],
+   "BSX": [
+    "health",
+    0
+   ],
+   "MNTK": [
+    "industrial",
+    0
+   ],
+   "CTVA": [
+    "food",
+    5.41
+   ],
+   "AMSC": [
+    "industrial",
+    0
+   ],
+   "BP": [
+    "energy",
+    4.27
+   ],
+   "RPRX": [
+    "health",
+    1.6
+   ],
+   "NKE": [
+    "textile",
+    4.64
+   ],
+   "WWD": [
+    "industrial",
+    0.37
+   ],
+   "MNST": [
+    "food",
+    0
+   ],
+   "RCAT": [
+    "tech",
+    0
+   ],
+   "MOS": [
+    "chemicals",
+    4.67
+   ],
+   "ADM": [
+    "food",
+    2.57
+   ],
+   "JNJ": [
+    "health",
+    2
+   ],
+   "PEP": [
+    "food",
+    4.58
+   ],
+   "SHLS": [
+    "semis",
+    0
+   ],
+   "PHO": [
+    null,
+    null
+   ],
+   "PANW": [
+    "tech",
+    0
+   ],
+   "XYZ": [
+    "industrial",
+    0
+   ],
+   "DOC": [
+    "realEstate",
+    6.44
+   ],
+   "HAL": [
+    "energy",
+    2.09
+   ],
+   "BBJP": [
+    null,
+    null
+   ],
+   "WST": [
+    "health",
+    0.24
+   ],
+   "VRTX": [
+    "health",
+    0
+   ],
+   "MRNA": [
+    "health",
+    0
+   ],
+   "GEN": [
+    "tech",
+    2.14
+   ],
+   "DAL": [
+    "transport",
+    0.97
+   ],
+   "COST": [
+    "retail",
+    0.58
+   ],
+   "KKR": [
+    "finance",
+    0.83
+   ],
+   "CPRT": [
+    "retail",
+    0
+   ],
+   "UUUU": [
+    "metals",
+    0
+   ],
+   "AIPO": [
+    null,
+    null
+   ],
+   "DTE": [
+    "energy",
+    3.64
+   ],
+   "BKNG": [
+    "tourism",
+    1.04
+   ],
+   "TM": [
+    "autos",
+    3.22
+   ],
+   "LLY": [
+    "health",
+    0.57
    ],
    "NAIL": [
+    null,
+    null
+   ],
+   "CRSR": [
+    "tech",
+    0
+   ],
+   "WELL": [
+    "realEstate",
+    1.33
+   ],
+   "HWM": [
+    "defence",
+    0.23
+   ],
+   "JPM": [
+    "banks",
+    1.79
+   ],
+   "WHR": [
+    "retail",
+    9.35
+   ],
+   "IBLC": [
+    null,
+    null
+   ],
+   "POWI": [
+    "semis",
+    1.81
+   ],
+   "PHIN": [
+    "autos",
+    2.07
+   ],
+   "HLT": [
+    "tourism",
+    0.18
+   ],
+   "INFY": [
+    "tech",
+    4.12
+   ],
+   "ATEN": [
+    "tech",
+    0.84
+   ],
+   "CRI": [
+    "retail",
+    3.12
+   ],
+   "AAL": [
+    "transport",
+    0
+   ],
+   "UCO": [
+    null,
+    null
+   ],
+   "FXI": [
+    null,
+    null
+   ],
+   "GEV": [
+    "industrial",
+    0.18
+   ],
+   "BBWI": [
+    "retail",
+    4.6
+   ],
+   "DGX": [
+    "health",
+    1.43
+   ],
+   "AVGO": [
+    "semis",
+    0.73
+   ],
+   "VFC": [
+    "textile",
+    2.28
+   ],
+   "V": [
+    "finance",
+    0.69
+   ],
+   "NVEC": [
+    "semis",
+    3.63
+   ],
+   "SDIV": [
+    null,
+    null
+   ],
+   "MDLZ": [
+    "food",
+    3.27
+   ],
+   "APLD": [
+    "tech",
+    0
+   ],
+   "SONY": [
+    "tech",
+    0.46
+   ],
+   "BOTZ": [
+    null,
+    null
+   ],
+   "BG": [
+    "food",
+    2.73
+   ],
+   "TER": [
+    "semis",
+    0.13
+   ],
+   "MP": [
+    "metals",
+    0
+   ],
+   "VRSK": [
+    "tech",
+    1.1
+   ],
+   "ABNB": [
+    "tourism",
+    0
+   ],
+   "AMZN": [
+    "tech",
+    0
+   ],
+   "APP": [
+    "tech",
+    0
+   ],
+   "ANDE": [
+    "industrial",
+    1.22
+   ],
+   "BA": [
+    "defence",
+    0
+   ],
+   "SHEL": [
+    "energy",
+    2.98
+   ],
+   "UEC": [
+    "metals",
+    0
+   ],
+   "NEE": [
+    "energy",
+    3.1
+   ],
+   "BAESY": [
+    "defence",
+    1.72
+   ],
+   "STE": [
+    "health",
+    1.18
+   ],
+   "FLEX": [
+    "semis",
+    0
+   ],
+   "ROBT": [
+    null,
+    null
+   ],
+   "CNQ": [
+    "energy",
+    3.48
+   ],
+   "USO": [
+    null,
+    null
+   ],
+   "LOGI": [
+    "tech",
+    1.64
+   ],
+   "UAL": [
+    "transport",
+    0
+   ],
+   "LHX": [
+    "defence",
+    2.08
+   ],
+   "EW": [
+    "health",
+    0
+   ],
+   "PL": [
+    "tech",
+    0
+   ],
+   "TJX": [
+    "retail",
+    1.28
+   ],
+   "NXT": [
+    "tech",
+    0
+   ],
+   "BMY": [
+    "health",
+    4.36
+   ],
+   "CDW": [
+    "tech",
+    1.75
+   ],
+   "FSLY": [
+    "tech",
+    0
+   ],
+   "KOID": [
+    null,
+    null
+   ],
+   "USL": [
+    null,
+    null
+   ],
+   "LULU": [
+    "textile",
+    0
+   ],
+   "STLD": [
+    "metals",
+    0.87
+   ],
+   "LDOS": [
+    "tech",
+    1.41
+   ],
+   "CEVA": [
+    "semis",
+    0
+   ],
+   "RIO": [
+    "metals",
+    4.89
+   ],
+   "IYW": [
+    null,
+    null
+   ],
+   "HAGHY": [
+    "defence",
+    0.57
+   ],
+   "PSI": [
+    null,
+    null
+   ],
+   "IGV": [
+    null,
+    null
+   ],
+   "FROG": [
+    "tech",
+    0
+   ],
+   "INDA": [
+    null,
+    null
+   ],
+   "ABT": [
+    "health",
+    2.44
+   ],
+   "BKR": [
+    "energy",
+    1.64
+   ],
+   "ESE": [
+    "tech",
+    0.12
+   ],
+   "CHKP": [
+    "tech",
+    0
+   ],
+   "TSM": [
+    "semis",
+    0.67
+   ],
+   "RSPG": [
+    null,
+    null
+   ],
+   "MXI": [
+    null,
+    null
+   ],
+   "USFD": [
+    "food",
+    0
+   ],
+   "SYK": [
+    "health",
+    1.25
+   ],
+   "KORU": [
+    null,
+    null
+   ],
+   "FAN": [
+    null,
+    null
+   ],
+   "INCY": [
+    "health",
+    0
+   ],
+   "FIRY": [
+    "tech",
+    0
+   ],
+   "GT": [
+    "autos",
+    0
+   ],
+   "GE": [
+    "defence",
+    0.54
+   ],
+   "RBRK": [
+    "tech",
+    0
+   ],
+   "DBE": [
     null,
     null
    ],
@@ -5224,269 +4188,85 @@
     null,
     null
    ],
-   "HUYA": [
+   "HON": [
     "industrial",
-    0
+    3.74
    ],
-   "IBLC": [
-    null,
-    null
-   ],
-   "NVO": [
-    "health",
-    3.19
-   ],
-   "IBKR": [
-    "finance",
-    0.38
-   ],
-   "AIPO": [
-    null,
-    null
-   ],
-   "VRNS": [
+   "MSTR": [
     "tech",
     0
    ],
-   "SETM": [
-    null,
-    null
-   ],
-   "EIX": [
-    "energy",
-    6.22
-   ],
-   "NOMD": [
-    "food",
-    5.99
-   ],
-   "VRTX": [
-    "health",
-    0
-   ],
-   "OKLO": [
-    "industrial",
-    0
-   ],
-   "UL": [
-    "food",
-    3.5
-   ],
-   "MSI": [
-    "tech",
-    1.08
-   ],
-   "CAMT": [
-    "tech",
-    0
-   ],
-   "CRDO": [
-    "tech",
-    0
-   ],
-   "OXLC": [
-    "finance",
-    59.3
-   ],
-   "ON": [
+   "AMKR": [
     "semis",
-    0
+    0.69
    ],
-   "SQQQ": [
-    null,
-    null
-   ],
-   "KDP": [
-    "food",
-    2.81
-   ],
-   "STM": [
-    "semis",
-    0.61
-   ],
-   "CAH": [
-    "health",
-    0.86
-   ],
-   "IVE": [
-    null,
-    null
-   ],
-   "COLM": [
-    "textile",
-    2.13
-   ],
-   "WAT": [
-    "health",
-    0
-   ],
-   "AAPL": [
-    "tech",
-    0.31
-   ],
-   "ICOP": [
-    null,
-    null
-   ],
-   "KLAC": [
-    "semis",
-    0.36
-   ],
-   "XYZ": [
-    "industrial",
-    0
-   ],
-   "GE": [
-    "defence",
-    0.54
-   ],
-   "KBGGY": [
-    "defence",
-    20.74
-   ],
-   "SHLD": [
-    null,
-    null
-   ],
-   "DGP": [
-    null,
-    null
-   ],
-   "HSIC": [
-    "health",
-    0
+   "CF": [
+    "chemicals",
+    1.83
    ],
    "AXTI": [
     "semis",
     0
    ],
-   "ZBH": [
-    "health",
-    1.04
-   ],
-   "ATRO": [
-    "defence",
-    0
-   ],
-   "LMT": [
-    "defence",
-    2.7
-   ],
-   "INDI": [
-    "semis",
-    0
-   ],
-   "VONE": [
+   "PIO": [
     null,
     null
    ],
-   "GTLB": [
+   "DCO": [
+    "defence",
+    0
+   ],
+   "REGN": [
+    "health",
+    0.49
+   ],
+   "ELV": [
+    "health",
+    1.63
+   ],
+   "IGM": [
+    null,
+    null
+   ],
+   "VEEV": [
     "tech",
     0
    ],
-   "AMD": [
-    "semis",
+   "HSBC": [
+    "banks",
+    3.95
+   ],
+   "P": [
+    "tech",
     0
    ],
-   "HAL": [
-    "energy",
-    2.09
+   "ASML": [
+    "semis",
+    0.44
    ],
-   "BLK": [
-    "finance",
-    2.07
+   "MUFG": [
+    "banks",
+    2.65
    ],
-   "LLY": [
-    "health",
-    0.57
+   "SQQQ": [
+    null,
+    null
    ],
-   "MP": [
+   "IDR": [
     "metals",
     0
    ],
-   "MGV": [
-    null,
-    null
-   ],
-   "TGT": [
-    "retail",
-    2.98
-   ],
-   "CLSK": [
+   "RIOT": [
     "tech",
     0
    ],
-   "DIOD": [
-    "semis",
-    0
+   "SBUX": [
+    "tourism",
+    2.69
    ],
-   "SPYI": [
+   "ICOP": [
     null,
     null
-   ],
-   "ZS": [
-    "tech",
-    0
-   ],
-   "USO": [
-    null,
-    null
-   ],
-   "STX": [
-    "tech",
-    0.39
-   ],
-   "MRNA": [
-    "health",
-    0
-   ],
-   "UBER": [
-    "transport",
-    0
-   ],
-   "UNP": [
-    "transport",
-    1.97
-   ],
-   "OTEX": [
-    "tech",
-    4.51
-   ],
-   "SHE": [
-    null,
-    null
-   ],
-   "VIXY": [
-    null,
-    null
-   ],
-   "AIQ": [
-    null,
-    null
-   ],
-   "QCLN": [
-    null,
-    null
-   ],
-   "CEVA": [
-    "semis",
-    0
-   ],
-   "ADI": [
-    "semis",
-    1.06
-   ],
-   "SMCI": [
-    "tech",
-    0
-   ],
-   "CRUS": [
-    "semis",
-    0
-   ],
-   "DOW": [
-    "chemicals",
-    4.98
    ],
    "KARS": [
     null,
@@ -5496,231 +4276,527 @@
     null,
     null
    ],
-   "FDRV": [
+   "HD": [
+    "retail",
+    3.2
+   ],
+   "MICC": [
+    "food",
+    0
+   ],
+   "VOYG": [
+    "tech",
+    0
+   ],
+   "NOC": [
+    "defence",
+    1.97
+   ],
+   "ATRO": [
+    "defence",
+    0
+   ],
+   "TTWO": [
+    "tech",
+    0
+   ],
+   "IXN": [
     null,
     null
    ],
-   "DHR": [
-    "health",
-    0.69
+   "LEA": [
+    "autos",
+    2.63
    ],
-   "EWT": [
-    null,
-    null
+   "ZETA": [
+    "tech",
+    0
    ],
-   "RVTY": [
+   "COIN": [
+    "finance",
+    0
+   ],
+   "SAN": [
+    "banks",
+    1.49
+   ],
+   "ZBH": [
     "health",
-    0.18
+    1.04
    ],
    "MRSH": [
     "finance",
     2.09
    ],
-   "FSLY": [
-    "tech",
+   "AXON": [
+    "defence",
     0
    ],
-   "MSTX": [
-    null,
-    null
-   ],
-   "IYW": [
-    null,
-    null
-   ],
-   "AMAT": [
-    "industrial",
-    0.4
-   ],
-   "PLD": [
-    "realEstate",
-    3.19
-   ],
-   "ESGD": [
-    null,
-    null
-   ],
-   "OII": [
-    "industrial",
-    0
-   ],
-   "ALAB": [
-    "semis",
-    0
-   ],
-   "SOXL": [
-    null,
-    null
-   ],
-   "QCOM": [
-    "semis",
-    2.08
-   ],
-   "RGTI": [
-    "tech",
-    0
-   ],
-   "AVEM": [
-    null,
-    null
-   ],
-   "EWY": [
-    null,
-    null
-   ],
-   "SBUX": [
+   "PZZA": [
     "tourism",
-    2.69
+    9.35
    ],
-   "MCO": [
-    "finance",
-    0.86
+   "LH": [
+    "health",
+    0.91
    ],
-   "EOG": [
-    "energy",
-    2.71
-   ],
-   "COST": [
-    "retail",
-    0.58
-   ],
-   "OUST": [
-    "semis",
-    0
-   ],
-   "BHP": [
-    "metals",
-    3.93
-   ],
-   "DT": [
-    "tech",
-    0
-   ],
-   "SJNK": [
+   "DBO": [
     null,
     null
    ],
-   "PH": [
+   "BLDP": [
     "industrial",
-    0.79
+    0
    ],
-   "MTSI": [
+   "PLUG": [
     "semis",
     0
    ],
-   "VYM": [
-    null,
-    null
+   "UL": [
+    "food",
+    3.5
    ],
-   "ICLN": [
-    null,
-    null
-   ],
-   "IRM": [
-    "realEstate",
-    3
-   ],
-   "WULF": [
+   "AKAM": [
     "tech",
     0
    ],
-   "APP": [
+   "XLE": [
+    null,
+    null
+   ],
+   "MRAM": [
+    "semis",
+    0
+   ],
+   "HXL": [
+    "defence",
+    0.84
+   ],
+   "SSM": [
+    "autos",
+    0
+   ],
+   "FDRV": [
+    null,
+    null
+   ],
+   "MELI": [
     "tech",
+    0
+   ],
+   "WDAY": [
+    "tech",
+    0
+   ],
+   "KULR": [
+    "industrial",
+    0
+   ],
+   "FANG": [
+    "energy",
+    2.18
+   ],
+   "NOMD": [
+    "food",
+    5.99
+   ],
+   "KDP": [
+    "food",
+    2.81
+   ],
+   "SPEM": [
+    null,
+    null
+   ],
+   "PICK": [
+    null,
+    null
+   ],
+   "THNQ": [
+    null,
+    null
+   ],
+   "SARO": [
+    "transport",
+    0
+   ],
+   "DOW": [
+    "chemicals",
+    4.98
+   ],
+   "HMC": [
+    "autos",
+    3.29
+   ],
+   "CQQQ": [
+    null,
+    null
+   ],
+   "TMC": [
+    "metals",
+    0
+   ],
+   "BIL": [
+    null,
+    null
+   ],
+   "KMB": [
+    "food",
+    5.16
+   ],
+   "COLM": [
+    "textile",
+    2.13
+   ],
+   "VGT": [
+    null,
+    null
+   ],
+   "FIW": [
+    null,
+    null
+   ],
+   "SLB": [
+    "energy",
+    2.4
+   ],
+   "NOK": [
+    "tech",
+    1.21
+   ],
+   "DKNG": [
+    "tourism",
+    0
+   ],
+   "BAH": [
+    "industrial",
+    3.15
+   ],
+   "QYLD": [
+    null,
+    null
+   ],
+   "PONY": [
+    "tech",
+    0
+   ],
+   "UDOW": [
+    null,
+    null
+   ],
+   "DD": [
+    "chemicals",
+    1.86
+   ],
+   "GOOG": [
+    "tech",
+    0.25
+   ],
+   "BAC": [
+    "banks",
+    2.13
+   ],
+   "HERO": [
+    null,
+    null
+   ],
+   "SHE": [
+    null,
+    null
+   ],
+   "HUT": [
+    "tech",
+    0
+   ],
+   "SPSB": [
+    null,
+    null
+   ],
+   "IMMR": [
+    "tech",
+    3.67
+   ],
+   "GLXY": [
+    "finance",
     0
    ],
    "AMRC": [
     "construction",
     0
    ],
-   "IFF": [
-    "food",
-    1.88
+   "TXN": [
+    "semis",
+    2.02
    ],
-   "VOYG": [
+   "INDI": [
+    "semis",
+    0
+   ],
+   "PG": [
+    "food",
+    2.8
+   ],
+   "KEYS": [
     "tech",
     0
    ],
-   "DASH": [
-    "transport",
-    0
+   "DVN": [
+    "energy",
+    2.29
    ],
-   "SMH": [
+   "MRVL": [
+    "semis",
+    0.09
+   ],
+   "DRIV": [
     null,
     null
    ],
-   "SNN": [
-    "health",
-    2.72
+   "SWKS": [
+    "semis",
+    3.8
    ],
-   "CTVA": [
-    "food",
-    5.41
-   ],
-   "INFY": [
-    "tech",
-    4.12
-   ],
-   "SONY": [
-    "tech",
-    0.46
-   ],
-   "TXT": [
-    "defence",
-    0.11
-   ],
-   "BLOK": [
+   "TDIV": [
     null,
     null
    ],
-   "DKILY": [
+   "PCAR": [
     "industrial",
+    1.26
+   ],
+   "PGY": [
+    "tech",
+    0
+   ],
+   "SYNA": [
+    "semis",
+    0
+   ],
+   "ETN": [
+    "industrial",
+    1.02
+   ],
+   "CVX": [
+    "energy",
+    3.28
+   ],
+   "HPQ": [
+    "tech",
+    4.02
+   ],
+   "APH": [
+    "tech",
+    0.58
+   ],
+   "ONDS": [
+    "tech",
+    0
+   ],
+   "EADSY": [
+    "defence",
+    1.38
+   ],
+   "TSLA": [
+    "autos",
+    0
+   ],
+   "XEL": [
+    "energy",
+    3.17
+   ],
+   "BB": [
+    "tech",
+    0
+   ],
+   "NVDL": [
+    null,
+    null
+   ],
+   "ONTO": [
+    "tech",
+    0
+   ],
+   "RTX": [
+    "defence",
+    1.51
+   ],
+   "IWM": [
+    null,
+    null
+   ],
+   "RNMBY": [
+    "defence",
+    0.88
+   ],
+   "UTHR": [
+    "health",
+    0
+   ],
+   "ITRI": [
+    "tech",
+    0
+   ],
+   "SCHD": [
+    null,
+    null
+   ],
+   "MCK": [
+    "health",
+    0.36
+   ],
+   "ROBO": [
+    null,
+    null
+   ],
+   "SETM": [
+    null,
+    null
+   ],
+   "GTLB": [
+    "tech",
+    0
+   ],
+   "DELL": [
+    "tech",
+    0.4
+   ],
+   "BWXT": [
+    "defence",
+    0.76
+   ],
+   "PVH": [
+    "textile",
+    0.18
+   ],
+   "MSFU": [
+    null,
+    null
+   ],
+   "MRK": [
+    "health",
+    2.34
+   ],
+   "IHAK": [
+    null,
+    null
+   ],
+   "NXPI": [
+    "semis",
+    1.8
+   ],
+   "CWEN": [
+    "energy",
+    6.1
+   ],
+   "SOXL": [
+    null,
+    null
+   ],
+   "WPC": [
+    "realEstate",
+    5.82
+   ],
+   "LUNR": [
+    "defence",
+    0
+   ],
+   "TMUS": [
+    "telecom",
+    2.69
+   ],
+   "SNOW": [
+    "tech",
+    0
+   ],
+   "CSCO": [
+    "tech",
     1.44
    ],
-   "BKNG": [
+   "QCLN": [
+    null,
+    null
+   ],
+   "RCL": [
     "tourism",
-    1.04
+    1.96
    ],
-   "BMY": [
-    "health",
-    4.36
+   "AAPB": [
+    null,
+    null
    ],
-   "RMBS": [
+   "LSCC": [
     "semis",
     0
    ],
-   "MTD": [
-    "health",
-    0
-   ],
-   "NOK": [
+   "BTDR": [
     "tech",
-    1.21
+    0
    ],
-   "CTAS": [
-    "industrial",
-    0.91
+   "HSY": [
+    "food",
+    3.49
    ],
-   "AMBA": [
+   "XME": [
+    null,
+    null
+   ],
+   "QBTS": [
+    "tech",
+    0
+   ],
+   "GSIE": [
+    null,
+    null
+   ],
+   "VGK": [
+    null,
+    null
+   ],
+   "THRM": [
+    "autos",
+    0
+   ],
+   "GLD": [
+    null,
+    null
+   ],
+   "AEIS": [
+    "semis",
+    0.14
+   ],
+   "ZTS": [
+    "health",
+    2.76
+   ],
+   "F": [
+    "autos",
+    5
+   ],
+   "FSLR": [
     "semis",
     0
    ],
-   "CNQ": [
-    "energy",
-    3.48
+   "RYCEY": [
+    "defence",
+    0.76
    ],
-   "CRL": [
+   "LRCX": [
     "industrial",
-    0
+    0.36
    ],
-   "ORLY": [
-    "retail",
-    0
+   "LTC": [
+    "realEstate",
+    5.3
    ],
-   "GALDY": [
-    "health",
-    0.16
+   "MSFT": [
+    "tech",
+    0.67
    ],
-   "PIO": [
+   "XLV": [
+    null,
+    null
+   ],
+   "EMB": [
     null,
     null
    ],
@@ -5728,111 +4804,1035 @@
     "defence",
     0
    ],
-   "SLAB": [
-    "semis",
-    0
-   ],
-   "RKLB": [
-    "defence",
-    0
-   ],
-   "LAC": [
-    "metals",
-    0
-   ],
-   "WOLF": [
-    "semis",
-    0
-   ],
-   "VVX": [
-    "industrial",
-    0
-   ],
-   "EXC": [
+   "XOM": [
     "energy",
-    3.94
+    2.39
    ],
-   "LIT": [
+   "NTAP": [
+    "tech",
+    0.87
+   ],
+   "ALB": [
+    "chemicals",
+    1.65
+   ],
+   "PUK": [
+    "finance",
+    2.2
+   ],
+   "EEM": [
     null,
     null
+   ],
+   "ANET": [
+    "tech",
+    0
+   ],
+   "FTDS": [
+    null,
+    null
+   ],
+   "HSIC": [
+    "health",
+    0
+   ],
+   "LIN": [
+    "chemicals",
+    1.29
    ],
    "AXP": [
     "finance",
     1.14
    ],
-   "KEEL": [
-    "tech",
-    0
-   ],
-   "TEM": [
-    "tech",
-    0
-   ],
-   "GOOG": [
-    "tech",
-    0.25
-   ],
-   "VOD": [
-    "telecom",
-    3.26
-   ],
-   "EWJ": [
-    null,
-    null
-   ],
-   "VHT": [
-    null,
-    null
-   ],
-   "BA": [
+   "TDY": [
     "defence",
+    0
+   ],
+   "MU": [
+    "semis",
+    0.05
+   ],
+   "NFLX": [
+    "tech",
+    0
+   ],
+   "PLD": [
+    "realEstate",
+    3.19
+   ],
+   "OII": [
+    "industrial",
+    0
+   ],
+   "CDRE": [
+    "defence",
+    1.53
+   ],
+   "PM": [
+    "food",
+    2.91
+   ],
+   "NTR": [
+    "chemicals",
+    3.19
+   ],
+   "CBRS": [
+    "tech",
+    0
+   ],
+   "DCH": [
+    "autos",
+    0
+   ],
+   "QTEC": [
+    null,
+    null
+   ],
+   "AZN": [
+    "health",
+    0
+   ],
+   "BEEM": [
+    "industrial",
+    0
+   ],
+   "MCD": [
+    "tourism",
+    3.16
+   ],
+   "SLAB": [
+    "semis",
+    0
+   ],
+   "HUYA": [
+    "industrial",
+    0
+   ],
+   "MPWR": [
+    "semis",
+    0.57
+   ],
+   "IBM": [
+    "tech",
+    2.97
+   ],
+   "WOLF": [
+    "semis",
+    0
+   ],
+   "REET": [
+    null,
+    null
+   ],
+   "NVTS": [
+    "semis",
+    0
+   ],
+   "INSM": [
+    "health",
+    0
+   ],
+   "GALDY": [
+    "health",
+    0.16
+   ],
+   "FTNT": [
+    "tech",
+    0
+   ],
+   "COHR": [
+    "semis",
+    0
+   ],
+   "CDNS": [
+    "tech",
+    0
+   ],
+   "WVE": [
+    "health",
+    0
+   ],
+   "URA": [
+    null,
+    null
+   ],
+   "CPRI": [
+    "retail",
+    0
+   ],
+   "FAST": [
+    "industrial",
+    1.86
+   ],
+   "CAN": [
+    "semis",
+    0
+   ],
+   "LITE": [
+    "industrial",
+    0
+   ],
+   "KLAC": [
+    "semis",
+    0.36
+   ],
+   "ASTS": [
+    "telecom",
+    0
+   ],
+   "ARRY": [
+    "industrial",
     0
    ],
    "GPRE": [
     "chemicals",
     0
    ],
-   "WH": [
-    "tourism",
-    2.32
+   "SCCO": [
+    "metals",
+    1.87
+   ],
+   "MDB": [
+    "tech",
+    0
+   ],
+   "BRO": [
+    "finance",
+    1.04
+   ],
+   "NIO": [
+    "autos",
+    0
+   ],
+   "REMX": [
+    null,
+    null
+   ],
+   "PSA": [
+    "realEstate",
+    4.15
+   ],
+   "ZINC": [
+    null,
+    null
+   ],
+   "NET": [
+    "tech",
+    0
+   ],
+   "CVLT": [
+    "tech",
+    0
+   ],
+   "HPE": [
+    "tech",
+    0.81
+   ],
+   "ARKX": [
+    null,
+    null
+   ],
+   "SPG": [
+    "realEstate",
+    4.42
+   ],
+   "DLR": [
+    "realEstate",
+    2.71
+   ],
+   "UNP": [
+    "transport",
+    1.97
+   ],
+   "CRDO": [
+    "tech",
+    0
+   ],
+   "MTZ": [
+    "construction",
+    0
+   ],
+   "CRWV": [
+    "tech",
+    0
+   ],
+   "SLV": [
+    null,
+    null
+   ],
+   "CRWD": [
+    "tech",
+    0
+   ],
+   "TRMB": [
+    "tech",
+    0
+   ],
+   "AMBA": [
+    "semis",
+    0
+   ],
+   "MTUAY": [
+    "defence",
+    0.76
    ],
    "VLO": [
     "energy",
     1.08
    ],
-   "NBIS": [
+   "PPA": [
+    null,
+    null
+   ],
+   "VTR": [
+    "realEstate",
+    2.44
+   ],
+   "OVV": [
+    "energy",
+    1.84
+   ],
+   "SOLV": [
+    "health",
+    0
+   ],
+   "PODD": [
+    "health",
+    0
+   ],
+   "HEI": [
+    "defence",
+    0.08
+   ],
+   "SPYI": [
+    null,
+    null
+   ],
+   "QS": [
+    "industrial",
+    0
+   ],
+   "HUBS": [
     "tech",
+    0
+   ],
+   "MAXNQ": [
+    "energy",
+    0
+   ],
+   "VOD": [
+    "telecom",
+    3.26
+   ],
+   "ROK": [
+    "industrial",
+    1.27
+   ],
+   "ACES": [
+    null,
+    null
+   ],
+   "ORLY": [
+    "retail",
+    0
+   ],
+   "NCLH": [
+    "tourism",
+    0
+   ],
+   "GMAB": [
+    "health",
+    0
+   ],
+   "BIIB": [
+    "health",
+    0
+   ],
+   "TTC": [
+    "industrial",
+    1.6
+   ],
+   "FTCI": [
+    "tech",
+    0
+   ],
+   "RUN": [
+    "semis",
+    0
+   ],
+   "PBJ": [
+    null,
+    null
+   ],
+   "QCOM": [
+    "semis",
+    2.08
+   ],
+   "RMD": [
+    "health",
+    1.05
+   ],
+   "MAGS": [
+    null,
+    null
+   ],
+   "GLDM": [
+    null,
+    null
+   ],
+   "ORA": [
+    "energy",
+    0.52
+   ],
+   "WULF": [
+    "tech",
+    0
+   ],
+   "VIXY": [
+    null,
+    null
+   ],
+   "OXM": [
+    "textile",
+    11
+   ],
+   "VHT": [
+    null,
+    null
+   ],
+   "ZS": [
+    "tech",
+    0
+   ],
+   "INTC": [
+    "semis",
+    0
+   ],
+   "MAR": [
+    "tourism",
+    0.76
+   ],
+   "FCEL": [
+    "tech",
+    0
+   ],
+   "FCX": [
+    "metals",
+    0.82
+   ],
+   "SPY": [
+    null,
+    null
+   ],
+   "SITM": [
+    "semis",
+    0
+   ],
+   "AMAT": [
+    "industrial",
+    0.4
+   ],
+   "CVS": [
+    "retail",
+    3.03
+   ],
+   "VWOB": [
+    null,
+    null
+   ],
+   "BLNK": [
+    "industrial",
+    0
+   ],
+   "O": [
+    "realEstate",
+    5.93
+   ],
+   "HOCPY": [
+    "health",
+    0.94
+   ],
+   "LPLA": [
+    "finance",
+    0.36
+   ],
+   "CTSH": [
+    "tech",
+    2.18
+   ],
+   "EWT": [
+    null,
+    null
+   ],
+   "SDY": [
+    null,
+    null
+   ],
+   "AMT": [
+    "realEstate",
+    3.87
+   ],
+   "COPX": [
+    null,
+    null
+   ],
+   "ECH": [
+    null,
+    null
+   ],
+   "BE": [
+    "semis",
+    0
+   ],
+   "DE": [
+    "industrial",
+    1.02
+   ],
+   "ODFL": [
+    "transport",
+    0.63
+   ],
+   "HY": [
+    "industrial",
+    4.54
+   ],
+   "IREN": [
+    "tech",
+    0
+   ],
+   "HYG": [
+    null,
+    null
+   ],
+   "SNN": [
+    "health",
+    2.72
+   ],
+   "HL": [
+    "metals",
+    0.09
+   ],
+   "DHR": [
+    "health",
+    0.69
+   ],
+   "CL": [
+    "food",
+    2.33
+   ],
+   "KURE": [
+    null,
+    null
+   ],
+   "ON": [
+    "semis",
+    0
+   ],
+   "DVLT": [
+    "semis",
+    0
+   ],
+   "LQD": [
+    null,
+    null
+   ],
+   "GOEVQ": [
+    "autos",
+    0
+   ],
+   "PWR": [
+    "construction",
+    0.06
+   ],
+   "KEEL": [
+    "tech",
+    0
+   ],
+   "RKLB": [
+    "defence",
+    0
+   ],
+   "VGNT": [
+    "industrial",
+    0
+   ],
+   "GS": [
+    "finance",
+    2.01
+   ],
+   "PDD": [
+    "retail",
+    0
+   ],
+   "KRMN": [
+    "defence",
+    0
+   ],
+   "PDSB": [
+    "health",
+    0
+   ],
+   "ATI": [
+    "metals",
+    0
+   ],
+   "MMM": [
+    "industrial",
+    1.91
+   ],
+   "LYV": [
+    "tourism",
+    0
+   ],
+   "ADI": [
+    "semis",
+    1.06
+   ],
+   "ROG": [
+    "chemicals",
+    0
+   ],
+   "AIR": [
+    "defence",
+    0
+   ],
+   "VXX": [
+    null,
+    null
+   ],
+   "CLSK": [
+    "tech",
+    0
+   ],
+   "MPC": [
+    "energy",
+    0.87
+   ],
+   "BAX": [
+    "health",
+    0.16
+   ],
+   "HAP": [
+    null,
+    null
+   ],
+   "RDW": [
+    "defence",
+    0
+   ],
+   "SHOP": [
+    "industrial",
+    0
+   ],
+   "AAPL": [
+    "tech",
+    0.31
+   ],
+   "BIDU": [
+    "tech",
+    0
+   ],
+   "OSCR": [
+    "health",
+    0
+   ],
+   "WTAI": [
+    null,
+    null
+   ],
+   "CSX": [
+    "transport",
+    1.15
+   ],
+   "EQIX": [
+    "realEstate",
+    1.95
+   ],
+   "ESTC": [
+    "tech",
+    0
+   ],
+   "ADSK": [
+    "tech",
+    0
+   ],
+   "ABBV": [
+    "health",
+    2.43
+   ],
+   "PATH": [
+    "tech",
+    0
+   ],
+   "AMD": [
+    "semis",
+    0
+   ],
+   "VST": [
+    "energy",
+    0.58
+   ],
+   "IFF": [
+    "food",
+    1.88
+   ],
+   "DXCM": [
+    "health",
+    0
+   ],
+   "CRCL": [
+    "tech",
+    0
+   ],
+   "WDC": [
+    "tech",
+    0.14
+   ],
+   "GNTX": [
+    "autos",
+    2.32
+   ],
+   "ARM": [
+    "semis",
+    0
+   ],
+   "FICO": [
+    "finance",
+    0
+   ],
+   "VRRM": [
+    "transport",
+    0
+   ],
+   "RRX": [
+    "industrial",
+    0.86
+   ],
+   "ACN": [
+    "tech",
+    3.03
+   ],
+   "CRL": [
+    "industrial",
+    0
+   ],
+   "CEG": [
+    "energy",
+    0.57
+   ],
+   "EWJ": [
+    null,
+    null
+   ],
+   "EWG": [
+    null,
+    null
+   ],
+   "VSNT": [
+    "telecom",
+    0
+   ],
+   "LCID": [
+    "autos",
+    0
+   ],
+   "CIFR": [
+    "tech",
+    0
+   ],
+   "SMPL": [
+    "food",
     0
    ],
    "FTEC": [
     null,
     null
    ],
-   "NXT": [
-    "tech",
-    0
-   ],
-   "SCCO": [
-    "metals",
-    1.87
-   ],
-   "DXCM": [
-    "health",
-    0
-   ],
-   "PHIN": [
-    "autos",
-    2.07
-   ],
-   "CEG": [
-    "energy",
-    0.57
-   ],
    "CRS": [
     "metals",
     0.21
    ],
-   "PODD": [
+   "AGX": [
+    "construction",
+    0.52
+   ],
+   "UBER": [
+    "transport",
+    0
+   ],
+   "TBCH": [
+    "retail",
+    0
+   ],
+   "STT": [
+    "finance",
+    1.92
+   ],
+   "SHLD": [
+    null,
+    null
+   ],
+   "DFJ": [
+    null,
+    null
+   ],
+   "ISRG": [
+    "health",
+    0
+   ],
+   "KNDI": [
+    "autos",
+    0
+   ],
+   "LAC": [
+    "metals",
+    0
+   ],
+   "BR": [
+    "tech",
+    2.41
+   ],
+   "SRAD": [
+    "tech",
+    0
+   ],
+   "FINX": [
+    null,
+    null
+   ],
+   "XBI": [
+    null,
+    null
+   ],
+   "VVX": [
+    "industrial",
+    0
+   ],
+   "CNH": [
+    "industrial",
+    0.86
+   ],
+   "CTAS": [
+    "industrial",
+    0.91
+   ],
+   "UNH": [
+    "health",
+    2.39
+   ],
+   "NBIS": [
+    "tech",
+    0
+   ],
+   "RNW": [
+    "energy",
+    0
+   ],
+   "U": [
+    "tech",
+    0
+   ],
+   "IRM": [
+    "realEstate",
+    3
+   ],
+   "MCHI": [
+    null,
+    null
+   ],
+   "BCI": [
+    null,
+    null
+   ],
+   "CHTR": [
+    "telecom",
+    0
+   ],
+   "SAABY": [
+    "defence",
+    0.19
+   ],
+   "CVE": [
+    "energy",
+    1.88
+   ],
+   "PRU": [
+    "finance",
+    4.89
+   ],
+   "VYM": [
+    null,
+    null
+   ],
+   "RACE": [
+    "autos",
+    1.03
+   ],
+   "DKILY": [
+    "industrial",
+    1.44
+   ],
+   "CBT": [
+    "chemicals",
+    2.48
+   ],
+   "VZ": [
+    "telecom",
+    6.53
+   ],
+   "NTSK": [
+    "tech",
+    0
+   ],
+   "KTOS": [
+    "defence",
+    0
+   ],
+   "EWZ": [
+    null,
+    null
+   ],
+   "TSLL": [
+    null,
+    null
+   ],
+   "ESGU": [
+    null,
+    null
+   ],
+   "TQQQ": [
+    null,
+    null
+   ],
+   "ROST": [
+    "retail",
+    0.77
+   ],
+   "COMB": [
+    null,
+    null
+   ],
+   "DRS": [
+    "defence",
+    1.01
+   ],
+   "RGTI": [
+    "tech",
+    0
+   ],
+   "DAR": [
+    "food",
+    0
+   ],
+   "ACHR": [
+    "defence",
+    0
+   ],
+   "TENB": [
+    "tech",
+    0
+   ],
+   "DOV": [
+    "industrial",
+    1.09
+   ],
+   "AMGN": [
+    "health",
+    2.38
+   ],
+   "PENG": [
+    "semis",
+    0
+   ],
+   "PFE": [
+    "health",
+    6.06
+   ],
+   "IDXX": [
+    "health",
+    0
+   ],
+   "IQQ": [
+    null,
+    null
+   ],
+   "A": [
+    "health",
+    0.59
+   ],
+   "DIOD": [
+    "semis",
+    0
+   ],
+   "ARR": [
+    "realEstate",
+    20.95
+   ],
+   "ROP": [
+    "tech",
+    0.97
+   ],
+   "EWW": [
+    null,
+    null
+   ],
+   "LIT": [
+    null,
+    null
+   ],
+   "RVTY": [
+    "health",
+    0.18
+   ],
+   "DASH": [
+    "transport",
+    0
+   ],
+   "NVO": [
+    "health",
+    3.19
+   ],
+   "TKR": [
+    "industrial",
+    1.23
+   ],
+   "EOG": [
+    "energy",
+    2.71
+   ],
+   "CNC": [
+    "health",
+    0
+   ],
+   "HCA": [
+    "health",
+    0.67
+   ],
+   "VTRS": [
+    "health",
+    2.74
+   ],
+   "XPEV": [
+    "autos",
+    0
+   ],
+   "PYPL": [
+    "industrial",
+    1
+   ],
+   "JKS": [
+    "semis",
+    17.15
+   ],
+   "RIVN": [
+    "autos",
+    0
+   ],
+   "OTEX": [
+    "tech",
+    4.51
+   ],
+   "COO": [
     "health",
     0
    ]
