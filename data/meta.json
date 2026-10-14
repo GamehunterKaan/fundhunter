@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-14T12:14:23.397Z",
+  "lastUpdated": "2026-10-14T15:59:59.205Z",
   "latestDate": "2026-10-14",
   "lastWideRead": "2026-10-11T09:47:25.448Z",
   "rangeStart": "2025-10-14",
@@ -1265,11 +1265,11 @@
         0.0979
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0966
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0966
       ],
       [
@@ -2197,7 +2197,7 @@
         0.0442
       ],
       [
-        "KRDMD",
+        "KRDMA",
         0.0431
       ],
       [
@@ -2205,7 +2205,7 @@
         0.0431
       ],
       [
-        "KRDMA",
+        "KRDMD",
         0.0431
       ],
       [
@@ -3849,97 +3849,97 @@
     "sectors": [
       {
         "id": "energy",
-        "move": 0.21,
+        "move": -0.38,
         "of": 44
       },
       {
         "id": "health",
-        "move": 0.02,
+        "move": -0.64,
         "of": 16
       },
       {
-        "id": "chemicals",
-        "move": -0.76,
-        "of": 12
-      },
-      {
-        "id": "metals",
-        "move": -1.11,
-        "of": 37
-      },
-      {
         "id": "food",
-        "move": -1.25,
+        "move": -1.38,
         "of": 67
       },
       {
         "id": "retail",
-        "move": -1.32,
+        "move": -1.84,
         "of": 27
       },
       {
-        "id": "banks",
-        "move": -1.51,
+        "id": "chemicals",
+        "move": -1.84,
         "of": 12
       },
       {
         "id": "telecom",
-        "move": -2.06,
+        "move": -2,
         "of": 9
       },
       {
-        "id": "tourism",
-        "move": -2.26,
-        "of": 28
+        "id": "banks",
+        "move": -2.27,
+        "of": 12
+      },
+      {
+        "id": "metals",
+        "move": -2.53,
+        "of": 37
       },
       {
         "id": "transport",
-        "move": -2.28,
+        "move": -2.92,
         "of": 13
       },
       {
+        "id": "tourism",
+        "move": -2.95,
+        "of": 28
+      },
+      {
         "id": "realEstate",
-        "move": -2.62,
+        "move": -2.96,
         "of": 63
       },
       {
         "id": "finance",
-        "move": -3.11,
+        "move": -3.04,
         "of": 61
       },
       {
         "id": "textile",
-        "move": -3.65,
+        "move": -4.41,
         "of": 33
       },
       {
         "id": "autos",
-        "move": -4.18,
+        "move": -5.07,
         "of": 14
       },
       {
         "id": "construction",
-        "move": -5.11,
+        "move": -5.35,
         "of": 36
       },
       {
         "id": "industrial",
-        "move": -6.3,
+        "move": -7.29,
         "of": 104
       },
       {
         "id": "defence",
-        "move": -7.32,
+        "move": -7.71,
         "of": 5
       },
       {
         "id": "semis",
-        "move": -8.18,
+        "move": -9.23,
         "of": 4
       },
       {
         "id": "tech",
-        "move": -11.13,
+        "move": -12.24,
         "of": 28
       }
     ],
@@ -3953,25 +3953,19 @@
       {
         "c": "TMPOL",
         "n": "Temapol Polimer Plastik Ve Insaat Sanayi Ticaret A..S",
-        "move": 61.1,
+        "move": 69.5,
         "th": "chemicals"
       },
       {
         "c": "HEDEF",
         "n": "Hedef Holding AS",
-        "move": 55.4,
+        "move": 60.7,
         "th": "finance"
       },
       {
         "c": "CRDFA",
         "n": "Creditwest Faktoring A.S.",
-        "move": 46.4,
-        "th": "finance"
-      },
-      {
-        "c": "HDFGS",
-        "n": "Hedef Girisim Sermayesi Yatirim Ortakligi A.S.",
-        "move": 42.1,
+        "move": 44.2,
         "th": "finance"
       },
       {
@@ -3983,18 +3977,24 @@
       {
         "c": "GEREL",
         "n": "Gersan Elektrik Ticaret ve Sanayi A.S.",
-        "move": 29.7,
+        "move": 37.2,
         "th": "industrial"
+      },
+      {
+        "c": "HDFGS",
+        "n": "Hedef Girisim Sermayesi Yatirim Ortakligi A.S.",
+        "move": 34.7,
+        "th": "finance"
       },
       {
         "c": "BORLS",
         "n": "Borlease Otomotiv AS",
-        "move": 29.6,
+        "move": 32.1,
         "th": "finance",
         "spec": 1
       }
     ],
-    "floor": 28773091,
+    "floor": 29548705,
     "of": 310
   },
   "peerGroups": [
@@ -4126,5 +4126,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-14T15:59:16.771Z"
+  "analyticsBuiltAt": "2026-10-14T16:01:12.351Z"
 }
