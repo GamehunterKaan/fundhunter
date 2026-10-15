@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-15T11:55:07.937Z",
+  "lastUpdated": "2026-10-15T15:29:23.973Z",
   "latestDate": "2026-10-15",
   "lastWideRead": "2026-10-11T09:47:25.448Z",
   "rangeStart": "2025-10-15",
@@ -1562,11 +1562,11 @@
         0.0996
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0798
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0798
       ],
       [
@@ -2194,11 +2194,11 @@
         0.0463
       ],
       [
-        "KRDMB",
+        "KRDMD",
         0.043
       ],
       [
-        "KRDMD",
+        "KRDMB",
         0.043
       ],
       [
@@ -3850,92 +3850,92 @@
     "sectors": [
       {
         "id": "health",
-        "move": 2.56,
+        "move": 2.7,
         "of": 16
       },
       {
-        "id": "retail",
-        "move": -0.3,
-        "of": 27
-      },
-      {
-        "id": "telecom",
-        "move": -0.35,
-        "of": 9
+        "id": "chemicals",
+        "move": -0.2,
+        "of": 12
       },
       {
         "id": "defence",
-        "move": -0.52,
+        "move": -0.23,
         "of": 5
       },
       {
         "id": "energy",
-        "move": -0.52,
+        "move": -0.4,
         "of": 44
       },
       {
         "id": "tourism",
-        "move": -0.7,
+        "move": -0.4,
         "of": 28
       },
       {
-        "id": "realEstate",
-        "move": -0.97,
-        "of": 63
-      },
-      {
-        "id": "chemicals",
-        "move": -1.08,
-        "of": 12
+        "id": "retail",
+        "move": -0.58,
+        "of": 27
       },
       {
         "id": "metals",
-        "move": -1.1,
+        "move": -0.83,
         "of": 37
       },
       {
+        "id": "telecom",
+        "move": -1.04,
+        "of": 9
+      },
+      {
+        "id": "realEstate",
+        "move": -1.24,
+        "of": 63
+      },
+      {
         "id": "banks",
-        "move": -1.61,
+        "move": -1.8,
         "of": 12
       },
       {
         "id": "transport",
-        "move": -1.87,
+        "move": -2.57,
         "of": 13
       },
       {
         "id": "food",
-        "move": -2.45,
+        "move": -2.86,
         "of": 67
       },
       {
         "id": "textile",
-        "move": -3.17,
+        "move": -3.59,
         "of": 33
       },
       {
         "id": "finance",
-        "move": -3.42,
+        "move": -3.71,
         "of": 61
       },
       {
-        "id": "autos",
-        "move": -4.36,
-        "of": 14
-      },
-      {
         "id": "semis",
-        "move": -4.68,
+        "move": -4.03,
         "of": 4
       },
       {
+        "id": "autos",
+        "move": -5.09,
+        "of": 14
+      },
+      {
         "id": "construction",
-        "move": -5.19,
+        "move": -5.48,
         "of": 36
       },
       {
         "id": "industrial",
-        "move": -5.49,
+        "move": -6.4,
         "of": 104
       },
       {
@@ -3966,37 +3966,37 @@
       {
         "c": "GENIL",
         "n": "Gen Ilac ve Saglik Urunleri Sanayi ve Ticaret A.S.",
-        "move": 46.1,
+        "move": 50.1,
         "th": "health"
-      },
-      {
-        "c": "CEMZY",
-        "n": "CEM ZEYTIN ANONIM SIRKETI",
-        "move": 36.2,
-        "th": "food",
-        "spec": 1
       },
       {
         "c": "BORLS",
         "n": "Borlease Otomotiv AS",
-        "move": 35.6,
+        "move": 34.4,
         "th": "finance",
+        "spec": 1
+      },
+      {
+        "c": "CRDFA",
+        "n": "Creditwest Faktoring A.S.",
+        "move": 34.3,
+        "th": "finance"
+      },
+      {
+        "c": "CEMZY",
+        "n": "CEM ZEYTIN ANONIM SIRKETI",
+        "move": 34,
+        "th": "food",
         "spec": 1
       },
       {
         "c": "DGNMO",
         "n": "Doganlar Mobilya Grubu Imalat Sanayi ve Ticaret A.S.",
-        "move": 32.4,
+        "move": 33.8,
         "th": "retail"
-      },
-      {
-        "c": "EFOR",
-        "n": "Efor Yatirim Sanayi Ticaret A.S.",
-        "move": 26.5,
-        "th": "food"
       }
     ],
-    "floor": 27650319,
+    "floor": 28986763,
     "of": 310
   },
   "peerGroups": [
@@ -4128,5 +4128,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-15T15:28:46.622Z"
+  "analyticsBuiltAt": "2026-10-15T15:30:34.967Z"
 }
