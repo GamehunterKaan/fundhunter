@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-15T10:19:12.681Z",
+  "lastUpdated": "2026-10-15T11:55:07.937Z",
   "latestDate": "2026-10-15",
   "lastWideRead": "2026-10-11T09:47:25.448Z",
   "rangeStart": "2025-10-15",
@@ -9,7 +9,7 @@
     "funds": 2037,
     "priced": 2025,
     "lagging": 12,
-    "implausible": 6,
+    "implausible": 7,
     "carried": 531,
     "byKind": {
       "YAT": 2001,
@@ -1262,11 +1262,11 @@
         0.1516
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0971
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0971
       ],
       [
@@ -1562,11 +1562,11 @@
         0.0996
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0798
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0798
       ],
       [
@@ -3850,97 +3850,97 @@
     "sectors": [
       {
         "id": "health",
-        "move": 2.79,
+        "move": 2.56,
         "of": 16
       },
       {
-        "id": "chemicals",
-        "move": -0.13,
-        "of": 12
-      },
-      {
         "id": "retail",
-        "move": -0.22,
+        "move": -0.3,
         "of": 27
       },
       {
         "id": "telecom",
-        "move": -0.22,
+        "move": -0.35,
         "of": 9
       },
       {
-        "id": "tourism",
-        "move": -0.5,
-        "of": 28
+        "id": "defence",
+        "move": -0.52,
+        "of": 5
       },
       {
         "id": "energy",
-        "move": -0.55,
+        "move": -0.52,
         "of": 44
       },
       {
+        "id": "tourism",
+        "move": -0.7,
+        "of": 28
+      },
+      {
         "id": "realEstate",
-        "move": -0.74,
+        "move": -0.97,
         "of": 63
       },
       {
-        "id": "banks",
-        "move": -0.96,
+        "id": "chemicals",
+        "move": -1.08,
         "of": 12
       },
       {
         "id": "metals",
-        "move": -0.98,
+        "move": -1.1,
         "of": 37
       },
       {
-        "id": "defence",
-        "move": -0.99,
-        "of": 5
-      },
-      {
-        "id": "food",
-        "move": -1.18,
-        "of": 67
+        "id": "banks",
+        "move": -1.61,
+        "of": 12
       },
       {
         "id": "transport",
-        "move": -1.32,
+        "move": -1.87,
         "of": 13
       },
       {
+        "id": "food",
+        "move": -2.45,
+        "of": 67
+      },
+      {
         "id": "textile",
-        "move": -3.24,
+        "move": -3.17,
         "of": 33
       },
       {
         "id": "finance",
-        "move": -3.31,
+        "move": -3.42,
         "of": 61
       },
       {
         "id": "autos",
-        "move": -3.91,
+        "move": -4.36,
         "of": 14
       },
       {
         "id": "semis",
-        "move": -4.64,
+        "move": -4.68,
         "of": 4
       },
       {
         "id": "construction",
-        "move": -4.72,
+        "move": -5.19,
         "of": 36
       },
       {
         "id": "industrial",
-        "move": -5.16,
+        "move": -5.49,
         "of": 104
       },
       {
         "id": "tech",
-        "move": -8.28,
+        "move": -8.66,
         "of": 28
       }
     ],
@@ -3966,38 +3966,37 @@
       {
         "c": "GENIL",
         "n": "Gen Ilac ve Saglik Urunleri Sanayi ve Ticaret A.S.",
-        "move": 47.9,
+        "move": 46.1,
         "th": "health"
-      },
-      {
-        "c": "BORLS",
-        "n": "Borlease Otomotiv AS",
-        "move": 42.5,
-        "th": "finance",
-        "spec": 1
       },
       {
         "c": "CEMZY",
         "n": "CEM ZEYTIN ANONIM SIRKETI",
-        "move": 39.2,
+        "move": 36.2,
         "th": "food",
+        "spec": 1
+      },
+      {
+        "c": "BORLS",
+        "n": "Borlease Otomotiv AS",
+        "move": 35.6,
+        "th": "finance",
         "spec": 1
       },
       {
         "c": "DGNMO",
         "n": "Doganlar Mobilya Grubu Imalat Sanayi ve Ticaret A.S.",
-        "move": 36.1,
+        "move": 32.4,
         "th": "retail"
       },
       {
-        "c": "POLTK",
-        "n": "Politeknik Metal Sanayi ve Ticaret AS",
-        "move": 31.4,
-        "th": "chemicals",
-        "spec": 1
+        "c": "EFOR",
+        "n": "Efor Yatirim Sanayi Ticaret A.S.",
+        "move": 26.5,
+        "th": "food"
       }
     ],
-    "floor": 27458486,
+    "floor": 27650319,
     "of": 310
   },
   "peerGroups": [
@@ -4129,5 +4128,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-15T10:19:30.956Z"
+  "analyticsBuiltAt": "2026-10-15T11:55:26.135Z"
 }
