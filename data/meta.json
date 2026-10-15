@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-15T06:39:50.163Z",
+  "lastUpdated": "2026-10-15T07:10:46.406Z",
   "latestDate": "2026-10-15",
   "lastWideRead": "2026-10-11T09:47:25.448Z",
   "rangeStart": "2025-10-15",
@@ -7,8 +7,8 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2037,
-    "priced": 1907,
-    "lagging": 130,
+    "priced": 1966,
+    "lagging": 71,
     "implausible": 5,
     "carried": 531,
     "byKind": {
@@ -1265,11 +1265,11 @@
         0.0979
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0966
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0966
       ],
       [
@@ -2197,15 +2197,15 @@
         0.0442
       ],
       [
+        "KRDMD",
+        0.0431
+      ],
+      [
         "KRDMB",
         0.0431
       ],
       [
         "KRDMA",
-        0.0431
-      ],
-      [
-        "KRDMD",
         0.0431
       ],
       [
@@ -3848,153 +3848,153 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "energy",
-        "move": -0.38,
-        "of": 44
-      },
-      {
         "id": "health",
-        "move": -0.64,
+        "move": 2.37,
         "of": 16
       },
       {
-        "id": "food",
-        "move": -1.38,
-        "of": 67
+        "id": "chemicals",
+        "move": 0.42,
+        "of": 12
       },
       {
         "id": "retail",
-        "move": -1.84,
+        "move": 0.36,
         "of": 27
       },
       {
-        "id": "chemicals",
-        "move": -1.84,
-        "of": 12
-      },
-      {
-        "id": "telecom",
-        "move": -2,
-        "of": 9
-      },
-      {
-        "id": "banks",
-        "move": -2.27,
-        "of": 12
+        "id": "energy",
+        "move": -0.51,
+        "of": 44
       },
       {
         "id": "metals",
-        "move": -2.53,
+        "move": -0.77,
         "of": 37
       },
       {
-        "id": "transport",
-        "move": -2.92,
-        "of": 13
-      },
-      {
-        "id": "tourism",
-        "move": -2.95,
-        "of": 28
-      },
-      {
         "id": "realEstate",
-        "move": -2.96,
+        "move": -0.87,
         "of": 63
       },
       {
-        "id": "finance",
-        "move": -3.04,
-        "of": 61
+        "id": "food",
+        "move": -1.14,
+        "of": 67
       },
       {
-        "id": "textile",
-        "move": -4.41,
-        "of": 33
+        "id": "telecom",
+        "move": -1.22,
+        "of": 9
       },
       {
-        "id": "autos",
-        "move": -5.07,
-        "of": 14
-      },
-      {
-        "id": "construction",
-        "move": -5.35,
-        "of": 36
-      },
-      {
-        "id": "industrial",
-        "move": -7.29,
-        "of": 104
+        "id": "tourism",
+        "move": -1.71,
+        "of": 28
       },
       {
         "id": "defence",
-        "move": -7.71,
+        "move": -1.87,
         "of": 5
       },
       {
+        "id": "transport",
+        "move": -2.03,
+        "of": 13
+      },
+      {
+        "id": "banks",
+        "move": -2.09,
+        "of": 12
+      },
+      {
+        "id": "textile",
+        "move": -3.2,
+        "of": 33
+      },
+      {
+        "id": "construction",
+        "move": -4.07,
+        "of": 36
+      },
+      {
+        "id": "autos",
+        "move": -4.26,
+        "of": 14
+      },
+      {
+        "id": "finance",
+        "move": -4.31,
+        "of": 61
+      },
+      {
+        "id": "industrial",
+        "move": -5.41,
+        "of": 104
+      },
+      {
         "id": "semis",
-        "move": -9.23,
+        "move": -5.62,
         "of": 4
       },
       {
         "id": "tech",
-        "move": -12.24,
+        "move": -8.99,
         "of": 28
       }
     ],
     "shares": [
       {
-        "c": "IZFAS",
-        "n": "Izmir Firca Sanayi ve Ticaret AS",
-        "move": 96.5,
-        "th": "industrial"
-      },
-      {
         "c": "TMPOL",
         "n": "Temapol Polimer Plastik Ve Insaat Sanayi Ticaret A..S",
-        "move": 69.5,
+        "move": 60.9,
         "th": "chemicals"
+      },
+      {
+        "c": "IZFAS",
+        "n": "Izmir Firca Sanayi ve Ticaret AS",
+        "move": 55.8,
+        "th": "industrial"
       },
       {
         "c": "HEDEF",
         "n": "Hedef Holding AS",
-        "move": 60.7,
+        "move": 52,
         "th": "finance"
       },
       {
-        "c": "CRDFA",
-        "n": "Creditwest Faktoring A.S.",
-        "move": 44.2,
-        "th": "finance"
-      },
-      {
-        "c": "UFUK",
-        "n": "Ufuk Yatirim Yonetim Ve Gayrimenkul A.S.",
-        "move": 38.7,
-        "th": "finance"
-      },
-      {
-        "c": "GEREL",
-        "n": "Gersan Elektrik Ticaret ve Sanayi A.S.",
-        "move": 37.2,
-        "th": "industrial"
-      },
-      {
-        "c": "HDFGS",
-        "n": "Hedef Girisim Sermayesi Yatirim Ortakligi A.S.",
-        "move": 34.7,
-        "th": "finance"
+        "c": "GENIL",
+        "n": "Gen Ilac ve Saglik Urunleri Sanayi ve Ticaret A.S.",
+        "move": 44.7,
+        "th": "health"
       },
       {
         "c": "BORLS",
         "n": "Borlease Otomotiv AS",
-        "move": 32.1,
+        "move": 33.8,
         "th": "finance",
         "spec": 1
+      },
+      {
+        "c": "CEMZY",
+        "n": "CEM ZEYTIN ANONIM SIRKETI",
+        "move": 33,
+        "th": "food"
+      },
+      {
+        "c": "EFOR",
+        "n": "Efor Yatirim Sanayi Ticaret A.S.",
+        "move": 31.4,
+        "th": "food"
+      },
+      {
+        "c": "GEREL",
+        "n": "Gersan Elektrik Ticaret ve Sanayi A.S.",
+        "move": 28.4,
+        "th": "industrial"
       }
     ],
-    "floor": 29548705,
+    "floor": 26332250,
     "of": 310
   },
   "peerGroups": [
@@ -4126,5 +4126,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-15T06:40:05.759Z"
+  "analyticsBuiltAt": "2026-10-15T07:11:53.550Z"
 }
