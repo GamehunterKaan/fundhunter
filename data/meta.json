@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-16T09:52:42.505Z",
+  "lastUpdated": "2026-10-16T11:46:03.880Z",
   "latestDate": "2026-10-16",
   "lastWideRead": "2026-10-11T09:47:25.448Z",
   "rangeStart": "2025-10-16",
@@ -7,9 +7,9 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2037,
-    "priced": 2024,
-    "lagging": 13,
-    "implausible": 30,
+    "priced": 2025,
+    "lagging": 12,
+    "implausible": 32,
     "carried": 530,
     "byKind": {
       "YAT": 2001,
@@ -1561,11 +1561,11 @@
         0.0972
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0815
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0815
       ],
       [
@@ -2197,15 +2197,15 @@
         0.0447
       ],
       [
+        "KRDMD",
+        0.0422
+      ],
+      [
         "KRDMA",
         0.0422
       ],
       [
         "KRDMB",
-        0.0422
-      ],
-      [
-        "KRDMD",
         0.0422
       ],
       [
@@ -3849,97 +3849,97 @@
     "sectors": [
       {
         "id": "tourism",
-        "move": -1.92,
+        "move": -2.12,
         "of": 28
       },
       {
-        "id": "banks",
-        "move": -2.9,
-        "of": 12
-      },
-      {
         "id": "realEstate",
-        "move": -3.23,
+        "move": -3.56,
         "of": 63
       },
       {
-        "id": "defence",
-        "move": -3.69,
-        "of": 5
-      },
-      {
         "id": "telecom",
-        "move": -3.97,
+        "move": -3.83,
         "of": 9
       },
       {
+        "id": "banks",
+        "move": -3.89,
+        "of": 12
+      },
+      {
+        "id": "defence",
+        "move": -4.39,
+        "of": 5
+      },
+      {
         "id": "health",
-        "move": -4.78,
+        "move": -4.4,
         "of": 16
       },
       {
-        "id": "transport",
-        "move": -4.93,
-        "of": 13
-      },
-      {
         "id": "energy",
-        "move": -5.25,
+        "move": -5.2,
         "of": 44
       },
       {
+        "id": "transport",
+        "move": -5.27,
+        "of": 13
+      },
+      {
         "id": "retail",
-        "move": -5.39,
+        "move": -5.67,
         "of": 27
       },
       {
         "id": "food",
-        "move": -6.23,
+        "move": -6.09,
         "of": 67
       },
       {
         "id": "metals",
-        "move": -6.34,
+        "move": -6.87,
         "of": 37
       },
       {
         "id": "finance",
-        "move": -6.48,
+        "move": -7.04,
         "of": 61
       },
       {
         "id": "chemicals",
-        "move": -7.13,
+        "move": -7.6,
         "of": 12
       },
       {
-        "id": "textile",
-        "move": -8.43,
-        "of": 33
-      },
-      {
         "id": "autos",
-        "move": -8.6,
+        "move": -8.69,
         "of": 14
       },
       {
+        "id": "textile",
+        "move": -9.1,
+        "of": 33
+      },
+      {
         "id": "construction",
-        "move": -9.26,
+        "move": -9.95,
         "of": 36
       },
       {
         "id": "tech",
-        "move": -11.78,
+        "move": -12.01,
         "of": 28
       },
       {
         "id": "industrial",
-        "move": -12.65,
+        "move": -13.16,
         "of": 104
       },
       {
         "id": "semis",
-        "move": -13.72,
+        "move": -14.47,
         "of": 4
       }
     ],
@@ -3965,36 +3965,35 @@
       {
         "c": "IZFAS",
         "n": "Izmir Firca Sanayi ve Ticaret AS",
-        "move": 55.7,
+        "move": 59.7,
         "th": "industrial"
       },
       {
         "c": "DCTTR",
         "n": "DCT Trading Dis Ticaret Anonim Sirketi",
-        "move": 19.6,
+        "move": 24.1,
         "th": "industrial"
       },
       {
         "c": "CRDFA",
         "n": "Creditwest Faktoring A.S.",
-        "move": 15.2,
+        "move": 18.2,
         "th": "finance"
-      },
-      {
-        "c": "HRKET",
-        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 13.3,
-        "th": "transport",
-        "spec": 1
       },
       {
         "c": "EDATA",
         "n": "E-Data Teknoloji Pazarlama AS",
         "move": 11.7,
         "th": "industrial"
+      },
+      {
+        "c": "GENIL",
+        "n": "Gen Ilac ve Saglik Urunleri Sanayi ve Ticaret A.S.",
+        "move": 11.5,
+        "th": "health"
       }
     ],
-    "floor": 27219236,
+    "floor": 27405256,
     "of": 310
   },
   "peerGroups": [
@@ -4068,7 +4067,7 @@
     "fundOfFunds": {
       "count": 138,
       "medianY1": 30.30105,
-      "medianVol": 9.08
+      "medianVol": 9.17
     },
     "balanced": {
       "count": 143,
@@ -4126,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-16T09:53:55.327Z"
+  "analyticsBuiltAt": "2026-10-16T11:46:19.411Z"
 }
