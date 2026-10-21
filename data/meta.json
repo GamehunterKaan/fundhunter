@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-21T12:11:00.449Z",
+  "lastUpdated": "2026-10-21T15:56:08.683Z",
   "latestDate": "2026-10-21",
   "lastWideRead": "2026-10-19T13:54:38.132Z",
   "rangeStart": "2025-10-21",
@@ -1265,11 +1265,11 @@
         0.0997
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0988
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0988
       ],
       [
@@ -2197,7 +2197,7 @@
         0.0441
       ],
       [
-        "KRDMB",
+        "KRDMA",
         0.0429
       ],
       [
@@ -2205,7 +2205,7 @@
         0.0429
       ],
       [
-        "KRDMA",
+        "KRDMB",
         0.0429
       ],
       [
@@ -3849,97 +3849,97 @@
     "sectors": [
       {
         "id": "defence",
-        "move": 0.56,
+        "move": -1.1,
         "of": 5
       },
       {
-        "id": "telecom",
-        "move": -3.76,
-        "of": 9
-      },
-      {
         "id": "banks",
-        "move": -3.77,
+        "move": -4.31,
         "of": 12
       },
       {
+        "id": "telecom",
+        "move": -4.62,
+        "of": 9
+      },
+      {
         "id": "transport",
-        "move": -4.12,
+        "move": -4.73,
         "of": 13
       },
       {
         "id": "tourism",
-        "move": -4.95,
+        "move": -5.16,
         "of": 28
       },
       {
         "id": "realEstate",
-        "move": -5.7,
+        "move": -6.28,
         "of": 63
       },
       {
-        "id": "energy",
-        "move": -6.11,
-        "of": 44
-      },
-      {
         "id": "retail",
-        "move": -6.14,
+        "move": -6.43,
         "of": 27
       },
       {
+        "id": "energy",
+        "move": -7,
+        "of": 44
+      },
+      {
         "id": "metals",
-        "move": -7.46,
+        "move": -7.98,
         "of": 37
       },
       {
-        "id": "autos",
-        "move": -7.97,
-        "of": 14
-      },
-      {
         "id": "food",
-        "move": -8.39,
+        "move": -8.67,
         "of": 67
       },
       {
         "id": "construction",
-        "move": -8.43,
+        "move": -8.74,
         "of": 36
       },
       {
+        "id": "autos",
+        "move": -9.02,
+        "of": 14
+      },
+      {
         "id": "textile",
-        "move": -8.8,
+        "move": -9.31,
         "of": 33
       },
       {
         "id": "tech",
-        "move": -9.85,
+        "move": -10.32,
         "of": 28
       },
       {
-        "id": "chemicals",
-        "move": -10.16,
-        "of": 12
-      },
-      {
         "id": "health",
-        "move": -10.57,
+        "move": -11.16,
         "of": 16
       },
       {
+        "id": "chemicals",
+        "move": -11.62,
+        "of": 12
+      },
+      {
         "id": "semis",
-        "move": -11.82,
+        "move": -12.16,
         "of": 4
       },
       {
         "id": "finance",
-        "move": -12.87,
+        "move": -14.67,
         "of": 61
       },
       {
         "id": "industrial",
-        "move": -15.43,
+        "move": -15.77,
         "of": 104
       }
     ],
@@ -3947,7 +3947,7 @@
       {
         "c": "TGSAS",
         "n": "TGS Dis Ticaret AS",
-        "move": 37.9,
+        "move": 39.2,
         "th": "industrial"
       },
       {
@@ -3959,42 +3959,42 @@
       {
         "c": "ODINE",
         "n": "Odine Solutions Teknoloji Ticaret ve Sanayi AS",
-        "move": 20.8,
+        "move": 22.2,
         "th": "tech"
       },
       {
         "c": "DCTTR",
         "n": "DCT Trading Dis Ticaret Anonim Sirketi",
-        "move": 15.2,
+        "move": 18.3,
         "th": "industrial"
       },
       {
         "c": "BORLS",
         "n": "Borlease Otomotiv AS",
-        "move": 7.9,
+        "move": 8.3,
         "th": "finance",
         "spec": 1
       },
       {
         "c": "TAVHL",
         "n": "TAV Havalimanlari Holding A.S.",
-        "move": 6.3,
+        "move": 7.2,
         "th": "transport"
       },
       {
-        "c": "KLRHO",
-        "n": "KILER HOLDING A.S.",
-        "move": 5,
-        "th": "food"
+        "c": "USHOL",
+        "n": "US Yatirim Holding A.S.",
+        "move": 6.2,
+        "th": "industrial"
       },
       {
-        "c": "SAHOL",
-        "n": "Haci Omer Sabanci Holding A.S.",
-        "move": 4.4,
-        "th": "banks"
+        "c": "LIDFA",
+        "n": "Lider Faktoring Anonim Sirketi",
+        "move": 4.8,
+        "th": "finance"
       }
     ],
-    "floor": 25822479,
+    "floor": 26913785,
     "of": 310
   },
   "peerGroups": [
@@ -4126,5 +4126,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-21T15:40:10.369Z"
+  "analyticsBuiltAt": "2026-10-21T15:57:19.906Z"
 }
