@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-21T11:08:27.107Z",
+  "lastUpdated": "2026-10-21T12:11:00.449Z",
   "latestDate": "2026-10-21",
   "lastWideRead": "2026-10-19T13:54:38.132Z",
   "rangeStart": "2025-10-21",
@@ -1265,11 +1265,11 @@
         0.0997
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0988
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0988
       ],
       [
@@ -1561,11 +1561,11 @@
         0.0983
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.081
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.081
       ],
       [
@@ -2197,15 +2197,15 @@
         0.0441
       ],
       [
-        "KRDMA",
-        0.0429
-      ],
-      [
         "KRDMB",
         0.0429
       ],
       [
         "KRDMD",
+        0.0429
+      ],
+      [
+        "KRDMA",
         0.0429
       ],
       [
@@ -3849,97 +3849,97 @@
     "sectors": [
       {
         "id": "defence",
-        "move": 0.58,
+        "move": 0.56,
         "of": 5
       },
       {
-        "id": "banks",
-        "move": -3.09,
-        "of": 12
-      },
-      {
         "id": "telecom",
-        "move": -3.84,
+        "move": -3.76,
         "of": 9
       },
       {
+        "id": "banks",
+        "move": -3.77,
+        "of": 12
+      },
+      {
         "id": "transport",
-        "move": -3.87,
+        "move": -4.12,
         "of": 13
       },
       {
         "id": "tourism",
-        "move": -5.15,
+        "move": -4.95,
         "of": 28
       },
       {
         "id": "realEstate",
-        "move": -5.54,
+        "move": -5.7,
         "of": 63
       },
       {
         "id": "energy",
-        "move": -5.99,
+        "move": -6.11,
         "of": 44
       },
       {
         "id": "retail",
-        "move": -5.99,
+        "move": -6.14,
         "of": 27
       },
       {
         "id": "metals",
-        "move": -7.1,
+        "move": -7.46,
         "of": 37
       },
       {
-        "id": "food",
-        "move": -7.5,
-        "of": 67
-      },
-      {
         "id": "autos",
-        "move": -7.93,
+        "move": -7.97,
         "of": 14
       },
       {
+        "id": "food",
+        "move": -8.39,
+        "of": 67
+      },
+      {
         "id": "construction",
-        "move": -8.12,
+        "move": -8.43,
         "of": 36
       },
       {
         "id": "textile",
-        "move": -8.58,
+        "move": -8.8,
         "of": 33
       },
       {
         "id": "tech",
-        "move": -9.62,
+        "move": -9.85,
         "of": 28
       },
       {
         "id": "chemicals",
-        "move": -9.81,
+        "move": -10.16,
         "of": 12
       },
       {
         "id": "health",
-        "move": -10.16,
+        "move": -10.57,
         "of": 16
       },
       {
         "id": "semis",
-        "move": -11.41,
+        "move": -11.82,
         "of": 4
       },
       {
         "id": "finance",
-        "move": -12.82,
+        "move": -12.87,
         "of": 61
       },
       {
         "id": "industrial",
-        "move": -15.04,
+        "move": -15.43,
         "of": 104
       }
     ],
@@ -3947,7 +3947,7 @@
       {
         "c": "TGSAS",
         "n": "TGS Dis Ticaret AS",
-        "move": 37.3,
+        "move": 37.9,
         "th": "industrial"
       },
       {
@@ -3959,42 +3959,42 @@
       {
         "c": "ODINE",
         "n": "Odine Solutions Teknoloji Ticaret ve Sanayi AS",
-        "move": 20.3,
+        "move": 20.8,
         "th": "tech"
       },
       {
         "c": "DCTTR",
         "n": "DCT Trading Dis Ticaret Anonim Sirketi",
-        "move": 12.9,
+        "move": 15.2,
         "th": "industrial"
       },
       {
         "c": "BORLS",
         "n": "Borlease Otomotiv AS",
-        "move": 7.5,
+        "move": 7.9,
         "th": "finance",
         "spec": 1
       },
       {
         "c": "TAVHL",
         "n": "TAV Havalimanlari Holding A.S.",
-        "move": 7.1,
+        "move": 6.3,
         "th": "transport"
       },
       {
         "c": "KLRHO",
         "n": "KILER HOLDING A.S.",
-        "move": 5.7,
+        "move": 5,
         "th": "food"
       },
       {
-        "c": "IHAAS",
-        "n": "Ihlas Haber Ajansi SA",
-        "move": 4.6,
-        "th": "industrial"
+        "c": "SAHOL",
+        "n": "Haci Omer Sabanci Holding A.S.",
+        "move": 4.4,
+        "th": "banks"
       }
     ],
-    "floor": 25335688,
+    "floor": 25822479,
     "of": 310
   },
   "peerGroups": [
@@ -4126,5 +4126,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-21T11:09:39.961Z"
+  "analyticsBuiltAt": "2026-10-21T12:11:13.273Z"
 }
