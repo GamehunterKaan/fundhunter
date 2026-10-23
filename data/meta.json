@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-23T11:55:59.291Z",
+  "lastUpdated": "2026-10-23T15:43:49.286Z",
   "latestDate": "2026-10-23",
   "lastWideRead": "2026-10-19T13:54:38.132Z",
   "rangeStart": "2025-10-23",
@@ -7,9 +7,9 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2027,
-    "priced": 2020,
-    "lagging": 7,
-    "implausible": 12,
+    "priced": 2019,
+    "lagging": 8,
+    "implausible": 11,
     "carried": 526,
     "byKind": {
       "YAT": 1991,
@@ -3849,97 +3849,97 @@
     "sectors": [
       {
         "id": "defence",
-        "move": -6.08,
+        "move": -2.83,
         "of": 5
       },
       {
+        "id": "tourism",
+        "move": -5.16,
+        "of": 28
+      },
+      {
         "id": "transport",
-        "move": -7.35,
+        "move": -5.56,
         "of": 13
       },
       {
         "id": "retail",
-        "move": -7.67,
+        "move": -6.26,
         "of": 27
       },
       {
+        "id": "construction",
+        "move": -6.42,
+        "of": 36
+      },
+      {
         "id": "banks",
-        "move": -7.79,
+        "move": -6.47,
         "of": 12
       },
       {
         "id": "realEstate",
-        "move": -8.14,
+        "move": -6.54,
         "of": 63
       },
       {
-        "id": "construction",
-        "move": -8.24,
-        "of": 36
-      },
-      {
-        "id": "tech",
-        "move": -8.69,
-        "of": 28
-      },
-      {
-        "id": "tourism",
-        "move": -9.15,
-        "of": 28
-      },
-      {
-        "id": "health",
-        "move": -9.23,
-        "of": 16
-      },
-      {
         "id": "textile",
-        "move": -9.63,
+        "move": -6.98,
         "of": 33
       },
       {
+        "id": "tech",
+        "move": -7.09,
+        "of": 28
+      },
+      {
         "id": "energy",
-        "move": -9.8,
+        "move": -7.54,
         "of": 44
       },
       {
+        "id": "health",
+        "move": -7.61,
+        "of": 16
+      },
+      {
         "id": "autos",
-        "move": -9.92,
+        "move": -7.63,
         "of": 14
       },
       {
         "id": "food",
-        "move": -10.15,
+        "move": -7.68,
         "of": 67
       },
       {
         "id": "telecom",
-        "move": -12.08,
+        "move": -9.02,
         "of": 9
       },
       {
         "id": "metals",
-        "move": -13.85,
+        "move": -12.71,
         "of": 37
       },
       {
         "id": "semis",
-        "move": -16.65,
+        "move": -14.76,
         "of": 4
       },
       {
-        "id": "industrial",
-        "move": -16.81,
-        "of": 104
-      },
-      {
         "id": "finance",
-        "move": -17.05,
+        "move": -15.37,
         "of": 61
       },
       {
+        "id": "industrial",
+        "move": -15.54,
+        "of": 104
+      },
+      {
         "id": "chemicals",
-        "move": -18.3,
+        "move": -17.6,
         "of": 12
       }
     ],
@@ -3957,6 +3957,12 @@
         "th": "tech"
       },
       {
+        "c": "BIOEN",
+        "n": "BIotrend Cevre ve EnerjI Yatirimlari AS",
+        "move": 14.2,
+        "th": "energy"
+      },
+      {
         "c": "BORLS",
         "n": "Borlease Otomotiv AS",
         "move": 13.9,
@@ -3964,37 +3970,31 @@
         "spec": 1
       },
       {
-        "c": "TGSAS",
-        "n": "TGS Dis Ticaret AS",
-        "move": 8.2,
+        "c": "USHOL",
+        "n": "US Yatirim Holding A.S.",
+        "move": 13.1,
         "th": "industrial"
       },
       {
-        "c": "USHOL",
-        "n": "US Yatirim Holding A.S.",
-        "move": 6,
+        "c": "TGSAS",
+        "n": "TGS Dis Ticaret AS",
+        "move": 11.2,
         "th": "industrial"
       },
       {
         "c": "BIGTK",
         "n": "Big Medya Teknoloji A.S.",
-        "move": 5.9,
+        "move": 9.6,
         "th": "telecom"
       },
       {
-        "c": "DMRGD",
-        "n": "DMR Unlu Mamuller Uretim Gida Toptan Perakende Ihracat A.S.",
-        "move": 5.1,
-        "th": "food"
-      },
-      {
-        "c": "PKENT",
-        "n": "Petrokent Turizm A.S.",
-        "move": 4.4,
-        "th": "tourism"
+        "c": "DGNMO",
+        "n": "Doganlar Mobilya Grubu Imalat Sanayi ve Ticaret A.S.",
+        "move": 6.8,
+        "th": "retail"
       }
     ],
-    "floor": 24438467,
+    "floor": 26794262,
     "of": 310
   },
   "peerGroups": [
@@ -4043,7 +4043,7 @@
     "equity": {
       "count": 613,
       "medianY1": 13.6466,
-      "medianVol": 23.3
+      "medianVol": 23.29
     },
     "metals": {
       "count": 54,
@@ -4126,5 +4126,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-23T15:27:20.198Z"
+  "analyticsBuiltAt": "2026-10-23T15:44:59.821Z"
 }
