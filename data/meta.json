@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-26T06:56:51.708Z",
+  "lastUpdated": "2026-10-26T13:27:18.468Z",
   "latestDate": "2026-10-26",
   "lastWideRead": "2026-10-19T13:54:38.132Z",
   "rangeStart": "2025-10-26",
@@ -7,8 +7,8 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2025,
-    "priced": 1960,
-    "lagging": 65,
+    "priced": 2019,
+    "lagging": 6,
     "implausible": 9,
     "carried": 526,
     "byKind": {
@@ -1265,11 +1265,11 @@
         0.0999
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0998
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0998
       ],
       [
@@ -1561,11 +1561,11 @@
         0.103
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0766
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0766
       ],
       [
@@ -2193,7 +2193,7 @@
         0.049
       ],
       [
-        "KRDMD",
+        "KRDMA",
         0.0434
       ],
       [
@@ -2201,7 +2201,7 @@
         0.0434
       ],
       [
-        "KRDMA",
+        "KRDMD",
         0.0434
       ],
       [
@@ -3849,48 +3849,53 @@
     "sectors": [
       {
         "id": "defence",
-        "move": -2.83,
+        "move": -2.01,
         "of": 5
       },
       {
-        "id": "tourism",
-        "move": -5.08,
-        "of": 28
-      },
-      {
-        "id": "transport",
-        "move": -5.5,
-        "of": 13
-      },
-      {
-        "id": "retail",
-        "move": -6.21,
-        "of": 27
-      },
-      {
-        "id": "banks",
-        "move": -6.35,
-        "of": 12
-      },
-      {
         "id": "construction",
-        "move": -6.36,
+        "move": -3.81,
         "of": 36
       },
       {
+        "id": "retail",
+        "move": -4.31,
+        "of": 27
+      },
+      {
+        "id": "energy",
+        "move": -5.08,
+        "of": 44
+      },
+      {
         "id": "realEstate",
-        "move": -6.41,
+        "move": -5.26,
         "of": 63
       },
       {
-        "id": "textile",
-        "move": -6.88,
-        "of": 33
+        "id": "transport",
+        "move": -6.02,
+        "of": 13
       },
       {
-        "id": "health",
-        "move": -7.34,
-        "of": 16
+        "id": "autos",
+        "move": -6.05,
+        "of": 14
+      },
+      {
+        "id": "tourism",
+        "move": -6.22,
+        "of": 28
+      },
+      {
+        "id": "banks",
+        "move": -6.92,
+        "of": 12
+      },
+      {
+        "id": "textile",
+        "move": -7.19,
+        "of": 33
       },
       {
         "id": "tech",
@@ -3898,103 +3903,97 @@
         "of": 28
       },
       {
-        "id": "energy",
-        "move": -7.42,
-        "of": 44
-      },
-      {
-        "id": "autos",
-        "move": -7.63,
-        "of": 14
-      },
-      {
-        "id": "food",
-        "move": -7.64,
-        "of": 67
-      },
-      {
-        "id": "telecom",
-        "move": -9.02,
-        "of": 9
-      },
-      {
-        "id": "metals",
-        "move": -12.63,
-        "of": 37
-      },
-      {
         "id": "semis",
-        "move": -14.73,
+        "move": -7.72,
         "of": 4
       },
       {
-        "id": "finance",
-        "move": -14.93,
-        "of": 61
+        "id": "telecom",
+        "move": -7.87,
+        "of": 9
+      },
+      {
+        "id": "food",
+        "move": -8.27,
+        "of": 67
+      },
+      {
+        "id": "health",
+        "move": -9.75,
+        "of": 16
       },
       {
         "id": "industrial",
-        "move": -15.33,
+        "move": -9.83,
         "of": 104
       },
       {
+        "id": "metals",
+        "move": -12.93,
+        "of": 37
+      },
+      {
+        "id": "finance",
+        "move": -15.02,
+        "of": 61
+      },
+      {
         "id": "chemicals",
-        "move": -17.34,
+        "move": -19.74,
         "of": 12
       }
     ],
     "shares": [
       {
-        "c": "GUNDG",
-        "n": "Gundogdu Gida Sut Urunleri Sanayi Ve Dis Ticaret AS",
-        "move": 44.8,
-        "th": "food"
+        "c": "AKFIS",
+        "n": "Akfen insaat Turizm ve Ticaret AS",
+        "move": 19.5,
+        "th": "construction"
       },
       {
-        "c": "ODINE",
-        "n": "Odine Solutions Teknoloji Ticaret ve Sanayi AS",
-        "move": 40.6,
-        "th": "tech"
+        "c": "DCTTR",
+        "n": "DCT Trading Dis Ticaret Anonim Sirketi",
+        "move": 16.8,
+        "th": "industrial"
       },
       {
         "c": "BIOEN",
         "n": "BIotrend Cevre ve EnerjI Yatirimlari AS",
-        "move": 14.2,
+        "move": 12.6,
         "th": "energy"
-      },
-      {
-        "c": "BORLS",
-        "n": "Borlease Otomotiv AS",
-        "move": 13.9,
-        "th": "finance",
-        "spec": 1
-      },
-      {
-        "c": "USHOL",
-        "n": "US Yatirim Holding A.S.",
-        "move": 13.1,
-        "th": "industrial"
       },
       {
         "c": "TGSAS",
         "n": "TGS Dis Ticaret AS",
-        "move": 11.2,
+        "move": 12.4,
         "th": "industrial"
-      },
-      {
-        "c": "BIGTK",
-        "n": "Big Medya Teknoloji A.S.",
-        "move": 9.6,
-        "th": "telecom"
       },
       {
         "c": "DGNMO",
         "n": "Doganlar Mobilya Grubu Imalat Sanayi ve Ticaret A.S.",
-        "move": 6.8,
+        "move": 9.3,
+        "th": "retail"
+      },
+      {
+        "c": "RYGYO",
+        "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
+        "move": 8.8,
+        "th": "realEstate"
+      },
+      {
+        "c": "GUNDG",
+        "n": "Gundogdu Gida Sut Urunleri Sanayi Ve Dis Ticaret AS",
+        "move": 7.8,
+        "th": "food"
+      },
+      {
+        "c": "KLSYN",
+        "n": "Koleksiyon Mobilya Sanayi AS",
+        "move": 7.7,
         "th": "retail"
       }
     ],
-    "floor": 26794262,
+    "floor": 25272161,
     "of": 310
   },
   "peerGroups": [
@@ -4041,44 +4040,44 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 617,
-      "medianY1": 8.0051,
-      "medianVol": 23.29
+      "count": 614,
+      "medianY1": 8.45035,
+      "medianVol": 23.295
     },
     "metals": {
       "count": 54,
       "medianY1": 9.46545,
-      "medianVol": 24.68
+      "medianVol": 24.69
     },
     "foreign": {
       "count": 36,
       "medianY1": 25.8199,
-      "medianVol": 17.86
+      "medianVol": 17.885
     },
     "bonds": {
       "count": 532,
-      "medianY1": 22.2511,
-      "medianVol": 2.955
+      "medianY1": 22.23845,
+      "medianVol": 2.94
     },
     "cash": {
-      "count": 301,
-      "medianY1": 37.802,
-      "medianVol": 1.69
+      "count": 302,
+      "medianY1": 37.50064999999999,
+      "medianVol": 1.705
     },
     "fundOfFunds": {
-      "count": 137,
-      "medianY1": 20.767650000000003,
-      "medianVol": 9.379999999999999
+      "count": 138,
+      "medianY1": 21.6518,
+      "medianVol": 9.58
     },
     "balanced": {
-      "count": 140,
-      "medianY1": 23.2687,
-      "medianVol": 13.985
+      "count": 136,
+      "medianY1": 22.7856,
+      "medianVol": 14.184999999999999
     },
     "conservative": {
-      "count": 208,
-      "medianY1": 40.9943,
-      "medianVol": 1.975
+      "count": 213,
+      "medianY1": 40.86,
+      "medianVol": 2.11
     }
   },
   "cashReturn": 44.81,
@@ -4126,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-26T06:56:59.674Z"
+  "analyticsBuiltAt": "2026-10-26T13:28:25.165Z"
 }
