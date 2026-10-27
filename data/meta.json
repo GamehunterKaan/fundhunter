@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-27T12:33:53.583Z",
+  "lastUpdated": "2026-10-27T16:34:44.456Z",
   "latestDate": "2026-10-27",
   "lastWideRead": "2026-10-26T17:22:54.037Z",
   "rangeStart": "2025-10-27",
@@ -1264,11 +1264,11 @@
         0.1019
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0999
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0999
       ],
       [
@@ -2200,11 +2200,11 @@
         0.042
       ],
       [
-        "KRDMA",
+        "KRDMD",
         0.042
       ],
       [
-        "KRDMD",
+        "KRDMA",
         0.042
       ],
       [
@@ -3848,97 +3848,97 @@
     "sectors": [
       {
         "id": "defence",
-        "move": 6.11,
+        "move": 5.31,
         "of": 5
       },
       {
         "id": "autos",
-        "move": 0.3,
+        "move": 0.5,
         "of": 14
       },
       {
         "id": "construction",
-        "move": -0.29,
+        "move": -1.14,
         "of": 36
       },
       {
         "id": "realEstate",
-        "move": -1.41,
+        "move": -1.52,
         "of": 63
       },
       {
         "id": "energy",
-        "move": -1.51,
+        "move": -2.09,
         "of": 44
       },
       {
+        "id": "tourism",
+        "move": -2.12,
+        "of": 28
+      },
+      {
         "id": "retail",
-        "move": -1.92,
+        "move": -3.74,
         "of": 27
       },
       {
-        "id": "tourism",
-        "move": -1.93,
-        "of": 28
-      },
-      {
-        "id": "transport",
-        "move": -3.71,
-        "of": 13
-      },
-      {
         "id": "tech",
-        "move": -3.82,
+        "move": -4.01,
         "of": 28
-      },
-      {
-        "id": "textile",
-        "move": -3.88,
-        "of": 33
       },
       {
         "id": "industrial",
-        "move": -4.06,
+        "move": -4.2,
         "of": 104
       },
       {
-        "id": "banks",
-        "move": -5.56,
-        "of": 12
+        "id": "textile",
+        "move": -4.43,
+        "of": 33
+      },
+      {
+        "id": "transport",
+        "move": -5.05,
+        "of": 13
       },
       {
         "id": "health",
-        "move": -5.68,
+        "move": -5.41,
         "of": 16
       },
       {
+        "id": "banks",
+        "move": -5.88,
+        "of": 12
+      },
+      {
         "id": "telecom",
-        "move": -6.66,
+        "move": -6.03,
         "of": 9
       },
       {
         "id": "food",
-        "move": -6.7,
+        "move": -6.81,
         "of": 67
       },
       {
-        "id": "semis",
-        "move": -7.51,
-        "of": 4
-      },
-      {
         "id": "metals",
-        "move": -7.96,
+        "move": -7.86,
         "of": 37
       },
       {
+        "id": "semis",
+        "move": -8.66,
+        "of": 4
+      },
+      {
         "id": "finance",
-        "move": -10.8,
+        "move": -11.05,
         "of": 61
       },
       {
         "id": "chemicals",
-        "move": -16.49,
+        "move": -16.02,
         "of": 12
       }
     ],
@@ -3946,54 +3946,54 @@
       {
         "c": "DGNMO",
         "n": "Doganlar Mobilya Grubu Imalat Sanayi ve Ticaret A.S.",
-        "move": 26.8,
+        "move": 29.5,
         "th": "retail"
       },
       {
         "c": "KARTN",
         "n": "Kartonsan Karton Sanayi ve Ticaret Anonim Sirketi",
-        "move": 21.2,
+        "move": 23.9,
         "th": "industrial",
         "spec": 1
       },
       {
-        "c": "DCTTR",
-        "n": "DCT Trading Dis Ticaret Anonim Sirketi",
-        "move": 19.1,
-        "th": "industrial"
-      },
-      {
         "c": "MCARD",
         "n": "Metropal Kurumsal Hizmetler A.S.",
-        "move": 18.2,
+        "move": 20.2,
         "th": "industrial"
       },
       {
         "c": "RYGYO",
         "n": "Reysas Gayrimenkul Yatirim Ortakligi A.S.",
-        "move": 17.9,
+        "move": 18.9,
         "th": "realEstate"
+      },
+      {
+        "c": "GRTHO",
+        "n": "Grainturk Holding A.S.",
+        "move": 16.8,
+        "th": "industrial"
       },
       {
         "c": "TCKRC",
         "n": "Kirac Galvaniz Telekominikasyon Metal Makine Insaat Elektrik Sanayi Ve Ticaret AS",
-        "move": 14.2,
+        "move": 15.9,
         "th": "metals"
+      },
+      {
+        "c": "DCTTR",
+        "n": "DCT Trading Dis Ticaret Anonim Sirketi",
+        "move": 14.3,
+        "th": "industrial"
       },
       {
         "c": "CITAS",
         "n": "Citlekci Magazacilik Gida AS",
-        "move": 11.5,
+        "move": 12.5,
         "th": "retail"
-      },
-      {
-        "c": "VERUS",
-        "n": "Verusa Holding AS",
-        "move": 10.7,
-        "th": "finance"
       }
     ],
-    "floor": 24200481,
+    "floor": 25203815,
     "of": 310
   },
   "peerGroups": [
@@ -4125,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-27T16:33:33.944Z"
+  "analyticsBuiltAt": "2026-10-27T16:35:52.154Z"
 }
