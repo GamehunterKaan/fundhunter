@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-30T09:08:31.122Z",
+  "lastUpdated": "2026-10-30T13:19:55.369Z",
   "latestDate": "2026-10-30",
   "lastWideRead": "2026-10-26T17:22:54.037Z",
   "rangeStart": "2025-10-30",
@@ -9,8 +9,8 @@
     "funds": 2025,
     "priced": 2024,
     "lagging": 1,
-    "implausible": 3,
-    "carried": 524,
+    "implausible": 2,
+    "carried": 525,
     "byKind": {
       "YAT": 1989,
       "BYF": 36
@@ -2196,15 +2196,15 @@
         0.0439
       ],
       [
-        "KRDMB",
-        0.043
-      ],
-      [
         "KRDMD",
         0.043
       ],
       [
         "KRDMA",
+        0.043
+      ],
+      [
+        "KRDMB",
         0.043
       ],
       [
@@ -3847,154 +3847,153 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "tourism",
-        "move": 2.13,
-        "of": 28
-      },
-      {
         "id": "defence",
-        "move": 1.81,
+        "move": 2.86,
         "of": 5
       },
       {
-        "id": "industrial",
-        "move": 1.34,
-        "of": 104
+        "id": "tourism",
+        "move": 2.24,
+        "of": 28
       },
       {
         "id": "construction",
-        "move": 0.49,
+        "move": 0.95,
         "of": 36
       },
       {
+        "id": "industrial",
+        "move": -0.52,
+        "of": 104
+      },
+      {
         "id": "energy",
-        "move": -0.25,
+        "move": -1.2,
         "of": 44
       },
       {
         "id": "autos",
-        "move": -0.86,
+        "move": -1.5,
         "of": 14
       },
       {
         "id": "telecom",
-        "move": -1.68,
+        "move": -1.53,
         "of": 9
       },
       {
-        "id": "retail",
-        "move": -2.87,
-        "of": 27
-      },
-      {
-        "id": "realEstate",
-        "move": -3,
-        "of": 63
-      },
-      {
         "id": "banks",
-        "move": -3.13,
+        "move": -1.9,
         "of": 12
       },
       {
+        "id": "realEstate",
+        "move": -3.14,
+        "of": 63
+      },
+      {
+        "id": "retail",
+        "move": -3.68,
+        "of": 27
+      },
+      {
         "id": "food",
-        "move": -3.9,
+        "move": -4.37,
         "of": 67
       },
       {
         "id": "textile",
-        "move": -4.36,
+        "move": -4.37,
         "of": 33
       },
       {
         "id": "transport",
-        "move": -4.58,
+        "move": -5,
         "of": 13
       },
       {
         "id": "tech",
-        "move": -5.4,
+        "move": -5.93,
         "of": 28
       },
       {
         "id": "health",
-        "move": -6.13,
+        "move": -6.52,
         "of": 16
       },
       {
-        "id": "metals",
-        "move": -6.14,
-        "of": 37
-      },
-      {
         "id": "finance",
-        "move": -6.84,
+        "move": -6.79,
         "of": 61
       },
       {
+        "id": "metals",
+        "move": -7.5,
+        "of": 37
+      },
+      {
         "id": "semis",
-        "move": -8.24,
+        "move": -8.04,
         "of": 4
       },
       {
         "id": "chemicals",
-        "move": -9.82,
+        "move": -10.82,
         "of": 12
       }
     ],
     "shares": [
       {
-        "c": "MCARD",
-        "n": "Metropal Kurumsal Hizmetler A.S.",
-        "move": 36.3,
-        "th": "industrial"
-      },
-      {
         "c": "KARTN",
         "n": "Kartonsan Karton Sanayi ve Ticaret Anonim Sirketi",
-        "move": 32.3,
+        "move": 32.8,
         "th": "industrial",
         "spec": 1
       },
       {
+        "c": "MCARD",
+        "n": "Metropal Kurumsal Hizmetler A.S.",
+        "move": 31.2,
+        "th": "industrial"
+      },
+      {
         "c": "GRTHO",
         "n": "Grainturk Holding A.S.",
-        "move": 24.9,
+        "move": 24.2,
         "th": "industrial"
       },
       {
         "c": "GMTAS",
         "n": "Gimat Magazacilik Insaat Sanayi ve Ticaret A.S.",
-        "move": 20.7,
+        "move": 19.4,
         "th": "retail"
       },
       {
-        "c": "OBAMS",
-        "n": "Oba Makarnacilik Sanayi Ve Ticaret A. S.",
-        "move": 18.2,
-        "th": "food"
-      },
-      {
-        "c": "KAPLM",
-        "n": "Kaplamin Ambalaj Sanayi ve Ticaret A.S.",
-        "move": 18,
-        "th": "industrial",
-        "spec": 1
-      },
-      {
-        "c": "ALBTN",
-        "n": "Albayrak Hazir Beton Sanayi ve Ticaret AS",
-        "move": 15.5,
-        "th": "construction"
+        "c": "GEREL",
+        "n": "Gersan Elektrik Ticaret ve Sanayi A.S.",
+        "move": 17.7,
+        "th": "industrial"
       },
       {
         "c": "DOAS",
         "n": "Dogus Otomotiv Servis ve Ticaret Anonim Sirketi",
         "move": 15.4,
         "th": "retail"
+      },
+      {
+        "c": "ALBTN",
+        "n": "Albayrak Hazir Beton Sanayi ve Ticaret AS",
+        "move": 15.2,
+        "th": "construction"
+      },
+      {
+        "c": "MNDRS",
+        "n": "Menderes Tekstil Sanayi ve Ticaret Anonim Sirketi",
+        "move": 12.4,
+        "th": "textile"
       }
     ],
-    "floor": 20953546,
+    "floor": 21437170,
     "of": 310
   },
   "peerGroups": [
@@ -4126,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-30T09:09:37.515Z"
+  "analyticsBuiltAt": "2026-10-30T13:20:04.447Z"
 }
