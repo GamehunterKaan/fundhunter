@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-10-30T13:19:55.369Z",
+  "lastUpdated": "2026-10-30T15:48:50.180Z",
   "latestDate": "2026-10-30",
   "lastWideRead": "2026-10-26T17:22:54.037Z",
   "rangeStart": "2025-10-30",
@@ -1260,11 +1260,11 @@
         0.1627
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.1003
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.1003
       ],
       [
@@ -2196,15 +2196,15 @@
         0.0439
       ],
       [
+        "KRDMB",
+        0.043
+      ],
+      [
         "KRDMD",
         0.043
       ],
       [
         "KRDMA",
-        0.043
-      ],
-      [
-        "KRDMB",
         0.043
       ],
       [
@@ -3848,97 +3848,97 @@
     "sectors": [
       {
         "id": "defence",
-        "move": 2.86,
+        "move": 2.08,
         "of": 5
       },
       {
         "id": "tourism",
-        "move": 2.24,
+        "move": 0.77,
         "of": 28
       },
       {
         "id": "construction",
-        "move": 0.95,
+        "move": -0.12,
         "of": 36
       },
       {
         "id": "industrial",
-        "move": -0.52,
+        "move": -0.97,
         "of": 104
       },
       {
-        "id": "energy",
-        "move": -1.2,
-        "of": 44
-      },
-      {
-        "id": "autos",
-        "move": -1.5,
-        "of": 14
-      },
-      {
         "id": "telecom",
-        "move": -1.53,
+        "move": -2.17,
         "of": 9
       },
       {
+        "id": "energy",
+        "move": -2.66,
+        "of": 44
+      },
+      {
         "id": "banks",
-        "move": -1.9,
+        "move": -3.64,
         "of": 12
       },
       {
+        "id": "autos",
+        "move": -3.65,
+        "of": 14
+      },
+      {
         "id": "realEstate",
-        "move": -3.14,
+        "move": -4.34,
         "of": 63
       },
       {
-        "id": "retail",
-        "move": -3.68,
-        "of": 27
-      },
-      {
         "id": "food",
-        "move": -4.37,
+        "move": -5.52,
         "of": 67
       },
       {
+        "id": "retail",
+        "move": -5.7,
+        "of": 27
+      },
+      {
+        "id": "tech",
+        "move": -5.7,
+        "of": 28
+      },
+      {
         "id": "textile",
-        "move": -4.37,
+        "move": -6.17,
         "of": 33
       },
       {
         "id": "transport",
-        "move": -5,
+        "move": -6.7,
         "of": 13
       },
       {
-        "id": "tech",
-        "move": -5.93,
-        "of": 28
-      },
-      {
-        "id": "health",
-        "move": -6.52,
-        "of": 16
-      },
-      {
         "id": "finance",
-        "move": -6.79,
+        "move": -7.22,
         "of": 61
       },
       {
-        "id": "metals",
-        "move": -7.5,
-        "of": 37
+        "id": "health",
+        "move": -7.37,
+        "of": 16
       },
       {
         "id": "semis",
-        "move": -8.04,
+        "move": -7.48,
         "of": 4
       },
       {
+        "id": "metals",
+        "move": -8.87,
+        "of": 37
+      },
+      {
         "id": "chemicals",
-        "move": -10.82,
+        "move": -13.12,
         "of": 12
       }
     ],
@@ -3946,33 +3946,27 @@
       {
         "c": "KARTN",
         "n": "Kartonsan Karton Sanayi ve Ticaret Anonim Sirketi",
-        "move": 32.8,
+        "move": 36.2,
         "th": "industrial",
         "spec": 1
       },
       {
         "c": "MCARD",
         "n": "Metropal Kurumsal Hizmetler A.S.",
-        "move": 31.2,
+        "move": 27.5,
         "th": "industrial"
       },
       {
         "c": "GRTHO",
         "n": "Grainturk Holding A.S.",
-        "move": 24.2,
+        "move": 22.5,
         "th": "industrial"
       },
       {
         "c": "GMTAS",
         "n": "Gimat Magazacilik Insaat Sanayi ve Ticaret A.S.",
-        "move": 19.4,
+        "move": 17.3,
         "th": "retail"
-      },
-      {
-        "c": "GEREL",
-        "n": "Gersan Elektrik Ticaret ve Sanayi A.S.",
-        "move": 17.7,
-        "th": "industrial"
       },
       {
         "c": "DOAS",
@@ -3981,19 +3975,25 @@
         "th": "retail"
       },
       {
-        "c": "ALBTN",
-        "n": "Albayrak Hazir Beton Sanayi ve Ticaret AS",
-        "move": 15.2,
-        "th": "construction"
+        "c": "DMRGD",
+        "n": "DMR Unlu Mamuller Uretim Gida Toptan Perakende Ihracat A.S.",
+        "move": 13.8,
+        "th": "food"
       },
       {
-        "c": "MNDRS",
-        "n": "Menderes Tekstil Sanayi ve Ticaret Anonim Sirketi",
-        "move": 12.4,
-        "th": "textile"
+        "c": "OZYSR",
+        "n": "Ozyasar Tel ve Galvanizleme Sanayi Anonim Sirketi",
+        "move": 12.8,
+        "th": "metals"
+      },
+      {
+        "c": "TKFEN",
+        "n": "Tekfen Holding Anonim Sirketi",
+        "move": 12.3,
+        "th": "construction"
       }
     ],
-    "floor": 21437170,
+    "floor": 22159944,
     "of": 310
   },
   "peerGroups": [
@@ -4125,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-10-30T13:20:04.447Z"
+  "analyticsBuiltAt": "2026-10-30T15:49:57.440Z"
 }
