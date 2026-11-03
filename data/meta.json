@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-03T09:56:13.455Z",
+  "lastUpdated": "2026-11-03T14:32:20.566Z",
   "latestDate": "2026-11-03",
   "lastWideRead": "2026-11-03T09:56:13.455Z",
   "rangeStart": "2025-11-03",
@@ -9,7 +9,7 @@
     "funds": 2025,
     "priced": 2022,
     "lagging": 3,
-    "implausible": 2,
+    "implausible": 3,
     "carried": 525,
     "byKind": {
       "YAT": 1989,
@@ -1260,11 +1260,11 @@
         0.1595
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0977
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0977
       ],
       [
@@ -3848,97 +3848,97 @@
     "sectors": [
       {
         "id": "banks",
-        "move": 4.49,
+        "move": 5.77,
         "of": 12
       },
       {
-        "id": "defence",
-        "move": 4.17,
-        "of": 5
-      },
-      {
-        "id": "tourism",
-        "move": 2.49,
-        "of": 28
-      },
-      {
         "id": "construction",
-        "move": 1.91,
+        "move": 3.33,
         "of": 35
       },
       {
-        "id": "metals",
-        "move": 1.31,
-        "of": 37
-      },
-      {
         "id": "transport",
-        "move": 1.26,
+        "move": 3.19,
         "of": 13
       },
       {
+        "id": "tourism",
+        "move": 3.05,
+        "of": 28
+      },
+      {
+        "id": "metals",
+        "move": 2.49,
+        "of": 37
+      },
+      {
         "id": "telecom",
-        "move": 1.11,
+        "move": 2.44,
         "of": 9
       },
       {
+        "id": "defence",
+        "move": 2.43,
+        "of": 5
+      },
+      {
         "id": "food",
-        "move": -0.05,
+        "move": 0.75,
         "of": 67
       },
       {
         "id": "autos",
-        "move": -0.69,
+        "move": -0.22,
         "of": 14
       },
       {
         "id": "finance",
-        "move": -2.05,
+        "move": -1.61,
         "of": 61
       },
       {
-        "id": "retail",
-        "move": -2.65,
-        "of": 27
-      },
-      {
-        "id": "health",
-        "move": -2.75,
-        "of": 16
-      },
-      {
         "id": "chemicals",
-        "move": -2.77,
+        "move": -1.64,
         "of": 12
       },
       {
-        "id": "textile",
-        "move": -2.92,
-        "of": 33
+        "id": "health",
+        "move": -1.7,
+        "of": 16
+      },
+      {
+        "id": "retail",
+        "move": -2.37,
+        "of": 27
       },
       {
         "id": "realEstate",
-        "move": -3.01,
+        "move": -2.8,
         "of": 63
       },
       {
-        "id": "industrial",
-        "move": -3.79,
-        "of": 105
+        "id": "textile",
+        "move": -2.99,
+        "of": 33
       },
       {
         "id": "energy",
-        "move": -3.85,
+        "move": -3.1,
         "of": 44
       },
       {
+        "id": "industrial",
+        "move": -3.28,
+        "of": 105
+      },
+      {
         "id": "tech",
-        "move": -4.71,
+        "move": -3.55,
         "of": 28
       },
       {
         "id": "semis",
-        "move": -5.53,
+        "move": -5.09,
         "of": 4
       }
     ],
@@ -3946,54 +3946,54 @@
       {
         "c": "KARTN",
         "n": "Kartonsan Karton Sanayi ve Ticaret Anonim Sirketi",
-        "move": 25.1,
+        "move": 35.8,
         "th": "industrial",
         "spec": 1
       },
       {
         "c": "MCARD",
         "n": "Metropal Kurumsal Hizmetler A.S.",
-        "move": 24.8,
+        "move": 23.1,
         "th": "industrial"
       },
       {
         "c": "KRDMB",
         "n": "Kardemir Karabiik Demir celik Sanayi ve Ticaret A.S. Class B",
-        "move": 23.6,
+        "move": 22.8,
         "th": "metals"
       },
       {
         "c": "BURCE",
         "n": "Burcelik Bursa Celik Doekum Sanayii A.S.",
-        "move": 20.1,
+        "move": 18.9,
         "th": "metals"
       },
       {
         "c": "NETCD",
         "n": "Netcad Yazilim A.S.",
-        "move": 14.1,
+        "move": 14.9,
         "th": "tech"
       },
       {
-        "c": "EGGUB",
-        "n": "Ege Gubre Sanayii A.S.",
-        "move": 11.6,
-        "th": "chemicals"
+        "c": "RYSAS",
+        "n": "Reysas Tasimacilik ve Lojistik Ticaret Anonim Sirketi",
+        "move": 11.7,
+        "th": "transport"
       },
       {
-        "c": "SKYMD",
-        "n": "Seker Yatirim Menkul Degerler A.S.",
-        "move": 10.8,
-        "th": "finance"
+        "c": "MNDRS",
+        "n": "Menderes Tekstil Sanayi ve Ticaret Anonim Sirketi",
+        "move": 11.4,
+        "th": "textile"
       },
       {
-        "c": "ANSGR",
-        "n": "Anadolu Anonim Turk Sigorta Sirketi A.S.",
-        "move": 10.7,
-        "th": "finance"
+        "c": "DMRGD",
+        "n": "DMR Unlu Mamuller Uretim Gida Toptan Perakende Ihracat A.S.",
+        "move": 11.3,
+        "th": "food"
       }
     ],
-    "floor": 20707721,
+    "floor": 22065258,
     "of": 310
   },
   "peerGroups": [
@@ -4066,18 +4066,18 @@
     },
     "fundOfFunds": {
       "count": 132,
-      "medianY1": 25.3586,
-      "medianVol": 9.305
+      "medianY1": 25.219749999999998,
+      "medianVol": 9.225
     },
     "balanced": {
-      "count": 134,
+      "count": 135,
       "medianY1": 22.2255,
-      "medianVol": 14.350000000000001
+      "medianVol": 14.31
     },
     "conservative": {
-      "count": 207,
-      "medianY1": 40.25145,
-      "medianVol": 2.18
+      "count": 206,
+      "medianY1": 40.5229,
+      "medianVol": 2.17
     }
   },
   "cashReturn": 44.66,
@@ -4125,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-11-03T09:57:21.863Z"
+  "analyticsBuiltAt": "2026-11-03T14:32:27.848Z"
 }
