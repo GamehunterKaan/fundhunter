@@ -2,15 +2,28 @@
  "code": "PTS",
  "kapCode": null,
  "name": "PTS-QNB PORTFÖY PARA PİYASASI SERBEST (TL) FON",
- "period": "Eylül-2026",
- "prevPeriod": "2026-08",
- "publishedAt": "07.10.2026 09:40:59",
- "disclosure": 1674074,
+ "period": "Ekim-2026",
+ "prevPeriod": "2026-09",
+ "publishedAt": "04.11.2026 10:56:59",
+ "disclosure": 1692085,
  "form": "A",
- "portfolioValue": 8898078215.32,
- "netAssetValue": 8885127529.6,
+ "portfolioValue": 7704040585.65,
+ "netAssetValue": 7693727137.29,
  "warnings": [],
  "holdings": [
+  {
+   "code": "TRT030730T12",
+   "isin": "TRT030730T12",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "BORÇLANMA SENETLERİ",
+   "subgroup": "Devlet Tahvili",
+   "nominal": 100000000,
+   "value": 111547404.94,
+   "weight": 1.45,
+   "prevWeight": 0.61
+  },
   {
    "code": "TRT110930T36",
    "isin": "TRT110930T36",
@@ -20,9 +33,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 596074,
-   "value": 595395.54,
+   "value": 609944.16,
    "weight": 0.01,
-   "prevWeight": null
+   "prevWeight": 11.17
   },
   {
    "code": "TRFTKNO12715",
@@ -33,9 +46,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Bono",
    "nominal": 9000000,
-   "value": 9861276.58,
-   "weight": 0.11,
-   "prevWeight": 0.1
+   "value": 10169977.96,
+   "weight": 0.13,
+   "prevWeight": 0.11
   },
   {
    "code": "TRFANBK32710",
@@ -46,9 +59,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Bono",
    "nominal": 50000000,
-   "value": 51730740.39,
-   "weight": 0.58,
-   "prevWeight": 0.52
+   "value": 53216075.45,
+   "weight": 0.69,
+   "prevWeight": 0.58
   },
   {
    "code": "TRFYAKF32718",
@@ -59,9 +72,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Bono",
    "nominal": 80000000,
-   "value": 81586800.51,
-   "weight": 0.92,
-   "prevWeight": null
+   "value": 83861337.32,
+   "weight": 1.09,
+   "prevWeight": 0.91
   },
   {
    "code": "TRSANBK72719",
@@ -72,9 +85,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Özel Sektör",
    "nominal": 100000000,
-   "value": 109329560.24,
-   "weight": 1.23,
-   "prevWeight": 1.1
+   "value": 102064958.31,
+   "weight": 1.32,
+   "prevWeight": 1.22
   },
   {
    "code": "TRT050630T11",
@@ -84,22 +97,9 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 116351432.33,
-   "value": 116351432.33,
-   "weight": 1.31,
-   "prevWeight": null
-  },
-  {
-   "code": "TRT070727T13",
-   "isin": "TRT070727T13",
-   "ref": null,
-   "name": "HAZİNE",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 353066415.34,
-   "value": 353066415.34,
-   "weight": 3.97,
+   "nominal": 312920357.26,
+   "value": 312920357.26,
+   "weight": 4.06,
    "prevWeight": null
   },
   {
@@ -110,9 +110,9 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 216654391.23,
-   "value": 216654391.23,
-   "weight": 2.43,
+   "nominal": 413215343.56,
+   "value": 413215343.56,
+   "weight": 5.36,
    "prevWeight": null
   },
   {
@@ -123,9 +123,35 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 385163362.19,
-   "value": 385163362.19,
-   "weight": 4.33,
+   "nominal": 188554574.25,
+   "value": 188554574.25,
+   "weight": 2.45,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT070727T13",
+   "isin": "TRT070727T13",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 501474931.51,
+   "value": 501474931.51,
+   "weight": 6.51,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT070727T13",
+   "isin": "TRT070727T13",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 88259587.95,
+   "value": 88259587.95,
+   "weight": 1.15,
    "prevWeight": null
   },
   {
@@ -136,61 +162,22 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 250756986.3,
-   "value": 250756986.3,
-   "weight": 2.82,
+   "nominal": 413215343.56,
+   "value": 413215343.56,
+   "weight": 5.36,
    "prevWeight": null
   },
   {
-   "code": "TRT080530T19",
-   "isin": "TRT080530T19",
+   "code": "TRT150328T24",
+   "isin": "TRT150328T24",
    "ref": null,
    "name": "HAZİNE",
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 176532918.36,
-   "value": 176532918.36,
-   "weight": 1.98,
-   "prevWeight": null
-  },
-  {
-   "code": "TRT080530T19",
-   "isin": "TRT080530T19",
-   "ref": null,
-   "name": "HAZİNE",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 250756986.3,
-   "value": 250756986.3,
-   "weight": 2.82,
-   "prevWeight": null
-  },
-  {
-   "code": "TRT080530T19",
-   "isin": "TRT080530T19",
-   "ref": null,
-   "name": "HAZİNE",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 176532918.36,
-   "value": 176532918.36,
-   "weight": 1.98,
-   "prevWeight": null
-  },
-  {
-   "code": "TRT110232T15",
-   "isin": "TRT110232T15",
-   "ref": null,
-   "name": "HAZİNE",
-   "currency": "TL",
-   "group": "T.REPO",
-   "subgroup": null,
-   "nominal": 74224067.95,
-   "value": 74224067.95,
-   "weight": 0.83,
+   "nominal": 40117830.14,
+   "value": 40117830.14,
+   "weight": 0.52,
    "prevWeight": null
   },
   {
@@ -201,23 +188,101 @@
    "currency": "TL",
    "group": "T.REPO",
    "subgroup": null,
-   "nominal": 74224067.95,
-   "value": 74224067.95,
-   "weight": 0.83,
+   "nominal": 88259587.95,
+   "value": 88259587.95,
+   "weight": 1.15,
    "prevWeight": null
   },
   {
-   "code": "YAPI VE KREDİ",
-   "isin": null,
+   "code": "TRT280628T18",
+   "isin": "TRT280628T18",
    "ref": null,
-   "name": null,
+   "name": "HAZİNE",
    "currency": "TL",
-   "group": "MEVDUAT",
+   "group": "T.REPO",
    "subgroup": null,
-   "nominal": 293161534.25,
-   "value": 303703301.75,
-   "weight": 3.41,
-   "prevWeight": 5.65
+   "nominal": 200588986.3,
+   "value": 200588986.3,
+   "weight": 2.6,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT280628T18",
+   "isin": "TRT280628T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 441295769.86,
+   "value": 441295769.86,
+   "weight": 5.73,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT280628T18",
+   "isin": "TRT280628T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 260765682.19,
+   "value": 260765682.19,
+   "weight": 3.38,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT280628T18",
+   "isin": "TRT280628T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 341001276.71,
+   "value": 341001276.71,
+   "weight": 4.43,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT280628T18",
+   "isin": "TRT280628T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 365071955.07,
+   "value": 365071955.07,
+   "weight": 4.74,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT280628T18",
+   "isin": "TRT280628T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 160471189.04,
+   "value": 160471189.04,
+   "weight": 2.08,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT280628T18",
+   "isin": "TRT280628T18",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 60176695.89,
+   "value": 60176695.89,
+   "weight": 0.78,
+   "prevWeight": null
   },
   {
    "code": "QNB BANK A.Ş.",
@@ -227,10 +292,23 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 217581885.21,
-   "value": 218243572.59,
-   "weight": 2.45,
-   "prevWeight": 6.03
+   "nominal": 59500065.69,
+   "value": 59677343.28,
+   "weight": 0.78,
+   "prevWeight": 3.17
+  },
+  {
+   "code": "TC ZIRAAT BANKASI",
+   "isin": null,
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "MEVDUAT",
+   "subgroup": null,
+   "nominal": 360562791.32,
+   "value": 361651888.52,
+   "weight": 4.69,
+   "prevWeight": 29.08
   },
   {
    "code": "T. HALK BANKASI",
@@ -240,49 +318,10 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 307441391.6,
-   "value": 308370033.06,
-   "weight": 3.47,
-   "prevWeight": 3.11
-  },
-  {
-   "code": "TC ZIRAAT BANKASI",
-   "isin": null,
-   "ref": null,
-   "name": null,
-   "currency": "TL",
-   "group": "MEVDUAT",
-   "subgroup": null,
-   "nominal": 216284313.2,
-   "value": 223835616.1,
-   "weight": 2.52,
-   "prevWeight": 29.65
-  },
-  {
-   "code": "TÜRKİYE GARANTİ",
-   "isin": null,
-   "ref": null,
-   "name": null,
-   "currency": "TL",
-   "group": "MEVDUAT",
-   "subgroup": null,
-   "nominal": 92570461.73,
-   "value": 95747558.39,
-   "weight": 1.08,
-   "prevWeight": 8.04
-  },
-  {
-   "code": "TÜRKİYE GARANTİ",
-   "isin": null,
-   "ref": null,
-   "name": null,
-   "currency": "TL",
-   "group": "MEVDUAT",
-   "subgroup": null,
-   "nominal": 728410958.9,
-   "value": 797258692.02,
-   "weight": 8.96,
-   "prevWeight": 8.04
+   "nominal": 156623678.51,
+   "value": 157093549.55,
+   "weight": 2.04,
+   "prevWeight": null
   },
   {
    "code": "AKBANK T.A.Ş.",
@@ -292,10 +331,10 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 246442827.66,
-   "value": 252740669.42,
-   "weight": 2.84,
-   "prevWeight": 2.55
+   "nominal": 255304641.67,
+   "value": 259936006.7,
+   "weight": 3.37,
+   "prevWeight": 2.83
   },
   {
    "code": "YAPI VE KREDİ",
@@ -305,23 +344,10 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 249541827.13,
-   "value": 255660680.73,
-   "weight": 2.87,
-   "prevWeight": 5.65
-  },
-  {
-   "code": "TC ZIRAAT BANKASI",
-   "isin": null,
-   "ref": null,
-   "name": null,
-   "currency": "TL",
-   "group": "MEVDUAT",
-   "subgroup": null,
-   "nominal": 118282911.22,
-   "value": 120823563.36,
-   "weight": 1.36,
-   "prevWeight": 29.65
+   "nominal": 258515077.76,
+   "value": 262959668.79,
+   "weight": 3.41,
+   "prevWeight": 2.86
   },
   {
    "code": "ANADOLUBANK A.S.",
@@ -331,23 +357,10 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 410475737.27,
-   "value": 418879497.82,
-   "weight": 4.71,
-   "prevWeight": 4.23
-  },
-  {
-   "code": "TC ZIRAAT BANKASI",
-   "isin": null,
-   "ref": null,
-   "name": null,
-   "currency": "TL",
-   "group": "MEVDUAT",
-   "subgroup": null,
-   "nominal": 1214442145.03,
-   "value": 1238112706.16,
-   "weight": 13.91,
-   "prevWeight": 29.65
+   "nominal": 425295035.98,
+   "value": 430875335.58,
+   "weight": 5.59,
+   "prevWeight": 4.69
   },
   {
    "code": "TÜRKİYE VAKIFLAR",
@@ -357,36 +370,23 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 701683636.49,
-   "value": 715360076.72,
-   "weight": 8.04,
-   "prevWeight": 15.46
+   "nominal": 427083622.92,
+   "value": 432253733.31,
+   "weight": 5.61,
+   "prevWeight": 8.01
   },
   {
-   "code": "TC ZIRAAT BANKASI",
+   "code": "T. HALK BANKASI",
    "isin": null,
    "ref": null,
    "name": null,
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 627437323.11,
-   "value": 639017086.1,
-   "weight": 7.18,
-   "prevWeight": 29.65
-  },
-  {
-   "code": "TC ZIRAAT BANKASI",
-   "isin": null,
-   "ref": null,
-   "name": null,
-   "currency": "TL",
-   "group": "MEVDUAT",
-   "subgroup": null,
-   "nominal": 590109041.29,
-   "value": 600389600.5,
-   "weight": 6.75,
-   "prevWeight": 29.65
+   "nominal": 200000000,
+   "value": 202203537.02,
+   "weight": 2.62,
+   "prevWeight": null
   },
   {
    "code": "QNB BANK A.Ş.",
@@ -397,9 +397,9 @@
    "group": "MEVDUAT",
    "subgroup": null,
    "nominal": 159600000,
-   "value": 165059118.37,
-   "weight": 1.86,
-   "prevWeight": 6.03
+   "value": 169837281.15,
+   "weight": 2.21,
+   "prevWeight": 3.17
   },
   {
    "code": "QNB BANK A.Ş.",
@@ -410,9 +410,22 @@
    "group": "MEVDUAT",
    "subgroup": null,
    "nominal": 100000000,
-   "value": 103294528.05,
-   "weight": 1.16,
-   "prevWeight": 6.03
+   "value": 106266155.01,
+   "weight": 1.38,
+   "prevWeight": 3.17
+  },
+  {
+   "code": "TÜRKİYE GARANTİ",
+   "isin": null,
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "MEVDUAT",
+   "subgroup": null,
+   "nominal": 450000000,
+   "value": 459037430.28,
+   "weight": 5.96,
+   "prevWeight": 8.93
   },
   {
    "code": "DENİZBANK A.Ş.",
@@ -423,9 +436,48 @@
    "group": "MEVDUAT",
    "subgroup": null,
    "nominal": 108503069.43,
-   "value": 114214594.61,
-   "weight": 1.28,
-   "prevWeight": 5.83
+   "value": 117612312.83,
+   "weight": 1.53,
+   "prevWeight": 1.28
+  },
+  {
+   "code": "ZİRAAT KATILIM",
+   "isin": null,
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "KATILIM HESABI",
+   "subgroup": "KATILIM HESABI",
+   "nominal": 200000000,
+   "value": 204898630.14,
+   "weight": 2.66,
+   "prevWeight": 2.23
+  },
+  {
+   "code": "ZİRAAT KATILIM",
+   "isin": null,
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "KATILIM HESABI",
+   "subgroup": "KATILIM HESABI",
+   "nominal": 200000000,
+   "value": 202432876.71,
+   "weight": 2.63,
+   "prevWeight": 2.23
+  },
+  {
+   "code": "ZİRAAT KATILIM",
+   "isin": null,
+   "ref": null,
+   "name": null,
+   "currency": "TL",
+   "group": "KATILIM HESABI",
+   "subgroup": "KATILIM HESABI",
+   "nominal": 40000000,
+   "value": 40446027.4,
+   "weight": 0.53,
+   "prevWeight": 2.23
   }
  ]
 }

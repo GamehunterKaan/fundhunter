@@ -2,28 +2,41 @@
  "code": "TPP",
  "kapCode": null,
  "name": "TPP - TEB PORTFÖY PUSULA SERBEST FONU",
- "period": "Eylül-2026",
- "prevPeriod": "2026-08",
- "publishedAt": "05.10.2026 16:28:30",
- "disclosure": 1672329,
+ "period": "Ekim-2026",
+ "prevPeriod": "2026-09",
+ "publishedAt": "04.11.2026 09:09:00",
+ "disclosure": 1692003,
  "form": "A",
- "portfolioValue": 1702068283.96,
- "netAssetValue": 1731155747.47,
+ "portfolioValue": 1598792775.13,
+ "netAssetValue": 1590974050.77,
  "warnings": [
-  "Portfolio weights sum to 97.67%, not 100%"
+  "Portfolio weights sum to 97.60%, not 100%"
  ],
  "holdings": [
   {
-   "code": "GLRMK",
-   "isin": "TREGLRM00010",
+   "code": "SELEC",
+   "isin": "TRESLEC00014",
    "ref": null,
-   "name": "Gülermak Ağır Sanayiİnşaat ve Taahhüt A.Ş.",
+   "name": "SELÇUK ECZA DEPOSU TİCARET VE SANAYİA.Ş.",
    "currency": "TL",
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Türk",
-   "nominal": 343000,
-   "value": 49117600,
-   "weight": 2.89,
+   "nominal": 240000,
+   "value": 15252000,
+   "weight": 0.95,
+   "prevWeight": null
+  },
+  {
+   "code": "SELEC",
+   "isin": "TRESLEC00014",
+   "ref": null,
+   "name": "SELÇUK ECZA DEPOSU TİCARET VE SANAYİA.Ş.",
+   "currency": "TL",
+   "group": "HİSSE SENETLERİ",
+   "subgroup": "Hisse Türk",
+   "nominal": 56071,
+   "value": 3563312.05,
+   "weight": 0.22,
    "prevWeight": null
   },
   {
@@ -35,9 +48,9 @@
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Türk",
    "nominal": 165000,
-   "value": 21004500,
-   "weight": 1.23,
-   "prevWeight": null
+   "value": 17407500,
+   "weight": 1.09,
+   "prevWeight": 1.22
   },
   {
    "code": "HY9H",
@@ -47,23 +60,10 @@
    "currency": "EUR",
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Yabancı",
-   "nominal": 1400,
-   "value": 93502559.27,
-   "weight": 5.49,
-   "prevWeight": 5.49
-  },
-  {
-   "code": "PRX NA",
-   "isin": "NL0013654783",
-   "ref": null,
-   "name": "PROSUS NV - SPONADR",
-   "currency": "EUR",
-   "group": "HİSSE SENETLERİ",
-   "subgroup": "Hisse Yabancı",
-   "nominal": 26500,
-   "value": 51176254.93,
-   "weight": 3.01,
-   "prevWeight": 2.87
+   "nominal": 1450,
+   "value": 75566271.53,
+   "weight": 4.73,
+   "prevWeight": 4.61
   },
   {
    "code": "7721 JP",
@@ -74,22 +74,35 @@
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Yabancı",
    "nominal": 10100,
-   "value": 23352899.09,
-   "weight": 1.37,
-   "prevWeight": 1.12
+   "value": 17659482.98,
+   "weight": 1.11,
+   "prevWeight": 1.26
   },
   {
    "code": "SMSN",
    "isin": "US7960508882",
    "ref": null,
-   "name": "SAMSUNG ELECTRONİCS CO LTD",
+   "name": "SAMSUNG ELECTRONİCS CO LTD KURUM",
    "currency": "USD",
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Yabancı",
-   "nominal": 350,
-   "value": 87825727.76,
-   "weight": 5.16,
-   "prevWeight": 5.09
+   "nominal": 375,
+   "value": 77157330.37,
+   "weight": 4.83,
+   "prevWeight": 4.97
+  },
+  {
+   "code": "TRT061228T16 _VIOP",
+   "isin": "TRT061228T16",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "BORÇLANMA SENETLERİ",
+   "subgroup": "Devlet Tahvili",
+   "nominal": 50000000,
+   "value": 52754573.98,
+   "weight": 3.3,
+   "prevWeight": null
   },
   {
    "code": "TRT130629T30",
@@ -100,7 +113,7 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 50335,
-   "value": 51308.83,
+   "value": 52713.73,
    "weight": 0,
    "prevWeight": 0
   },
@@ -113,9 +126,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 25006527,
-   "value": 27459903.74,
-   "weight": 1.61,
-   "prevWeight": 1.45
+   "value": 28223185.6,
+   "weight": 1.76,
+   "prevWeight": 1.66
   },
   {
    "code": "TRT090130T12 _VIOP",
@@ -126,9 +139,9 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 499935924,
-   "value": 538257057.83,
-   "weight": 31.63,
-   "prevWeight": 28.59
+   "value": 551428949.42,
+   "weight": 34.48,
+   "prevWeight": 32.5
   },
   {
    "code": "TRT030730T12",
@@ -138,10 +151,10 @@
    "currency": "TL",
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
-   "nominal": 203469148,
-   "value": 220812553.85,
-   "weight": 12.97,
-   "prevWeight": 11.72
+   "nominal": 350469148,
+   "value": 390939239.51,
+   "weight": 24.45,
+   "prevWeight": 13.34
   },
   {
    "code": "TRT040832T18",
@@ -152,7 +165,7 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 659,
-   "value": 2299.08,
+   "value": 2344.61,
    "weight": 0,
    "prevWeight": 0
   },
@@ -165,9 +178,35 @@
    "group": "BORÇLANMA SENETLERİ",
    "subgroup": "Devlet Tahvili",
    "nominal": 542,
-   "value": 1559.81,
+   "value": 1591.21,
    "weight": 0,
    "prevWeight": 0
+  },
+  {
+   "code": "TRT080530T19",
+   "isin": "TRT080530T19",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 90265339.73,
+   "value": 90265339.73,
+   "weight": 5.65,
+   "prevWeight": null
+  },
+  {
+   "code": "TRT080530T19",
+   "isin": "TRT080530T19",
+   "ref": null,
+   "name": "HAZİNE",
+   "currency": "TL",
+   "group": "T.REPO",
+   "subgroup": null,
+   "nominal": 10029482.19,
+   "value": 10029482.19,
+   "weight": 0.63,
+   "prevWeight": null
   },
   {
    "code": "TEB A.Ş.",
@@ -177,34 +216,47 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 338500000,
-   "value": 339522455.5,
-   "weight": 19.95,
-   "prevWeight": 26.09
+   "nominal": 41396000,
+   "value": 41517670.22,
+   "weight": 2.6,
+   "prevWeight": 19.1
   },
   {
-   "code": "EURUSD - DEC 2026",
-   "isin": "BBG012DD63G2",
+   "code": "F_XAGUSD1226",
+   "isin": "TRVXIST05OI1",
    "ref": null,
    "name": null,
    "currency": "USD",
    "group": "Uzun",
    "subgroup": null,
-   "nominal": 135,
-   "value": 932513911.68,
+   "nominal": 3000,
+   "value": 74886036.15,
+   "weight": 0,
+   "prevWeight": null
+  },
+  {
+   "code": "ISHARE MSCI SOUTH",
+   "isin": "BBG0241D77C3",
+   "ref": null,
+   "name": null,
+   "currency": "USD",
+   "group": "Call Alım",
+   "subgroup": null,
+   "nominal": 100,
+   "value": 0,
    "weight": 0,
    "prevWeight": 0
   },
   {
-   "code": "F_XAGUSD1026",
-   "isin": "TRVXIST05KX8",
+   "code": "ISHARE MSCI SOUTH",
+   "isin": "BBG0241D9YN0",
    "ref": null,
    "name": null,
    "currency": "USD",
-   "group": "Uzun",
+   "group": "Call Alım",
    "subgroup": null,
-   "nominal": 4500,
-   "value": 134157938.04,
+   "nominal": 100,
+   "value": 0,
    "weight": 0,
    "prevWeight": 0
   },
@@ -274,32 +326,6 @@
    "prevWeight": 0
   },
   {
-   "code": "ISHARES SILVER",
-   "isin": "BBG020GH7SM9",
-   "ref": null,
-   "name": null,
-   "currency": "USD",
-   "group": "Call Alım",
-   "subgroup": null,
-   "nominal": 340,
-   "value": 0,
-   "weight": 0,
-   "prevWeight": 0
-  },
-  {
-   "code": "ISHARES SILVER",
-   "isin": "BBG020GH21L4",
-   "ref": null,
-   "name": null,
-   "currency": "USD",
-   "group": "Call Alım",
-   "subgroup": null,
-   "nominal": 350,
-   "value": 0,
-   "weight": 0,
-   "prevWeight": 0
-  },
-  {
    "code": "VIOP Nakit Teminatı",
    "isin": null,
    "ref": null,
@@ -307,10 +333,10 @@
    "currency": null,
    "group": "VIOP Nakit Teminatı",
    "subgroup": null,
-   "nominal": 42892443.39,
-   "value": 42892443.39,
-   "weight": 2.52,
-   "prevWeight": 2.88
+   "nominal": 21248821.23,
+   "value": 21248821.23,
+   "weight": 1.33,
+   "prevWeight": 2.6
   },
   {
    "code": "Yurtdışı Futures USD",
@@ -320,8 +346,8 @@
    "currency": null,
    "group": "Yurtdışı Futures USD Nakit Teminatı",
    "subgroup": null,
-   "nominal": 825532.92,
-   "value": 40426264.54,
+   "nominal": 786302.19,
+   "value": 39137955.62,
    "weight": 0.05,
    "prevWeight": 0.06
   },
@@ -334,9 +360,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 794188,
-   "value": 7655438.63,
-   "weight": 0.45,
-   "prevWeight": 0.41
+   "value": 7648705.5,
+   "weight": 0.48,
+   "prevWeight": 0.46
   },
   {
    "code": "OJG-OYAK PORTFÖY",
@@ -347,9 +373,9 @@
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
    "nominal": 4275708,
-   "value": 159007457.71,
-   "weight": 9.34,
-   "prevWeight": 8.59
+   "value": 158936305.65,
+   "weight": 9.94,
+   "prevWeight": 9.52
   },
   {
    "code": "EUR",
@@ -359,8 +385,8 @@
    "currency": "EUR",
    "group": "DİĞER",
    "subgroup": "Döviz",
-   "nominal": 388733.18,
-   "value": 21412434.26,
+   "nominal": 793.47,
+   "value": 44208.1,
    "weight": 0,
    "prevWeight": 0
   },
@@ -373,7 +399,7 @@
    "group": "DİĞER",
    "subgroup": "Döviz",
    "nominal": 968.56,
-   "value": 300.12,
+   "value": 305.68,
    "weight": 0,
    "prevWeight": 0
   },
@@ -385,8 +411,8 @@
    "currency": "USD",
    "group": "DİĞER",
    "subgroup": "Döviz",
-   "nominal": 1095328.72,
-   "value": 53638137.89,
+   "nominal": 797104.41,
+   "value": 39675632.88,
    "weight": 0,
    "prevWeight": 0
   }
