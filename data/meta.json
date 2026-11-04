@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-04T10:01:02.990Z",
+  "lastUpdated": "2026-11-04T14:47:10.589Z",
   "latestDate": "2026-11-04",
   "lastWideRead": "2026-11-03T09:56:13.455Z",
   "rangeStart": "2025-11-04",
@@ -2192,15 +2192,15 @@
         0.0479
       ],
       [
-        "KRDMA",
-        0.0449
-      ],
-      [
         "KRDMD",
         0.0449
       ],
       [
         "KRDMB",
+        0.0449
+      ],
+      [
+        "KRDMA",
         0.0449
       ],
       [
@@ -3847,98 +3847,98 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "banks",
-        "move": 10.78,
-        "of": 12
-      },
-      {
         "id": "transport",
-        "move": 10.58,
+        "move": 12.56,
         "of": 13
       },
       {
+        "id": "banks",
+        "move": 12.22,
+        "of": 12
+      },
+      {
         "id": "semis",
-        "move": 10.51,
+        "move": 10.31,
         "of": 4
       },
       {
         "id": "tourism",
-        "move": 5.98,
+        "move": 7.11,
         "of": 28
       },
       {
         "id": "health",
-        "move": 5.89,
+        "move": 6.79,
         "of": 16
       },
       {
-        "id": "chemicals",
-        "move": 5.06,
-        "of": 12
-      },
-      {
         "id": "metals",
-        "move": 4.73,
+        "move": 5.01,
         "of": 37
       },
       {
         "id": "construction",
-        "move": 4.33,
+        "move": 4.76,
         "of": 35
       },
       {
         "id": "textile",
-        "move": 3.78,
+        "move": 4.23,
         "of": 33
       },
       {
-        "id": "telecom",
-        "move": 3.69,
-        "of": 9
-      },
-      {
-        "id": "defence",
-        "move": 3.14,
-        "of": 5
+        "id": "chemicals",
+        "move": 3.89,
+        "of": 12
       },
       {
         "id": "food",
-        "move": 3.11,
+        "move": 3.85,
         "of": 67
       },
       {
-        "id": "tech",
-        "move": 3.06,
-        "of": 28
-      },
-      {
-        "id": "retail",
-        "move": 2.29,
-        "of": 27
-      },
-      {
         "id": "finance",
-        "move": 2.28,
+        "move": 3.62,
         "of": 61
       },
       {
+        "id": "defence",
+        "move": 3.38,
+        "of": 5
+      },
+      {
+        "id": "tech",
+        "move": 3.32,
+        "of": 28
+      },
+      {
+        "id": "telecom",
+        "move": 2.95,
+        "of": 9
+      },
+      {
+        "id": "retail",
+        "move": 2.94,
+        "of": 27
+      },
+      {
         "id": "energy",
-        "move": 1.03,
+        "move": 0.76,
         "of": 44
       },
       {
         "id": "autos",
-        "move": 0.35,
+        "move": 0.69,
         "of": 14
       },
       {
         "id": "industrial",
-        "move": -0.19,
+        "move": -0.11,
         "of": 105
       },
       {
         "id": "realEstate",
-        "move": -0.63,
+        "move": -0.59,
         "of": 63
       }
     ],
@@ -3946,28 +3946,40 @@
       {
         "c": "KRDMB",
         "n": "Kardemir Karabiik Demir celik Sanayi ve Ticaret A.S. Class B",
-        "move": 26.1,
+        "move": 28.2,
         "th": "metals"
       },
       {
         "c": "HRKET",
         "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 24.9,
+        "move": 25.4,
         "th": "transport",
         "spec": 1
       },
       {
-        "c": "KARTN",
-        "n": "Kartonsan Karton Sanayi ve Ticaret Anonim Sirketi",
-        "move": 21.6,
-        "th": "industrial",
-        "spec": 1
+        "c": "INTET",
+        "n": "Intetra Teknoloji ve Bilisim Hizmetleri AS",
+        "move": 21.1,
+        "th": "semis"
       },
       {
         "c": "BURCE",
         "n": "Burcelik Bursa Celik Doekum Sanayii A.S.",
-        "move": 21.4,
+        "move": 21.1,
         "th": "metals"
+      },
+      {
+        "c": "KARTN",
+        "n": "Kartonsan Karton Sanayi ve Ticaret Anonim Sirketi",
+        "move": 21,
+        "th": "industrial",
+        "spec": 1
+      },
+      {
+        "c": "KBORU",
+        "n": "Kuzey Boru A.S.",
+        "move": 19.6,
+        "th": "industrial"
       },
       {
         "c": "VESBE",
@@ -3976,25 +3988,14 @@
         "th": "retail"
       },
       {
-        "c": "INTET",
-        "n": "Intetra Teknoloji ve Bilisim Hizmetleri AS",
-        "move": 16.6,
-        "th": "semis"
-      },
-      {
-        "c": "KBORU",
-        "n": "Kuzey Boru A.S.",
-        "move": 16.6,
-        "th": "industrial"
-      },
-      {
-        "c": "TURSG",
-        "n": "Turkiye Sigorta A.S.",
+        "c": "ARMGD",
+        "n": "Armada Gida Ticaret ve Sanayi Anonim Sirketi",
         "move": 16.5,
-        "th": "finance"
+        "th": "food",
+        "spec": 1
       }
     ],
-    "floor": 22431277,
+    "floor": 23422145,
     "of": 310
   },
   "peerGroups": [
@@ -4126,5 +4127,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-11-04T10:02:09.332Z"
+  "analyticsBuiltAt": "2026-11-04T14:47:18.798Z"
 }
