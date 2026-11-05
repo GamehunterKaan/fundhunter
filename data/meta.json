@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-05T10:57:37.635Z",
+  "lastUpdated": "2026-11-05T14:51:38.048Z",
   "latestDate": "2026-11-05",
   "lastWideRead": "2026-11-03T09:56:13.455Z",
   "rangeStart": "2025-11-05",
@@ -7,9 +7,9 @@
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2025,
-    "priced": 2018,
-    "lagging": 7,
-    "implausible": 13,
+    "priced": 2017,
+    "lagging": 8,
+    "implausible": 12,
     "carried": 536,
     "byKind": {
       "YAT": 1989,
@@ -1260,11 +1260,11 @@
         0.1587
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0952
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0952
       ],
       [
@@ -1560,11 +1560,11 @@
         0.0925
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0793
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0793
       ],
       [
@@ -2196,11 +2196,11 @@
         0.0455
       ],
       [
-        "KRDMA",
+        "KRDMB",
         0.0455
       ],
       [
-        "KRDMB",
+        "KRDMA",
         0.0455
       ],
       [
@@ -2490,11 +2490,11 @@
         0.0047
       ],
       [
-        "EKOS",
+        "SAFKR",
         0.0047
       ],
       [
-        "SAFKR",
+        "EKOS",
         0.0047
       ],
       [
@@ -3847,109 +3847,102 @@
     "over": "w1",
     "sectors": [
       {
-        "id": "banks",
-        "move": 14.79,
-        "of": 12
-      },
-      {
         "id": "semis",
-        "move": 14.75,
+        "move": 15.66,
         "of": 4
       },
       {
+        "id": "banks",
+        "move": 15.24,
+        "of": 12
+      },
+      {
         "id": "transport",
-        "move": 14.1,
+        "move": 14.99,
         "of": 13
       },
       {
         "id": "health",
-        "move": 11.15,
+        "move": 11.81,
         "of": 16
       },
       {
         "id": "tourism",
-        "move": 8,
+        "move": 8.63,
         "of": 28
       },
       {
         "id": "construction",
-        "move": 4.91,
+        "move": 5.47,
         "of": 35
       },
       {
-        "id": "metals",
-        "move": 4.44,
-        "of": 37
-      },
-      {
         "id": "chemicals",
-        "move": 4.15,
+        "move": 4.53,
         "of": 12
       },
       {
-        "id": "telecom",
-        "move": 3.7,
-        "of": 9
-      },
-      {
         "id": "textile",
-        "move": 3.64,
+        "move": 4.21,
         "of": 33
       },
       {
+        "id": "finance",
+        "move": 4.11,
+        "of": 60
+      },
+      {
+        "id": "metals",
+        "move": 4.03,
+        "of": 37
+      },
+      {
         "id": "tech",
-        "move": 3.34,
+        "move": 3.98,
         "of": 28
       },
       {
-        "id": "finance",
-        "move": 3.3,
-        "of": 61
-      },
-      {
-        "id": "retail",
-        "move": 3.11,
-        "of": 27
+        "id": "telecom",
+        "move": 3.97,
+        "of": 9
       },
       {
         "id": "food",
-        "move": 3.06,
+        "move": 3.51,
         "of": 67
       },
       {
-        "id": "defence",
-        "move": 0.92,
-        "of": 5
-      },
-      {
-        "id": "autos",
-        "move": 0.44,
-        "of": 14
+        "id": "retail",
+        "move": 3.12,
+        "of": 27
       },
       {
         "id": "realEstate",
-        "move": -0.19,
+        "move": 0.34,
         "of": 63
       },
       {
+        "id": "energy",
+        "move": 0,
+        "of": 44
+      },
+      {
         "id": "industrial",
-        "move": -0.47,
+        "move": 0,
         "of": 105
       },
       {
-        "id": "energy",
-        "move": -0.52,
-        "of": 44
+        "id": "autos",
+        "move": -0.02,
+        "of": 14
+      },
+      {
+        "id": "defence",
+        "move": -1.11,
+        "of": 5
       }
     ],
     "shares": [
-      {
-        "c": "HRKET",
-        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 33.3,
-        "th": "transport",
-        "spec": 1
-      },
       {
         "c": "BURCE",
         "n": "Burcelik Bursa Celik Doekum Sanayii A.S.",
@@ -3959,8 +3952,27 @@
       {
         "c": "KRDMB",
         "n": "Kardemir Karabiik Demir celik Sanayi ve Ticaret A.S. Class B",
-        "move": 29.5,
+        "move": 27.3,
         "th": "metals"
+      },
+      {
+        "c": "AKSUE",
+        "n": "Aksu Enerji ve Ticaret A.S.",
+        "move": 26.4,
+        "th": "energy"
+      },
+      {
+        "c": "HRKET",
+        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
+        "move": 24.4,
+        "th": "transport",
+        "spec": 1
+      },
+      {
+        "c": "ACSEL",
+        "n": "Aciselsan Acipayam Seluloz Sanayi ve Ticaret AS",
+        "move": 24.2,
+        "th": "chemicals"
       },
       {
         "c": "PSGYO",
@@ -3975,26 +3987,13 @@
         "th": "industrial"
       },
       {
-        "c": "INTET",
-        "n": "Intetra Teknoloji ve Bilisim Hizmetleri AS",
-        "move": 22.9,
-        "th": "semis"
-      },
-      {
         "c": "KBORU",
         "n": "Kuzey Boru A.S.",
-        "move": 22.5,
+        "move": 23.2,
         "th": "industrial"
-      },
-      {
-        "c": "KARTN",
-        "n": "Kartonsan Karton Sanayi ve Ticaret Anonim Sirketi",
-        "move": 21.9,
-        "th": "industrial",
-        "spec": 1
       }
     ],
-    "floor": 24049718,
+    "floor": 25927174,
     "of": 310
   },
   "peerGroups": [
@@ -4126,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-11-05T10:58:44.487Z"
+  "analyticsBuiltAt": "2026-11-05T14:51:47.597Z"
 }
