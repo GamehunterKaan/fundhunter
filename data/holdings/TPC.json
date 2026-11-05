@@ -2,15 +2,15 @@
  "code": "TPC",
  "kapCode": null,
  "name": "TPC - TEB PORTFÖY KIYMETLİ MADENLER FON SEPETİ FONU",
- "period": "Ağustos-2026",
- "prevPeriod": "2026-07",
- "publishedAt": "04.09.2026 10:17:52",
- "disclosure": 1658767,
+ "period": "Ekim-2026",
+ "prevPeriod": null,
+ "publishedAt": "05.11.2026 09:27:21",
+ "disclosure": 1692904,
  "form": "A",
- "portfolioValue": 5775478248.45,
- "netAssetValue": 5931321222.61,
+ "portfolioValue": 4103963683.65,
+ "netAssetValue": 4222151485.93,
  "warnings": [
-  "Portfolio weights sum to 99.21%, not 100%"
+  "Portfolio weights sum to 99.03%, not 100%"
  ],
  "holdings": [
   {
@@ -22,21 +22,8 @@
    "group": "HİSSE SENETLERİ",
    "subgroup": "Hisse Türk",
    "nominal": 1250000,
-   "value": 93100000,
-   "weight": 1.61,
-   "prevWeight": null
-  },
-  {
-   "code": "PHPD.LN",
-   "isin": "JE00B1VS3002",
-   "ref": null,
-   "name": null,
-   "currency": "USD",
-   "group": "HİSSE SENETLERİ",
-   "subgroup": "Hisse Yabancı",
-   "nominal": 10000,
-   "value": 63656628.11,
-   "weight": 1.1,
+   "value": 85687500,
+   "weight": 2.09,
    "prevWeight": null
   },
   {
@@ -47,10 +34,23 @@
    "currency": "TL",
    "group": "MEVDUAT",
    "subgroup": null,
-   "nominal": 123900000,
-   "value": 124025088.1,
-   "weight": 2.15,
-   "prevWeight": 1.14
+   "nominal": 50534000,
+   "value": 50682528.43,
+   "weight": 1.23,
+   "prevWeight": null
+  },
+  {
+   "code": "ISHARES SILVER",
+   "isin": "BBG01XGTVVB6",
+   "ref": null,
+   "name": null,
+   "currency": "USD",
+   "group": "Call Alım",
+   "subgroup": null,
+   "nominal": 250,
+   "value": 0,
+   "weight": 0,
+   "prevWeight": null
   },
   {
    "code": "ISHARES SILVER",
@@ -73,8 +73,8 @@
    "currency": null,
    "group": "Yurtdışı Futures USD Nakit Teminatı",
    "subgroup": null,
-   "nominal": 970999.22,
-   "value": 46777401.92,
+   "nominal": 819998.44,
+   "value": 40815176.35,
    "weight": 0.02,
    "prevWeight": null
   },
@@ -86,10 +86,10 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Türk",
-   "nominal": 1700000,
-   "value": 1053575000,
-   "weight": 18.24,
-   "prevWeight": 11.69
+   "nominal": 1650000,
+   "value": 818070000,
+   "weight": 19.93,
+   "prevWeight": null
   },
   {
    "code": "COPX.US",
@@ -99,10 +99,10 @@
    "currency": "USD",
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
-   "nominal": 65000,
-   "value": 291655432.39,
-   "weight": 5.05,
-   "prevWeight": 5.31
+   "nominal": 55000,
+   "value": 198428160.58,
+   "weight": 4.84,
+   "prevWeight": null
   },
   {
    "code": "PALL",
@@ -112,36 +112,10 @@
    "currency": "USD",
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
-   "nominal": 985000,
-   "value": 1176930060.89,
-   "weight": 20.38,
-   "prevWeight": 19.14
-  },
-  {
-   "code": "PALL",
-   "isin": "US0032621023",
-   "ref": null,
-   "name": "Abrdn Physical PalladiumShare",
-   "currency": "USD",
-   "group": "DİĞER",
-   "subgroup": "Borsa Y.Fonu Yabancı",
-   "nominal": -50000,
-   "value": -59742642.69,
-   "weight": -1.03,
-   "prevWeight": 19.14
-  },
-  {
-   "code": "PLTM",
-   "isin": "US38748T1034",
-   "ref": null,
-   "name": "GRANİTESHARES PLATİNUMTRUST",
-   "currency": "USD",
-   "group": "DİĞER",
-   "subgroup": "Borsa Y.Fonu Yabancı",
-   "nominal": 70000,
-   "value": 58100903.9,
-   "weight": 1.01,
-   "prevWeight": 0.99
+   "nominal": 915000,
+   "value": 805365571.55,
+   "weight": 19.62,
+   "prevWeight": null
   },
   {
    "code": "PPLT",
@@ -151,23 +125,10 @@
    "currency": "USD",
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
-   "nominal": 1435000,
-   "value": 1122691643.88,
-   "weight": 19.44,
-   "prevWeight": 19
-  },
-  {
-   "code": "PPLT",
-   "isin": "US0032601066",
-   "ref": null,
-   "name": "Aberdeen Standart Investments",
-   "currency": "USD",
-   "group": "DİĞER",
-   "subgroup": "Borsa Y.Fonu Yabancı",
-   "nominal": -10000,
-   "value": -7823635.15,
-   "weight": -0.14,
-   "prevWeight": 19
+   "nominal": 1250000,
+   "value": 805348424.16,
+   "weight": 19.62,
+   "prevWeight": null
   },
   {
    "code": "REMX",
@@ -178,9 +139,9 @@
    "group": "DİĞER",
    "subgroup": "Borsa Y.Fonu Yabancı",
    "nominal": 80000,
-   "value": 299885877.1,
-   "weight": 5.19,
-   "prevWeight": 4.47
+   "value": 200811846.08,
+   "weight": 4.89,
+   "prevWeight": null
   },
   {
    "code": "IOG - İŞ POTFÖY",
@@ -190,10 +151,10 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 32500000,
-   "value": 460505792.5,
-   "weight": 7.97,
-   "prevWeight": 9.31
+   "nominal": 20500000,
+   "value": 231515376.5,
+   "weight": 5.64,
+   "prevWeight": null
   },
   {
    "code": "TUA TEB PORTFÖY",
@@ -203,23 +164,10 @@
    "currency": "TL",
    "group": "DİĞER",
    "subgroup": "Y.Fonu Türk",
-   "nominal": 730000000,
-   "value": 1087564220,
-   "weight": 18.83,
-   "prevWeight": 20.04
-  },
-  {
-   "code": "IOG - İŞ POTFÖY",
-   "isin": "TRYISPO00597",
-   "ref": null,
-   "name": "İŞ PORTFÖY YÖNETİMİA.Ş.",
-   "currency": "TL",
-   "group": "DİĞER",
-   "subgroup": "Y.Fonu Türk",
-   "nominal": -2500000,
-   "value": -35423522.5,
-   "weight": -0.61,
-   "prevWeight": 9.31
+   "nominal": 630000000,
+   "value": 867239100,
+   "weight": 21.15,
+   "prevWeight": null
   },
   {
    "code": "EUR",
@@ -229,10 +177,10 @@
    "currency": "EUR",
    "group": "DİĞER",
    "subgroup": "Döviz",
-   "nominal": 333.62,
-   "value": 18637.75,
+   "nominal": 365.98,
+   "value": 20390.54,
    "weight": 0,
-   "prevWeight": 0
+   "prevWeight": null
   },
   {
    "code": "USD",
@@ -242,10 +190,10 @@
    "currency": "USD",
    "group": "DİĞER",
    "subgroup": "Döviz",
-   "nominal": 2529214.2,
-   "value": 121843629.48,
+   "nominal": 3628782.52,
+   "value": 180621561.3,
    "weight": 0,
-   "prevWeight": 0
+   "prevWeight": null
   }
  ]
 }
