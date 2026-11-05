@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-11-05T14:51:38.048Z",
+  "lastUpdated": "2026-11-05T18:44:54.539Z",
   "latestDate": "2026-11-05",
   "lastWideRead": "2026-11-03T09:56:13.455Z",
   "rangeStart": "2025-11-05",
@@ -1560,11 +1560,11 @@
         0.0925
       ],
       [
-        "EKGYO",
+        "DMLKT",
         0.0793
       ],
       [
-        "DMLKT",
+        "EKGYO",
         0.0793
       ],
       [
@@ -2192,15 +2192,15 @@
         0.05
       ],
       [
+        "KRDMA",
+        0.0455
+      ],
+      [
         "KRDMD",
         0.0455
       ],
       [
         "KRDMB",
-        0.0455
-      ],
-      [
-        "KRDMA",
         0.0455
       ],
       [
@@ -3848,97 +3848,97 @@
     "sectors": [
       {
         "id": "semis",
-        "move": 15.66,
+        "move": 14.56,
         "of": 4
       },
       {
-        "id": "banks",
-        "move": 15.24,
-        "of": 12
-      },
-      {
         "id": "transport",
-        "move": 14.99,
+        "move": 14.5,
         "of": 13
       },
       {
+        "id": "banks",
+        "move": 14.38,
+        "of": 12
+      },
+      {
         "id": "health",
-        "move": 11.81,
+        "move": 11.26,
         "of": 16
       },
       {
         "id": "tourism",
-        "move": 8.63,
+        "move": 7.88,
         "of": 28
       },
       {
         "id": "construction",
-        "move": 5.47,
+        "move": 4.77,
         "of": 35
       },
       {
         "id": "chemicals",
-        "move": 4.53,
+        "move": 3.83,
         "of": 12
       },
       {
+        "id": "metals",
+        "move": 3.64,
+        "of": 37
+      },
+      {
         "id": "textile",
-        "move": 4.21,
+        "move": 3.42,
         "of": 33
       },
       {
         "id": "finance",
-        "move": 4.11,
-        "of": 60
+        "move": 3.39,
+        "of": 61
       },
       {
-        "id": "metals",
-        "move": 4.03,
-        "of": 37
+        "id": "food",
+        "move": 3.27,
+        "of": 67
       },
       {
         "id": "tech",
-        "move": 3.98,
+        "move": 3.17,
         "of": 28
       },
       {
         "id": "telecom",
-        "move": 3.97,
+        "move": 2.98,
         "of": 9
       },
       {
-        "id": "food",
-        "move": 3.51,
-        "of": 67
-      },
-      {
         "id": "retail",
-        "move": 3.12,
+        "move": 2.63,
         "of": 27
       },
       {
         "id": "realEstate",
-        "move": 0.34,
+        "move": -0.13,
         "of": 63
       },
       {
         "id": "energy",
-        "move": 0,
+        "move": -0.66,
         "of": 44
       },
       {
-        "id": "industrial",
-        "move": 0,
-        "of": 105
-      },
-      {
         "id": "autos",
-        "move": -0.02,
+        "move": -0.86,
         "of": 14
       },
       {
+        "id": "industrial",
+        "move": -1.79,
+        "of": 105
+      },
+      {
         "id": "defence",
-        "move": -1.11,
+        "move": -4.04,
         "of": 5
       }
     ],
@@ -3952,7 +3952,7 @@
       {
         "c": "KRDMB",
         "n": "Kardemir Karabiik Demir celik Sanayi ve Ticaret A.S. Class B",
-        "move": 27.3,
+        "move": 30.3,
         "th": "metals"
       },
       {
@@ -3962,16 +3962,9 @@
         "th": "energy"
       },
       {
-        "c": "HRKET",
-        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
-        "move": 24.4,
-        "th": "transport",
-        "spec": 1
-      },
-      {
         "c": "ACSEL",
         "n": "Aciselsan Acipayam Seluloz Sanayi ve Ticaret AS",
-        "move": 24.2,
+        "move": 24.6,
         "th": "chemicals"
       },
       {
@@ -3987,13 +3980,20 @@
         "th": "industrial"
       },
       {
-        "c": "KBORU",
-        "n": "Kuzey Boru A.S.",
-        "move": 23.2,
-        "th": "industrial"
+        "c": "BTCIM",
+        "n": "Baticim Bati Anadolu Cimento Sanayii A.S.",
+        "move": 22.7,
+        "th": "construction"
+      },
+      {
+        "c": "HRKET",
+        "n": "Hareket Proje Tasimaciligi ve Yuk Muhendisligi AS",
+        "move": 22.6,
+        "th": "transport",
+        "spec": 1
       }
     ],
-    "floor": 25927174,
+    "floor": 25961359,
     "of": 310
   },
   "peerGroups": [
@@ -4125,5 +4125,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-11-05T18:44:22.422Z"
+  "analyticsBuiltAt": "2026-11-05T18:45:59.684Z"
 }
