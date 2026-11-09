@@ -1,15 +1,15 @@
 {
-  "lastUpdated": "2026-11-07T16:50:05.941Z",
-  "latestDate": "2026-11-06",
+  "lastUpdated": "2026-11-09T08:46:39.367Z",
+  "latestDate": "2026-11-09",
   "lastWideRead": "2026-11-03T09:56:13.455Z",
-  "rangeStart": "2025-11-06",
+  "rangeStart": "2025-11-09",
   "months": 12,
   "source": "https://www.tefas.gov.tr",
   "counts": {
     "funds": 2021,
-    "priced": 2017,
-    "lagging": 4,
-    "implausible": 5,
+    "priced": 2016,
+    "lagging": 5,
+    "implausible": 3,
     "carried": 525,
     "byKind": {
       "YAT": 1985,
@@ -1260,11 +1260,11 @@
         0.1587
       ],
       [
-        "ISCTR",
+        "ISBTR",
         0.0952
       ],
       [
-        "ISBTR",
+        "ISCTR",
         0.0952
       ],
       [
@@ -2192,15 +2192,15 @@
         0.05
       ],
       [
+        "KRDMB",
+        0.0455
+      ],
+      [
         "KRDMD",
         0.0455
       ],
       [
         "KRDMA",
-        0.0455
-      ],
-      [
-        "KRDMB",
         0.0455
       ],
       [
@@ -3848,97 +3848,97 @@
     "sectors": [
       {
         "id": "semis",
-        "move": 18.09,
+        "move": 24.84,
         "of": 4
       },
       {
         "id": "transport",
-        "move": 16.71,
+        "move": 21.87,
         "of": 13
       },
       {
-        "id": "banks",
-        "move": 14.43,
-        "of": 12
-      },
-      {
         "id": "health",
-        "move": 10.56,
+        "move": 17.01,
         "of": 16
       },
       {
-        "id": "tourism",
-        "move": 8.07,
-        "of": 28
-      },
-      {
         "id": "tech",
-        "move": 7.23,
+        "move": 15.55,
         "of": 28
-      },
-      {
-        "id": "metals",
-        "move": 6.79,
-        "of": 37
       },
       {
         "id": "autos",
-        "move": 6.52,
+        "move": 13.92,
         "of": 14
       },
       {
-        "id": "food",
-        "move": 6.02,
-        "of": 67
-      },
-      {
-        "id": "finance",
-        "move": 4.64,
-        "of": 60
-      },
-      {
-        "id": "textile",
-        "move": 4.55,
-        "of": 33
-      },
-      {
-        "id": "construction",
-        "move": 4.05,
-        "of": 35
-      },
-      {
-        "id": "retail",
-        "move": 3.23,
-        "of": 27
-      },
-      {
         "id": "chemicals",
-        "move": 3.14,
+        "move": 13.74,
         "of": 12
       },
       {
+        "id": "metals",
+        "move": 13.33,
+        "of": 37
+      },
+      {
+        "id": "banks",
+        "move": 12.09,
+        "of": 12
+      },
+      {
+        "id": "food",
+        "move": 10.97,
+        "of": 67
+      },
+      {
         "id": "industrial",
-        "move": 2.39,
+        "move": 10.21,
         "of": 105
       },
       {
+        "id": "tourism",
+        "move": 9.81,
+        "of": 28
+      },
+      {
+        "id": "textile",
+        "move": 8.64,
+        "of": 33
+      },
+      {
+        "id": "finance",
+        "move": 8.46,
+        "of": 60
+      },
+      {
+        "id": "retail",
+        "move": 8.31,
+        "of": 27
+      },
+      {
         "id": "realEstate",
-        "move": 1.99,
+        "move": 7.97,
         "of": 63
       },
       {
         "id": "energy",
-        "move": 1.73,
+        "move": 6.63,
         "of": 44
       },
       {
+        "id": "construction",
+        "move": 5.47,
+        "of": 35
+      },
+      {
         "id": "telecom",
-        "move": 0.61,
+        "move": 3.67,
         "of": 9
       },
       {
         "id": "defence",
-        "move": -6.96,
+        "move": -3.72,
         "of": 5
       }
     ],
@@ -3946,53 +3946,53 @@
       {
         "c": "KARCL",
         "n": "Kardemir Celik Sanayi AS",
-        "move": 44.3,
+        "move": 55.7,
         "th": "metals"
       },
       {
-        "c": "FZLGY",
-        "n": "FUZUL GAYRIMENKUL YATIRIM ORTAKLIGI A.S.",
-        "move": 39.9,
+        "c": "AKSUE",
+        "n": "Aksu Enerji ve Ticaret A.S.",
+        "move": 52.7,
+        "th": "energy"
+      },
+      {
+        "c": "KTLEV",
+        "n": "KATILIMEVIM TASARRUF FINANSMAN A.S.",
+        "move": 49,
+        "th": "finance"
+      },
+      {
+        "c": "BSOKE",
+        "n": "Batisoke Soke Cimento Sanayii T.A.S.",
+        "move": 47.9,
+        "th": "construction"
+      },
+      {
+        "c": "SVGYO",
+        "n": "Savur Gayrimenkul Yatirim Ortakligi A.S",
+        "move": 47.4,
         "th": "realEstate"
       },
       {
-        "c": "KRDMB",
-        "n": "Kardemir Karabiik Demir celik Sanayi ve Ticaret A.S. Class B",
-        "move": 38.6,
-        "th": "metals"
-      },
-      {
-        "c": "GIPTA",
-        "n": "Gipta Ofis Kirtasiye ve Promosyon Urunleri Imalat Sanayi A.S.",
-        "move": 34.9,
+        "c": "TKNKA",
+        "n": "Teknika Plast Teknik Kalip Plastik Sanayi Ve Ticaret Anonim Sirketi",
+        "move": 47.1,
         "th": "industrial"
       },
       {
-        "c": "BURCE",
-        "n": "Burcelik Bursa Celik Doekum Sanayii A.S.",
-        "move": 33.8,
-        "th": "metals"
+        "c": "HDFGS",
+        "n": "Hedef Girisim Sermayesi Yatirim Ortakligi A.S.",
+        "move": 46.7,
+        "th": "finance"
       },
       {
-        "c": "PSGYO",
-        "n": "Pasifik Gayrimenkul Yatirim Ortakligi AS",
-        "move": 31.1,
-        "th": "realEstate"
-      },
-      {
-        "c": "ISVEA",
-        "n": "Isvea Seramik ve Banyo Urunleri Sanayi A.S.",
-        "move": 31,
-        "th": "industrial"
-      },
-      {
-        "c": "CWENE",
-        "n": "CW ENERJI MUHENDISLIK TICARET VE SANAYI A.S.",
-        "move": 28.9,
-        "th": "semis"
+        "c": "CATES",
+        "n": "Cates Elektrik Uretim Anonim Sirketi",
+        "move": 46.6,
+        "th": "energy"
       }
     ],
-    "floor": 25659304,
+    "floor": 24097939,
     "of": 310
   },
   "peerGroups": [
@@ -4039,55 +4039,55 @@
   ],
   "peerStats": {
     "equity": {
-      "count": 615,
-      "medianY1": 7.40515,
-      "medianVol": 23.58
+      "count": 611,
+      "medianY1": 13.234449999999999,
+      "medianVol": 23.6
     },
     "metals": {
       "count": 55,
-      "medianY1": 16.6009,
+      "medianY1": 16.6189,
       "medianVol": 24.75
     },
     "foreign": {
       "count": 36,
-      "medianY1": 21.3582,
-      "medianVol": 18.130000000000003
+      "medianY1": 22.9052,
+      "medianVol": 18.259999999999998
     },
     "bonds": {
-      "count": 539,
-      "medianY1": 22.0248,
-      "medianVol": 2.92
+      "count": 534,
+      "medianY1": 22.7735,
+      "medianVol": 2.925
     },
     "cash": {
-      "count": 320,
-      "medianY1": 22.1945,
-      "medianVol": 2.04
+      "count": 321,
+      "medianY1": 36.056,
+      "medianVol": 1.975
     },
     "fundOfFunds": {
-      "count": 135,
-      "medianY1": 16.898699999999998,
-      "medianVol": 9.37
+      "count": 136,
+      "medianY1": 26.5668,
+      "medianVol": 9.425
     },
     "balanced": {
-      "count": 125,
-      "medianY1": 17.7097,
-      "medianVol": 14.34
+      "count": 132,
+      "medianY1": 24.478050000000003,
+      "medianVol": 14.29
     },
     "conservative": {
       "count": 196,
-      "medianY1": 34.066649999999996,
-      "medianVol": 2.23
+      "medianY1": 39.743700000000004,
+      "medianVol": 2.31
     }
   },
-  "cashReturn": 44.6,
+  "cashReturn": 44.37,
   "cashReturns": {
-    "m1": 2.09,
-    "m3": 8.6,
-    "m6": 19.69,
-    "ytd": 36.55,
-    "y1": 44.6,
-    "y3": 255.35,
-    "y5": 440
+    "m1": 2.4,
+    "m3": 8.55,
+    "m6": 19.66,
+    "ytd": 36.92,
+    "y1": 44.37,
+    "y3": 255.74,
+    "y5": 441.37
   },
   "cashBasis": {
     "m1": {
@@ -4124,5 +4124,5 @@
     "usdtry",
     "mmf"
   ],
-  "analyticsBuiltAt": "2026-11-08T17:27:02.045Z"
+  "analyticsBuiltAt": "2026-11-09T08:47:44.244Z"
 }
